@@ -29,30 +29,31 @@ font-size:20px;
 <h1> First New TorStatus Table? </h1>
 
 {% if statusEntry_FullList %}
-	<table border="1">
+	<table border="0">
 	<tr>
 		<th> Router Name </th>
 		<th> Bandwidth </th>
-		<th> Uptime </th>
-		<th> Hostname </th>
 		<th> orPort </th>
 		<th> dsPort </th>
-		<th> exit </th>
+		<th> isFast </th>
+		<th> isGuard </th>
+		<th> isExit </th>
 	</tr>
 	{% for relay in statusEntry_FullList %}
 		<tr>
-			<td><img src="flags/{{relay.country}}.gif"> {{relay.name}} </td>
+			<td><img src="flags/{{relay.country}}.gif"> {{relay.nickname}} </td>
 			<td> {{relay.bandwidth}} kb/s</td>
-			<td> {{relay.uptime}}  d</td>
-			<td> {{relay.hostname}} </td>
-			<td> {{relay.orPort}} </td>
-			<td> {{relay.dsPort}} </td>
-			<td> {{relay.exit}} </td>
+			<td> {{relay.orport}} </td>
+			<td> {{relay.dirport}} </td>
+			<td> {{relay.isfast}} </td>
+			<td> {{relay.isguard}} </td>
+			<td> {{relay.isexit}} </td>
 		</tr>
 	{% endfor %}
 	</table>
 {% else %}
 	<p> NO LIST !
+	<p> {{a}}
 {% endif %}
 </body>
 
