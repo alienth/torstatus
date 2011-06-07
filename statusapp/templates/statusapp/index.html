@@ -28,7 +28,7 @@ font-size:20px;
 <body>
 <h1> First New TorStatus Table? </h1>
 
-{% if relay_exit_list %}
+{% if statusEntry_FullList %}
 	<table border="1">
 	<tr>
 		<th> Router Name </th>
@@ -39,7 +39,7 @@ font-size:20px;
 		<th> dsPort </th>
 		<th> exit </th>
 	</tr>
-	{% for relay in relay_exit_list %}
+	{% for relay in statusEntry_FullList %}
 		<tr>
 			<td><img src="flags/{{relay.country}}.gif"> {{relay.name}} </td>
 			<td> {{relay.bandwidth}} kb/s</td>

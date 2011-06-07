@@ -4,6 +4,7 @@ from django.views.static import *
 from django.conf import settings
 
 urlpatterns = patterns('',
+	(r'^$', 'statusapp.views.index'),
     (r'^flags/(?P<country_code>\w\w).gif', 'statusapp.views.displayFlag'),
     (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT})
 
