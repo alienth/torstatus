@@ -16,7 +16,6 @@ class Consensus(models.Model):
         db_table = u'consensus'
 
 class Statusentry(models.Model):
-    consensus = models.ForeignKey('Consensus') # A Guess
     validafter = models.DateTimeField()
     nickname = models.CharField(max_length=57)
     fingerprint = models.CharField(max_length=120, primary_key=True)
@@ -51,7 +50,7 @@ class Statusentry(models.Model):
         return self.fingerprint
 
 class Descriptor(models.Model):
-    statusentry = models.ForeignKey('Statusentry') # A guess
+    statusentry = models.ForeignKey('Statusentry', related_name="statusapp_statusentry_related") # A guess
     descriptor = models.CharField(max_length=120, primary_key=True)
     nickname = models.CharField(max_length=57)
     address = models.CharField(max_length=45)
