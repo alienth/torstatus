@@ -44,7 +44,7 @@ class ScheduledUpdates(models.Model):
 class Statusentry(models.Model):
     validafter = models.DateTimeField(primary_key=True)
     nickname = models.CharField(max_length=57)
-    fingerprint = models.CharField(max_length=120)
+    fingerprint = models.CharField(max_length=120, primary_key=True)
     descriptor = models.CharField(max_length=120)
     published = models.DateTimeField()
     address = models.CharField(max_length=45)
@@ -68,8 +68,10 @@ class Statusentry(models.Model):
     bandwidth = models.BigIntegerField(null=True, blank=True)
     ports = models.TextField(blank=True)
     rawdesc = models.TextField()
+
     class Meta:
         db_table = u'statusentry'
+        unique_together = ("validafter", "fingerprint")
     def __unicode__(self):
         return self.fingerprint
 
