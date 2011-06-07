@@ -1,7 +1,5 @@
 body
 {
-/* background-color:#d0e4fe; */
-/* background-image:url('../image/pony.png') */
 }
 
 h1
@@ -23,12 +21,11 @@ table
 
 td
 {
-color:blue
-font-weight:bold
+font-size:10;
 }
 
 th
 {
-font-size:20;
-color:green
+font-size:12;
+font-weight:bold
 }

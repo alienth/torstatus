@@ -7,7 +7,7 @@
 </head>
 
 <body>
-<h1> First New TorStatus Table? </h1>
+<h1> TorStatus </h1>
 <p>
 <p> {{debugText}}
 <p>
@@ -15,25 +15,73 @@
 {% if statusEntry_FullList %}
 	<table border="0">
 	<tr>
-		<th> Router Name </th>
-		<th> Bandwidth </th>
-		<th> orPort </th>
-		<th> dsPort </th>
-		<th> isFast </th>
-		<th> isGuard </th>
-		<th> isExit </th>
-		<th> TEST </th>
+		<th>Router Name</th>
+		<th>Bandwidth</th>
+		<th></th>
+        <th>orPort</th>
+        <th>dsPort</th>
+		<th>TEST</th>
 	</tr>
 	{% for relay in statusEntry_FullList %}
 		<tr>
-			<td><img src="flags/us.gif"> {{relay.nickname}} </td>
+            <td><img src="flags/us.gif"> 
+                {% ifequal relay.isnamed 1 %}
+                    <b>{{relay.nickname}}</b> 
+                {% else %}
+                    {{relay.nickname}}
+                {% endifequal %}
+            </td>
 			<td> {{relay.bandwidth}} kb/s</td>
-			<td> {{relay.orport}} </td>
-			<td> {{relay.dirport}} </td>
-			<td> {{relay.isfast}} </td>
-			<td> {{relay.isguard}} </td>
-			<td> {{relay.isexit}} </td>
-			<td> {{relay.descriptor}} </td>
+            <td align="right">
+                {% ifequal relay.isauthority 1 %}
+                    <img src="status/Authority.png">
+                {% endifequal %}
+
+                {% ifequal relay.isbadexit 1 %}
+                    <img src="status/bx.gif">
+                {% endifequal %}
+
+                {% ifequal relay.isbaddirectory 1 %}
+                    <img src="status/PUTITHERE.png">
+                {% endifequal %}
+
+                {% ifequal relay.isexit 1 %}
+                    <img src="status/.png">
+                {% endifequal %}
+
+                {% ifequal relay.isexit 1 %}
+                    <img src="status/Exit.png">
+                {% endifequal %}
+
+                {% ifequal relay.isfast 1 %}
+                    <img src="status/Fast.png">
+                {% endifequal %}
+
+                {% ifequal relay.isguard 1 %}
+                    <img src="status/Guard.png">
+                {% endifequal %}
+
+                {% ifequal relay.ishsdir 1 %}
+                    <img src="status/PUTITHERE.png">
+                {% endifequal %}
+
+                {% ifequal relay.isstable 1 %}
+                    <img src="status/Stable.png">
+                {% endifequal %}
+
+                {% ifequal relay.isv2dir 1 %}
+                    <img src="status/v2.dif">
+                {% endifequal %}
+
+                {% ifequal relay.isv3dir 1 %}
+                    <img src="status/v3.gif">
+                {% endifequal %}
+
+
+            </td>
+            <td>{{relay.orport}}</td>
+			<td>{{relay.dirport}}</td>
+			<td>{{relay.descriptor}}</td>
 		</tr>
 	{% endfor %}
 	</table>
