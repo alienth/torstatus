@@ -24,7 +24,7 @@
 	</tr>
 	{% for relay in statusEntry_FullList %}
 		<tr>
-            <td><img src="flags/us.gif"> 
+            <td><img src="static/img/flags/us.gif"> 
                 {% ifequal relay.isnamed 1 %}
                     <b>{{relay.nickname}}</b> 
                 {% else %}
@@ -34,50 +34,71 @@
 			<td> {{relay.bandwidth}} kb/s</td>
             <td align="right">
                 {% ifequal relay.isauthority 1 %}
-                    <img src="status/Authority.png">
+                    <img src="static/img/status/Authority.png">
                 {% endifequal %}
 
                 {% ifequal relay.isbadexit 1 %}
-                    <img src="status/bx.gif">
+                    <img src="static/img/status/bx.gif">
                 {% endifequal %}
 
                 {% ifequal relay.isbaddirectory 1 %}
-                    <img src="status/PUTITHERE.png">
+                    <img src="static/img/status/PUTITHERE.png">
                 {% endifequal %}
 
                 {% ifequal relay.isexit 1 %}
-                    <img src="status/.png">
-                {% endifequal %}
-
-                {% ifequal relay.isexit 1 %}
-                    <img src="status/Exit.png">
+                    <img src="static/img/status/Exit.png">
                 {% endifequal %}
 
                 {% ifequal relay.isfast 1 %}
-                    <img src="status/Fast.png">
+                    <img src="static/img/status/Fast.png">
                 {% endifequal %}
 
                 {% ifequal relay.isguard 1 %}
-                    <img src="status/Guard.png">
-                {% endifequal %}
-
-                {% ifequal relay.ishsdir 1 %}
-                    <img src="status/PUTITHERE.png">
+                    <img src="static/img/status/Guard.png">
                 {% endifequal %}
 
                 {% ifequal relay.isstable 1 %}
-                    <img src="status/Stable.png">
+                    <img src="static/img/status/Stable.png">
                 {% endifequal %}
 
                 {% ifequal relay.isv2dir 1 %}
-                    <img src="status/v2.dif">
+                    <img src="static/img/status/v2.gif">
                 {% endifequal %}
 
                 {% ifequal relay.isv3dir 1 %}
-                    <img src="status/v3.gif">
+                    <img src="static/img/status/v3.gif">
                 {% endifequal %}
 
-
+                {# These should work, but as of this writing, the current "relay" being passed does not have a "platform" field! #}
+                {% if "Linux" in relay.platform %}
+                    <img src="static/img/os-icons/Linux.png">
+                {% else %}{% if "XP" in relay.platform %}
+                    <img src="static/img/os-icons/WindowsXP.png">
+                    {% else %}{% if "Windows" in relay.platform and "erver" in relay.platform %}
+                    <img src="static/img/os-icons/WindowsServer.png">
+                {% else %}{% if "Windows" in relay.platform %}
+                    <img src="static/img/os-icons/WindowsOther.png">
+                {% else %}{% if "Darwin" in relay.platform %}
+                    <img src="static/img/os-icons/Darwin.png">
+                {% else %}{% if "FreeBSD" in relay.platform %}
+                    <img src="static/img/os-icons/FreeBSD.png">
+                {% else %}{% if "NetBSD" in relay.platform %}
+                    <img src="static/img/os-icons/NetBSD.png">
+                {% else %}{% if "OpenBSD" in relay.platform %}
+                    <img src="static/img/os-icons/OpenBSD.png">
+                {% else %}{% if "SunOS" in relay.platform %}
+                    <img src="static/img/os-icons/SunOS.png">
+                {% else %}{% if "available" in relay.platform %}
+                    <img src="static/img/os-icons/NotAvailable.png">
+                {% else %}{% if "IRIX" in relay.platform %}
+                    <img src="static/img/os-icons/IRIX64.png">
+                {% else %}{% if "Cygwin" in relay.platform %}
+                    <img src="static/img/os-icons/Cygwin.png">
+                {% else %}{% if "Dragon" in relay.platform %}
+                    <img src="static/img/os-icons/DragonFly.png">
+                {% else %}
+                    <img src="static/img/os-icons/NotAvailable.png">
+                {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
             </td>
             <td>{{relay.orport}}</td>
 			<td>{{relay.dirport}}</td>
