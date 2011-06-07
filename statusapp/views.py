@@ -6,10 +6,13 @@ import os
 
 def index(request):
 	statusEntry_FullList = Statusentry.objects.all()
+	debugText = ""
 	if statusEntry_FullList:
-		template_values = {'statusEntry_FullList': statusEntry_FullList}
+		debugText = "Everything is fine!"
+		template_values = {'statusEntry_FullList': statusEntry_FullList, 'debugText': debugText}
 	else:
-		template_values = {'a': "Didn't get anything from the all()"}
+		debugText = "Didn't get anything from the all()"
+		template_values = {'debugText': debugText}
 	return render_to_response('statusapp/index.html', template_values)
 
 def displayFlag(request, country_code):

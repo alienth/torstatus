@@ -32,6 +32,8 @@ class Descriptor(models.Model):
     rawdesc = models.TextField()
     class Meta:
         db_table = u'descriptor'
+    def __unicode__(self):
+        return self.fingerprint
 
 class ScheduledUpdates(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -68,4 +70,6 @@ class Statusentry(models.Model):
     rawdesc = models.TextField()
     class Meta:
         db_table = u'statusentry'
+    def __unicode__(self):
+        return self.fingerprint
 
