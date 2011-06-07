@@ -50,7 +50,7 @@ class Statusentry(models.Model):
         return self.fingerprint
 
 class Descriptor(models.Model):
-    statusentry = models.ForeignKey('Statusentry', related_name="statusapp_statusentry_related") # A guess
+    #statusentry = models.ForeignKey('Statusentry', related_name="statusapp_statusentry_related") # A guess
     descriptor = models.CharField(max_length=120, primary_key=True)
     nickname = models.CharField(max_length=57)
     address = models.CharField(max_length=45)
