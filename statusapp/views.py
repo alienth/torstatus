@@ -13,10 +13,10 @@ def index(request):
 	else:
 		debugText = "Didn't get anything from the all()"
 		template_values = {'debugText': debugText}
-	return render_to_response('statusapp/index.html', template_values)
+	return render_to_response('index.html', template_values)
 
 def displayFlag(request, country_code):
-	imagePath = os.path.join(os.path.dirname(__file__), 'templates/statusapp/flags/' + str(country_code) + '.gif')
+	imagePath = os.path.join(os.path.dirname(__file__), 'templates/static/img/flags/' + str(country_code) + '.gif')
 	from PIL import Image
 	Image.init()
 	i = Image.open(imagePath)

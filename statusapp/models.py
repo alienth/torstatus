@@ -15,34 +15,9 @@ class Consensus(models.Model):
     class Meta:
         db_table = u'consensus'
 
-class Descriptor(models.Model):
-    descriptor = models.CharField(max_length=120, primary_key=True)
-    nickname = models.CharField(max_length=57)
-    address = models.CharField(max_length=45)
-    orport = models.IntegerField()
-    dirport = models.IntegerField()
-    fingerprint = models.CharField(max_length=120)
-    bandwidthavg = models.BigIntegerField()
-    bandwidthburst = models.BigIntegerField()
-    bandwidthobserved = models.BigIntegerField()
-    platform = models.CharField(max_length=768, blank=True)
-    published = models.DateTimeField()
-    uptime = models.BigIntegerField(null=True, blank=True)
-    extrainfo = models.CharField(max_length=120, blank=True)
-    rawdesc = models.TextField()
-    class Meta:
-        db_table = u'descriptor'
-    def __unicode__(self):
-        return self.fingerprint
-
-class ScheduledUpdates(models.Model):
-    id = models.IntegerField(primary_key=True)
-    date = models.DateField()
-    class Meta:
-        db_table = u'scheduled_updates'
-
 class Statusentry(models.Model):
-    validafter = models.DateTimeField(primary_key=True)
+    consensus = models.ForeignKey('Consensus') # A Guess
+    validafter = models.DateTimeField()
     nickname = models.CharField(max_length=57)
     fingerprint = models.CharField(max_length=120, primary_key=True)
     descriptor = models.CharField(max_length=120)
@@ -71,7 +46,34 @@ class Statusentry(models.Model):
 
     class Meta:
         db_table = u'statusentry'
-        unique_together = ("validafter", "fingerprint")
+        unique_together = ("validafter", "fingerprint") # May or may not be necessary
     def __unicode__(self):
         return self.fingerprint
+
+class Descriptor(models.Model):
+    statusentry = models.ForeignKey('Statusentry') # A guess
+    descriptor = models.CharField(max_length=120, primary_key=True)
+    nickname = models.CharField(max_length=57)
+    address = models.CharField(max_length=45)
+    orport = models.IntegerField()
+    dirport = models.IntegerField()
+    fingerprint = models.CharField(max_length=120)
+    bandwidthavg = models.BigIntegerField()
+    bandwidthburst = models.BigIntegerField()
+    bandwidthobserved = models.BigIntegerField()
+    platform = models.CharField(max_length=768, blank=True)
+    published = models.DateTimeField()
+    uptime = models.BigIntegerField(null=True, blank=True)
+    extrainfo = models.CharField(max_length=120, blank=True)
+    rawdesc = models.TextField()
+    class Meta:
+        db_table = u'descriptor'
+    def __unicode__(self):
+        return self.fingerprint
+
+class ScheduledUpdates(models.Model): #what should this primary key be?
+    id = models.IntegerField(primary_key=True)
+    date = models.DateField()
+    class Meta:
+        db_table = u'scheduled_updates'
 
