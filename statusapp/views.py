@@ -5,7 +5,7 @@ from django.http import HttpResponse
 import os
 
 def index(request):
-	statusEntry_FullList = Statusentry.objects.filter(pk='2011-05-06 20:00:00')
+	statusEntry_FullList = Statusentry.objects.filter(pk='2011-05-31 19:00:00')
 	debugText = ""
 	if statusEntry_FullList:
 		debugText = "Everything is fine!"
