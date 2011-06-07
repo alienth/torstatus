@@ -16,9 +16,9 @@ class Consensus(models.Model):
         db_table = u'consensus'
 
 class Statusentry(models.Model):
-    validafter = models.DateTimeField()
+    validafter = models.DateTimeField(primary_key=True)
     nickname = models.CharField(max_length=57)
-    fingerprint = models.CharField(max_length=120, primary_key=True)
+    fingerprint = models.CharField(max_length=120)
     descriptor = models.CharField(max_length=120)
     published = models.DateTimeField()
     address = models.CharField(max_length=45)
