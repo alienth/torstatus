@@ -45,6 +45,7 @@ class Statusentry(models.Model):
 
     class Meta:
         db_table = u'statusentry'
+        
         unique_together = ("validafter", "fingerprint") # May or may not be necessary
     def __unicode__(self):
         return self.fingerprint

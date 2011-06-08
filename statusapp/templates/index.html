@@ -8,9 +8,6 @@
 
 <body>
 <h1> First New TorStatus Table? </h1>
-<p>
-<p> {{debugText}}
-<p>
 
 {% if statusEntry_FullList %}
 	<table border="0">
@@ -30,10 +27,10 @@
 			<td> {{relay.bandwidth}} kb/s</td>
 			<td> {{relay.orport}} </td>
 			<td> {{relay.dirport}} </td>
-			<td> {{relay.isfast}} </td>
+			<td> {{relay.isfast}} </td>			
 			<td> {{relay.isguard}} </td>
 			<td> {{relay.isexit}} </td>
-			<td> {{relay.descriptor}} </td>
+			<td> {{descriptorDictionary.relay.address}} </td>
 		</tr>
 	{% endfor %}
 	</table>
