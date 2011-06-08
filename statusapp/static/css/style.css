@@ -1,0 +1,31 @@
+body
+{
+}
+
+h1
+{
+color:green;
+text-align:center;
+}
+
+p
+{
+font-family:"Times New Roman";
+font-size:20px;
+}
+
+table
+{
+/* background:lightblue; */
+}
+
+td
+{
+font-size:10;
+}
+
+th
+{
+font-size:12;
+font-weight:bold
+}

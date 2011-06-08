@@ -7,30 +7,106 @@
 </head>
 
 <body>
-<h1> First New TorStatus Table? </h1>
+<h1> TorStatus </h1>
+<p>
+<p> {{debugText}}
+<p>
 
 {% if statusEntry_FullList %}
-	<table border="0">
+<table border="0" width="100%">
 	<tr>
-		<th> Router Name </th>
-		<th> Bandwidth </th>
-		<th> orPort </th>
-		<th> dsPort </th>
-		<th> isFast </th>
-		<th> isGuard </th>
-		<th> isExit </th>
-		<th> TEST </th>
+		<th>Router Name</th>
+		<th>Bandwidth</th>
+		<th></th>
+        <th>orPort</th>
+        <th>dsPort</th>
+		<th>TEST</th>
 	</tr>
 	{% for relay in statusEntry_FullList %}
 		<tr>
-			<td><img src="flags/us.gif"> {{relay.nickname}} </td>
+            <td><img src="static/img/flags/us.gif"> 
+                {% ifequal relay.isnamed 1 %}
+                    <b>{{relay.nickname}}</b> 
+                {% else %}
+                    {{relay.nickname}}
+                {% endifequal %}
+            </td>
 			<td> {{relay.bandwidth}} kb/s</td>
-			<td> {{relay.orport}} </td>
-			<td> {{relay.dirport}} </td>
-			<td> {{relay.isfast}} </td>			
-			<td> {{relay.isguard}} </td>
-			<td> {{relay.isexit}} </td>
-			<td> {{descriptorDictionary.relay.address}} </td>
+            <td align="right">
+                {% ifequal relay.isauthority 1 %}
+                    <img src="static/img/status/Authority.png" alt="Authority Server" title="Authority Server">
+                {% endifequal %}
+
+                {% ifequal relay.isbadexit 1 %}
+                    <img src="static/img/status/bx.gif" alt="Bad Exit" title="Bad Exit">
+                {% endifequal %}
+
+                {% ifequal relay.isbaddirectory 1 %}
+                    <img src="static/img/status/PUTITHERE.png" alt="Bad Directory" title="Bad Directory">
+                {% endifequal %}
+
+                {% ifequal relay.isexit 1 %}
+                    <img src="static/img/status/Exit.png" alt="Exit Server" title="Exit Server">
+                {% endifequal %}
+
+                {% ifequal relay.isfast 1 %}
+                    <img src="static/img/status/Fast.png" alt="Fast Server" title="Fast Server">
+                {% endifequal %}
+
+                {% ifequal relay.isguard 1 %}
+                    <img src="static/img/status/Guard.png" alt="Guard Server" title="Guard Server">
+                {% endifequal %}
+
+                {% ifequal relay.isstable 1 %}
+                    <img src="static/img/status/Stable.png" alt="Stable Server" title="Stable Server">
+                {% endifequal %}
+
+                {% ifequal relay.isv2dir 1 %}
+                    <img src="static/img/status/v2.gif" alt="Version 2 Directory" title="Version 2 Directory">
+                {% endifequal %}
+
+                {% ifequal relay.isv3dir 1 %}
+                    <img src="static/img/status/v3.gif" alt="Version 3 Directory" title="Version 3 Directory">
+                {% endifequal %}
+
+                {# These should work, but as of this writing, the current "relay" being passed does not have a "platform" field! #}
+                {% if "Linux" in relay.platform %}
+                    <img src="static/img/os-icons/Linux.png">
+                {% else %}{% if "XP" in relay.platform %}
+                    <img src="static/img/os-icons/WindowsXP.png">
+                    {% else %}{% if "Windows" in relay.platform and "erver" in relay.platform %}
+                    <img src="static/img/os-icons/WindowsServer.png">
+                {% else %}{% if "Windows" in relay.platform %}
+                    <img src="static/img/os-icons/WindowsOther.png">
+                {% else %}{% if "Darwin" in relay.platform %}
+                    <img src="static/img/os-icons/Darwin.png">
+                {% else %}{% if "FreeBSD" in relay.platform %}
+                    <img src="static/img/os-icons/FreeBSD.png">
+                {% else %}{% if "NetBSD" in relay.platform %}
+                    <img src="static/img/os-icons/NetBSD.png">
+                {% else %}{% if "OpenBSD" in relay.platform %}
+                    <img src="static/img/os-icons/OpenBSD.png">
+                {% else %}{% if "SunOS" in relay.platform %}
+                    <img src="static/img/os-icons/SunOS.png">
+                {% else %}{% if "available" in relay.platform %}
+                    <img src="static/img/os-icons/NotAvailable.png">
+                {% else %}{% if "IRIX" in relay.platform %}
+                    <img src="static/img/os-icons/IRIX64.png">
+                {% else %}{% if "Cygwin" in relay.platform %}
+                    <img src="static/img/os-icons/Cygwin.png">
+                {% else %}{% if "Dragon" in relay.platform %}
+                    <img src="static/img/os-icons/DragonFly.png">
+                {% else %}
+                    <img src="static/img/os-icons/NotAvailable.png">
+                {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
+            </td>
+            <td>{{relay.orport}}</td>
+            <td>{% ifequal relay.dirport 0 %}
+                    None
+                {% else %}
+                    {{ relay.dirport }}
+                {% endifequal %}</td>
+			<td>{{relay.descriptor}}</td>
 		</tr>
 	{% endfor %}
 	</table>
