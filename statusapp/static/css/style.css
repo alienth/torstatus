@@ -1,33 +1,37 @@
 td.headerTitle {
-	background-color: #13A200;
+	background-color: #7BD4F7;
 	text-align:center;
 	font:bold 16pt Arial;
 	color: #000000;
 	border-style: solid;
 	border-color: black;
 	border-width: 1px;
-}
-
-td#a {
-	text-decoration: none;
 }
 
 td.headerLinks {
-	background-color: #13A200;
-	text-align:center;
-	font:bold 16pt Arial;
-	color: #000000;
+	background-color: #7BD4F7;
 	border-style: solid;
 	border-color: black;
 	border-width: 1px;
+	text-align: center;
+	font-size: .7em;
+	color: red;
 }
 
-tr.relayHeader:hover {
-	background-color: #69EEC8;
+tr.relay: {
+	font: 10px Arial;
 }
 
 tr.relay:hover {
 	background-color: #69EEC8;
+}
+
+th.relayHeader {
+	text-align: left;
+	font: bold 11px Arial;
+	background-color: #7BD4F7;
+	border-top: 2px solid black;
+	border-bottom: 2px solid black;
 }
 
 table.body
@@ -37,7 +41,83 @@ table.body
 	margin-left: auto;
 	margin-right: auto;
 }
+
+table.displayStatus {
+	width: 300px;
+	position: center;
+	border-style: none;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+table.legend {
+	width: 300px;
+	position: center;
+	border-style: solid;
+	border-color: black;
+	border-width: 1px;
+	margin-left: auto;
+	margin-right: auto;
+}
 	
+a:hover {
+	color: black;
+	text-decoration: none;
+}
+
+a.link {
+	color: black;
+	text-decoration: none;
+}
+
+a.link:hover {
+	background-color: #89FB69;
+}
+
+td.routerOK {
+	font: 10px Arial;
+	background-color: white;
+}
+
+td.routerHibernating {
+	font: 10px Arial;
+	background-color: #FEEED0;
+}
+
+td.routerDown {
+	font: 10px Arial;
+	background-color: yellow;
+}
+
+td.routerBadExit {
+	font: 10px Arial;
+	background-color: red;
+}
+
+table.appServerDetails {
+	width: 350px;
+	border-style: solid;
+	border-color: black; 
+	border-width: 1px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+td.boxTitle {
+	font:bold 10pt Arial; 
+	background-color: #7BD4F7;
+	text-align: center;
+	position: center;
+	color: #000000; 
+	white-space:nowrap;
+	border-top: 2px solid black;
+	border-bottom: 2px solid black;
+}
+
+tr.appServerDetails:hover {
+	background-color: #7BD4F7;
+}
+
 
 p {
 	font-family:"Times New Roman";
