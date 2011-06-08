@@ -2,6 +2,7 @@
 
 <head>
 <link rel="stylesheet" type="text/css" href="static/css/style.css" />
+<script src="static/js/sorttable.js" type="text/javascript"></script>
 </head>
 
 <body>
@@ -111,18 +112,18 @@
 		
 
 {% if statusEntry_FullList %}
-<table cellspacing="0" border="0" width="100%">
+<table cellspacing="0" border="0" width="100%" class="sortable">
 	<tr class="relayheader">
-		<th class="relayHeader">Router Name</th>
-		<th class="relayHeader">Bandwidth</th>
-		<th class="relayHeader"> </th>
-        <th class="relayHeader">ORPort</th>
-        <th class="relayHeader">DirPort</th>
-        <th class="relayHeader">Descriptor</th>
-        <th class="relayHeader">BadExit</th>
+		<th class="relayHeader sorttable_alpha">Router Name</th>
+		<th class="relayHeader sorttable_numeric">Bandwidth</th>
+		<th class="relayHeaderInv">Icons</th>
+        <th class="relayHeader sorttable_numeric">ORPort</th>
+        <th class="relayHeader sorttable_numeric">DirPort</th>
+        <th class="relayHeader sorttable_alpha">Descriptor</th>
+        <th class="relayHeader sorttale_numeric">BadExit</th>
 	</tr>
 	{% for relay in statusEntry_FullList %}
-		<tr class="relay">
+		<tr {% ifequal relay.isbadexit 1 %} class="relayBadExit" {% else %} class="relay" {% endifequal %}>
             <td><img src="static/img/flags/us.gif"> 
                 {% ifequal relay.isnamed 1 %}
                     <b>{{relay.nickname}}</b> 
@@ -130,7 +131,7 @@
                     {{relay.nickname}}
                 {% endifequal %}
             </td>
-			<td> {{relay.bandwidth}} kb/s</td>
+			<td> {{relay.bandwidth}} kb/s 
             <td align="right">
                 {% ifequal relay.isauthority 1 %}
                     <img src="static/img/status/Authority.png" alt="Authority Server" title="Authority Server">
@@ -165,6 +166,7 @@
                 {% endifequal %}
 
                 {# These should work, but as of this writing, the current "relay" being passed does not have a "platform" field! #}
+                
                 {% if "Linux" in relay.platform %}
                     <img src="static/img/os-icons/Linux.png">
                 {% else %}{% if "XP" in relay.platform %}
@@ -202,10 +204,10 @@
                     {{ relay.dirport }}
                 {% endifequal %}</td>
             <td>{{relay.descriptor}}</td>
-            <td>{% ifequal relay.isbadexit 1 %}
-                	<img src="static/img/bg_no.png" alt="Bad Exit" title="Bad Exit">
-                {% else %}
-               		<img src="static/img/bg_yes.png" alt="Not a Bad Exit" title="Not a Bad Exit">
+            <td {% ifequal relay.isbadexit 1 %} sorttable_customkey="1">
+                	<img src="static/img/bg_yes.png" alt="Not a Bad Exit" title="Not a Bad Exit">
+                {% else %} sorttable_customkey="0">
+               		<img src="static/img/bg_no.png" alt="Bad Exit" title="Bad Exit">
                 {% endifequal %}
             </td>
 		</tr>
