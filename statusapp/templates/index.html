@@ -111,7 +111,6 @@
 <br />
 		
 
-{% if statusEntry_FullList %}
 <table cellspacing="0" border="0" width="100%" class="sortable">
 	<tr class="relayheader">
 		<th class="relayHeader sorttable_alpha">Router Name</th>
@@ -122,7 +121,7 @@
         <th class="relayHeader sorttable_alpha">Descriptor</th>
         <th class="relayHeader sorttale_numeric">BadExit</th>
 	</tr>
-	{% for relay in statusEntry_FullList %}
+	{% for relay, descriptor in template_values %}
 		<tr {% ifequal relay.isbadexit 1 %} class="relayBadExit" {% else %} class="relay" {% endifequal %}>
             <td><img src="static/img/flags/us.gif"> 
                 {% ifequal relay.isnamed 1 %}
@@ -203,7 +202,7 @@
                 {% else %}
                     {{ relay.dirport }}
                 {% endifequal %}</td>
-            <td>{{relay.descriptor}}</td>
+            <td>{{ descriptor.address }}</td>
             <td {% ifequal relay.isbadexit 1 %} sorttable_customkey="1">
                 	<img src="static/img/bg_yes.png" alt="Not a Bad Exit" title="Not a Bad Exit">
                 {% else %} sorttable_customkey="0">
@@ -213,9 +212,6 @@
 		</tr>
 	{% endfor %}
 	</table>
-{% else %}
-	<p> NO LIST !
-{% endif %}
 </body>
 
 </html>
