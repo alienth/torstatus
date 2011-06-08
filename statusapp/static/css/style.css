@@ -26,9 +26,21 @@ tr.relay:hover {
 	background-color: #69EEC8;
 }
 
+tr.relayBadExit {
+	background-color: red;
+}
+
 th.relayHeader {
 	text-align: left;
 	font: bold 11px Arial;
+	background-color: #7BD4F7;
+	border-top: 2px solid black;
+	border-bottom: 2px solid black;
+}
+
+th.relayHeaderInv {
+	text-align: left;
+	font: bold 0px Arial;
 	background-color: #7BD4F7;
 	border-top: 2px solid black;
 	border-bottom: 2px solid black;
