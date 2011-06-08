@@ -17,12 +17,12 @@
 <tr>
 	<td class="headerLinks">
 		<br />
-		<a class="link" href=""> Tor Exit Node Query</a> | 
-		<a class="link" href=""> TorStatus Server Details</a> |
-		<a class="link" href=""> Opinion Source</a> |
-		<a class="link" href=""> Advanced Query Options</a> |
-		<a class="link" href=""> Advanced Display Options</a> | 
-		<a class="link" href=""> Network Statistic Graphs</a>
+		<a class="link" href="">Tor Exit Node Query</a> | 
+		<a class="link" href="">TorStatus Server Details</a> |
+		<a class="link" href="">Opinion Source</a> |
+		<a class="link" href="">Advanced Query Options</a> |
+		<a class="link" href="">Advanced Display Options</a> | 
+		<a class="link" href="">Network Statistic Graphs</a>
 		<br />
 		<br />
 	</td>
@@ -30,9 +30,9 @@
 <tr>
 	<td class="headerLinks">
 		<br />
-		<a class="link" href=""> CSV List of Current Result Set</a> |
-		<a class="link" href=""> CSV List of All Current Tor Server IP Addresses</a> |
-		<a class="link" href=""> CSV List of All Current Tor Server Exit Node IP Addresses</a> 
+		<a class="link" href="">CSV List of Current Result Set</a> |
+		<a class="link" href="">CSV List of All Current Tor Server IP Addresses</a> |
+		<a class="link" href="">CSV List of All Current Tor Server Exit Node IP Addresses</a> 
 		<br />
 		<br />
 	</td>
@@ -116,10 +116,10 @@
 		<th class="relayHeader">Router Name</th>
 		<th class="relayHeader">Bandwidth</th>
 		<th class="relayHeader"> </th>
-        <th class="relayHeader">OrPort</th>
+        <th class="relayHeader">ORPort</th>
         <th class="relayHeader">DirPort</th>
-		<th class="relayHeader">Descriptor</th>
-		<th class="relayHeader">Bad Exit</th>
+        <th class="relayHeader">Descriptor</th>
+        <th class="relayHeader">BadExit</th>
 	</tr>
 	{% for relay in statusEntry_FullList %}
 		<tr class="relay">
@@ -134,10 +134,6 @@
             <td align="right">
                 {% ifequal relay.isauthority 1 %}
                     <img src="static/img/status/Authority.png" alt="Authority Server" title="Authority Server">
-                {% endifequal %}
-
-                {% ifequal relay.isbadexit 1 %}
-                    <img src="static/img/status/bx.gif" alt="Bad Exit" title="Bad Exit">
                 {% endifequal %}
 
                 {% ifequal relay.isbaddirectory 1 %}
@@ -205,7 +201,13 @@
                 {% else %}
                     {{ relay.dirport }}
                 {% endifequal %}</td>
-			<td>{{relay.descriptor}}</td>
+            <td>{{relay.descriptor}}</td>
+            <td>{% ifequal relay.isbadexit 1 %}
+                	<img src="static/img/bg_no.png" alt="Bad Exit" title="Bad Exit">
+                {% else %}
+               		<img src="static/img/bg_yes.png" alt="Not a Bad Exit" title="Not a Bad Exit">
+                {% endifequal %}
+            </td>
 		</tr>
 	{% endfor %}
 	</table>
