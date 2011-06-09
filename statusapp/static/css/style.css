@@ -23,6 +23,9 @@ td.headerLinks {
 	color: red;
 }
 
+tr {
+    line-height:75%;
+}
 tr.relay: {
 	font: 0.625em;
 }
@@ -31,6 +34,9 @@ tr.relay:hover {
 	background-color: #69EEC8;
 }
 
+th {
+    line-height:75%;
+}
 
 th.relayHeader {
 	text-align: left;
@@ -166,7 +172,6 @@ td {
 
 th {
 	font-size:12;
-	font-weight:bold
 }
 
 table.relayTable {
