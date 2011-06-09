@@ -1,7 +1,12 @@
+body {
+    font-family: FreeSans, Arial, Helvetica, sans-serif;
+}
+
 td.headerTitle {
 	background-color: #7BD4F7;
 	text-align:center;
-	font:bold 16pt Arial;
+	font-size: 3.0em;
+    font-weight: bold;
 	color: #000000;
 	border-style: solid;
 	border-color: black;
@@ -14,12 +19,12 @@ td.headerLinks {
 	border-color: black;
 	border-width: 1px;
 	text-align: center;
-	font-size: .7em;
+	font-size: 0.75em;
 	color: red;
 }
 
 tr.relay: {
-	font: 10px Arial;
+	font: 0.625em;
 }
 
 tr.relay:hover {
@@ -29,7 +34,7 @@ tr.relay:hover {
 
 th.relayHeader {
 	text-align: left;
-	font: bold 11px Arial;
+	font: bold 0.6875em; /*11px Arial;*/
 	background-color: #7BD4F7;
 	border-top: 2px solid black;
 	border-bottom: 2px solid black;
@@ -37,6 +42,7 @@ th.relayHeader {
 
 th.relayHeader:hover {
 	background-color: #89FB69;	
+	cursor: pointer;
 }
 
 th.relayHeaderInv {
@@ -45,6 +51,7 @@ th.relayHeaderInv {
 	background-color: #7BD4F7;
 	border-top: 2px solid black;
 	border-bottom: 2px solid black;
+	cursor: pointer;
 }
 
 table.body
@@ -53,6 +60,8 @@ table.body
 	border-style: none;
 	margin-left: auto;
 	margin-right: auto;
+	border-spacing: 1;
+	padding: 2px;
 }
 
 table.displayStatus {
@@ -61,6 +70,8 @@ table.displayStatus {
 	border-style: none;
 	margin-left: auto;
 	margin-right: auto;
+    border-spacing: 1;
+	padding: 2px;
 }
 
 table.legend {
@@ -71,6 +82,8 @@ table.legend {
 	border-width: 1px;
 	margin-left: auto;
 	margin-right: auto;
+    border-spacing: 1;
+	padding: 2px;
 }
 	
 a:hover {
@@ -88,22 +101,21 @@ a.link:hover {
 }
 
 .relayOK {
-	font: 10px Arial;
+	font: 0.625em /*Arial;*/
 	background-color: white;
 }
 
 .relayHibernating {
-	font: 10px Arial;
+	font: 0.625em /*Arial;*/
 	background-color: #FEEED0;
 }
 
 .relayDown {
-	font: 10px Arial;
+	font: 0.625em /*Arial;*/
 	background-color: yellow;
 }
 
 .relayBadExit {
-	font: 10px Arial;
 	background-color: red;
 }
 
@@ -114,10 +126,12 @@ table.appServerDetails {
 	border-width: 1px;
 	margin-left: auto;
 	margin-right: auto;
+	border-spacing: 1;
+	padding: 2px;
 }
 
 td.boxTitle {
-	font:bold 10pt Arial; 
+	font: bold 0.625em; /*10pt Arial;*/
 	background-color: #7BD4F7;
 	text-align: center;
 	position: center;
@@ -129,13 +143,34 @@ td.boxTitle {
 
 tr.appServerDetails:hover {
 	background-color: #7BD4F7;
+	cursor: pointer;
+}
+
+td.col_relayName {
+    background-color: #C7FF89;
+    width: 20px;
+}
+
+td.col_relayName:hover {
+    background-color: #69EEC8;
+}
+
+td.col_relayIcons {
+    text-align: right;
 }
 
 td {
-	font-size:10;
+    font-size: 0.5625em;
+    /*font-family: FreeSans, Arial, Helvetica, sans-serif;*/
 }
 
 th {
 	font-size:12;
 	font-weight:bold
+}
+
+table.relayTable {
+    width: 100%;
+    border-spacing: 0;
+    border: 0;
 }
