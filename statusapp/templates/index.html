@@ -1,12 +1,12 @@
 <html>
 
 <head>
-<link rel="stylesheet" type="text/css" href="static/css/style.css" />
+<link rel="stylesheet" type="text/css" href="static/css/style.css"></link>
 <script src="static/js/sorttable.js" type="text/javascript"></script>
 </head>
 
 <body>
-<table cellspacing="1" cellpadding="2" class="body">
+<table class="body">
 <tr>
 	<td class="headerTitle">
 		<br />
@@ -76,7 +76,7 @@
 </tr>
 </table>
 <br />
-<table cellspacing="1" cellpadding="2" class="appServerDetails">
+<table class="appServerDetails">
 <tr>
 	<td class="boxTitle" colspan="2">Application Server Details</td>
 </tr>
@@ -112,32 +112,32 @@
 
 
 {% if statusEntry_descriptorEntry %}
-<table cellspacing="0" border="0" width="100%" class="sortable" id="sortable">
+<table class="sortable relayTable">
 	<tr class="relayheader">
 		<th class="relayHeader sorttable_alpha">&nbsp</th>
 		<th class="relayHeader sorttable_alpha">Router Name</th>
 		<th class="relayHeader sorttable_numeric">Bandwidth</th>
         <th class="relayHeader sorttable_numeric">Uptime</th>
         <th class="relayHeader sorttable_numeric">IP</th>
-		<th class="relayHeaderInv">Icons</th>
+		<th class="relayHeaderInv sorttable_nosort">Icons</th>
         <th class="relayHeader sorttable_numeric">ORPort</th>
         <th class="relayHeader sorttable_numeric">DirPort</th>
         <th class="relayHeader sorttale_numeric">BadExit</th>
 	</tr>
 	{% for relay, descriptor in statusEntry_descriptorEntry %}
 		<tr {% ifequal relay.isbadexit 1 %} class="relayBadExit" {% else %} class="relay" {% endifequal %}>
-			<td sorttable_customkey="us"><img src="static/img/flags/us.gif" alt="US" title="US"></td>
-            <td> 
+			<td sorttable_customkey="us" class="col_relayName"><img src="static/img/flags/us.gif" alt="US" title="US"></td>
+            <td class="col_relayName"> 
                 {% ifequal relay.isnamed 1 %}
                     <b>{{relay.nickname}}</b> 
                 {% else %}
                     {{relay.nickname}}
                 {% endifequal %}
             </td>
-            <td>{% widthratio descriptor.bandwidthobserved|floatformat 1024 1 %} KB/s</td>
-            <td>{% widthratio descriptor.uptime|floatformat 86000 1 %} d</td>
+            <td class="col_relayBandwidth">{% widthratio descriptor.bandwidthobserved|floatformat 1024 1 %} KB/s</td>
+            <td class="col_relayUptime">{% widthratio descriptor.uptime|floatformat 86000 1 %} d</td>
             <td>{{relay.address}}</td>
-            <td align="right">
+            <td class="col_relayIcons">
 
                 {% ifequal relay.isfast 1 %}
                     <img src="static/img/status/Fast.png" alt="Fast Server" title="Fast Server">
@@ -187,13 +187,13 @@
                     <img src="static/img/os-icons/NotAvailable.png" alt="NotAvailable" title="Not Available">
                 {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
             </td>
-            <td>{{relay.orport}}</td>
-            <td>{% ifequal relay.dirport 0 %}
+            <td class="col_relayOrport">{{relay.orport}}</td>
+            <td class="col_relayDirport">{% ifequal relay.dirport 0 %}
                     None
                 {% else %}
                     {{ relay.dirport }}
                 {% endifequal %}</td>
-            <td {% ifequal relay.isbadexit 1 %} sorttable_customkey="1">
+            <td class="col_relayBadExit" {% ifequal relay.isbadexit 1 %} sorttable_customkey="1">
                 	<img src="static/img/bg_yes.png" width="12" height="12" alt="Not a Bad Exit" title="Not a Bad Exit">
                 {% else %} sorttable_customkey="0">
                		<img src="static/img/bg_no.png" width="12" height="12" alt="Bad Exit" title="Bad Exit">

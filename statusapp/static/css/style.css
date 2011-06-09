@@ -46,6 +46,7 @@ th.relayHeader {
 
 th.relayHeader:hover {
 	background-color: #89FB69;	
+	cursor: pointer;
 }
 
 th.relayHeaderInv {
@@ -54,8 +55,7 @@ th.relayHeaderInv {
 	background-color: #7BD4F7;
 	border-top: 2px solid black;
 	border-bottom: 2px solid black;
-    border-right: 2px solid black;
-    border-left: 2px solid black;
+	cursor: pointer;
 }
 
 table.body
@@ -64,6 +64,8 @@ table.body
 	border-style: none;
 	margin-left: auto;
 	margin-right: auto;
+	border-spacing: 1;
+	padding: 2px;
 }
 
 table.displayStatus {
@@ -72,6 +74,8 @@ table.displayStatus {
 	border-style: none;
 	margin-left: auto;
 	margin-right: auto;
+    border-spacing: 1;
+	padding: 2px;
 }
 
 table.legend {
@@ -82,6 +86,8 @@ table.legend {
 	border-width: 1px;
 	margin-left: auto;
 	margin-right: auto;
+    border-spacing: 1;
+	padding: 2px;
 }
 	
 a:hover {
@@ -99,17 +105,17 @@ a.link:hover {
 }
 
 .relayOK {
-	font: 0.625em /*Arial;*/
+	font: 0.625em; /*Arial;*/
 	background-color: white;
 }
 
 .relayHibernating {
-	font: 0.625em /*Arial;*/
+	font: 0.625em; /*Arial;*/
 	background-color: #FEEED0;
 }
 
 .relayDown {
-	font: 0.625em /*Arial;*/
+	font: 0.625em; /*Arial;*/
 	background-color: yellow;
 }
 
@@ -124,6 +130,8 @@ table.appServerDetails {
 	border-width: 1px;
 	margin-left: auto;
 	margin-right: auto;
+	border-spacing: 1;
+	padding: 2px;
 }
 
 td.boxTitle {
@@ -139,6 +147,20 @@ td.boxTitle {
 
 tr.appServerDetails:hover {
 	background-color: #7BD4F7;
+	cursor: pointer;
+}
+
+td.col_relayName {
+    background-color: #C7FF89;
+    width: 20px;
+}
+
+td.col_relayName:hover {
+    background-color: #69EEC8;
+}
+
+td.col_relayIcons {
+    text-align: right;
 }
 
 td {
@@ -148,5 +170,10 @@ td {
 
 th {
 	font-size:12;
-	font-weight:bold
+}
+
+table.relayTable {
+    width: 100%;
+    border-spacing: 0;
+    border: 0;
 }
