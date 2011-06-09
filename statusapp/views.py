@@ -16,5 +16,8 @@ def index(request):
 	return render_to_response('index.html', template_values)
 
 def details(request, fingerprint):
+    statusEntry_FullList = Statusentry.objects.filter(pk='2011-05-31 19:00:00')
+    #descriptor = Descriptor.objects.get(pk=fingerprint)
     template_values = {'fingerprint': fingerprint,}
+    
     return render_to_response('details.html', template_values)
