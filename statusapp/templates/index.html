@@ -101,7 +101,6 @@
 <br />
 <br />
 
-
 {% if statusEntry_descriptorEntry %}
 <table class="sortable relayTable">
 	<tr class="relayheader">
@@ -115,14 +114,15 @@
         <th class="relayHeader sorttable_numeric">DirPort</th>
         <th class="relayHeader sorttale_numeric">BadExit</th>
 	</tr>
+
 	{% for relay, descriptor in statusEntry_descriptorEntry %}
 		<tr {% ifequal relay.isbadexit 1 %} class="relayBadExit" {% else %} class="relay" {% endifequal %}>
 			<td sorttable_customkey="us" class="col_relayName"><img src="static/img/flags/us.gif" alt="US" title="US"></td>
             <td class="col_relayName"> 
                 {% ifequal relay.isnamed 1 %}
-                    <b>{{relay.nickname}}</b> 
-                {% else %}
-                    {{relay.nickname}}
+                    <a class="link" href="/{{ relay.fingerprint }}/details/"> {{ relay.nickname }} </a>
+                    {% else %}
+                    <a class="link" href="/{{ relay.fingerprint }}/details/"> {{ relay.nickname }} </a>
                 {% endifequal %}
             </td>
             <td class="col_relayBandwidth">{% widthratio descriptor.bandwidthobserved|floatformat 1024 1 %} KB/s</td>
@@ -192,9 +192,7 @@
             </td>
 		</tr>
 	{% endfor %}
-	</table>
-{% else %}
-	<p> NO LIST !
+</table>
 {% endif %}
 </body>
 

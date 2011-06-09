@@ -14,4 +14,7 @@ def index(request):
 	clientAddress = request.META['REMOTE_ADDR']
 	template_values = {'statusEntry_descriptorEntry': statusEntry_descriptorEntry, 'clientAddress': clientAddress, }
 	return render_to_response('index.html', template_values)
-    
+
+def details(request, fingerprint):
+    template_values = {'fingerprint': fingerprint,}
+    return render_to_response('details.html', template_values)
