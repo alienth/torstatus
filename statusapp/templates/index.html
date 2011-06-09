@@ -134,7 +134,7 @@
                     {{relay.nickname}}
                 {% endifequal %}
             </td>
-            <td>{% widthratio descriptor.bandwidthobserved|floatformat 1000 1 %} KB/s</td>
+            <td>{% widthratio descriptor.bandwidthobserved|floatformat 1024 1 %} KB/s</td>
             <td>{% widthratio descriptor.uptime|floatformat 86000 1 %} d</td>
             <td>{{relay.address}}</td>
             <td align="right">

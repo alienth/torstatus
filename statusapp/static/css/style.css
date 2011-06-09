@@ -1,7 +1,12 @@
+body {
+    font-family: FreeSans, Arial, Helvetica, sans-serif;
+}
+
 td.headerTitle {
 	background-color: #7BD4F7;
 	text-align:center;
-	font:bold 16pt Arial;
+	font-size: 3.0em;
+    font-weight: bold;
 	color: #000000;
 	border-style: solid;
 	border-color: black;
@@ -14,12 +19,12 @@ td.headerLinks {
 	border-color: black;
 	border-width: 1px;
 	text-align: center;
-	font-size: .7em;
+	font-size: 0.75em;
 	color: red;
 }
 
 tr.relay: {
-	font: 10px Arial;
+	font: 0.625em;
 }
 
 tr.relay:hover {
@@ -29,7 +34,7 @@ tr.relay:hover {
 
 th.relayHeader {
 	text-align: left;
-	font: bold 11px Arial;
+	font: bold 0.6875em; /*11px Arial;*/
 	background-color: #7BD4F7;
 	border-top: 2px solid black;
 	border-bottom: 2px solid black;
@@ -41,7 +46,7 @@ th.relayHeader:hover {
 
 th.relayHeaderInv {
 	text-align: left;
-	font: bold 0px Arial;
+	font: bold 0px /*Arial;*/
 	background-color: #7BD4F7;
 	border-top: 2px solid black;
 	border-bottom: 2px solid black;
@@ -88,22 +93,21 @@ a.link:hover {
 }
 
 .relayOK {
-	font: 10px Arial;
+	font: 0.625em /*Arial;*/
 	background-color: white;
 }
 
 .relayHibernating {
-	font: 10px Arial;
+	font: 0.625em /*Arial;*/
 	background-color: #FEEED0;
 }
 
 .relayDown {
-	font: 10px Arial;
+	font: 0.625em /*Arial;*/
 	background-color: yellow;
 }
 
 .relayBadExit {
-	font: 10px Arial;
 	background-color: red;
 }
 
@@ -117,7 +121,7 @@ table.appServerDetails {
 }
 
 td.boxTitle {
-	font:bold 10pt Arial; 
+	font: bold 0.625em; /*10pt Arial;*/
 	background-color: #7BD4F7;
 	text-align: center;
 	position: center;
@@ -132,7 +136,8 @@ tr.appServerDetails:hover {
 }
 
 td {
-    font: 9pt Arial 
+    font-size: 0.5625em;
+    /*font-family: FreeSans, Arial, Helvetica, sans-serif;*/
 }
 
 th {
