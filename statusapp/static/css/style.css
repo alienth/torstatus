@@ -167,8 +167,31 @@ td.col_relayName:hover {
     background-color: #69EEC8;
 }
 
+td.col_relayBandwidth {
+    width: 100px;
+}
+
+td.col_relayUptime {
+    width: 50px;
+}
+
 td.col_relayIcons {
+    width: 100px;
     text-align: right;
+}
+
+td.col_relayOrport {
+    width: 50px;
+}
+
+
+td.col_relayDirport {
+    width: 50px;
+}
+
+td.col_relayBadExit {
+    width: 50px;
+    text-align: center;
 }
 
 td {

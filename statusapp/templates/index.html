@@ -85,7 +85,7 @@
 		<th class="relayHeaderInv sorttable_nosort">Icons</th>
         <th class="relayHeader sorttable_numeric">ORPort</th>
         <th class="relayHeader sorttable_numeric">DirPort</th>
-        <th class="relayHeader sorttale_numeric">BadExit</th>
+        <th class="relayHeader sorttale_numeric">Bad Exit</th>
 	</tr>
 
 	{% for relay, descriptor in statusEntry_descriptorEntry %}
@@ -93,14 +93,14 @@
 			<td sorttable_customkey="us" class="col_relayName"><img src="static/img/flags/us.gif" alt="US" title="US"></td>
             <td class="col_relayName"> 
                 {% ifequal relay.isnamed 1 %}
-                    <b><a class="linkDetails" href="/{{ relay.fingerprint }}/details/"> {{ relay.nickname }}</a></b>
+                    <b><a class="linkDetails" href="/details/{{ relay.fingerprint }}/"> {{ relay.nickname }}</a></b>
                     {% else %}
-                    <a class="linkDetails" href="/{{ relay.fingerprint }}/details/"> {{ relay.nickname }} </a>
+                    <a class="linkDetails" href="/details/{{ relay.fingerprint }}/"> {{ relay.nickname }} </a>
                 {% endifequal %}
             </td>
             <td class="col_relayBandwidth">{% widthratio descriptor.bandwidthobserved|floatformat 1024 1 %} KB/s</td>
             <td class="col_relayUptime">{% widthratio descriptor.uptime|floatformat 86000 1 %} d</td>
-            <td>{{relay.address}}</td>
+            <td class="col_relayAddress">{{relay.address}}</td>
             <td class="col_relayIcons">
 
                 {% ifequal relay.isfast 1 %}
