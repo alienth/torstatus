@@ -2,6 +2,7 @@
 
 <head>
 <link rel="stylesheet" type="text/css" href="static/css/style.css" />
+<script src="static/js/sorttable.js" type="text/javascript"></script>
 </head>
 
 <body>
@@ -62,16 +63,16 @@
 	<td class="boxTitle"> Legend </td>
 </tr>
 <tr>
-	<td class="routerOK">Router is ok</td>
+	<td class="relayOK">Router is ok</td>
 </tr>
 <tr>
-	<td class="routerHibernating">Router is hibernating</td>
+	<td class="relayHibernating">Router is hibernating</td>
 </tr>
 <tr>
-	<td class="routerDown">Router is currently down</td>
+	<td class="relayDown">Router is currently down</td>
 </tr>
 <tr>
-	<td class="routerBadExit">Router is a bad exit node</td>
+	<td class="relayBadExit">Router is a bad exit node</td>
 </tr>
 </table>
 <br />
@@ -108,94 +109,94 @@
 	
 <br />
 <br />
-		
-{% if statuses_descriptors %}
-<table cellspacing="0" border="0" width="100%">
+
+
+{% if statusEntry_descriptorEntry %}
+<table cellspacing="0" border="0" width="100%" class="sortable" id="sortable">
 	<tr class="relayheader">
-		<th class="relayHeader">Router Name</th>
-		<th class="relayHeader">Bandwidth</th>
-        <th class="relayHeader">Uptime</th>
-        <th class="relayHeader">IP</th>
-		<th class="relayHeader"> </th>
-        <th class="relayHeader">ORPort</th>
-        <th class="relayHeader">DirPort</th>
-        <th class="relayHeader">BadExit</th>
+		<th class="relayHeader sorttable_alpha">&nbsp</th>
+		<th class="relayHeader sorttable_alpha">Router Name</th>
+		<th class="relayHeader sorttable_numeric">Bandwidth</th>
+        <th class="relayHeader sorttable_numeric">Uptime</th>
+        <th class="relayHeader sorttable_numeric">IP</th>
+		<th class="relayHeaderInv">Icons</th>
+        <th class="relayHeader sorttable_numeric">ORPort</th>
+        <th class="relayHeader sorttable_numeric">DirPort</th>
+        <th class="relayHeader sorttale_numeric">BadExit</th>
 	</tr>
-	{% for relay_stat, relay_desc in statuses_descriptors %}
-		<tr class="relay">
-            <td><img src="static/img/flags/us.gif"> 
-                {% ifequal relay_stat.isnamed 1 %}
-                    <b>{{relay_stat.nickname}}</b> 
+	{% for relay, descriptor in statusEntry_descriptorEntry %}
+		<tr {% ifequal relay.isbadexit 1 %} class="relayBadExit" {% else %} class="relay" {% endifequal %}>
+			<td sorttable_customkey="us"><img src="static/img/flags/us.gif" alt="US" title="US"></td>
+            <td> 
+                {% ifequal relay.isnamed 1 %}
+                    <b>{{relay.nickname}}</b> 
                 {% else %}
-                    {{relay_stat.nickname}}
+                    {{relay.nickname}}
                 {% endifequal %}
             </td>
-            <td> {% widthratio relay_desc.bandwidthobserved|floatformat 1000 1 %} KB/s</td>
-            <td> {% widthratio relay_desc.uptime|floatformat 86000 1 %} d</td>
-            <td> {{relay_stat.address}}
+            <td>{% widthratio descriptor.bandwidthobserved|floatformat 1000 1 %} KB/s</td>
+            <td>{% widthratio descriptor.uptime|floatformat 86000 1 %} d</td>
+            <td>{{relay.address}}</td>
             <td align="right">
 
-                {% ifequal relay_stat.isfast 1 %}
+                {% ifequal relay.isfast 1 %}
                     <img src="static/img/status/Fast.png" alt="Fast Server" title="Fast Server">
                 {% endifequal %}
 
-                {% ifequal relay_stat.isexit 1 %}
+                {% ifequal relay.isexit 1 %}
                     <img src="static/img/status/Exit.png" alt="Exit Server" title="Exit Server">
                 {% endifequal %}
 
-                {% ifequal relay_stat.isguard 1 %}
+                {% ifequal relay.isguard 1 %}
                     <img src="static/img/status/Guard.png" alt="Guard Server" title="Guard Server">
                 {% endifequal %}
 
-                {% ifequal relay_stat.isstable 1 %}
+                {% ifequal relay.isstable 1 %}
                     <img src="static/img/status/Stable.png" alt="Stable Server" title="Stable Server">
                 {% endifequal %}
 
-                {% ifequal relay_stat.isauthority 1 %}
+                {% ifequal relay.isauthority 1 %}
                     <img src="static/img/status/Authority.png" alt="Authority Server" title="Authority Server">
                 {% endifequal %}
 
-                {% if "Linux" in relay_desc.platform %}
-                <img src="static/img/os-icons/Linux.png" alt="{{ relay_desc.platform }}" title="{{ relay_desc.platform }}">
-                {% else %}{% if "XP" in relay_desc.platform %}
-                    <img src="static/img/os-icons/WindowsXP.png" alt="{{ relay_desc.platform }}" title="{{ relay_desc.platform }}">
-                    {% else %}{% if "Windows" in relay_desc.platform and "erver" in relay_desc.platform %}
-                    <img src="static/img/os-icons/WindowsServer.png" alt="{{ relay_desc.platform }}" title="{{ relay_desc.platform }}">
-                {% else %}{% if "Windows" in relay_desc.platform %}
-                    <img src="static/img/os-icons/WindowsOther.png" alt="{{ relay_desc.platform }}" title="{{ relay_desc.platform }}">
-                {% else %}{% if "Darwin" in relay_desc.platform %}
-                    <img src="static/img/os-icons/Darwin.png" alt="{{ relay_desc.platform }}" title="{{ relay_desc.platform }}">
-                {% else %}{% if "FreeBSD" in relay_desc.platform %}
-                    <img src="static/img/os-icons/FreeBSD.png" alt="{{ relay_desc.platform }}" title="{{ relay_desc.platform }}">
-                {% else %}{% if "NetBSD" in relay_desc.platform %}
-                    <img src="static/img/os-icons/NetBSD.png" alt="{{ relay_desc.platform }}" title="{{ relay_desc.platform }}">
-                {% else %}{% if "OpenBSD" in relay_desc.platform %}
-                    <img src="static/img/os-icons/OpenBSD.png" alt="{{ relay_desc.platform }}" title="{{ relay_desc.platform }}">
-                {% else %}{% if "SunOS" in relay_desc.platform %}
-                    <img src="static/img/os-icons/SunOS.png" alt="{{ relay_desc.platform }}" title="{{ relay_desc.platform }}">
-                {% else %}{% if "available" in relay_desc.platform %}
-                    <img src="static/img/os-icons/NotAvailable.png" alt="{{ relay_desc.platform }}" title="{{ relay_desc.platform }}">
-                {% else %}{% if "IRIX" in relay_desc.platform %}
-                    <img src="static/img/os-icons/IRIX64.png" alt="{{ relay_desc.platform }}" title="{{ relay_desc.platform }}">
-                {% else %}{% if "Cygwin" in relay_desc.platform %}
-                    <img src="static/img/os-icons/Cygwin.png" alt="{{ relay_desc.platform }}" title="{{ relay_desc.platform }}">
-                {% else %}{% if "Dragon" in relay_desc.platform %}
-                    <img src="static/img/os-icons/DragonFly.png" alt="{{ relay_desc.platform }}" title="{{ relay_desc.platform }}">
+                {% if "Linux" in descriptor.platform %}
+                    <img src="static/img/os-icons/Linux.png" alt="Linux" title="{{descriptor.platform}}">
+                {% else %}{% if "XP" in descriptor.platform %}
+                    <img src="static/img/os-icons/WindowsXP.png" alt="WindowsXP" title="{{descriptor.platform}}">
+                    {% else %}{% if "Windows" in descriptor.platform and "Server" in descriptor.platform %}
+                    <img src="static/img/os-icons/WindowsServer.png" alt="WindowsServer" title="{{descriptor.platform}}">
+                {% else %}{% if "Windows" in descriptor.platform %}
+                    <img src="static/img/os-icons/WindowsOther.png" alt="WindowsOther" title="{{descriptor.platform}}">
+                {% else %}{% if "Darwin" in descriptor.platform %}
+                    <img src="static/img/os-icons/Darwin.png" alt="Darwin" title="{{descriptor.platform}}">
+                {% else %}{% if "FreeBSD" in descriptor.platform %}
+                    <img src="static/img/os-icons/FreeBSD.png" alt="FreeBSD" title="{{descriptor.platform}}">
+                {% else %}{% if "NetBSD" in descriptor.platform %}
+                    <img src="static/img/os-icons/NetBSD.png" alt="NetBSD" title="{{descriptor.platform}}">
+                {% else %}{% if "OpenBSD" in descriptor.platform %}
+                    <img src="static/img/os-icons/OpenBSD.png" alt="OpenBSD" title="{{descriptor.platform}}">
+                {% else %}{% if "SunOS" in descriptor.platform %}
+                    <img src="static/img/os-icons/SunOS.png" alt="SunOS" title="{{descriptor.platform}}">
+                {% else %}{% if "IRIX" in descriptor.platform %}
+                    <img src="static/img/os-icons/IRIX64.png" alt="IRIX" title="{{descriptor.platform}}">
+                {% else %}{% if "Cygwin" in descriptor.platform %}
+                    <img src="static/img/os-icons/Cygwin.png" alt="Cygwin" title="{{descriptor.platform}}">
+                {% else %}{% if "Dragon" in descriptor.platform %}
+                    <img src="static/img/os-icons/DragonFly.png" alt ="Dragon" title="{{descriptor.platform}}">
                 {% else %}
-                    <img src="static/img/os-icons/NotAvailable.png" alt="{{ relay_desc.platform }}" title="{{ relay_desc.platform }}">
-                {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
+                    <img src="static/img/os-icons/NotAvailable.png" alt="NotAvailable" title="Not Available">
+                {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
             </td>
-            <td>{{relay_stat.orport}}</td>
-            <td>{% ifequal relay_stat.dirport 0 %}
+            <td>{{relay.orport}}</td>
+            <td>{% ifequal relay.dirport 0 %}
                     None
                 {% else %}
-                    {{ relay_stat.dirport }}
-                {% endifequal %}
-            </td>
-            <td>{% ifequal relay_stat.isbadexit 1 %}
-                    <img src="static/img/bg_yes.png" alt="Not a Bad Exit" title="Not a Bad Exit">
-                {% else %}
-                    <img src="static/img/bg_no.png" alt="Bad Exit" title="Bad Exit">
+                    {{ relay.dirport }}
+                {% endifequal %}</td>
+            <td {% ifequal relay.isbadexit 1 %} sorttable_customkey="1">
+                	<img src="static/img/bg_yes.png" alt="Not a Bad Exit" title="Not a Bad Exit">
+                {% else %} sorttable_customkey="0">
+               		<img src="static/img/bg_no.png" alt="Bad Exit" title="Bad Exit">
                 {% endifequal %}
             </td>
 		</tr>

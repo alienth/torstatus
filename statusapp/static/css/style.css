@@ -25,10 +25,27 @@ tr.relay: {
 tr.relay:hover {
 	background-color: #69EEC8;
 }
+/*
+tr.relayBadExit {
+	background-color: red;
+} 
+*/
 
 th.relayHeader {
 	text-align: left;
 	font: bold 11px Arial;
+	background-color: #7BD4F7;
+	border-top: 2px solid black;
+	border-bottom: 2px solid black;
+}
+
+th.relayHeader:hover {
+	background-color: #89FB69;	
+}
+
+th.relayHeaderInv {
+	text-align: left;
+	font: bold 0px Arial;
 	background-color: #7BD4F7;
 	border-top: 2px solid black;
 	border-bottom: 2px solid black;
@@ -74,22 +91,22 @@ a.link:hover {
 	background-color: #89FB69;
 }
 
-td.routerOK {
+.relayOK {
 	font: 10px Arial;
 	background-color: white;
 }
 
-td.routerHibernating {
+.relayHibernating {
 	font: 10px Arial;
 	background-color: #FEEED0;
 }
 
-td.routerDown {
+.relayDown {
 	font: 10px Arial;
 	background-color: yellow;
 }
 
-td.routerBadExit {
+.relayBadExit {
 	font: 10px Arial;
 	background-color: red;
 }
