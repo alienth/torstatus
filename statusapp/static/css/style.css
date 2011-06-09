@@ -5,12 +5,13 @@ body {
 td.headerTitle {
 	background-color: #7BD4F7;
 	text-align:center;
-	font-size: 3.0em;
+	font-size: 2.0em;
     font-weight: bold;
 	color: #000000;
 	border-style: solid;
 	border-color: black;
 	border-width: 1px;
+	padding: 10px;
 }
 
 td.col_relayName {
@@ -26,16 +27,21 @@ td.headerLinks {
 	text-align: center;
 	font-size: 0.75em;
 	color: red;
+	padding: 10px;
 }
 
 tr.relay: {
 	font: 0.625em;
+    line-height:75%;
 }
 
 tr.relay:hover {
 	background-color: #69EEC8;
 }
 
+th {
+    line-height:75%;
+}
 
 th.relayHeader {
 	text-align: left;
@@ -59,8 +65,7 @@ th.relayHeaderInv {
 	cursor: pointer;
 }
 
-table.body
-{
+table.body {
 	width: 100%;
 	border-style: none;
 	margin-left: auto;
@@ -106,17 +111,17 @@ a.link:hover {
 }
 
 .relayOK {
-	font: 0.625em /*Arial;*/
+	font: 0.625em; /*Arial;*/
 	background-color: white;
 }
 
 .relayHibernating {
-	font: 0.625em /*Arial;*/
+	font: 0.625em; /*Arial;*/
 	background-color: #FEEED0;
 }
 
 .relayDown {
-	font: 0.625em /*Arial;*/
+	font: 0.625em; /*Arial;*/
 	background-color: yellow;
 }
 
@@ -132,7 +137,7 @@ table.appServerDetails {
 	margin-left: auto;
 	margin-right: auto;
 	border-spacing: 1;
-	padding: 2px;
+/*	padding: 2px;*/
 }
 
 td.boxTitle {
@@ -167,7 +172,6 @@ td {
 
 th {
 	font-size:12;
-	font-weight:bold
 }
 
 table.relayTable {
