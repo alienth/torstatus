@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block auxCSS %} 
+<link rel="stylesheet" type="text/css" href="../../static/css/style.css"></link>
+{% endblock %}
+
+{% block mainTitle %} TorStatus Details Page {% endblock %}
+
+{% block headerTitle %} TorStatus details.html {% endblock %}
+
+{% block mainPage %}
+    {{ fingerprint }}
+{% endblock %}
