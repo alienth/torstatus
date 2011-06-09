@@ -21,3 +21,13 @@ def details(request, fingerprint):
     template_values = {'fingerprint': fingerprint,}
     
     return render_to_response('details.html', template_values)
+
+def exitnodequery(request):
+    variables = "MWAHAHA"
+    template_values = {'variables': variables,}
+    return render_to_response('nodequery.html', template_values)
+
+def networkstatisticgraphs(request):
+    variables = "mWAHAHA"
+    template_values = {'variables': variables,}
+    return render_to_response('statisticgraphs.html', template_values)
