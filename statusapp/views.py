@@ -1,26 +1,16 @@
-from statusapp.models import Statusentry
+from statusapp.models import Statusentry, Descriptor
 from django.shortcuts import render_to_response, get_object_or_404
-from django.http import HttpResponse
-
-import os
+from django.http import HttpResponse, HttpRequest
 
 def index(request):
 	statusEntry_FullList = Statusentry.objects.filter(pk='2011-05-31 19:00:00')
-	debugText = ""
-	if statusEntry_FullList:
-		debugText = "Everything is fine!"
-		template_values = {'statusEntry_FullList': statusEntry_FullList, 'debugText': debugText}
-	else:
-		debugText = "Didn't get anything from the all()"
-		template_values = {'debugText': debugText}
+	descriptor_list = []
+	for entry in statusEntry_FullList:
+		try:
+			descriptor_list.append(Descriptor.objects.get(pk=entry.descriptor))
+		except:
+			descriptor_list.append(Descriptor())
+	statusEntry_descriptorEntry = zip(statusEntry_FullList, descriptor_list)
+	clientAddress = request.META['REMOTE_ADDR']
+	template_values = {'statusEntry_descriptorEntry': statusEntry_descriptorEntry, 'clientAddress': clientAddress, }
 	return render_to_response('index.html', template_values)
-
-def displayFlag(request, country_code):
-	imagePath = os.path.join(os.path.dirname(__file__), 'templates/static/img/flags/' + str(country_code) + '.gif')
-	from PIL import Image
-	Image.init()
-	i = Image.open(imagePath)
-	response = HttpResponse(content_type='image/gif')
-	i.save(response, 'GIF')
-	return response
-
