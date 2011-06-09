@@ -9,33 +9,24 @@
 <table class="body">
 <tr>
 	<td class="headerTitle">
-		<br />
 		<a class="link" href=""> TorStatus</a>
-		<br />
-		<br />
 	</td>
 </tr>
 <tr>
 	<td class="headerLinks">
-		<br />
 		<a class="link" href="">Tor Exit Node Query</a> | 
 		<a class="link" href="">TorStatus Server Details</a> |
 		<a class="link" href="">Opinion Source</a> |
 		<a class="link" href="">Advanced Query Options</a> |
 		<a class="link" href="">Advanced Display Options</a> | 
 		<a class="link" href="">Network Statistic Graphs</a>
-		<br />
-		<br />
 	</td>
 </tr>
 <tr>
 	<td class="headerLinks">
-		<br />
 		<a class="link" href="">CSV List of Current Result Set</a> |
 		<a class="link" href="">CSV List of All Current Tor Server IP Addresses</a> |
 		<a class="link" href="">CSV List of All Current Tor Server Exit Node IP Addresses</a> 
-		<br />
-		<br />
 	</td>
 </tr>
 <tr>
@@ -48,12 +39,9 @@
 <table cellspacing="2" cellpadding="2" class="displayStatus">
 <tr>
 	<td class="headerLinks">
-		<br />
 		<a class="link" href="https://check.torproject.org/"> Check if you are using Tor (via TorCheck)</a>
 		<br />
 		Your IP Address is: {{clientAddress}}
-		<br />
-		<br />
 	</td>
 </tr>
 </table>
@@ -113,8 +101,8 @@
 
 {% if statusEntry_descriptorEntry %}
 <table class="sortable relayTable">
-	<tr class="relayheader">
-		<th class="relayHeader sorttable_alpha">&nbsp</th>
+	<tr>
+        <th class="relayHeader sorttable_alpha">&nbsp</th>
 		<th class="relayHeader sorttable_alpha">Router Name</th>
 		<th class="relayHeader sorttable_numeric">Bandwidth</th>
         <th class="relayHeader sorttable_numeric">Uptime</th>
@@ -122,7 +110,7 @@
 		<th class="relayHeaderInv sorttable_nosort">Icons</th>
         <th class="relayHeader sorttable_numeric">ORPort</th>
         <th class="relayHeader sorttable_numeric">DirPort</th>
-        <th class="relayHeader sorttale_numeric">BadExit</th>
+        <th class="relayHeader sorttale_numeric">Bad Exit</th>
 	</tr>
 	{% for relay, descriptor in statusEntry_descriptorEntry %}
 		<tr {% ifequal relay.isbadexit 1 %} class="relayBadExit" {% else %} class="relay" {% endifequal %}>
