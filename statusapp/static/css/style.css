@@ -11,6 +11,12 @@ td.headerTitle {
 	border-style: solid;
 	border-color: black;
 	border-width: 1px;
+	padding: 10px;
+}
+
+td.col_relayName {
+    background-color: #C7FF89;
+    width: 20px;
 }
 
 td.headerLinks {
@@ -21,6 +27,7 @@ td.headerLinks {
 	text-align: center;
 	font-size: 0.75em;
 	color: red;
+	padding: 10px;
 }
 
 tr.relay: {
@@ -38,8 +45,8 @@ th {
 
 th.relayHeader {
 	text-align: left;
-    font-weight: bold;
-    font-size: 0.5625em;
+	font-weight: bold; 
+	font-size: 0.6875em;
 	background-color: #7BD4F7;
 	border-top: 2px solid black;
 	border-bottom: 2px solid black;
@@ -59,8 +66,7 @@ th.relayHeaderInv {
 	cursor: pointer;
 }
 
-table.body
-{
+table.body {
 	width: 100%;
 	border-style: none;
 	margin-left: auto;
@@ -105,6 +111,11 @@ a.link:hover {
 	background-color: #89FB69;
 }
 
+a.linkDetails {
+    color: black;
+	text-decoration: none;
+}
+
 .relayOK {
 	font: 0.625em; /*Arial;*/
 	background-color: white;
@@ -132,7 +143,7 @@ table.appServerDetails {
 	margin-left: auto;
 	margin-right: auto;
 	border-spacing: 1;
-	padding: 2px;
+/*	padding: 2px;*/
 }
 
 td.boxTitle {
@@ -151,10 +162,6 @@ tr.appServerDetails:hover {
 	cursor: pointer;
 }
 
-td.col_relayName {
-    background-color: #C7FF89;
-    width: 20px;
-}
 
 td.col_relayName:hover {
     background-color: #69EEC8;
@@ -174,3 +181,18 @@ table.relayTable {
     border-spacing: 0;
     border: 0;
 }
+
+div.footer {
+    text-align: center;
+    padding: 5px 0 0 0;
+    margin: 25px 0 0 0;
+    border-top: 1px solid rgb(100,100,100);
+    color: rgb(100, 100, 100);
+}
+
+div.footer#trademark {
+    text-align: center;
+    font-size: 12px;
+    margin: 0 0 1px 0;
+}
+
