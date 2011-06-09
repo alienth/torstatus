@@ -11,6 +11,7 @@ td.headerTitle {
 	border-style: solid;
 	border-color: black;
 	border-width: 1px;
+	padding: 10px;
 }
 
 td.headerLinks {
@@ -21,6 +22,7 @@ td.headerLinks {
 	text-align: center;
 	font-size: 0.75em;
 	color: red;
+	padding: 10px;
 }
 
 tr {
@@ -60,8 +62,7 @@ th.relayHeaderInv {
 	cursor: pointer;
 }
 
-table.body
-{
+table.body {
 	width: 100%;
 	border-style: none;
 	margin-left: auto;
@@ -133,7 +134,7 @@ table.appServerDetails {
 	margin-left: auto;
 	margin-right: auto;
 	border-spacing: 1;
-	padding: 2px;
+/*	padding: 2px;*/
 }
 
 td.boxTitle {
