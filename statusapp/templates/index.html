@@ -109,6 +109,10 @@
 	
 <br />
 <br />
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1a9b4b701f44beb32254c9e5da3ede98b8bc5cc5
 
 {% if statusEntry_descriptorEntry %}
 <table cellspacing="0" border="0" width="100%" class="sortable" id="sortable">
@@ -117,8 +121,8 @@
 		<th class="relayHeader sorttable_alpha">&nbsp</th>
 		<th class="relayHeader sorttable_alpha">Router Name</th>
 		<th class="relayHeader sorttable_numeric">Bandwidth</th>
-<!--		<th class="relayHeader sorttable_numeric">Uptime</th>  -->
-	    <th class="relayHeader sorttable_numeric">Hostname</th>
+        <th class="relayHeader sorttable_numeric">Uptime</th>
+        <th class="relayHeader sorttable_numeric">IP</th>
 		<th class="relayHeaderInv">Icons</th>
         <th class="relayHeader sorttable_numeric">ORPort</th>
         <th class="relayHeader sorttable_numeric">DirPort</th>
@@ -135,23 +139,17 @@
                     {{relay.nickname}}
                 {% endifequal %}
             </td>
-			<td> {{relay.bandwidth}} kb/s</td>
-			<td>{{descriptor.address}}</td>
+            <td>{% widthratio descriptor.bandwidthobserved|floatformat 1000 1 %} KB/s</td>
+            <td>{% widthratio descriptor.uptime|floatformat 86000 1 %} d</td>
+            <td>{{relay.address}}</td>
             <td align="right">
-                {% ifequal relay.isauthority 1 %}
-                    <img src="static/img/status/Authority.png" alt="Authority Server" title="Authority Server">
-                {% endifequal %}
 
-                {% ifequal relay.isbaddirectory 1 %}
-                    <img src="static/img/status/PUTITHERE.png" alt="Bad Directory" title="Bad Directory">
+                {% ifequal relay.isfast 1 %}
+                    <img src="static/img/status/Fast.png" alt="Fast Server" title="Fast Server">
                 {% endifequal %}
 
                 {% ifequal relay.isexit 1 %}
                     <img src="static/img/status/Exit.png" alt="Exit Server" title="Exit Server">
-                {% endifequal %}
-
-                {% ifequal relay.isfast 1 %}
-                    <img src="static/img/status/Fast.png" alt="Fast Server" title="Fast Server">
                 {% endifequal %}
 
                 {% ifequal relay.isguard 1 %}
@@ -162,16 +160,10 @@
                     <img src="static/img/status/Stable.png" alt="Stable Server" title="Stable Server">
                 {% endifequal %}
 
-                {% ifequal relay.isv2dir 1 %}
-                    <img src="static/img/status/v2.gif" alt="Version 2 Directory" title="Version 2 Directory">
+                {% ifequal relay.isauthority 1 %}
+                    <img src="static/img/status/Authority.png" alt="Authority Server" title="Authority Server">
                 {% endifequal %}
 
-                {% ifequal relay.isv3dir 1 %}
-                    <img src="static/img/status/v3.gif" alt="Version 3 Directory" title="Version 3 Directory">
-                {% endifequal %}
-
-                {# These should work, but as of this writing, the current "relay" being passed does not have a "platform" field! #}
-                
                 {% if "Linux" in descriptor.platform %}
                     <img src="static/img/os-icons/Linux.png" alt="Linux" title="{{descriptor.platform}}">
                 {% else %}{% if "XP" in descriptor.platform %}
