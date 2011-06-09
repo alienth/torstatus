@@ -2,6 +2,9 @@ body {
     font-family: FreeSans, Arial, Helvetica, sans-serif;
 }
 
+td {
+    line-height:75%;
+}
 td.headerTitle {
 	background-color: #7BD4F7;
 	text-align:center;
@@ -23,6 +26,9 @@ td.headerLinks {
 	color: red;
 }
 
+tr {
+    line-height:75%;
+}
 tr.relay: {
 	font: 0.625em;
 }
@@ -31,6 +37,9 @@ tr.relay:hover {
 	background-color: #69EEC8;
 }
 
+th {
+    line-height:75%;
+}
 
 th.relayHeader {
 	text-align: left;
@@ -46,7 +55,7 @@ th.relayHeader:hover {
 
 th.relayHeaderInv {
 	text-align: left;
-	font: bold 0px /*Arial;*/
+	font: bold 0px Arial;
 	background-color: #7BD4F7;
 	border-top: 2px solid black;
 	border-bottom: 2px solid black;
