@@ -13,6 +13,11 @@ td.headerTitle {
 	border-width: 1px;
 }
 
+td.col_relayName {
+    background-color: #C7FF89;
+    width: 20px;
+}
+
 td.headerLinks {
 	background-color: #7BD4F7;
 	border-style: solid;
@@ -146,10 +151,6 @@ tr.appServerDetails:hover {
 	cursor: pointer;
 }
 
-td.col_relayName {
-    background-color: #C7FF89;
-    width: 20px;
-}
 
 td.col_relayName:hover {
     background-color: #69EEC8;
