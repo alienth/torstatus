@@ -101,17 +101,17 @@ a.link:hover {
 }
 
 .relayOK {
-	font: 0.625em /*Arial;*/
+	font: 0.625em; /*Arial;*/
 	background-color: white;
 }
 
 .relayHibernating {
-	font: 0.625em /*Arial;*/
+	font: 0.625em; /*Arial;*/
 	background-color: #FEEED0;
 }
 
 .relayDown {
-	font: 0.625em /*Arial;*/
+	font: 0.625em; /*Arial;*/
 	background-color: yellow;
 }
 
