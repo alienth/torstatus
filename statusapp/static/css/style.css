@@ -25,11 +25,9 @@ td.headerLinks {
 	padding: 10px;
 }
 
-tr {
-    line-height:75%;
-}
 tr.relay: {
 	font: 0.625em;
+    line-height:75%;
 }
 
 tr.relay:hover {
