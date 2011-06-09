@@ -25,11 +25,7 @@ tr.relay: {
 tr.relay:hover {
 	background-color: #69EEC8;
 }
-/*
-tr.relayBadExit {
-	background-color: red;
-} 
-*/
+
 
 th.relayHeader {
 	text-align: left;
@@ -133,16 +129,6 @@ td.boxTitle {
 
 tr.appServerDetails:hover {
 	background-color: #7BD4F7;
-}
-
-
-p {
-	font-family:"Times New Roman";
-	font-size:20px;
-}
-
-table {
-	/* background:lightblue; */
 }
 
 td {
