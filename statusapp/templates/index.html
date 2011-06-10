@@ -12,12 +12,9 @@
 <table cellspacing="2" cellpadding="2" class="displayStatus">
 <tr>
 	<td class="headerLinks">
-		<br />
 		<a class="link" href="https://check.torproject.org/"> Check if you are using Tor (via TorCheck)</a>
 		<br />
 		Your IP Address is: {{clientAddress}}
-		<br />
-		<br />
 	</td>
 </tr>
 </table>
@@ -76,8 +73,8 @@
 
 {% if statusEntry_descriptorEntry %}
 <table class="sortable relayTable">
-	<tr class="relayheader">
-		<th class="relayHeader sorttable_alpha">&nbsp</th>
+	<tr>
+        <th class="relayHeader sorttable_alpha">&nbsp</th>
 		<th class="relayHeader sorttable_alpha">Router Name</th>
 		<th class="relayHeader sorttable_numeric">Bandwidth</th>
         <th class="relayHeader sorttable_numeric">Uptime</th>
@@ -93,9 +90,9 @@
 			<td sorttable_customkey="us" class="col_relayName"><img src="static/img/flags/us.gif" alt="US" title="US"></td>
             <td class="col_relayName"> 
                 {% ifequal relay.isnamed 1 %}
-                    <b><a class="linkDetails" href="/details/{{ relay.fingerprint }}/"> {{ relay.nickname }}</a></b>
+                    <b><a class="linkDetails" href="/details/{{ relay.fingerprint }}"> {{ relay.nickname }}</a></b>
                     {% else %}
-                    <a class="linkDetails" href="/details/{{ relay.fingerprint }}/"> {{ relay.nickname }} </a>
+                    <a class="linkDetails" href="/details/{{ relay.fingerprint }}"> {{ relay.nickname }} </a>
                 {% endifequal %}
             </td>
             <td class="col_relayBandwidth">{% widthratio descriptor.bandwidthobserved|floatformat 1024 1 %} KB/s</td>
