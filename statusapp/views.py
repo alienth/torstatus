@@ -54,6 +54,7 @@ def details(request, fingerprint):
     template_values = {'status': recent_statuses[i], 'descriptor': descriptor}
     return render_to_response('details.html', template_values)
 
+
 def exitnodequery(request):
     variables = "MWAHAHA"
     template_values = {'variables': variables,}
