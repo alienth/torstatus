@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block mainCSS %}
+<link rel="stylesheet" type="text/css" href="static/css/style.css"></link>
+{% endblock %}
+
+{% block mainTitle %} TorStatus Main Page {% endblock %}
+
+{% block headerTitle %} TorStatus{% endblock %}
+
+{% block extraHeader %}
+<table cellspacing="2" cellpadding="2" class="displayStatus">
+<tr>
+	<td class="headerLinks">
+		<br />
+		<a class="link" href="https://check.torproject.org/"> Check if you are using Tor (via TorCheck)</a>
+		<br />
+		Your IP Address is: {{clientAddress}}
+		<br />
+		<br />
+	</td>
+</tr>
+</table>
+<br />
+<table cellspacing="1" cellpadding="2" class="legend">
+<tr> 
+	<td class="boxTitle"> Legend </td>
+</tr>
+<tr>
+	<td class="relayOK">Router is ok</td>
+</tr>
+<tr>
+	<td class="relayHibernating">Router is hibernating</td>
+</tr>
+<tr>
+	<td class="relayDown">Router is currently down</td>
+</tr>
+<tr>
+	<td class="relayBadExit">Router is a bad exit node</td>
+</tr>
+</table>
+<br />
+<table class="appServerDetails" id="serverdetails">
+<tr>
+	<td class="boxTitle" colspan="2">Application Server Details</td>
+</tr>
+<tr class="appServerDetails">
+	<td>Cache Last Updated (Local Server Time):</td>
+	<td>16:32:23 (GMT)</td>
+</tr>
+<tr class="appServerDetails">
+	<td>Last Update Cycle Processing Time (Seconds):</td>
+	<td>534</td>
+</tr>
+<tr class="appServerDetails">
+	<td>Current Cache Expire Time (Seconds):</td>
+	<td>234</td>
+</tr>
+<tr class="appServerDetails">
+	<td>Number of Routers In Cache:</td>
+	<td>765</td>
+</tr>
+<tr class="appServerDetails">
+	<td>Number of Descriptors In Cache:</td>
+	<td>123</td>
+</tr>
+<tr class="appServerDetails">
+	<td>Approximate Page Generation Time (Seconds):</td>
+	<td>534.34</td>
+</tr>
+</table>
+
+{% endblock %}	
+	
+{% block mainPage %}
+
+{% if statusEntry_descriptorEntry %}
+<table class="sortable relayTable">
+	<tr class="relayheader">
+		<th class="relayHeader sorttable_alpha">&nbsp</th>
+		<th class="relayHeader sorttable_alpha">Router Name</th>
+		<th class="relayHeader sorttable_numeric">Bandwidth</th>
+        <th class="relayHeader sorttable_numeric">Uptime</th>
+        <th class="relayHeader sorttable_numeric">IP</th>
+		<th class="relayHeaderInv sorttable_nosort">Icons</th>
+        <th class="relayHeader sorttable_numeric">ORPort</th>
+        <th class="relayHeader sorttable_numeric">DirPort</th>
+        <th class="relayHeader sorttale_numeric">BadExit</th>
+	</tr>
+
+	{% for relay, descriptor in statusEntry_descriptorEntry %}
+		<tr {% ifequal relay.isbadexit 1 %} class="relayBadExit" {% else %} class="relay" {% endifequal %}>
+			<td sorttable_customkey="us" class="col_relayName"><img src="static/img/flags/us.gif" alt="US" title="US"></td>
+            <td class="col_relayName"> 
+                {% ifequal relay.isnamed 1 %}
+                    <b><a class="linkDetails" href="/details/{{ relay.fingerprint }}"> {{ relay.nickname }}</a></b>
+                    {% else %}
+                    <a class="linkDetails" href="/details/{{ relay.fingerprint }}"> {{ relay.nickname }} </a>
+                {% endifequal %}
+            </td>
+            <td class="col_relayBandwidth">{% widthratio descriptor.bandwidthobserved|floatformat 1024 1 %} KB/s</td>
+            <td class="col_relayUptime">{% widthratio descriptor.uptime|floatformat 86000 1 %} d</td>
+            <td>{{relay.address}}</td>
+            <td class="col_relayIcons">
+
+                {% ifequal relay.isfast 1 %}
+                    <img src="static/img/status/Fast.png" alt="Fast Server" title="Fast Server">
+                {% endifequal %}
+
+                {% ifequal relay.isexit 1 %}
+                    <img src="static/img/status/Exit.png" alt="Exit Server" title="Exit Server">
+                {% endifequal %}
+
+                {% ifequal relay.isguard 1 %}
+                    <img src="static/img/status/Guard.png" alt="Guard Server" title="Guard Server">
+                {% endifequal %}
+
+                {% ifequal relay.isstable 1 %}
+                    <img src="static/img/status/Stable.png" alt="Stable Server" title="Stable Server">
+                {% endifequal %}
+
+                {% ifequal relay.isauthority 1 %}
+                    <img src="static/img/status/Authority.png" alt="Authority Server" title="Authority Server">
+                {% endifequal %}
+
+                {% if "Linux" in descriptor.platform %}
+                    <img src="static/img/os-icons/Linux.png" alt="Linux" title="{{descriptor.platform}}">
+                {% else %}{% if "XP" in descriptor.platform %}
+                    <img src="static/img/os-icons/WindowsXP.png" alt="WindowsXP" title="{{descriptor.platform}}">
+                    {% else %}{% if "Windows" in descriptor.platform and "Server" in descriptor.platform %}
+                    <img src="static/img/os-icons/WindowsServer.png" alt="WindowsServer" title="{{descriptor.platform}}">
+                {% else %}{% if "Windows" in descriptor.platform %}
+                    <img src="static/img/os-icons/WindowsOther.png" alt="WindowsOther" title="{{descriptor.platform}}">
+                {% else %}{% if "Darwin" in descriptor.platform %}
+                    <img src="static/img/os-icons/Darwin.png" alt="Darwin" title="{{descriptor.platform}}">
+                {% else %}{% if "FreeBSD" in descriptor.platform %}
+                    <img src="static/img/os-icons/FreeBSD.png" alt="FreeBSD" title="{{descriptor.platform}}">
+                {% else %}{% if "NetBSD" in descriptor.platform %}
+                    <img src="static/img/os-icons/NetBSD.png" alt="NetBSD" title="{{descriptor.platform}}">
+                {% else %}{% if "OpenBSD" in descriptor.platform %}
+                    <img src="static/img/os-icons/OpenBSD.png" alt="OpenBSD" title="{{descriptor.platform}}">
+                {% else %}{% if "SunOS" in descriptor.platform %}
+                    <img src="static/img/os-icons/SunOS.png" alt="SunOS" title="{{descriptor.platform}}">
+                {% else %}{% if "IRIX" in descriptor.platform %}
+                    <img src="static/img/os-icons/IRIX64.png" alt="IRIX" title="{{descriptor.platform}}">
+                {% else %}{% if "Cygwin" in descriptor.platform %}
+                    <img src="static/img/os-icons/Cygwin.png" alt="Cygwin" title="{{descriptor.platform}}">
+                {% else %}{% if "Dragon" in descriptor.platform %}
+                    <img src="static/img/os-icons/DragonFly.png" alt ="Dragon" title="{{descriptor.platform}}">
+                {% else %}
+                    <img src="static/img/os-icons/NotAvailable.png" alt="NotAvailable" title="Not Available">
+                {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
+            </td>
+            <td class="col_relayOrport">{{relay.orport}}</td>
+            <td class="col_relayDirport">{% ifequal relay.dirport 0 %}
+                    None
+                {% else %}
+                    {{ relay.dirport }}
+                {% endifequal %}</td>
+            <td class="col_relayBadExit" {% ifequal relay.isbadexit 1 %} sorttable_customkey="1">
+                	<img src="static/img/bg_yes.png" width="12" height="12" alt="Bad Exit" title="Bad Exit">
+                {% else %} sorttable_customkey="0">
+               		<img src="static/img/bg_no.png" width="12" height="12" alt="Not a Bad Exit" title="Not a Bad Exit">
+                {% endifequal %}
+            </td>
+		</tr>
+	{% endfor %}
+</table>
+{% endif %}
+
+<br />
+<br />
+
+<table class="aggStatisticSummary" id="networkstatisticsummary">
+<tr>
+    <td class="aggBoxTitle" colspan="3">Aggregate Network Statistic Summary | 
+    <a class="link" href="network-statistic-graphs">Graphs / Details</a>
+    </td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Bandwidth of displayed Routers [K bytes/s]:</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">empty on TorStatus</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of Routers:</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Routers in Current Query Result Set:</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of 'Authority' Routers"</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of 'Bad Directory' Routers:</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of 'Bad Exit' Routers:</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of 'Exit' Routers</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of 'Fast' Routers</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of 'Guard' Routers:</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of 'Hibernating' Routers</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of 'Named Routers:</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of 'Stable' Routers</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of 'Running' Routers:</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of 'Valid' Routers:</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of 'V2Dir' Routers:</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of 'Directory Mirror' Routers:</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+</table>
+{% endblock %}
