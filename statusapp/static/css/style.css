@@ -143,7 +143,19 @@ table.appServerDetails {
 	margin-left: auto;
 	margin-right: auto;
 	border-spacing: 1;
-/*	padding: 2px;*/
+}
+
+table.advancedQuery {
+    width: 250px;
+    border-style: solid;
+    border-color: black;
+    border-width: 1px;
+    margin-right: auto;
+    margin-left: auto;
+    border-spacing: 1;
+
+
+
 }
 
 table.aggStatisticSummary {

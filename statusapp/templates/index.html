@@ -268,7 +268,7 @@
 </table>
 <br />
 
-<table class="aggStatisticSummary" id="networkstatisticsummary">
+<table class="aggStatisticSummary" id="opinionsource">
 <tr>
     <td class="boxTitle" colspan="1">Network Status Opinion Source</td>
 </tr>
@@ -305,12 +305,188 @@
 </table>
 <br />
 
-<table class="aggStatisticSummary" id="networkstatisticsummary">
+<table class="advancedQuery" id="advancedquery">
 <tr>
     <td class="boxTitle" colspan="1">Custom / Advanced Query Options</td>
 </tr>
+<tr>
+    <td>
+        <p>Sort Router Listing By:
+        <form action="">
+        <select name="sortlistings">
+        <option value="router">Router Name</option>
+        <option value="fingerprint">Fingerprint</option>
+        <option value="country">Country Code</option>
+        <option value="bandwidth">Bandwidth</option>
+        <option value="uptime">Uptime</option>
+        <option value="lastDescriptor">Last Descriptor Published</option>
+        <option value="hostname">Hostname</option>
+        <option value="ip">IP Address</option>
+        <option value="ORPort">ORPort</option>
+        <option value="DirPort">DirPort</option>
+        <option value="platform">Platform</option>
+        <option value="contact">Contact</option>
+        <option value="authority">Authority</option>
+        <option value="badDirectory">Bad Directory</option>
+        <option value="badExit">Bad Exit</option>
+        <option value="exit">Exit</option>
+        <option value="fast">Fast</option>
+        <option value="guard">Guard</option>
+        <option value="hibernating">Hibernating</option>
+        <option value="named">Named</option>
+        </select>
+        </form>
+        </p>
+    </td>
+</tr>
+<tr>
+    <td>
+        <p>Sort Order:
+        <form action="">
+        <select name="sortorder">
+        <option value ="ascending">ascending</option>
+        <option value ="descending">descending</option>
+        </select>
+        </form>
+        </p>
+    <td>
+</tr>
+<tr>
+    <td>
+        <p>Require Flags:</p>
+            <p>
+            Authority: <form action="">
+            <input type="radio" name="authority" value="off" />Off
+            <input type="radio" name="authority" value="yes" />Yes
+            <input type="radio" name="authority" value="yes" />No
+            </form>
+            </p>
+            <p>
+            BadDirectory: <form action="">
+            <input type="radio" name="badDirectory" value="off" />Off
+            <input type="radio" name="badDirectory" value="yes" />Yes
+            <input type="radio" name="badDirectory" value="yes" />No
+            </form>
+            </p>
+            <p>
+            BadExit: <form action="">
+            <input type="radio" name="BadExit" value="off" />Off
+            <input type="radio" name="BadExit" value="yes" />Yes
+            <input type="radio" name="BadExit" value="yes" />No
+            </form>
+            </p>
+            <p>
+            Exit: <form action="">
+            <input type="radio" name="Exit" value="off" />Off
+            <input type="radio" name="Exit" value="yes" />Yes
+            <input type="radio" name="Exit" value="yes" />No
+            </form>
+            </p>
+            <p>
+            Fast: <form action="">
+            <input type="radio" name="Fast" value="off" />Off
+            <input type="radio" name="Fast" value="yes" />Yes
+            <input type="radio" name="Fast" value="yes" />No
+            </form>
+            </p>
+            <p>
+            Guard: <form action="">
+            <input type="radio" name="Guard" value="off" />Off
+            <input type="radio" name="Guard" value="yes" />Yes
+            <input type="radio" name="Guard" value="yes" />No
+            </form>
+            </p>
+            <p>
+            Hibernating: <form action="">
+            <input type="radio" name="Hibernating" value="off" />Off
+            <input type="radio" name="Hibernating" value="yes" />Yes
+            <input type="radio" name="Hibernating" value="yes" />No
+            </form>
+            </p>
+            <p>
+            Named: <form action="">
+            <input type="radio" name="Named" value="off" />Off
+            <input type="radio" name="Named" value="yes" />Yes
+            <input type="radio" name="Named" value="yes" />No
+            </form>
+            </p>
+            <p>
+            Stable: <form action="">
+            <input type="radio" name="Stable" value="off" />Off
+            <input type="radio" name="Stable" value="yes" />Yes
+            <input type="radio" name="Stable" value="yes" />No
+            </form>
+            </p>
+            <p>
+            Running: <form action="">
+            <input type="radio" name="Running" value="off" />Off
+            <input type="radio" name="Running" value="yes" />Yes
+            <input type="radio" name="Running" value="yes" />No
+            </form>
+            </p>
+            <p>
+            Valid: <form action="">
+            <input type="radio" name="Valid" value="off" />Off
+            <input type="radio" name="Valid" value="yes" />Yes
+            <input type="radio" name="Valid" value="yes" />No
+            </form>
+            </p>
+            <p>
+            V2Dir: <form action="">
+            <input type="radio" name="vdir" value="off" />Off
+            <input type="radio" name="vdir" value="yes" />Yes
+            <input type="radio" name="vdir" value="yes" />No
+            </form>
+            </p>
+    <td>
+</tr>
 
-
+<tr>
+    <td>
+        <p>Advanced Search:
+        <p>
+        <form action="">
+        <select name="criteria">
+        <option value ="fingerprint">Fingerprint</option>
+        <option value ="routername">Router Name</option>
+        <option value ="countrycode">Country Code</option>
+        <option value ="bandwidth">Bandwidth (kb/s)</option>
+        <option value ="uptime">Uptime (days)</option>
+        <option value ="lastdescriptorpublished">Last Descriptor Published</option>
+        <option value ="ipaddress">IP Address</option>
+        <option value ="hostname">Hostname</option>
+        <option value ="orport">Onion Router Port</option>
+        <option value ="dsport">Directory Sever Port</option>
+        <option value ="platform">Platform</option>
+        <option value ="contact">Contact</option>
+        </select>
+        </form>
+        <form action="">
+        <select name="boolLogic">
+        <option value ="equals">Equals</option>
+        <option value ="contains">Contains</option>
+        <option value ="less">Is Less Than</option>
+        <option value ="greater">Is Greater Than</option>
+        </select>
+        </form>
+        </p>
+        </p>
+    <td>
+</tr>
+<tr>
+    <td>
+    <form>
+    <input type="text" name="searchstuff" /><br />
+    </form>
+    </td>
+</tr>
+<tr>
+    <td>
+        <input type="submit" value="Apply Options" />
+    </td>
+</tr>
 </table>
+
+<br />
 
 {% endblock %}
