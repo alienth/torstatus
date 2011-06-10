@@ -51,8 +51,7 @@ def details(request, fingerprint):
     if (i == 72):
         i = 0
 
-    status_and_descriptor = (recent_statuses[i], descriptor)
-    template_values = {'status_and_descriptor': status_and_descriptor}
+    template_values = {'status': recent_statuses[i], 'descriptor': descriptor}
     return render_to_response('details.html', template_values)
 
 def exitnodequery(request):
