@@ -40,7 +40,7 @@
 </tr>
 </table>
 <br />
-<table class="appServerDetails">
+<table class="appServerDetails" id="serverdetails">
 <tr>
 	<td class="boxTitle" colspan="2">Application Server Details</td>
 </tr>
@@ -168,5 +168,94 @@
 </table>
 {% endif %}
 
-{% endblock %}
+<br />
+<br />
 
+<table class="aggStatisticSummary" id="networkstatisticsummary">
+<tr>
+    <td class="boxTitle" colspan="3">Aggregate Network Statistic Summary | 
+    <a class="link" href="network-statistic-graphs">Graphs / Details</a>
+    </td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Bandwidth of displayed Routers [K bytes/s]:</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">empty on TorStatus</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of Routers:</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Routers in Current Query Result Set:</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of 'Authority' Routers"</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of 'Bad Directory' Routers:</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of 'Bad Exit' Routers:</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of 'Exit' Routers</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of 'Fast' Routers</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of 'Guard' Routers:</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of 'Hibernating' Routers</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of 'Named Routers:</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of 'Stable' Routers</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of 'Running' Routers:</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of 'Valid' Routers:</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of 'V2Dir' Routers:</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+<tr class="aggStatisticSummary">
+	<td class="aggBox">Total Number of 'Directory Mirror' Routers:</td>
+    <td class="aggBox">some info</td>
+    <td class="aggBox">percentage%</td>
+</tr>
+</table>
+{% endblock %}
