@@ -10,4 +10,5 @@ urlpatterns = patterns('',
     (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
     (r'^exit-node-query/', 'statusapp.views.exitnodequery'),
     (r'^network-statistic-graphs/', 'statusapp.views.networkstatisticgraphs'),
+    (r'^column-preferences/', 'statusapp.views.columnpreferences'),
 )
