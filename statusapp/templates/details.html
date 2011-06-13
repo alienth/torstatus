@@ -8,13 +8,13 @@
 <link rel="stylesheet" type="text/css" href="../../static/css/details.css"></link>
 {% endblock %}
 
-{% block mainTitle %} TorStatus Details Page -- [[RELAY_NAME]] {% endblock %}
+{% block mainTitle %} TorStatus details for router {{nickname}} {% endblock %}
 
 {% block headerTitle %} TorStatus {% endblock %}
 
 {% block mainPage %}
 
-{% load status_filters %}
+{% load details_filters %}
 
 <table cellspacing="2" cellpadding="2" class="displayStatus">
 <tr>

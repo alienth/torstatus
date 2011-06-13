@@ -6,7 +6,7 @@ register = template.Library()
 def words(seconds):
     "Converts a duration in seconds to a duration in words"
     days = seconds/86000
-    hours = (seconds % 86000)/3600#(seconds - days*86000)/3600
+    hours = (seconds % 86000)/3600
     minutes = (seconds % 3600)/60
     seconds = (seconds % 60)
     return "%s day(s), %s hour(s), %s minute(s), %s second(s)" % \

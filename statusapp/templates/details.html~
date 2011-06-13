@@ -14,7 +14,7 @@
 
 {% block mainPage %}
 
-{% load status_filters %}
+{% load details_filters %}
 
 <table cellspacing="2" cellpadding="2" class="displayStatus">
 <tr>
@@ -37,7 +37,7 @@
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Fingerprint: </td>
-    <td id="aggBox">{{fingerprint|formatfing}}</td>
+    <td id="aggBox">{{fingerprint|format_fing}}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Contact: </td>
