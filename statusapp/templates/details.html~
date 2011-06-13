@@ -1,34 +1,310 @@
-<<<<<<< HEAD
-<p>fingerprint</p>
-{{ fingerprint }}
-<p>fingerprint</p>
-{{ fingerprint }}
-<p>fingerprint</p>
-{{ fingerprint }}
-<p>fingerprint</p>
-{{ fingerprint }}
-<p>fingerprint</p>
-{{ fingerprint }}
-<p>fingerprint</p>
-{{ fingerprint }}
-<p>fingerprint</p>
-{{ fingerprint }}
-<p>fingerprint</p>
-{{ fingerprint }}
-<p>fingerprint</p>
-{{ fingerprint }}
-=======
 {% extends "base.html" %}
 
-{% block auxCSS %} 
+{% block mainCSS %} 
 <link rel="stylesheet" type="text/css" href="../../static/css/style.css"></link>
 {% endblock %}
 
-{% block mainTitle %} TorStatus Details Page {% endblock %}
+{% block auxCSS %}
+<link rel="stylesheet" type="text/css" href="../../static/css/details.css"></link>
+{% endblock %}
 
-{% block headerTitle %} TorStatus details.html {% endblock %}
+{% block mainTitle %} TorStatus Details Page -- [[RELAY_NAME]] {% endblock %}
+
+{% block headerTitle %} TorStatus {% endblock %}
 
 {% block mainPage %}
-    {{ fingerprint }}
+
+{% load status_filters %}
+
+<table cellspacing="2" cellpadding="2" class="displayStatus">
+<tr>
+	<td id="mainLinks">
+        Details for Relay: {{nickname}}
+	</td>
+</tr>
+</table>
+
+<br />
+<br />
+
+<table class="aggStatisticSummary" id="networkstatisticsummary">
+<tr>
+    <td class="boxTitle" colspan="2"> General Information </td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Router Name: </td>
+    <td id="aggBox">{{nickname}}</td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Fingerprint: </td>
+    <td id="aggBox">{{fingerprint|formatfing}}</td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Contact: </td>
+    <td id="aggBox">[[ROUTER_COTACT]]</td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">IP Address: </td>
+    <td id="aggBox">{{address}}</td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Hostname: </td>
+    <td id="aggBox">[[ROUTER_ADDRESS_HOST]]</td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Onion Router Port: </td>
+    <td id="aggBox">{{orport}}</td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Directory Server Port: </td>
+    <td id="aggBox">{{dirport}}</td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Country Code: </td>
+    <td id="aggBox">[[ROUTER_COUNTRY]]</td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Platform / Version: </td>
+    <td id="aggBox">{{platform|wordwrap:80}}</td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Last Descriptor Published (GMT): </td>
+    <td id="aggBox">{{published}}</td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Current Uptime: </td>
+    <td id="aggBox">{{uptime|words}}</td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Bandwidth (Burst/Avg/Observed - In Bps): </td>
+    <td id="aggBox">{{bandwidthburst}} / {{bandwidthavg}} / {{bandwidthobserved}}</td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Family: </td>
+    <td id="aggBox">[[ROUTER_FAMILY]]</td>
+</tr>
+</table>
+
+<br />
+
+<table class="aggStatisticSummary" id="networkstatisticsummary">
+<tr>
+    <td class="boxTitle" colspan="2"> Graphs </td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox"><img src="../../static/img/graph_old.png" width="480px" height="300px" alt="GRAPH 1"  title="GRAPH 1"> </td>
+    <td id="aggBox"><img src="../../static/img/graph_old.png" width="480px" height="300px" alt="GRAPH 2"  title="GRAPH 2"> </td>
+</tr>
+</table>
+
+<br />
+
+
+<table class="mainDetails">
+<tr>
+    <td>
+        <table class="details">
+            <tr>
+                <td id="details_boxTitle"> Router Keys </td>
+            </tr>
+            <tr>
+                <td><b> Onion Key: </b><pre> [[ROUTER_ONION_KEY]] </pre>
+                    <br />
+                    <b> Signing Key: </b><pre> [[ROUTER_SIGNING_KEY]] </pre>
+                </td>
+            </tr>
+        </table>
+    </td>
+    <td>
+        <table class="details">
+            <tr>
+                <td id="details_boxTitle" colspan="2"> Router Flags </td>
+            </tr>
+            
+            <!-- NOTE: Fix the IF STATEMENTS FOR THE ICONS. -->
+            
+            <tr> 
+                <td id="detailBox"> Authority: </td>
+                <td {% if isauthority %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+            </tr>
+            <tr> 
+                <td id="detailBox"> Bad Directory: </td>
+                <td {% if isbaddirectory %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+            </tr>
+            <tr> 
+                <td id="detailBox"> Bad Exit: </td>
+                <td {% if isbadexit %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+            </tr>
+            <tr> 
+                <td id="detailBox"> Exit: </td>
+                <td {% if isexit %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+            </tr>
+            <tr> 
+                <td id="detailBox"> Fast: </td>
+                <td {% if isfast %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+            </tr>
+            <tr> 
+                <td id="detailBox"> Guard: </td>
+                <td {% if isguard %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+            </tr>
+            <tr> 
+                <td id="detailBox"> Hibernating: </td>
+                <td {% if ishibernating %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+            </tr>
+            <tr> 
+                <td id="detailBox"> Named: </td>
+                <td {% if isnamed %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+            </tr>
+            <tr> 
+                <td id="detailBox"> Stable: </td>
+                <td {% if isstable %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+            </tr>
+            <tr> 
+                <td id="detailBox"> Running: </td>
+                <td {% if isrunning %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+            </tr>
+            <tr> 
+                <td id="detailBox"> Valid: </td>
+                <td {% if isvalid %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+            </tr>
+            <tr> 
+                <td id="detailBox"> V2Dir: </td>
+                <td {% if isauthority %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+            </tr>
+        </table>
+    </td>
+    <td>
+        <table class="details">
+            <tr>
+                <td id="details_boxTitle"> Exit Policy Information </td>
+            </tr>
+            <tr>
+                <td><pre>{{ports|wordwrap:1}}</pre></td>
+            </tr>
+        </table>
+    </td>
+</tr>
+</table>
+    
+     
+                
+
+
+<!--
+<table class="mainDetails">
+<tr>
+
+<td>
+<table width='*' cellspacing='2' cellpadding='2' border='0' align='center'>
+<tr>
+    <td class='TDBLACK'>
+    <table cellspacing='2' cellpadding='6' border='0' align='center' width='100%'>
+    <tr>
+        <td class='THN'>Router Keys</td>
+    </tr>
+    <tr>
+        <td class='TRSB'>
+        <br />
+        <b>Onion Key:</b>
+            <pre> [[ROUTER_ONION_KEY]]
+            </pre>
+        <b>Signing Key:</b>
+            <pre> [[ROUTER_SIGNING_KEY]]
+            </pre>
+        <br/>
+        </td>
+    </tr>
+    </table>
+    </td>
+</tr>
+</table>
+</td>
+
+<td>
+<table width='*' cellspacing='2' cellpadding='2' border='0' align='center'>
+<tr>
+    <td class='TDBLACK'>
+    <table cellspacing='2' cellpadding='6' border='0' align='center' width='100%'>
+    <tr>
+        <td class='THN' colspan='2'>Router Flags</td>
+    </tr>
+    <tr class='nr'>
+        <td class='TRAR'><b>Authority:</b></td>
+        <td class='F0'></td>
+    </tr>
+    <tr class='nr'>
+        <td class='TRAR'><b>Bad Directory:</b></td>
+        <td class='F0'></td>
+    </tr>
+    <tr class='nr'>
+        <td class='TRAR'><b>Bad Exit:</b></td>
+        <td class='F0'></td>
+    </tr>
+    <tr class='nr'>
+        <td class='TRAR'><b>Exit:</b></td>
+        <td class='F1'></td>
+    </tr>
+    <tr class='nr'>
+        <td class='TRAR'><b>Fast:</b></td>
+        <td class='F1'></td>
+    </tr>
+    <tr class='nr'>
+        <td class='TRAR'><b>Guard:</b></td>
+        <td class='F1'></td>
+    </tr>
+    <tr class='nr'>
+        <td class='TRAR'><b>Hibernating:</b></td>
+        <td class='F0'></td>
+    </tr>
+    <tr class='nr'>
+    <td class='TRAR'><b>Named:</b></td>
+        <td class='F1'></td>
+    </tr>
+    <tr class='nr'>
+        <td class='TRAR'><b>Stable:</b></td>
+        <td class='F1'></td>
+    </tr>
+    <tr class='nr'>
+        <td class='TRAR'><b>Running:</b></td>
+        <td class='F1'></td>
+    </tr>
+    <tr class='nr'>
+        <td class='TRAR'><b>Valid:</b></td>
+        <td class='F1'></td>
+    </tr>
+    <tr class='nr'>
+        <td class='TRAR'><b>V2Dir:</b></td>
+        <td class='F1'></td>
+    </tr>
+    </table>
+    </td>
+</tr>
+</table>
+</td>
+
+<td>
+<table width='*' cellspacing='2' cellpadding='2' border='0' align='center'>
+<tr>
+    <td class='TDBLACK'>
+    <table cellspacing='2' cellpadding='6' border='0' align='center' width='100%'>
+    <tr>
+        <td class='THN'>Exit Policy Information</td>
+    </tr>
+    <tr>
+        <td class='TRS'>
+        <b>
+        [[ EXIT POLICY INFORMATION ]]
+        </b>
+        </td>
+    </tr>
+    </table>
+    </td>
+</tr>
+</table>
+</td>
+
+</tr>
+</table>
+-->
+
 {% endblock %}
->>>>>>> 86982204231be1b860e0ba62f772fc26fdd1790d

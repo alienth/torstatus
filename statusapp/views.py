@@ -1,9 +1,10 @@
 from statusapp.models import Statusentry, Descriptor
-from django.shortcuts import render_to_response, get_object_or_404
-from django.http import HttpResponse, HttpRequest
+from django.shortcuts import render_to_response #get_object_or_404
+from django.http import HttpResponse, HttpRequest, Http404
 import csv
 
 def index(request):
+    """
 	statusEntry_FullList = Statusentry.objects.filter(pk='2011-05-31 19:00:00')
 	descriptor_list = []
 	for entry in statusEntry_FullList:
@@ -15,8 +16,33 @@ def index(request):
 	clientAddress = request.META['REMOTE_ADDR']
 	template_values = {'statusEntry_descriptorEntry': statusEntry_descriptorEntry, 'clientAddress': clientAddress, }
 	return render_to_response('index.html', template_values)
+    """
+    from django.db import connection
+
+    cursor = connection.cursor()
+
+    cursor.execute('SELECT MAX(validafter) FROM statusentry')
+
+    last_validafter = cursor.fetchone()[0]
+
+    cursor.execute('SELECT statusentry.isbadexit, statusentry.isnamed, \
+            statusentry.fingerprint, statusentry.nickname, \
+            descriptor.bandwidthobserved, descriptor.uptime, \
+            statusentry.address, statusentry.isfast, statusentry.isexit, \
+            statusentry.isguard, statusentry.isstable, statusentry.isauthority, \
+            descriptor.platform, statusentry.orport, statusentry.dirport FROM \
+            statusentry LEFT JOIN descriptor ON statusentry.descriptor = \
+            descriptor.descriptor WHERE statusentry.validafter = %s', \
+            [last_validafter]) # Ugly, yes, but functional -- misses FOUR
+                               # descriptors (out of 2256)
+
+    relays = cursor.fetchall()
+    client_address = request.META['REMOTE_ADDR']
+    template_values = {'relay_list': relays, 'client_address': client_address}
+    return render_to_response('index.html', template_values)
 
 def details(request, fingerprint):
+    """
     statuses = Statusentry.objects.filter(fingerprint=fingerprint)
     status_count = int(statuses.count())
     recent_statuses = statuses[max(-1, (status_count - 73)):status_count]
@@ -34,6 +60,43 @@ def details(request, fingerprint):
     if (i == 72):
         i = 0
     template_values = {'status': recent_statuses[i], 'descriptor': descriptor}
+    return render_to_response('details.html', template_values)
+    """
+    from django.db import connection
+
+    cursor = connection.cursor()
+
+    cursor.execute('SELECT statusentry.nickname, statusentry.fingerprint, \
+            statusentry.address, statusentry.orport, statusentry.dirport, \
+            descriptor.platform, descriptor.published, descriptor.uptime, \
+            descriptor.bandwidthburst, descriptor.bandwidthavg, \
+            descriptor.bandwidthobserved, statusentry.isauthority, \
+            statusentry.isbaddirectory, statusentry.isbadexit, \
+            statusentry.isexit, statusentry.isfast, statusentry.isguard, \
+            statusentry.isnamed, statusentry.isstable, statusentry.isrunning, \
+            statusentry.isvalid, statusentry.isv2dir, statusentry.ports FROM \
+            statusentry JOIN descriptor ON statusentry.descriptor = \
+            descriptor.descriptor WHERE statusentry.fingerprint = %s ORDER BY \
+            statusentry.validafter DESC LIMIT 1', [fingerprint]) 
+
+    try: 
+        nickname, fingerprint, address, orport, dirport, platform, published, \
+            uptime, bandwidthburst, bandwidthavg, bandwidthobserved, \
+            isauthority, isbaddirectory, isbadexit, isexit, isfast, isguard, \
+            isnamed, isstable, isrunning, isvalid, isv2dir, ports = cursor.fetchone()
+    except:
+        raise Http404
+    
+    template_values = {'nickname': nickname, 'fingerprint': fingerprint, \
+            'address': address, 'orport': orport, 'dirport': dirport, \
+            'platform': platform, 'published': published, 'uptime': uptime, \
+            'bandwidthburst': bandwidthburst, 'bandwidthavg': bandwidthavg, \
+            'bandwidthobserved': bandwidthobserved, 'isauthority': isauthority, \
+            'isbaddirectory': isbaddirectory, 'isbadexit': isbadexit, \
+            'isexit': isexit, 'isfast': isfast, 'isguard': isguard, \
+            'isnamed': isnamed, 'isstable': isstable, 'isrunning': isrunning, \
+            'isvalid': isvalid, 'isv2dir': isv2dir, 'ports': ports}
+
     return render_to_response('details.html', template_values)
 
 def exitnodequery(request):
