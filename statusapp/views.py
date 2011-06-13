@@ -74,9 +74,10 @@ def details(request, fingerprint):
             statusentry.isbaddirectory, statusentry.isbadexit, \
             statusentry.isexit, statusentry.isfast, statusentry.isguard, \
             statusentry.isnamed, statusentry.isstable, statusentry.isrunning, \
-            statusentry.isvalid, statusentry.isv2dir, statusentry.ports, descriptor.rawdesc FROM \
-            statusentry JOIN descriptor ON statusentry.descriptor = \
-            descriptor.descriptor WHERE statusentry.fingerprint = %s ORDER BY \
+            statusentry.isvalid, statusentry.isv2dir, statusentry.ports, \
+            descriptor.rawdesc FROM statusentry JOIN descriptor ON \
+            statusentry.descriptor = descriptor.descriptor WHERE \
+            statusentry.fingerprint = %s ORDER BY \
             statusentry.validafter DESC LIMIT 1', [fingerprint]) 
 
     try: 
