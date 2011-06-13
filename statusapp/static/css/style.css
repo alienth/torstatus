@@ -2,35 +2,7 @@ body {
     font-family: FreeSans, Arial, Helvetica, sans-serif;
 }
 
-td.headerTitle {
-	background-color: #7BD4F7;
-	text-align:center;
-	font-size: 2.0em;
-    font-weight: bold;
-	color: #000000;
-	border-style: solid;
-	border-color: black;
-	border-width: 1px;
-	padding: 10px;
-}
-
-td.col_relayName {
-    background-color: #C7FF89;
-    width: 20px;
-}
-
-td.headerLinks {
-	background-color: #7BD4F7;
-	border-style: solid;
-	border-color: black;
-	border-width: 1px;
-	text-align: center;
-	font-size: 0.75em;
-	color: red;
-	padding: 10px;
-}
-
-tr.relay: {
+tr.relay {
 	font: 0.625em;
     line-height:75%;
 }
@@ -43,7 +15,7 @@ th {
     line-height:75%;
 }
 
-th.relayHeader {
+th#relayHeader {
 	text-align: left;
 	font-weight: bold; 
 	font-size: 0.6875em;
@@ -52,12 +24,12 @@ th.relayHeader {
 	border-bottom: 2px solid black;
 }
 
-th.relayHeader:hover {
+th#relayHeader:hover {
 	background-color: #89FB69;	
 	cursor: pointer;
 }
 
-th.relayHeaderInv {
+th#relayHeaderInv {
 	text-align: left;
 	font: bold 0px Arial;
 	background-color: #7BD4F7;
@@ -66,7 +38,7 @@ th.relayHeaderInv {
 	cursor: pointer;
 }
 
-table.body {
+table.header {
 	width: 100%;
 	border-style: none;
 	margin-left: auto;
@@ -74,6 +46,30 @@ table.body {
 	border-spacing: 1;
 	padding: 2px;
 }
+
+td#mainTitle {
+	background-color: #7BD4F7;
+	text-align:center;
+	font-size: 2.0em;
+    font-weight: bold;
+	color: #000000;
+	border-style: solid;
+	border-color: black;
+	border-width: 1px;
+	padding: 10px;
+}
+
+td#mainLinks {
+	background-color: #7BD4F7;
+	border-style: solid;
+	border-color: black;
+	border-width: 1px;
+	text-align: center;
+	font-size: 0.75em;
+	color: red;
+	padding: 10px;
+}
+
 
 table.displayStatus {
 	width: 300px;
@@ -146,6 +142,11 @@ table.appServerDetails {
 /*	padding: 2px;*/
 }
 
+tr#row_appServerDetails:hover {
+	background-color: #7BD4F7;
+	cursor: pointer;
+}
+
 table.aggStatisticSummary {
     width: 325px;
     border-style: solid;
@@ -155,13 +156,14 @@ table.aggStatisticSummary {
     margin-right: auto;
     border-spacing: 1;
     border-collapse: collapse;
+   	white-space:nowrap;
 }
 
-tr.aggStatisticSummary {
+tr#row_aggStatisticSummary {
     
 }
 
-td.aggBox {
+td#aggBox {
 	font: bold 0.625em; /*10pt Arial;*/
     border-style: solid;
     border-width: 1px;
@@ -177,44 +179,44 @@ td.boxTitle {
 	text-align: center;
 	position: center;
 	color: #000000; 
-	white-space:nowrap;
 	border-top: 2px solid black;
 	border-bottom: 2px solid black;
+	white-space:nowrap;
 }
 
-tr.appServerDetails:hover {
-	background-color: #7BD4F7;
-	cursor: pointer;
+td#col_relayName {
+    background-color: #C7FF89;
+    width: 20px;
 }
 
 
-td.col_relayName:hover {
+td#col_relayName:hover {
     background-color: #69EEC8;
 }
 
-td.col_relayBandwidth {
+td#col_relayBandwidth {
     width: 100px;
 }
 
-td.col_relayUptime {
+td#col_relayUptime {
     width: 50px;
 }
 
-td.col_relayIcons {
+td#col_relayIcons {
     width: 100px;
     text-align: right;
 }
 
-td.col_relayOrport {
+td#col_relayOrport {
     width: 50px;
 }
 
 
-td.col_relayDirport {
+td#col_relayDirport {
     width: 50px;
 }
 
-td.col_relayBadExit {
+td#col_relayBadExit {
     width: 50px;
     text-align: center;
 }
@@ -238,7 +240,7 @@ div.footer {
     color: rgb(100, 100, 100);
 }
 
-div.footer#trademark {
+p#trademark {
     text-align: center;
     font-size: 12px;
     margin: 0 0 1px 0;
