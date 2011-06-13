@@ -14,7 +14,7 @@
 
 {% block mainPage %}
 
-{% load status_filters %}
+{% load details_filters %}
 
 <table cellspacing="2" cellpadding="2" class="displayStatus">
 <tr>
@@ -179,7 +179,7 @@
                 <td id="details_boxTitle"> Exit Policy Information </td>
             </tr>
             <tr>
-                <td><pre>{{ports|wordwrap:1}}</pre></td>
+                <td><pre>{{ports}}</pre></td>
             </tr>
         </table>
     </td>
