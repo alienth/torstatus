@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 td.headerTitle {
 	background-color: #7BD4F7;
 	text-align:center;
@@ -20,11 +21,21 @@ td.headerLinks {
 
 tr.relay: {
 	font: 10px Arial;
+=======
+body {
+    font-family: FreeSans, Arial, Helvetica, sans-serif;
+}
+
+tr.relay {
+	font: 0.625em;
+    line-height:75%;
+>>>>>>> 408e843f4f278f41b4db1d0a02bcd9b3bc435e7e
 }
 
 tr.relay:hover {
 	background-color: #69EEC8;
 }
+<<<<<<< HEAD
 /*
 tr.relayBadExit {
 	background-color: red;
@@ -34,37 +45,100 @@ tr.relayBadExit {
 th.relayHeader {
 	text-align: left;
 	font: bold 11px Arial;
+=======
+
+th {
+    line-height:75%;
+}
+
+th#relayHeader {
+	text-align: left;
+	font-weight: bold; 
+	font-size: 0.6875em;
+>>>>>>> 408e843f4f278f41b4db1d0a02bcd9b3bc435e7e
 	background-color: #7BD4F7;
 	border-top: 2px solid black;
 	border-bottom: 2px solid black;
 }
 
+<<<<<<< HEAD
 th.relayHeader:hover {
 	background-color: #89FB69;	
 }
 
 th.relayHeaderInv {
+=======
+th#relayHeader:hover {
+	background-color: #89FB69;	
+	cursor: pointer;
+}
+
+th#relayHeaderInv {
+>>>>>>> 408e843f4f278f41b4db1d0a02bcd9b3bc435e7e
 	text-align: left;
 	font: bold 0px Arial;
 	background-color: #7BD4F7;
 	border-top: 2px solid black;
 	border-bottom: 2px solid black;
+<<<<<<< HEAD
 }
 
 table.body
 {
+=======
+	cursor: pointer;
+}
+
+table.header {
+>>>>>>> 408e843f4f278f41b4db1d0a02bcd9b3bc435e7e
 	width: 100%;
 	border-style: none;
 	margin-left: auto;
 	margin-right: auto;
+<<<<<<< HEAD
 }
 
+=======
+	border-spacing: 1;
+	padding: 2px;
+}
+
+td#mainTitle {
+	background-color: #7BD4F7;
+	text-align:center;
+	font-size: 2.0em;
+    font-weight: bold;
+	color: #000000;
+	border-style: solid;
+	border-color: black;
+	border-width: 1px;
+	padding: 10px;
+}
+
+td#mainLinks {
+	background-color: #7BD4F7;
+	border-style: solid;
+	border-color: black;
+	border-width: 1px;
+	text-align: center;
+	font-size: 0.75em;
+	color: red;
+	padding: 10px;
+}
+
+
+>>>>>>> 408e843f4f278f41b4db1d0a02bcd9b3bc435e7e
 table.displayStatus {
 	width: 300px;
 	position: center;
 	border-style: none;
 	margin-left: auto;
 	margin-right: auto;
+<<<<<<< HEAD
+=======
+    border-spacing: 1;
+	padding: 2px;
+>>>>>>> 408e843f4f278f41b4db1d0a02bcd9b3bc435e7e
 }
 
 table.legend {
@@ -75,6 +149,11 @@ table.legend {
 	border-width: 1px;
 	margin-left: auto;
 	margin-right: auto;
+<<<<<<< HEAD
+=======
+    border-spacing: 1;
+	padding: 2px;
+>>>>>>> 408e843f4f278f41b4db1d0a02bcd9b3bc435e7e
 }
 	
 a:hover {
@@ -91,23 +170,44 @@ a.link:hover {
 	background-color: #89FB69;
 }
 
+<<<<<<< HEAD
 .relayOK {
 	font: 10px Arial;
+=======
+a.linkDetails {
+    color: black;
+	text-decoration: none;
+}
+
+.relayOK {
+	font: 0.625em; /*Arial;*/
+>>>>>>> 408e843f4f278f41b4db1d0a02bcd9b3bc435e7e
 	background-color: white;
 }
 
 .relayHibernating {
+<<<<<<< HEAD
 	font: 10px Arial;
+=======
+	font: 0.625em; /*Arial;*/
+>>>>>>> 408e843f4f278f41b4db1d0a02bcd9b3bc435e7e
 	background-color: #FEEED0;
 }
 
 .relayDown {
+<<<<<<< HEAD
 	font: 10px Arial;
+=======
+	font: 0.625em; /*Arial;*/
+>>>>>>> 408e843f4f278f41b4db1d0a02bcd9b3bc435e7e
 	background-color: yellow;
 }
 
 .relayBadExit {
+<<<<<<< HEAD
 	font: 10px Arial;
+=======
+>>>>>>> 408e843f4f278f41b4db1d0a02bcd9b3bc435e7e
 	background-color: red;
 }
 
@@ -118,15 +218,60 @@ table.appServerDetails {
 	border-width: 1px;
 	margin-left: auto;
 	margin-right: auto;
+<<<<<<< HEAD
 }
 
 td.boxTitle {
 	font:bold 10pt Arial; 
 	background-color: #7BD4F7;
+=======
+	border-spacing: 1;
+}
+
+table.advancedQuery {
+    width: 250px;
+    border-style: solid;
+    border-color: black;
+    border-width: 1px;
+    margin-right: auto;
+    margin-left: auto;
+    border-spacing: 1;
+
+
+
+}
+
+tr#row_appServerDetails:hover {
+	background-color: #7BD4F7;
+	cursor: pointer;
+}
+
+table.aggStatisticSummary {
+    width: 325px;
+    border-style: solid;
+    border-color: black;
+    border-width: 4px;
+    margin-left: auto;
+    margin-right: auto;
+    border-spacing: 1;
+    border-collapse: collapse;
+   	white-space:nowrap;
+}
+
+tr#row_aggStatisticSummary {
+    
+}
+
+td#aggBox {
+	font: bold 0.625em; /*10pt Arial;*/
+    border-style: solid;
+    border-width: 1px;
+>>>>>>> 408e843f4f278f41b4db1d0a02bcd9b3bc435e7e
 	text-align: center;
 	position: center;
 	color: #000000; 
 	white-space:nowrap;
+<<<<<<< HEAD
 	border-top: 2px solid black;
 	border-bottom: 2px solid black;
 }
@@ -153,3 +298,82 @@ th {
 	font-size:12;
 	font-weight:bold
 }
+=======
+}
+
+td.boxTitle {
+	font: bold 0.625em; /*10pt Arial;*/
+	background-color: #7BD4F7;
+	text-align: center;
+	position: center;
+	color: #000000; 
+	border-top: 2px solid black;
+	border-bottom: 2px solid black;
+	white-space:nowrap;
+}
+
+td#col_relayName {
+    background-color: #C7FF89;
+    width: 20px;
+}
+
+
+td#col_relayName:hover {
+    background-color: #69EEC8;
+}
+
+td#col_relayBandwidth {
+    width: 100px;
+}
+
+td#col_relayUptime {
+    width: 50px;
+}
+
+td#col_relayIcons {
+    width: 100px;
+    text-align: right;
+}
+
+td#col_relayOrport {
+    width: 50px;
+}
+
+
+td#col_relayDirport {
+    width: 50px;
+}
+
+td#col_relayBadExit {
+    width: 50px;
+    text-align: center;
+}
+
+td {
+    font-size: 0.5625em;
+    /*font-family: FreeSans, Arial, Helvetica, sans-serif;*/
+}
+
+table.relayTable {
+    width: 100%;
+    border-spacing: 0;
+    border: 0;
+}
+
+div.footer {
+    text-align: center;
+    padding: 5px 0 0 0;
+    margin: 25px 0 0 0;
+    border-top: 1px solid rgb(100,100,100);
+    color: rgb(100, 100, 100);
+}
+
+p#trademark {
+    text-align: center;
+    font-size: 12px;
+    margin: 0 0 1px 0;
+}
+
+
+
+>>>>>>> 408e843f4f278f41b4db1d0a02bcd9b3bc435e7e
