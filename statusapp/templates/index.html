@@ -4,6 +4,10 @@
 <link rel="stylesheet" type="text/css" href="static/css/style.css"></link>
 {% endblock %}
 
+{% block mainJS %}
+<script src="static/js/sorttable.js" type="text/javascript"></script>
+{% endblock %}
+
 {% block mainTitle %} TorStatus Main Page {% endblock %}
 
 {% block headerTitle %} TorStatus {% endblock %}
@@ -11,7 +15,7 @@
 {% block extraHeader %}
 <table cellspacing="2" cellpadding="2" class="displayStatus">
 <tr>
-	<td class="headerLinks">
+	<td id="mainLinks">
 		<a class="link" href="https://check.torproject.org/"> Check if you are using Tor (via TorCheck)</a>
 		<br />
 		Your IP Address is: {{clientAddress}}
@@ -41,27 +45,27 @@
 <tr>
 	<td class="boxTitle" colspan="2">Application Server Details</td>
 </tr>
-<tr class="appServerDetails">
+<tr id="row_appServerDetails">
 	<td>Cache Last Updated (Local Server Time):</td>
 	<td>16:32:23 (GMT)</td>
 </tr>
-<tr class="appServerDetails">
+<tr id="row_appServerDetails">
 	<td>Last Update Cycle Processing Time (Seconds):</td>
 	<td>534</td>
 </tr>
-<tr class="appServerDetails">
+<tr id="row_appServerDetails">
 	<td>Current Cache Expire Time (Seconds):</td>
 	<td>234</td>
 </tr>
-<tr class="appServerDetails">
+<tr id="row_appServerDetails">
 	<td>Number of Routers In Cache:</td>
 	<td>765</td>
 </tr>
-<tr class="appServerDetails">
+<tr id="row_appServerDetails">
 	<td>Number of Descriptors In Cache:</td>
 	<td>123</td>
 </tr>
-<tr class="appServerDetails">
+<tr id="row_appServerDetails">
 	<td>Approximate Page Generation Time (Seconds):</td>
 	<td>534.34</td>
 </tr>
@@ -72,33 +76,38 @@
 {% block mainPage %}
 
 {% if statusEntry_descriptorEntry %}
-<table class="sortable relayTable">
+<table class="relayTable sortable">
 	<tr>
-        <th class="relayHeader sorttable_alpha">&nbsp</th>
-		<th class="relayHeader sorttable_alpha">Router Name</th>
-		<th class="relayHeader sorttable_numeric">Bandwidth</th>
-        <th class="relayHeader sorttable_numeric">Uptime</th>
-        <th class="relayHeader sorttable_numeric">IP</th>
-		<th class="relayHeaderInv sorttable_nosort">Icons</th>
-        <th class="relayHeader sorttable_numeric">ORPort</th>
-        <th class="relayHeader sorttable_numeric">DirPort</th>
-        <th class="relayHeader sorttale_numeric">Bad Exit</th>
+        <th class="sorttable_alpha" id="relayHeader">&nbsp</th>
+		<th class="sorttable_alpha" id="relayHeader">Router Name</th>
+		<th class="sorttable_numeric" id="relayHeader">Bandwidth</th>
+        <th class="sorttable_numeric" id="relayHeader">Uptime</th>
+        <th class="sorttable_numeric" id="relayHeader">IP</th>
+		<th class="sorttable_nosort" id="relayHeaderInv">Icons</th>
+        <th class="sorttable_numeric" id="relayHeader">ORPort</th>
+        <th class="sorttable_numeric" id="relayHeader">DirPort</th>
+        <th class="sorttale_numeric" id="relayHeader">Bad Exit</th>
 	</tr>
 
 	{% for relay, descriptor in statusEntry_descriptorEntry %}
 		<tr {% ifequal relay.isbadexit 1 %} class="relayBadExit" {% else %} class="relay" {% endifequal %}>
-			<td sorttable_customkey="us" class="col_relayName"><img src="static/img/flags/us.gif" alt="US" title="US"></td>
-            <td class="col_relayName"> 
+		
+		    <!-- Add: RELAY IS DOWN and RELAY IS HIBERNATING -->
+		    
+			<td sorttable_customkey="us" id="col_relayName"><img src="static/img/flags/us.gif" alt="US" title="US"></td>
+			<!-- Note: sorttable_customkey="[[COUNTRY_PREFIX]]" -->
+			
+            <td id="col_relayName"> 
                 {% ifequal relay.isnamed 1 %}
                     <b><a class="linkDetails" href="/details/{{ relay.fingerprint }}"> {{ relay.nickname }}</a></b>
                     {% else %}
                     <a class="linkDetails" href="/details/{{ relay.fingerprint }}"> {{ relay.nickname }} </a>
                 {% endifequal %}
             </td>
-            <td class="col_relayBandwidth">{% widthratio descriptor.bandwidthobserved|floatformat 1024 1 %} KB/s</td>
-            <td class="col_relayUptime">{% widthratio descriptor.uptime|floatformat 86000 1 %} d</td>
-            <td class="col_relayAddress">{{relay.address}}</td>
-            <td class="col_relayIcons">
+            <td id="col_relayBandwidth">{% widthratio descriptor.bandwidthobserved|floatformat 1024 1 %} KB/s</td>
+            <td id="col_relayUptime">{% widthratio descriptor.uptime|floatformat 86000 1 %} d</td>
+            <td id="col_relayAddress">{{relay.address}}</td>
+            <td id="col_relayIcons">
 
                 {% ifequal relay.isfast 1 %}
                     <img src="static/img/status/Fast.png" alt="Fast Server" title="Fast Server">
@@ -148,13 +157,13 @@
                     <img src="static/img/os-icons/NotAvailable.png" alt="NotAvailable" title="Not Available">
                 {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
             </td>
-            <td class="col_relayOrport">{{relay.orport}}</td>
-            <td class="col_relayDirport">{% ifequal relay.dirport 0 %}
+            <td id="col_relayOrport">{{relay.orport}}</td>
+            <td id="col_relayDirport">{% ifequal relay.dirport 0 %}
                     None
                 {% else %}
                     {{ relay.dirport }}
                 {% endifequal %}</td>
-            <td class="col_relayBadExit" {% ifequal relay.isbadexit 1 %} sorttable_customkey="1">
+            <td id="col_relayBadExit" {% ifequal relay.isbadexit 1 %} sorttable_customkey="1">
                 	<img src="static/img/bg_yes.png" width="12" height="12" alt="Bad Exit" title="Bad Exit">
                 {% else %} sorttable_customkey="0">
                		<img src="static/img/bg_no.png" width="12" height="12" alt="Not a Bad Exit" title="Not a Bad Exit">
@@ -174,85 +183,85 @@
     <a class="link" href="network-statistic-graphs">Graphs / Details</a>
     </td>
 </tr>
-<tr class="aggStatisticSummary">
-	<td class="aggBox">Total Bandwidth of displayed Routers [K bytes/s]:</td>
-    <td class="aggBox">some info</td>
-    <td class="aggBox">empty on TorStatus</td>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Bandwidth of displayed Routers [K bytes/s]:</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">empty on TorStatus</td>
 </tr>
-<tr class="aggStatisticSummary">
-	<td class="aggBox">Total Number of Routers:</td>
-    <td class="aggBox">some info</td>
-    <td class="aggBox">percentage%</td>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of Routers:</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
 </tr>
-<tr class="aggStatisticSummary">
-	<td class="aggBox">Routers in Current Query Result Set:</td>
-    <td class="aggBox">some info</td>
-    <td class="aggBox">percentage%</td>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Routers in Current Query Result Set:</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
 </tr>
-<tr class="aggStatisticSummary">
-	<td class="aggBox">Total Number of 'Authority' Routers"</td>
-    <td class="aggBox">some info</td>
-    <td class="aggBox">percentage%</td>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of 'Authority' Routers"</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
 </tr>
-<tr class="aggStatisticSummary">
-	<td class="aggBox">Total Number of 'Bad Directory' Routers:</td>
-    <td class="aggBox">some info</td>
-    <td class="aggBox">percentage%</td>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of 'Bad Directory' Routers:</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
 </tr>
-<tr class="aggStatisticSummary">
-	<td class="aggBox">Total Number of 'Bad Exit' Routers:</td>
-    <td class="aggBox">some info</td>
-    <td class="aggBox">percentage%</td>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of 'Bad Exit' Routers:</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
 </tr>
-<tr class="aggStatisticSummary">
-	<td class="aggBox">Total Number of 'Exit' Routers</td>
-    <td class="aggBox">some info</td>
-    <td class="aggBox">percentage%</td>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of 'Exit' Routers</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
 </tr>
-<tr class="aggStatisticSummary">
-	<td class="aggBox">Total Number of 'Fast' Routers</td>
-    <td class="aggBox">some info</td>
-    <td class="aggBox">percentage%</td>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of 'Fast' Routers</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
 </tr>
-<tr class="aggStatisticSummary">
-	<td class="aggBox">Total Number of 'Guard' Routers:</td>
-    <td class="aggBox">some info</td>
-    <td class="aggBox">percentage%</td>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of 'Guard' Routers:</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
 </tr>
-<tr class="aggStatisticSummary">
-	<td class="aggBox">Total Number of 'Hibernating' Routers</td>
-    <td class="aggBox">some info</td>
-    <td class="aggBox">percentage%</td>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of 'Hibernating' Routers</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
 </tr>
-<tr class="aggStatisticSummary">
-	<td class="aggBox">Total Number of 'Named Routers:</td>
-    <td class="aggBox">some info</td>
-    <td class="aggBox">percentage%</td>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of 'Named Routers:</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
 </tr>
-<tr class="aggStatisticSummary">
-	<td class="aggBox">Total Number of 'Stable' Routers</td>
-    <td class="aggBox">some info</td>
-    <td class="aggBox">percentage%</td>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of 'Stable' Routers</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
 </tr>
-<tr class="aggStatisticSummary">
-	<td class="aggBox">Total Number of 'Running' Routers:</td>
-    <td class="aggBox">some info</td>
-    <td class="aggBox">percentage%</td>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of 'Running' Routers:</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
 </tr>
-<tr class="aggStatisticSummary">
-	<td class="aggBox">Total Number of 'Valid' Routers:</td>
-    <td class="aggBox">some info</td>
-    <td class="aggBox">percentage%</td>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of 'Valid' Routers:</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
 </tr>
-<tr class="aggStatisticSummary">
-	<td class="aggBox">Total Number of 'V2Dir' Routers:</td>
-    <td class="aggBox">some info</td>
-    <td class="aggBox">percentage%</td>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of 'V2Dir' Routers:</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
 </tr>
-<tr class="aggStatisticSummary">
-	<td class="aggBox">Total Number of 'Directory Mirror' Routers:</td>
-    <td class="aggBox">some info</td>
-    <td class="aggBox">percentage%</td>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of 'Directory Mirror' Routers:</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
 </tr>
 </table>
 

@@ -7,20 +7,20 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 <head>
 {% block mainCSS %} {% endblock %}
 {% block auxCSS %} {% endblock %}
-<script src="static/js/sorttable.js" type="text/javascript"></script>
+{% block mainJS %} {% endblock %}
 {% block auxJS %} {% endblock %}
 <title>{% block mainTitle %} {% endblock %}</title>
 </head>
 
 <body>
-<table class="body">
+<table class="header">
 <tr>
-	<td class="headerTitle">
-		<a class="link" href="">{% block headerTitle %} {% endblock %} </a>
+	<td id="mainTitle">
+		<a class="link" href="/">{% block headerTitle %} {% endblock %} </a>
 	</td>
 </tr>
 <tr>
-	<td class="headerLinks">
+	<td id="mainLinks">
 		<a class="link" href="/exit-node-query">Tor Exit Node Query</a> | 
 		<a class="link" href="#serverdetails">TorStatus Server Details</a> |
 		<a class="link" href="#opinionsource">Opinion Source</a> |
@@ -31,7 +31,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 	</td>
 </tr>
 <tr>
-	<td class="headerLinks">
+	<td id="mainLinks">
 		<a class="link" href="">CSV List of Current Result Set</a> |
 		<a class="link" href="">CSV List of All Current Tor Server IP Addresses</a> |
 		<a class="link" href="">CSV List of All Current Tor Server Exit Node IP Addresses</a> 
