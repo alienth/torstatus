@@ -16,9 +16,9 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'dcalderon_tordir',                      # Or path to database file if using sqlite3.
-        'USER': 'dcalderon',                      # Not used with sqlite3.
-        'PASSWORD': 'it3meePhod',                  # Not used with sqlite3.
+        'NAME': 'db_name',                      # Or path to database file if using sqlite3.
+        'USER': 'db_user',                      # Not used with sqlite3.
+        'PASSWORD': 'db_userpass',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }
@@ -62,7 +62,7 @@ MEDIA_URL = '/static/'
 ADMIN_MEDIA_PREFIX = '/media/'
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'p@y@6b2vc#6=rxe^p67ti4vlp_9n+@x27wac1g7mta)hfrmds2'
+SECRET_KEY = 'uniquekeygoeshere'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
