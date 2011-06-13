@@ -100,9 +100,9 @@
 <table class="mainDetails">
 <tr>
     <td>
-        <table>
+        <table class="details">
             <tr>
-                <td> Router Keys </td>
+                <td id="details_boxTitle"> Router Keys </td>
             </tr>
             <tr>
                 <td><b> Onion Key: </b><pre> [[ROUTER_ONION_KEY]] </pre>
@@ -113,67 +113,70 @@
         </table>
     </td>
     <td>
-        <table>
+        <table class="details">
             <tr>
-                <td colspan="2" align="center"> Router Flags </td>
+                <td id="details_boxTitle" colspan="2"> Router Flags </td>
+            </tr>
+            
+            <!-- NOTE: Fix the IF STATEMENTS FOR THE ICONS. -->
+            
+            <tr> 
+                <td id="detailBox"> Authority: </td>
+                <td {% if isAuthority %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
             <tr> 
-                <td> Authority: </td>
-                <td> ICON </td>
+                <td id="detailBox"> Bad Directory: </td>
+                <td {% if isBadDirectory %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
             <tr> 
-                <td> Bad Directory: </td>
-                <td> ICON </td>
+                <td id="detailBox"> Bad Exit: </td>
+                <td {% if isBadExit %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
             <tr> 
-                <td> Bad Exit: </td>
-                <td> ICON </td>
+                <td id="detailBox"> Exit: </td>
+                <td {% if isExit %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
             <tr> 
-                <td> Exit: </td>
-                <td> ICON </td>
+                <td id="detailBox"> Fast: </td>
+                <td {% if isFast %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
             <tr> 
-                <td> Fast: </td>
-                <td> ICON </td>
+                <td id="detailBox"> Guard: </td>
+                <td {% if isGuard %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
             <tr> 
-                <td> Guard: </td>
-                <td> ICON </td>
+                <td id="detailBox"> Hibernating: </td>
+                <td {% if isHibernating %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
             <tr> 
-                <td> Hibernating: </td>
-                <td> ICON </td>
+                <td id="detailBox"> Named: </td>
+                <td {% if isNamed %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
             <tr> 
-                <td> Named: </td>
-                <td> ICON </td>
+                <td id="detailBox"> Stable: </td>
+                <td {% if isStable %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
             <tr> 
-                <td> Stable: </td>
-                <td> ICON </td>
+                <td id="detailBox"> Running: </td>
+                <td {% if isRunning %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
             <tr> 
-                <td> Running: </td>
-                <td> ICON </td>
+                <td id="detailBox"> Valid: </td>
+                <td {% if isValid %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
             <tr> 
-                <td> Valid: </td>
-                <td> ICON </td>
-            </tr>
-            <tr> 
-                <td> V2Dir: </td>
-                <td> ICON </td>
+                <td id="detailBox"> V2Dir: </td>
+                <td {% if isAuthority %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
         </table>
     </td>
     <td>
-        <table>
+        <table class="details">
             <tr>
-                <td> Exit Policy Information </td>
+                <td id="details_boxTitle"> Exit Policy Information </td>
             </tr>
             <tr>
-                <td> [[EXIT POLICY INFORMATION </td>
+                <td><pre> [[EXIT POLICY INFORMATION]] </pre></td>
             </tr>
         </table>
     </td>
