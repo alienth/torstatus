@@ -8,7 +8,7 @@
 <link rel="stylesheet" type="text/css" href="../../static/css/details.css"></link>
 {% endblock %}
 
-{% block mainTitle %} TorStatus Details Page -- [[RELAY_NAME]] {% endblock %}
+{% block mainTitle %} TorStatus details for router {{nickname}} {% endblock %}
 
 {% block headerTitle %} TorStatus {% endblock %}
 
@@ -108,9 +108,8 @@
                 <td id="details_boxTitle"> Router Keys </td>
             </tr>
             <tr>
-                <td><b> Onion Key: </b><pre> [[ROUTER_ONION_KEY]] </pre>
-                    <br />
-                    <b> Signing Key: </b><pre> [[ROUTER_SIGNING_KEY]] </pre>
+                <td>
+                    <pre>{{rawdesc|keys}}</pre>
                 </td>
             </tr>
         </table>
