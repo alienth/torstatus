@@ -21,3 +21,10 @@ def format_fing(fingerprint):
 
     return new_fingerprint.upper()
 
+@register.filter
+def keys(rawdesc):
+    "Gets the keys from the raw descriptor, since we currently cannot get it \
+    from anywhere else."
+
+    return "\n".join(rawdesc.split("\n")[8:20])
+

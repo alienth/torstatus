@@ -74,7 +74,7 @@ def details(request, fingerprint):
             statusentry.isbaddirectory, statusentry.isbadexit, \
             statusentry.isexit, statusentry.isfast, statusentry.isguard, \
             statusentry.isnamed, statusentry.isstable, statusentry.isrunning, \
-            statusentry.isvalid, statusentry.isv2dir, statusentry.ports FROM \
+            statusentry.isvalid, statusentry.isv2dir, statusentry.ports, descriptor.rawdesc FROM \
             statusentry JOIN descriptor ON statusentry.descriptor = \
             descriptor.descriptor WHERE statusentry.fingerprint = %s ORDER BY \
             statusentry.validafter DESC LIMIT 1', [fingerprint]) 
@@ -83,7 +83,7 @@ def details(request, fingerprint):
         nickname, fingerprint, address, orport, dirport, platform, published, \
             uptime, bandwidthburst, bandwidthavg, bandwidthobserved, \
             isauthority, isbaddirectory, isbadexit, isexit, isfast, isguard, \
-            isnamed, isstable, isrunning, isvalid, isv2dir, ports = cursor.fetchone()
+            isnamed, isstable, isrunning, isvalid, isv2dir, ports, rawdesc = cursor.fetchone()
     except:
         raise Http404
     
@@ -95,7 +95,7 @@ def details(request, fingerprint):
             'isbaddirectory': isbaddirectory, 'isbadexit': isbadexit, \
             'isexit': isexit, 'isfast': isfast, 'isguard': isguard, \
             'isnamed': isnamed, 'isstable': isstable, 'isrunning': isrunning, \
-            'isvalid': isvalid, 'isv2dir': isv2dir, 'ports': ports}
+            'isvalid': isvalid, 'isv2dir': isv2dir, 'ports': ports, 'rawdesc': rawdesc}
 
     return render_to_response('details.html', template_values)
 
