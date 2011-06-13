@@ -68,14 +68,14 @@ def family(rawdesc):
                 try:
                     fingerprint = entry[1:].lower()
                     nickname = Statusentry.objects.filter(fingerprint='%s' % fingerprint)[0].nickname
-                    links.append("<a href=\"details/%s\">%s</a>" % (fingerprint, nickname))
+                    links.append("<a href=\"/details/%s\">%s</a>" % (fingerprint, nickname))
                 except:
                     links.append("(%s)" % entry)
             else:
                 try:
                     most_recent = Statusentry.objects.aggregate(last=Max('validafter'))
                     fingerprint = Statusentry.objects.get(nickname=entry, validafter=str(most_recent['last'])).fingerprint
-                    links.append("<a href\"details/%s\">%s</a>" % (fingerprint, entry))
+                    links.append("<a href=\"/details/%s\">%s</a>" % (fingerprint, entry))
                 except:
                     links.append("(%s)" % entry)
 
