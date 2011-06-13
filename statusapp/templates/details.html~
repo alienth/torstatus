@@ -109,9 +109,7 @@
             </tr>
             <tr>
                 <td>
-                    <pre>
-                   {{rawdesc|keys}}
-                    </pre>
+                    <pre>{{rawdesc|keys}}</pre>
                 </td>
             </tr>
         </table>

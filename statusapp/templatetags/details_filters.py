@@ -28,3 +28,16 @@ def keys(rawdesc):
 
     return "\n".join(rawdesc.split("\n")[8:20])
 
+@register.filter
+def exitinfo(rawdesc):
+    "Gets the detailed exit policy information from the raw descriptor"
+
+    policy = []
+    rawdesc_array = rawdesc.split("\n")
+    for line in rawdesc_array:
+        if (line[0:6] == "accept" or line[0:6] == "reject"):
+            policy.append(line)
+
+    return "\n".join(policy)
+
+
