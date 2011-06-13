@@ -1,27 +1,3 @@
-<<<<<<< HEAD
-td.headerTitle {
-	background-color: #7BD4F7;
-	text-align:center;
-	font:bold 16pt Arial;
-	color: #000000;
-	border-style: solid;
-	border-color: black;
-	border-width: 1px;
-}
-
-td.headerLinks {
-	background-color: #7BD4F7;
-	border-style: solid;
-	border-color: black;
-	border-width: 1px;
-	text-align: center;
-	font-size: .7em;
-	color: red;
-}
-
-tr.relay: {
-	font: 10px Arial;
-=======
 body {
     font-family: FreeSans, Arial, Helvetica, sans-serif;
 }
@@ -29,23 +5,11 @@ body {
 tr.relay {
 	font: 0.625em;
     line-height:75%;
->>>>>>> 408e843f4f278f41b4db1d0a02bcd9b3bc435e7e
 }
 
 tr.relay:hover {
 	background-color: #69EEC8;
 }
-<<<<<<< HEAD
-/*
-tr.relayBadExit {
-	background-color: red;
-} 
-*/
-
-th.relayHeader {
-	text-align: left;
-	font: bold 11px Arial;
-=======
 
 th {
     line-height:75%;
@@ -55,50 +19,30 @@ th#relayHeader {
 	text-align: left;
 	font-weight: bold; 
 	font-size: 0.6875em;
->>>>>>> 408e843f4f278f41b4db1d0a02bcd9b3bc435e7e
 	background-color: #7BD4F7;
 	border-top: 2px solid black;
 	border-bottom: 2px solid black;
 }
 
-<<<<<<< HEAD
-th.relayHeader:hover {
-	background-color: #89FB69;	
-}
-
-th.relayHeaderInv {
-=======
 th#relayHeader:hover {
 	background-color: #89FB69;	
 	cursor: pointer;
 }
 
 th#relayHeaderInv {
->>>>>>> 408e843f4f278f41b4db1d0a02bcd9b3bc435e7e
 	text-align: left;
 	font: bold 0px Arial;
 	background-color: #7BD4F7;
 	border-top: 2px solid black;
 	border-bottom: 2px solid black;
-<<<<<<< HEAD
-}
-
-table.body
-{
-=======
 	cursor: pointer;
 }
 
 table.header {
->>>>>>> 408e843f4f278f41b4db1d0a02bcd9b3bc435e7e
 	width: 100%;
 	border-style: none;
 	margin-left: auto;
 	margin-right: auto;
-<<<<<<< HEAD
-}
-
-=======
 	border-spacing: 1;
 	padding: 2px;
 }
@@ -126,19 +70,14 @@ td#mainLinks {
 	padding: 10px;
 }
 
-
->>>>>>> 408e843f4f278f41b4db1d0a02bcd9b3bc435e7e
 table.displayStatus {
 	width: 300px;
 	position: center;
 	border-style: none;
 	margin-left: auto;
 	margin-right: auto;
-<<<<<<< HEAD
-=======
     border-spacing: 1;
 	padding: 2px;
->>>>>>> 408e843f4f278f41b4db1d0a02bcd9b3bc435e7e
 }
 
 table.legend {
@@ -149,11 +88,8 @@ table.legend {
 	border-width: 1px;
 	margin-left: auto;
 	margin-right: auto;
-<<<<<<< HEAD
-=======
     border-spacing: 1;
 	padding: 2px;
->>>>>>> 408e843f4f278f41b4db1d0a02bcd9b3bc435e7e
 }
 	
 a:hover {
@@ -170,10 +106,6 @@ a.link:hover {
 	background-color: #89FB69;
 }
 
-<<<<<<< HEAD
-.relayOK {
-	font: 10px Arial;
-=======
 a.linkDetails {
     color: black;
 	text-decoration: none;
@@ -181,33 +113,20 @@ a.linkDetails {
 
 .relayOK {
 	font: 0.625em; /*Arial;*/
->>>>>>> 408e843f4f278f41b4db1d0a02bcd9b3bc435e7e
 	background-color: white;
 }
 
 .relayHibernating {
-<<<<<<< HEAD
-	font: 10px Arial;
-=======
 	font: 0.625em; /*Arial;*/
->>>>>>> 408e843f4f278f41b4db1d0a02bcd9b3bc435e7e
 	background-color: #FEEED0;
 }
 
 .relayDown {
-<<<<<<< HEAD
-	font: 10px Arial;
-=======
 	font: 0.625em; /*Arial;*/
->>>>>>> 408e843f4f278f41b4db1d0a02bcd9b3bc435e7e
 	background-color: yellow;
 }
 
 .relayBadExit {
-<<<<<<< HEAD
-	font: 10px Arial;
-=======
->>>>>>> 408e843f4f278f41b4db1d0a02bcd9b3bc435e7e
 	background-color: red;
 }
 
@@ -218,13 +137,6 @@ table.appServerDetails {
 	border-width: 1px;
 	margin-left: auto;
 	margin-right: auto;
-<<<<<<< HEAD
-}
-
-td.boxTitle {
-	font:bold 10pt Arial; 
-	background-color: #7BD4F7;
-=======
 	border-spacing: 1;
 }
 
@@ -236,9 +148,6 @@ table.advancedQuery {
     margin-right: auto;
     margin-left: auto;
     border-spacing: 1;
-
-
-
 }
 
 tr#row_appServerDetails:hover {
@@ -266,39 +175,10 @@ td#aggBox {
 	font: bold 0.625em; /*10pt Arial;*/
     border-style: solid;
     border-width: 1px;
->>>>>>> 408e843f4f278f41b4db1d0a02bcd9b3bc435e7e
 	text-align: center;
 	position: center;
 	color: #000000; 
 	white-space:nowrap;
-<<<<<<< HEAD
-	border-top: 2px solid black;
-	border-bottom: 2px solid black;
-}
-
-tr.appServerDetails:hover {
-	background-color: #7BD4F7;
-}
-
-
-p {
-	font-family:"Times New Roman";
-	font-size:20px;
-}
-
-table {
-	/* background:lightblue; */
-}
-
-td {
-	font-size:10;
-}
-
-th {
-	font-size:12;
-	font-weight:bold
-}
-=======
 }
 
 td.boxTitle {
@@ -373,7 +253,3 @@ p#trademark {
     font-size: 12px;
     margin: 0 0 1px 0;
 }
-
-
-
->>>>>>> 408e843f4f278f41b4db1d0a02bcd9b3bc435e7e
