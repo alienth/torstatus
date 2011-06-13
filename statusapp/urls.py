@@ -11,4 +11,7 @@ urlpatterns = patterns('',
     (r'^exit-node-query/', 'statusapp.views.exitnodequery'),
     (r'^network-statistic-graphs/', 'statusapp.views.networkstatisticgraphs'),
     (r'^column-preferences/', 'statusapp.views.columnpreferences'),
+    (r'^Tor-Query-Export.csv','statusapp.views.unruly_passengers_csv'),#Eventually have to make own function to send appropriate stuff
+    (r'^Tor-IP-List-All.csv','statusapp.views.unruly_passengers_csv'),#ditto
+    (r'^Tor-IP-List-Exit.csv','statusapp.views.unruly_passengers_csv'),#ditto
 )

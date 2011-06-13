@@ -1,6 +1,7 @@
 from statusapp.models import Statusentry, Descriptor
 from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponse, HttpRequest
+import csv
 
 def index(request):
 	statusEntry_FullList = Statusentry.objects.filter(pk='2011-05-31 19:00:00')
@@ -49,3 +50,18 @@ def columnpreferences(request):
     variables = "SOMETHING"
     template_values = {'variables': variables,}
     return render_to_response('columnpreferences.html', template_values)
+
+UNRULY_PASSENGERS = [146,184,235,200,226,251,299,273,281,304,203]
+
+def unruly_passengers_csv(request):
+    # Create the HttpResponse object with the appropriate CSV header.
+    response = HttpResponse(mimetype='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=test_data.csv'
+
+    # Create the CSV writer using the HttpResponse as the "file."
+    writer = csv.writer(response)
+    writer.writerow(['Year', 'Unruly Airline Passengers'])
+    for (year, num) in zip(range(1995, 2006), UNRULY_PASSENGERS):
+        writer.writerow([year, num])
+
+    return response
