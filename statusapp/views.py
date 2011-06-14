@@ -1,8 +1,6 @@
 from statusapp.models import Statusentry, Descriptor
 from django.shortcuts import render_to_response #get_object_or_404
 from django.http import HttpResponse, HttpRequest, Http404
-from django.db import connection
-import datetime
 import csv
 from django.views.decorators.cache import cache_page
 
@@ -67,29 +65,29 @@ def custom_index(request):
 
     sortorder: the order to sort by, could be (ascending, descending)
 
-    authority: requre flags, could be (off, yes, no)
+    authority: require flags, could be (off, yes, no)
 
-    badDirectory: requre flags, could be (off, yes, no)
+    badDirectory: require flags, could be (off, yes, no)
 
-    BadExit: requre flags, could be (off, yes, no)
+    BadExit: require flags, could be (off, yes, no)
 
-    Exit:  requre flags, could be (off, yes, no)
+    Exit:  require flags, could be (off, yes, no)
 
-    Fast:  requre flags, could be (off, yes, no)
+    Fast:  require flags, could be (off, yes, no)
 
-    Guard: requre flags, could be (off, yes, no)
+    Guard: require flags, could be (off, yes, no)
 
-    Hibernating: requre flags, could be (off, yes, no)
+    Hibernating: require flags, could be (off, yes, no)
 
-    Named:  requre flags, could be (off, yes, no)
+    Named:  require flags, could be (off, yes, no)
 
-    Stable:  requre flags, could be (off, yes, no)
+    Stable:  require flags, could be (off, yes, no)
 
-    Running:  requre flags, could be (off, yes, no)
+    Running:  require flags, could be (off, yes, no)
 
-    Valid:  requre flags, could be (off, yes, no)
+    Valid:  require flags, could be (off, yes, no)
 
-    V2Dir:  requre flags, could be (off, yes, no)
+    V2Dir:  require flags, could be (off, yes, no)
 
     criteria: the criteria for an advanced search could be (fingerprint, routername,
     countrycode, bandwidth, uptime, lastdescriptorpublished, ipaddress, hostname,
