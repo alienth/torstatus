@@ -1,27 +1,2 @@
-table.ipSearch {
-    border-left: auto;
-    border-right: auto;
-	border-width: 1px 1px 1px 1px;
-	border-spacing: 2px;
-	border-style: none none none none;
-	border-color: gray gray gray gray;
-	border-collapse: separate;
-	background-color: white;
-}
-table.ipSearch2 th {
-	border-width: 3px 3px 3px 3px;
-	padding: 0px 0px 0px 0px;
-	border-style: double double double double;
-	border-color: gray gray gray gray;
-	background-color: white;
-	-moz-border-radius: 0px 0px 0px 0px;
-}
-table.ipSearch3 td {
-	border-width: 3px 3px 3px 3px;
-	padding: 0px 0px 0px 0px;
-	border-style: double double double double;
-	border-color: gray gray gray gray;
-	background-color: white;
-	-moz-border-radius: 0px 0px 0px 0px
-}
+
 

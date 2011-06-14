@@ -25,7 +25,7 @@
 <br />
 <table cellspacing="1" cellpadding="2" class="legend">
 <tr> 
-	<td class="boxTitle"> Legend </td>
+	<td class="boxTitle">Legend</td>
 </tr>
 <tr>
 	<td class="relayOK">Router is ok</td>
@@ -75,7 +75,7 @@
 	
 {% block mainPage %}
 
-{% if statusEntry_descriptorEntry %}
+{% if relay_list %}
 <table class="relayTable sortable">
 	<tr>
         <th class="sorttable_alpha" id="relayHeader">&nbsp</th>
@@ -89,8 +89,8 @@
         <th class="sorttale_numeric" id="relayHeader">Bad Exit</th>
 	</tr>
 
-	{% for relay, descriptor in statusEntry_descriptorEntry %}
-		<tr {% ifequal relay.isbadexit 1 %} class="relayBadExit" {% else %} class="relay" {% endifequal %}>
+	{% for isbadexit, isnamed, fingerprint, nickname, bandwidthobserved, uptime, address, isfast, isexit, isguard, isstable, isauthority, platform, orport, dirport in relay_list %}
+		<tr {% ifequal isbadexit 1 %} class="relayBadExit" {% else %} class="relay" {% endifequal %}>
 		
 		    <!-- Add: RELAY IS DOWN and RELAY IS HIBERNATING -->
 		    
@@ -98,72 +98,72 @@
 			<!-- Note: sorttable_customkey="[[COUNTRY_PREFIX]]" -->
 			
             <td id="col_relayName"> 
-                {% ifequal relay.isnamed 1 %}
-                    <b><a class="linkDetails" href="/details/{{ relay.fingerprint }}"> {{ relay.nickname }}</a></b>
+                {% ifequal isnamed 1 %}
+                    <b><a class="linkDetails" href="/details/{{ fingerprint }}"> {{ nickname }}</a></b>
                     {% else %}
-                    <a class="linkDetails" href="/details/{{ relay.fingerprint }}"> {{ relay.nickname }} </a>
+                    <a class="linkDetails" href="/details/{{ fingerprint }}"> {{ nickname }} </a>
                 {% endifequal %}
             </td>
-            <td id="col_relayBandwidth">{% widthratio descriptor.bandwidthobserved|floatformat 1024 1 %} KB/s</td>
-            <td id="col_relayUptime">{% widthratio descriptor.uptime|floatformat 86000 1 %} d</td>
-            <td id="col_relayAddress">{{relay.address}}</td>
+            <td id="col_relayBandwidth">{% widthratio bandwidthobserved|floatformat 1024 1 %} KB/s</td>
+            <td id="col_relayUptime">{% widthratio uptime|floatformat 86000 1 %} d</td>
+            <td id="col_relayAddress">{{address}}</td>
             <td id="col_relayIcons">
 
-                {% ifequal relay.isfast 1 %}
+                {% ifequal isfast 1 %}
                     <img src="static/img/status/Fast.png" alt="Fast Server" title="Fast Server">
                 {% endifequal %}
 
-                {% ifequal relay.isexit 1 %}
+                {% ifequal isexit 1 %}
                     <img src="static/img/status/Exit.png" alt="Exit Server" title="Exit Server">
                 {% endifequal %}
 
-                {% ifequal relay.isguard 1 %}
+                {% ifequal isguard 1 %}
                     <img src="static/img/status/Guard.png" alt="Guard Server" title="Guard Server">
                 {% endifequal %}
 
-                {% ifequal relay.isstable 1 %}
+                {% ifequal isstable 1 %}
                     <img src="static/img/status/Stable.png" alt="Stable Server" title="Stable Server">
                 {% endifequal %}
 
-                {% ifequal relay.isauthority 1 %}
+                {% ifequal isauthority 1 %}
                     <img src="static/img/status/Authority.png" alt="Authority Server" title="Authority Server">
                 {% endifequal %}
 
-                {% if "Linux" in descriptor.platform %}
-                    <img src="static/img/os-icons/Linux.png" alt="Linux" title="{{descriptor.platform}}">
-                {% else %}{% if "XP" in descriptor.platform %}
-                    <img src="static/img/os-icons/WindowsXP.png" alt="WindowsXP" title="{{descriptor.platform}}">
-                    {% else %}{% if "Windows" in descriptor.platform and "Server" in descriptor.platform %}
-                    <img src="static/img/os-icons/WindowsServer.png" alt="WindowsServer" title="{{descriptor.platform}}">
-                {% else %}{% if "Windows" in descriptor.platform %}
-                    <img src="static/img/os-icons/WindowsOther.png" alt="WindowsOther" title="{{descriptor.platform}}">
-                {% else %}{% if "Darwin" in descriptor.platform %}
-                    <img src="static/img/os-icons/Darwin.png" alt="Darwin" title="{{descriptor.platform}}">
-                {% else %}{% if "FreeBSD" in descriptor.platform %}
-                    <img src="static/img/os-icons/FreeBSD.png" alt="FreeBSD" title="{{descriptor.platform}}">
-                {% else %}{% if "NetBSD" in descriptor.platform %}
-                    <img src="static/img/os-icons/NetBSD.png" alt="NetBSD" title="{{descriptor.platform}}">
-                {% else %}{% if "OpenBSD" in descriptor.platform %}
-                    <img src="static/img/os-icons/OpenBSD.png" alt="OpenBSD" title="{{descriptor.platform}}">
-                {% else %}{% if "SunOS" in descriptor.platform %}
-                    <img src="static/img/os-icons/SunOS.png" alt="SunOS" title="{{descriptor.platform}}">
-                {% else %}{% if "IRIX" in descriptor.platform %}
-                    <img src="static/img/os-icons/IRIX64.png" alt="IRIX" title="{{descriptor.platform}}">
-                {% else %}{% if "Cygwin" in descriptor.platform %}
-                    <img src="static/img/os-icons/Cygwin.png" alt="Cygwin" title="{{descriptor.platform}}">
-                {% else %}{% if "Dragon" in descriptor.platform %}
-                    <img src="static/img/os-icons/DragonFly.png" alt ="Dragon" title="{{descriptor.platform}}">
+                {% if "Linux" in platform %}
+                    <img src="static/img/os-icons/Linux.png" alt="Linux" title="{{platform}}">
+                {% else %}{% if "XP" in platform %}
+                    <img src="static/img/os-icons/WindowsXP.png" alt="WindowsXP" title="{{platform}}">
+                    {% else %}{% if "Windows" in platform and "Server" in platform %}
+                    <img src="static/img/os-icons/WindowsServer.png" alt="WindowsServer" title="{{platform}}">
+                {% else %}{% if "Windows" in platform %}
+                    <img src="static/img/os-icons/WindowsOther.png" alt="WindowsOther" title="{{platform}}">
+                {% else %}{% if "Darwin" in platform %}
+                    <img src="static/img/os-icons/Darwin.png" alt="Darwin" title="{{platform}}">
+                {% else %}{% if "FreeBSD" in platform %}
+                    <img src="static/img/os-icons/FreeBSD.png" alt="FreeBSD" title="{{platform}}">
+                {% else %}{% if "NetBSD" in platform %}
+                    <img src="static/img/os-icons/NetBSD.png" alt="NetBSD" title="{{platform}}">
+                {% else %}{% if "OpenBSD" in platform %}
+                    <img src="static/img/os-icons/OpenBSD.png" alt="OpenBSD" title="{{platform}}">
+                {% else %}{% if "SunOS" in platform %}
+                    <img src="static/img/os-icons/SunOS.png" alt="SunOS" title="{{platform}}">
+                {% else %}{% if "IRIX" in platform %}
+                    <img src="static/img/os-icons/IRIX64.png" alt="IRIX" title="{{platform}}">
+                {% else %}{% if "Cygwin" in platform %}
+                    <img src="static/img/os-icons/Cygwin.png" alt="Cygwin" title="{{platform}}">
+                {% else %}{% if "Dragon" in platform %}
+                    <img src="static/img/os-icons/DragonFly.png" alt ="Dragon" title="{{platform}}">
                 {% else %}
                     <img src="static/img/os-icons/NotAvailable.png" alt="NotAvailable" title="Not Available">
                 {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
             </td>
-            <td id="col_relayOrport">{{relay.orport}}</td>
-            <td id="col_relayDirport">{% ifequal relay.dirport 0 %}
+            <td id="col_relayOrport">{{orport}}</td>
+            <td id="col_relayDirport">{% ifequal dirport 0 %}
                     None
                 {% else %}
-                    {{ relay.dirport }}
+                    {{ dirport }}
                 {% endifequal %}</td>
-            <td id="col_relayBadExit" {% ifequal relay.isbadexit 1 %} sorttable_customkey="1">
+            <td id="col_relayBadExit" {% ifequal isbadexit 1 %} sorttable_customkey="1">
                 	<img src="static/img/bg_yes.png" width="12" height="12" alt="Bad Exit" title="Bad Exit">
                 {% else %} sorttable_customkey="0">
                		<img src="static/img/bg_no.png" width="12" height="12" alt="Not a Bad Exit" title="Not a Bad Exit">
@@ -321,7 +321,7 @@
 <tr>
     <td>
         <p>Sort Router Listing By:
-        <form action="">
+        <form action="custom/" method="get">
         <select name="sortlistings">
         <option value="router">Router Name</option>
         <option value="fingerprint">Fingerprint</option>
@@ -343,20 +343,16 @@
         <option value="guard">Guard</option>
         <option value="hibernating">Hibernating</option>
         <option value="named">Named</option>
-        </select>
-        </form>
         </p>
     </td>
 </tr>
 <tr>
     <td>
         <p>Sort Order:
-        <form action="">
         <select name="sortorder">
         <option value ="ascending">ascending</option>
         <option value ="descending">descending</option>
         </select>
-        </form>
         </p>
     <td>
 </tr>
@@ -364,88 +360,76 @@
     <td>
         <p>Require Flags:</p>
             <p>
-            Authority: <form action="">
+            Authority:
             <input type="radio" name="authority" value="off" />Off
             <input type="radio" name="authority" value="yes" />Yes
-            <input type="radio" name="authority" value="yes" />No
-            </form>
+            <input type="radio" name="authority" value="no" />No
             </p>
             <p>
-            BadDirectory: <form action="">
+            BadDirectory:
             <input type="radio" name="badDirectory" value="off" />Off
             <input type="radio" name="badDirectory" value="yes" />Yes
-            <input type="radio" name="badDirectory" value="yes" />No
-            </form>
+            <input type="radio" name="badDirectory" value="no" />No
             </p>
             <p>
-            BadExit: <form action="">
+            BadExit:
             <input type="radio" name="BadExit" value="off" />Off
             <input type="radio" name="BadExit" value="yes" />Yes
-            <input type="radio" name="BadExit" value="yes" />No
-            </form>
+            <input type="radio" name="BadExit" value="no" />No
             </p>
             <p>
-            Exit: <form action="">
+            Exit:
             <input type="radio" name="Exit" value="off" />Off
             <input type="radio" name="Exit" value="yes" />Yes
-            <input type="radio" name="Exit" value="yes" />No
-            </form>
+            <input type="radio" name="Exit" value="no" />No
             </p>
             <p>
-            Fast: <form action="">
+            Fast:
             <input type="radio" name="Fast" value="off" />Off
             <input type="radio" name="Fast" value="yes" />Yes
-            <input type="radio" name="Fast" value="yes" />No
-            </form>
+            <input type="radio" name="Fast" value="no" />No
             </p>
             <p>
-            Guard: <form action="">
+            Guard:
             <input type="radio" name="Guard" value="off" />Off
             <input type="radio" name="Guard" value="yes" />Yes
-            <input type="radio" name="Guard" value="yes" />No
-            </form>
+            <input type="radio" name="Guard" value="no" />No
             </p>
             <p>
-            Hibernating: <form action="">
+            Hibernating:
             <input type="radio" name="Hibernating" value="off" />Off
             <input type="radio" name="Hibernating" value="yes" />Yes
-            <input type="radio" name="Hibernating" value="yes" />No
-            </form>
+            <input type="radio" name="Hibernating" value="no" />No
             </p>
             <p>
-            Named: <form action="">
+            Named:
             <input type="radio" name="Named" value="off" />Off
             <input type="radio" name="Named" value="yes" />Yes
-            <input type="radio" name="Named" value="yes" />No
-            </form>
+            <input type="radio" name="Named" value="no" />No
             </p>
             <p>
-            Stable: <form action="">
+            Stable:
             <input type="radio" name="Stable" value="off" />Off
             <input type="radio" name="Stable" value="yes" />Yes
-            <input type="radio" name="Stable" value="yes" />No
-            </form>
+            <input type="radio" name="Stable" value="no" />No
             </p>
             <p>
-            Running: <form action="">
+            Running:
             <input type="radio" name="Running" value="off" />Off
             <input type="radio" name="Running" value="yes" />Yes
-            <input type="radio" name="Running" value="yes" />No
-            </form>
+            <input type="radio" name="Running" value="no" />No
             </p>
             <p>
-            Valid: <form action="">
+            Valid:
             <input type="radio" name="Valid" value="off" />Off
             <input type="radio" name="Valid" value="yes" />Yes
-            <input type="radio" name="Valid" value="yes" />No
-            </form>
+            <input type="radio" name="Valid" value="no" />No
             </p>
             <p>
-            V2Dir: <form action="">
+            V2Dir:
             <input type="radio" name="vdir" value="off" />Off
             <input type="radio" name="vdir" value="yes" />Yes
-            <input type="radio" name="vdir" value="yes" />No
-            </form>
+            <input type="radio" name="vdir" value="no" />No
             </p>
     <td>
 </tr>
@@ -454,7 +438,6 @@
     <td>
         <p>Advanced Search:
         <p>
-        <form action="">
         <select name="criteria">
         <option value ="fingerprint">Fingerprint</option>
         <option value ="routername">Router Name</option>
@@ -469,24 +452,19 @@
         <option value ="platform">Platform</option>
         <option value ="contact">Contact</option>
         </select>
-        </form>
-        <form action="">
         <select name="boolLogic">
         <option value ="equals">Equals</option>
         <option value ="contains">Contains</option>
         <option value ="less">Is Less Than</option>
         <option value ="greater">Is Greater Than</option>
         </select>
-        </form>
         </p>
         </p>
     <td>
 </tr>
 <tr>
     <td>
-    <form>
     <input type="text" name="searchstuff" /><br />
-    </form>
     </td>
 </tr>
 <tr>
@@ -495,7 +473,7 @@
     </td>
 </tr>
 </table>
-
+</form>
 <br />
 
 {% endblock %}
