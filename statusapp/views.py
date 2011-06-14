@@ -105,9 +105,10 @@ def custom_index(request):
     #Could even merge with index
 
     if 'searchstuff' in request.GET:
-        message = 'You searched for: %r' % request.GET['searchstuff']
-    else:
-        message = 'You submitted an empty form.'
+        if request.GET['searchstuff']:
+            message = 'You searched for: %r' % request.GET['searchstuff']
+        else:
+            message = 'You submitted an empty form.'
     return HttpResponse(message)
 
 def details(request, fingerprint):
