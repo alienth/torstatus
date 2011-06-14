@@ -1,8 +1,6 @@
 from statusapp.models import Statusentry, Descriptor
 from django.shortcuts import render_to_response #get_object_or_404
 from django.http import HttpResponse, HttpRequest, Http404
-from django.db import connection
-import datetime
 import csv
 
 # To do: get rid of javascript sorting: pass another argument
@@ -15,7 +13,7 @@ def index(request):
     only relays in the last consensus are found. This needs to be fixed
     as soon as possible.
     """
-
+    
     from django.db import connection
     import datetime
 
@@ -59,8 +57,52 @@ def custom_index(request):
     equivalent to columns in the statusentry and descriptor tables in the
     database. Querying the database is done with raw SQL.
     """
+    
+    """
+    list of variables passed from the html form:
 
+    sortlistings: what to sort by could be (router, fingerprint, country,
+    bandwidth, uptime, lastDescriptor, hostname, ip, ORPort, DirPort, platform,
+    contact, authority, badDirectory, badExit, exit, fast, guard, hibernating,
+    named)
+
+    sortorder: the order to sort by, could be (ascending, descending)
+
+    authority: require flags, could be (off, yes, no)
+
+    badDirectory: require flags, could be (off, yes, no)
+
+    BadExit: require flags, could be (off, yes, no)
+
+    Exit:  require flags, could be (off, yes, no)
+
+    Fast:  require flags, could be (off, yes, no)
+
+    Guard: require flags, could be (off, yes, no)
+
+    Hibernating: require flags, could be (off, yes, no)
+
+    Named:  require flags, could be (off, yes, no)
+
+    Stable:  require flags, could be (off, yes, no)
+
+    Running:  require flags, could be (off, yes, no)
+
+    Valid:  require flags, could be (off, yes, no)
+
+    V2Dir:  require flags, could be (off, yes, no)
+
+    criteria: the criteria for an advanced search could be (fingerprint, routername,
+    countrycode, bandwidth, uptime, lastdescriptorpublished, ipaddress, hostname,
+    orport, dsport, platform, contact)
+
+    boolLogic: the logic we'd like to use could be (equals, contains, less, greater)
+
+    searchstuff: stuff to searchfor could be (any string)
+    """
+    
     from django.db import connection
+
 
     #Lots of work to do here. A lot more complicated than initially thought.
     #I need to create the custom index page from all these variables.
