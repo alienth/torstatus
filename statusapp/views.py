@@ -15,13 +15,6 @@ def index(request):
     only relays in the last consensus are found. This needs to be fixed
     as soon as possible.
     """
-<<<<<<< HEAD
-=======
-
-    from django.db import connection
-    import datetime
-
->>>>>>> e582d1380ba172b20e36c611be7ebb00fe7f776c
     cursor = connection.cursor()
 
     cursor.execute('SELECT MAX(validafter) FROM statusentry')
@@ -62,7 +55,6 @@ def custom_index(request):
     equivalent to columns in the statusentry and descriptor tables in the
     database. Querying the database is done with raw SQL.
     """
-<<<<<<< HEAD
     """
     list of variables passed from the html form:
 
@@ -105,10 +97,6 @@ def custom_index(request):
 
     searchstuff: stuff to searchfor could be (any string)
     """
-=======
-
-    from django.db import connection
->>>>>>> e582d1380ba172b20e36c611be7ebb00fe7f776c
 
     #Lots of work to do here. A lot more complicated than initially thought.
     #I need to create the custom index page from all these variables.

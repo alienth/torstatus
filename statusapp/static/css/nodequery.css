@@ -8,7 +8,14 @@ table.searchQuery {
 	background-color: white;
 	padding: 5px;
     font-size: 20px;
+    text-align: center;
 }
+
+td#searchQMessage {
+    color: green;
+    font-style: italic;
+}
+    
 
 td#searchQInfo {
     text-align: center;
