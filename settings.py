@@ -72,11 +72,13 @@ TEMPLATE_LOADERS = (
 )
 
 MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.cache.UpdateCacheMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.cache.FetchFromCacheMiddleware',
 )
 
 ROOT_URLCONF = 'urls'
@@ -100,3 +102,13 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
+
+#CACHE_BACKEND = 'memcahed://127.0.0.1:22122/'
+
+#CACHE_BACKEND = 'db://cache_practice'
+
+CACHE_BACKEND = 'file:///home/dcalderon/status/django_cache'
+
+CACHE_MIDDLEWARE_SECONDS = 100
+
+CACHE_MIDDLEWARE_KEY_PREFIX = ""

@@ -4,6 +4,7 @@ from django.http import HttpResponse, HttpRequest, Http404
 from django.db import connection
 import datetime
 import csv
+from django.views.decorators.cache import cache_page
 
 # To do: get rid of javascript sorting: pass another argument
 # to this view function and sort the table accordingly.
@@ -48,6 +49,7 @@ def index(request):
     client_address = request.META['REMOTE_ADDR']
     template_values = {'relay_list': relays, 'client_address': client_address}
     return render_to_response('index.html', template_values)
+index = cache_page(index, 100)
 
 def custom_index(request):
     """
