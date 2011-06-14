@@ -1,5 +1,4 @@
 from django.conf.urls.defaults import *
-
 from django.views.static import *
 from django.conf import settings
 
@@ -11,7 +10,11 @@ urlpatterns = patterns('',
     (r'^exit-node-query/', 'statusapp.views.exitnodequery'),
     (r'^network-statistic-graphs/', 'statusapp.views.networkstatisticgraphs'),
     (r'^column-preferences/', 'statusapp.views.columnpreferences'),
-    (r'^Tor-Query-Export.csv','statusapp.views.unruly_passengers_csv'),#Eventually have to make own function to send appropriate stuff
+    (r'^Tor-Query-Export.csv','statusapp.views.unruly_passengers_csv'),
+    #Eventually have to make own function to send appropriate stuff
     (r'^Tor-IP-List-All.csv','statusapp.views.unruly_passengers_csv'),#ditto
     (r'^Tor-IP-List-Exit.csv','statusapp.views.unruly_passengers_csv'),#ditto
+    (r'^custom/$', 'statusapp.views.custom_index'), 
+    #Figure out how to make a method or methods that is capable of
+    #taking all the custom parameters and generate a custom index page.
 )

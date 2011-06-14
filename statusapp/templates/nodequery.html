@@ -18,6 +18,8 @@
 
 <p>-You must enter a Query IP, at minimum-</p>
 
+<p>{{ message }}</p>
+
 <br />
 
 <table cellspacing="2" cellpadding="2" class="ipSearch">
@@ -25,27 +27,21 @@
         <tr>
             IP Address to Query:
             <p>
-            <form>
+            <form action="" method="get">
                 <input type="text" name="queryAddress" /><br />
-            </form>
             </p>
-        
             Destination IP Address:
             <p>
-            <form>
                 <input type="text" name="destinationAddress" /><br />
-            </form>
             </p>
-        
             Destination Port:
             <p>
-            <form>
                 <input type="text" name="destinationPort" /><br />
-            </form>
             </p>
             <td>
             <input type="submit" value="Submit Query" />
-            </td>
+            </form>
+        </td>
         </tr>
     </tr>
 </table>

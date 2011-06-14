@@ -1,23 +1,10 @@
 from statusapp.models import Statusentry, Descriptor
 from django.shortcuts import render_to_response #get_object_or_404
 from django.http import HttpResponse, HttpRequest, Http404
+from django.db import connection
 import csv
 
 def index(request):
-    """
-	statusEntry_FullList = Statusentry.objects.filter(pk='2011-05-31 19:00:00')
-	descriptor_list = []
-	for entry in statusEntry_FullList:
-		try:
-			descriptor_list.append(Descriptor.objects.get(pk=entry.descriptor))
-		except:
-			descriptor_list.append(Descriptor())
-	statusEntry_descriptorEntry = zip(statusEntry_FullList, descriptor_list)
-	clientAddress = request.META['REMOTE_ADDR']
-	template_values = {'statusEntry_descriptorEntry': statusEntry_descriptorEntry, 'clientAddress': clientAddress, }
-	return render_to_response('index.html', template_values)
-    """
-    from django.db import connection
 
     cursor = connection.cursor()
 
@@ -41,31 +28,66 @@ def index(request):
     template_values = {'relay_list': relays, 'client_address': client_address}
     return render_to_response('index.html', template_values)
 
-def details(request, fingerprint):
+def custom_index(request):
     """
-    statuses = Statusentry.objects.filter(fingerprint=fingerprint)
-    status_count = int(statuses.count())
-    recent_statuses = statuses[max(-1, (status_count - 73)):status_count]
-    recent_statuses_list = list(recent_statuses)
-    recent_statuses_list.reverse()
+    list of variables passed from the html form:
 
-    descriptor = None
-    i = 0
-    while ((descriptor == None) & (i < 72)):
-        try:
-            descriptor = Descriptor.objects.get(descriptor=recent_statuses_list[i].descriptor)
-        except:
-            i += 1
-    
-    if (i == 72):
-        i = 0
-    template_values = {'status': recent_statuses[i], 'descriptor': descriptor}
-    return render_to_response('details.html', template_values)
+    sortlistings: what to sort by could be (router, fingerprint, country,
+    bandwidth, uptime, lastDescriptor, hostname, ip, ORPort, DirPort, platform,
+    contact, authority, badDirectory, badExit, exit, fast, guard, hibernating,
+    named)
+
+    sortorder: the order to sort by, could be (ascending, descending)
+
+    authority: requre flags, could be (off, yes, no)
+
+    badDirectory: requre flags, could be (off, yes, no)
+
+    BadExit: requre flags, could be (off, yes, no)
+
+    Exit:  requre flags, could be (off, yes, no)
+
+    Fast:  requre flags, could be (off, yes, no)
+
+    Guard: requre flags, could be (off, yes, no)
+
+    Hibernating: requre flags, could be (off, yes, no)
+
+    Named:  requre flags, could be (off, yes, no)
+
+    Stable:  requre flags, could be (off, yes, no)
+
+    Running:  requre flags, could be (off, yes, no)
+
+    Valid:  requre flags, could be (off, yes, no)
+
+    V2Dir:  requre flags, could be (off, yes, no)
+
+    criteria: the criteria for an advanced search could be (fingerprint, routername,
+    countrycode, bandwidth, uptime, lastdescriptorpublished, ipaddress, hostname,
+    orport, dsport, platform, contact)
+
+    boolLogic: the logic we'd like to use could be (equals, contains, less, greater)
+
+    searchstuff: stuff to searchfor could be (any string)
     """
-    from django.db import connection
+    
+
+    #Lots of work to do here. A lot more complicated than initially thought.
+    #I need to create the custom index page from all these variables.
+    #This means creating tons of different possible tables. I'll get to it
+    #eventually.
+
+    if 'searchstuff' in request.GET:
+        message = 'You searched for: %r' % request.GET['searchstuff']
+    else:
+        message = 'You submitted an empty form.'
+    return HttpResponse(message)
+
+
+def details(request, fingerprint):
 
     cursor = connection.cursor()
-
     cursor.execute('SELECT statusentry.nickname, statusentry.fingerprint, \
             statusentry.address, statusentry.orport, statusentry.dirport, \
             descriptor.platform, descriptor.published, descriptor.uptime, \
@@ -101,20 +123,40 @@ def details(request, fingerprint):
     return render_to_response('details.html', template_values)
 
 def exitnodequery(request):
-    variables = "MWAHAHA"
-    template_values = {'variables': variables,}
+    """
+    This method will present the client with a query result of an ip.
+
+
+    The variables recieved from the get method are:
+
+    queryAddress: the query address it will be an ip and this field is required
+
+    destinationAddress: the destination address, it will be an ip and it is optional
+
+    destinationPort: it will be a port number, it is also optional
+    """
+    #This method also needs a lot of work. We need some way of maintaing a list
+    #of the ips. And we need to check them for the stuff inputted.
+
+    variables = "TEMP STRING"
+    message = ""
+    if 'queryAddress' in request.GET:
+        if request.GET['queryAddress']:
+            message = "We recieved your address request and are processing"
+    template_values = {'variables': variables,'message': message}
     return render_to_response('nodequery.html', template_values)
 
 def networkstatisticgraphs(request):
-    variables = "mWAHAHA"
+    variables = "TEMP STRING"
     template_values = {'variables': variables,}
     return render_to_response('statisticgraphs.html', template_values)
 
 def columnpreferences(request):
-    variables = "SOMETHING"
+    variables = "TEMP STRING"
     template_values = {'variables': variables,}
     return render_to_response('columnpreferences.html', template_values)
 
+#This is a list of test data to be downloaded.
 UNRULY_PASSENGERS = [146,184,235,200,226,251,299,273,281,304,203]
 
 def unruly_passengers_csv(request):
