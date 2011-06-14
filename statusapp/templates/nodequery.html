@@ -10,40 +10,57 @@
 
 {% block mainTitle %} Tor Network Status -- Tor Exit Query {% endblock %}
 
-{% block headerTitle %} Tor Network Status -- Tor Exit Query {% endblock %}
+{% block headerTitle %} TorStatus {% endblock %}
 
 {% block mainPage %}
 
-<p>You can use this page to determine if an IP address is an active Tor server, and optionally see if that Tor server's Exit Policy would permit it to exit a certain destination IP address and port.</p>
-
-<p>-You must enter a Query IP, at minimum-</p>
-
-<p>{{ message }}</p>
-
-<br />
-
-<table cellspacing="2" cellpadding="2" class="ipSearch">
-    <tr>
-        <tr>
-            IP Address to Query:
-            <p>
+<table class="searchQuery">
+<tr>
+    <td id="searchQInfo"> You can use this page to determine if an IP address is an active Tor server, and optionally see if that Tor server's Exit Policy would permit it to exit a certain destination IP address and port.</td>
+</tr>
+<tr>
+    <td id="searchQError"> -You must enter a Query IP, at minimum- </td>
+</tr>
+<tr>
+    <td id="searchQNMessage"> {{ message }} </td>
+</tr>
+<tr>
+    <td>
+        <table class="ipSearch">
             <form action="" method="get">
-                <input type="text" name="queryAddress" /><br />
-            </p>
-            Destination IP Address:
-            <p>
-                <input type="text" name="destinationAddress" /><br />
-            </p>
-            Destination Port:
-            <p>
-                <input type="text" name="destinationPort" /><br />
-            </p>
-            <td>
-            <input type="submit" value="Submit Query" />
+            <tr>
+                <td id="ipSearch_AddressQ"> IP Address to Query: </td>
+            </tr>
+            <tr>
+                <td>
+                    <input id="ipSearch_AddressQ" type="text" name="queryAddress" />
+                </td>
+            </tr>
+            <tr>
+                <td id="ipSearch_DestIP"> Destination IP Address: </td>
+            </tr>
+            <tr>
+                <td>
+                    <input id="ipSearch_DestIP" type="text" name="destinationAddress" />
+                </td>
+            </tr>
+            <tr>
+                <td id="ipSearch_DestPort"> Destination Port: </td>
+            </tr>
+            <tr>
+                <td>
+                    <input id="ipSearch_DestPort" type="text" name="destinationPort" />
+                </td>
+            </tr>
+            <tr>
+                <td id="ipSearch_SUBMIT">
+                    <input type="submit" value="Submit Query" />
+                </td>
+            </tr>
             </form>
-        </td>
-        </tr>
-    </tr>
+        </table>
+    </td>
+</tr>
 </table>
 
 {% endblock %}
