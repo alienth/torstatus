@@ -11,7 +11,8 @@ created, then run "python manage.py runserver [port]".
 If you are Karsten, Damian, or anyone else with access to a Tor Metrics
 database, make sure you have a postgreSQL backend (psycopg2 or psycopg) 
 installed for python. Then, change the fields in settings.py to appropriate
-values to test our code with the/a Tor Metrics database.
+values to test our code with the/a Tor Metrics database. Then run
+"python manage.py runserver [port]".
 
 If you are somebody else, we don't have instructions for how to setup such a
 database quite yet; check back in a few weeks.
