@@ -7,6 +7,7 @@ def words(seconds):
     """
     Convert a duration in seconds to a duration in words
     """
+
     days = seconds/86000
     hours = (seconds % 86000)/3600
     minutes = (seconds % 3600)/60
@@ -82,6 +83,7 @@ def family(rawdesc):
         links = []
         from statusapp.models import Statusentry
         from django.db.models import Max
+        import datetime
         for entry in fingerprints_and_nicknames:
             if (entry[0] == "$" and len(entry[1:]) == 40):
                 try:
@@ -96,9 +98,18 @@ def family(rawdesc):
                 try:
                     most_recent = Statusentry.objects.aggregate(last=\
                             Max('validafter'))
-                    fingerprint = Statusentry.objects.get(nickname=entry, \
-                            validafter=str(most_recent['last'])).fingerprint
-                    links.append("<a href=\"/details/%s\">%s</a>" % (fingerprint, entry))
+                    fingerprint = ""
+                    hours_back = 0
+                    while (fingerprint == "" and hours_back < 25):
+                        try:
+                            fingerprint = Statusentry.objects.get(nickname=entry, \
+                                    validafter=str(most_recent['last'] - datetime.timedelta(hours=i))).fingerprint
+                        except:
+                            hours_back += 1
+                    if (fingerprint == ""):
+                        links.append("(%s)" % entry)
+                    else:
+                        links.append("<a href=\"/details/%s\">%s</a>" % (fingerprint, entry))
                 except:
                     links.append("(%s)" % entry)
 
@@ -112,8 +123,5 @@ def hostname(address):
     Get the hostname that corresponds to a given IP address
     """
 
-    from socket import gethostbyaddr
-    try:
-        return gethostbyaddr(address)[0]
-    except:
-        return "Hostname unavailable"
+    from socket import getfqdn
+    return getfqdn(address)
