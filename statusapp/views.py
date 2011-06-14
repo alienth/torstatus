@@ -15,6 +15,13 @@ def index(request):
     only relays in the last consensus are found. This needs to be fixed
     as soon as possible.
     """
+<<<<<<< HEAD
+=======
+
+    from django.db import connection
+    import datetime
+
+>>>>>>> e582d1380ba172b20e36c611be7ebb00fe7f776c
     cursor = connection.cursor()
 
     cursor.execute('SELECT MAX(validafter) FROM statusentry')
@@ -55,6 +62,7 @@ def custom_index(request):
     equivalent to columns in the statusentry and descriptor tables in the
     database. Querying the database is done with raw SQL.
     """
+<<<<<<< HEAD
     """
     list of variables passed from the html form:
 
@@ -97,6 +105,10 @@ def custom_index(request):
 
     searchstuff: stuff to searchfor could be (any string)
     """
+=======
+
+    from django.db import connection
+>>>>>>> e582d1380ba172b20e36c611be7ebb00fe7f776c
 
     #Lots of work to do here. A lot more complicated than initially thought.
     #I need to create the custom index page from all these variables.
@@ -187,6 +199,15 @@ def columnpreferences(request):
 
 #This is a list of test data to be downloaded.
 UNRULY_PASSENGERS = [146,184,235,200,226,251,299,273,281,304,203]
+
+def networkstatisticgraphs(request):
+    """
+    """
+
+    # For now, this function is just a placeholder.
+    variables = "mWAHAHA"
+    template_values = {'variables': variables,}
+    return render_to_response('statisticgraphs.html', template_values)
 
 def unruly_passengers_csv(request):
     """
