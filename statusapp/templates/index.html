@@ -321,7 +321,7 @@
 <tr>
     <td>
         <p>Sort Router Listing By:
-        <form action="">
+        <form action="custom/" method="get">
         <select name="sortlistings">
         <option value="router">Router Name</option>
         <option value="fingerprint">Fingerprint</option>
@@ -343,20 +343,16 @@
         <option value="guard">Guard</option>
         <option value="hibernating">Hibernating</option>
         <option value="named">Named</option>
-        </select>
-        </form>
         </p>
     </td>
 </tr>
 <tr>
     <td>
         <p>Sort Order:
-        <form action="">
         <select name="sortorder">
         <option value ="ascending">ascending</option>
         <option value ="descending">descending</option>
         </select>
-        </form>
         </p>
     <td>
 </tr>
@@ -364,88 +360,76 @@
     <td>
         <p>Require Flags:</p>
             <p>
-            Authority: <form action="">
+            Authority:
             <input type="radio" name="authority" value="off" />Off
             <input type="radio" name="authority" value="yes" />Yes
-            <input type="radio" name="authority" value="yes" />No
-            </form>
+            <input type="radio" name="authority" value="no" />No
             </p>
             <p>
-            BadDirectory: <form action="">
+            BadDirectory:
             <input type="radio" name="badDirectory" value="off" />Off
             <input type="radio" name="badDirectory" value="yes" />Yes
-            <input type="radio" name="badDirectory" value="yes" />No
-            </form>
+            <input type="radio" name="badDirectory" value="no" />No
             </p>
             <p>
-            BadExit: <form action="">
+            BadExit:
             <input type="radio" name="BadExit" value="off" />Off
             <input type="radio" name="BadExit" value="yes" />Yes
-            <input type="radio" name="BadExit" value="yes" />No
-            </form>
+            <input type="radio" name="BadExit" value="no" />No
             </p>
             <p>
-            Exit: <form action="">
+            Exit:
             <input type="radio" name="Exit" value="off" />Off
             <input type="radio" name="Exit" value="yes" />Yes
-            <input type="radio" name="Exit" value="yes" />No
-            </form>
+            <input type="radio" name="Exit" value="no" />No
             </p>
             <p>
-            Fast: <form action="">
+            Fast:
             <input type="radio" name="Fast" value="off" />Off
             <input type="radio" name="Fast" value="yes" />Yes
-            <input type="radio" name="Fast" value="yes" />No
-            </form>
+            <input type="radio" name="Fast" value="no" />No
             </p>
             <p>
-            Guard: <form action="">
+            Guard:
             <input type="radio" name="Guard" value="off" />Off
             <input type="radio" name="Guard" value="yes" />Yes
-            <input type="radio" name="Guard" value="yes" />No
-            </form>
+            <input type="radio" name="Guard" value="no" />No
             </p>
             <p>
-            Hibernating: <form action="">
+            Hibernating:
             <input type="radio" name="Hibernating" value="off" />Off
             <input type="radio" name="Hibernating" value="yes" />Yes
-            <input type="radio" name="Hibernating" value="yes" />No
-            </form>
+            <input type="radio" name="Hibernating" value="no" />No
             </p>
             <p>
-            Named: <form action="">
+            Named:
             <input type="radio" name="Named" value="off" />Off
             <input type="radio" name="Named" value="yes" />Yes
-            <input type="radio" name="Named" value="yes" />No
-            </form>
+            <input type="radio" name="Named" value="no" />No
             </p>
             <p>
-            Stable: <form action="">
+            Stable:
             <input type="radio" name="Stable" value="off" />Off
             <input type="radio" name="Stable" value="yes" />Yes
-            <input type="radio" name="Stable" value="yes" />No
-            </form>
+            <input type="radio" name="Stable" value="no" />No
             </p>
             <p>
-            Running: <form action="">
+            Running:
             <input type="radio" name="Running" value="off" />Off
             <input type="radio" name="Running" value="yes" />Yes
-            <input type="radio" name="Running" value="yes" />No
-            </form>
+            <input type="radio" name="Running" value="no" />No
             </p>
             <p>
-            Valid: <form action="">
+            Valid:
             <input type="radio" name="Valid" value="off" />Off
             <input type="radio" name="Valid" value="yes" />Yes
-            <input type="radio" name="Valid" value="yes" />No
-            </form>
+            <input type="radio" name="Valid" value="no" />No
             </p>
             <p>
-            V2Dir: <form action="">
+            V2Dir:
             <input type="radio" name="vdir" value="off" />Off
             <input type="radio" name="vdir" value="yes" />Yes
-            <input type="radio" name="vdir" value="yes" />No
-            </form>
+            <input type="radio" name="vdir" value="no" />No
             </p>
     <td>
 </tr>
@@ -454,7 +438,6 @@
     <td>
         <p>Advanced Search:
         <p>
-        <form action="">
         <select name="criteria">
         <option value ="fingerprint">Fingerprint</option>
         <option value ="routername">Router Name</option>
@@ -469,24 +452,19 @@
         <option value ="platform">Platform</option>
         <option value ="contact">Contact</option>
         </select>
-        </form>
-        <form action="">
         <select name="boolLogic">
         <option value ="equals">Equals</option>
         <option value ="contains">Contains</option>
         <option value ="less">Is Less Than</option>
         <option value ="greater">Is Greater Than</option>
         </select>
-        </form>
         </p>
         </p>
     <td>
 </tr>
 <tr>
     <td>
-    <form>
     <input type="text" name="searchstuff" /><br />
-    </form>
     </td>
 </tr>
 <tr>
@@ -495,7 +473,7 @@
     </td>
 </tr>
 </table>
-
+</form>
 <br />
 
 {% endblock %}
