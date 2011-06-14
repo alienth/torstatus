@@ -15,13 +15,10 @@ def index(request):
     only relays in the last consensus are found. This needs to be fixed
     as soon as possible.
     """
-<<<<<<< HEAD
-=======
 
     from django.db import connection
     import datetime
 
->>>>>>> e582d1380ba172b20e36c611be7ebb00fe7f776c
     cursor = connection.cursor()
 
     cursor.execute('SELECT MAX(validafter) FROM statusentry')
@@ -62,53 +59,8 @@ def custom_index(request):
     equivalent to columns in the statusentry and descriptor tables in the
     database. Querying the database is done with raw SQL.
     """
-<<<<<<< HEAD
-    """
-    list of variables passed from the html form:
-
-    sortlistings: what to sort by could be (router, fingerprint, country,
-    bandwidth, uptime, lastDescriptor, hostname, ip, ORPort, DirPort, platform,
-    contact, authority, badDirectory, badExit, exit, fast, guard, hibernating,
-    named)
-
-    sortorder: the order to sort by, could be (ascending, descending)
-
-    authority: requre flags, could be (off, yes, no)
-
-    badDirectory: requre flags, could be (off, yes, no)
-
-    BadExit: requre flags, could be (off, yes, no)
-
-    Exit:  requre flags, could be (off, yes, no)
-
-    Fast:  requre flags, could be (off, yes, no)
-
-    Guard: requre flags, could be (off, yes, no)
-
-    Hibernating: requre flags, could be (off, yes, no)
-
-    Named:  requre flags, could be (off, yes, no)
-
-    Stable:  requre flags, could be (off, yes, no)
-
-    Running:  requre flags, could be (off, yes, no)
-
-    Valid:  requre flags, could be (off, yes, no)
-
-    V2Dir:  requre flags, could be (off, yes, no)
-
-    criteria: the criteria for an advanced search could be (fingerprint, routername,
-    countrycode, bandwidth, uptime, lastdescriptorpublished, ipaddress, hostname,
-    orport, dsport, platform, contact)
-
-    boolLogic: the logic we'd like to use could be (equals, contains, less, greater)
-
-    searchstuff: stuff to searchfor could be (any string)
-    """
-=======
 
     from django.db import connection
->>>>>>> e582d1380ba172b20e36c611be7ebb00fe7f776c
 
     #Lots of work to do here. A lot more complicated than initially thought.
     #I need to create the custom index page from all these variables.
