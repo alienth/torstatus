@@ -1,52 +1,54 @@
 from statusapp.models import Statusentry, Descriptor
-from django.shortcuts import render_to_response #get_object_or_404
+from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpRequest, Http404
-from django.db import connection
-from django.views.decorators.cache import cache_page
-import datetime
+#from django.views.decorators.cache import cache_page
 import csv
 
 # To do: get rid of javascript sorting: pass another argument
 # to this view function and sort the table accordingly.
-@cache_page(60 * 15)
+#@cache_page(60 * 15) # Cache is turned off for development,
+                      # but it works.
 def index(request):
     """
     Supply a dictionary to the index.html template consisting of keys
     equivalent to columns in the statusentry and descriptor tables in the
-    database. Querying the database is done with raw SQL, and currently
-    only relays in the last consensus are found. This needs to be fixed
-    as soon as possible.
+    database. Querying the database is done with raw SQL. This needs 
+    to be fixed.
     """
 
     from django.db import connection
     import datetime
-    import time # Proc time, in unix...
+    import time # Processing time, in unix...
 
     start = datetime.datetime.now()
     tick = time.clock()
 
+    # Search options should probably not be implemented this way in a 
+    # raw SQL query for security reasons.
+    #ordering = ""
+    #restrictions = ""
+    #adv_search = ""
+    #if request.GET:
+            
     cursor = connection.cursor()
 
     cursor.execute('SELECT MAX(validafter) FROM statusentry')
 
     validafter_range = (cursor.fetchone()[0] - datetime.timedelta(hours=24))
 
-    ## Problem: only gets routers published in the last consensus, not in
-    ## the last 24 hours.
-
-    # New Problem: Query takes a LONG time (7.96 sec on marlow). 
-    # cache is NECESSARY!
-
-    # Other Problem: this is even uglier.
+    # Problem: Query takes a LONG time (7.96 sec on wesleyan's server). This
+    # should be cached.
+    # When a foreign key relationship is defined, this query will be done
+    # through Django's ORM
     cursor.execute('SELECT sentry.isbadexit, sentry.isnamed, \
             sentry.fingerprint, sentry.nickname, descriptor.bandwidthobserved, \
             descriptor.uptime, sentry.address, sentry.isfast, sentry.isexit, \
             sentry.isguard, sentry.isstable, sentry.isauthority, \
-            descriptor.platform, sentry.orport, sentry.dirport FROM \
+            descriptor.platform, sentry.orport, sentry.dirport, sentry.isv2dir FROM \
             descriptor RIGHT JOIN (SELECT u.isbadexit, u.isnamed, \
             u.fingerprint, u.nickname, u.address, u.isfast, u.isexit, \
             u.isguard, u.isstable, u.isauthority, u.orport, u.dirport, \
-            u.descriptor, q.validafter FROM statusentry AS u JOIN \
+            u.descriptor, u.isv2dir, q.validafter FROM statusentry AS u JOIN \
             (SELECT nickname, MAX(validafter) AS validafter FROM statusentry \
             WHERE validafter > %s GROUP BY nickname) AS q \
             ON u.nickname = q.nickname AND u.validafter = q.validafter WHERE \
@@ -69,29 +71,12 @@ def index(request):
              'num_routers': num_routers, 'exp_time': 900}
     return render_to_response('index.html', template_values)
 
-def custom_index(request):
-    """
-    Supply a dictionary to the details.html template consisting of keys
-    equivalent to columns in the statusentry and descriptor tables in the
-    database. Querying the database is done with raw SQL.
-    """
-
-    from django.db import connection
-
-    #Lots of work to do here. A lot more complicated than initially thought.
-    #I need to create the custom index page from all these variables.
-    #This means creating tons of different possible tables. I'll get to it
-    #eventually.
-    #Could even merge with index # This should definitely happen.
-
-    if 'searchstuff' in request.GET:
-        if request.GET['searchstuff']:
-            message = 'You searched for: %r' % request.GET['searchstuff']
-        else:
-            message = 'You submitted an empty form.'
-    return HttpResponse(message)
-
 def details(request, fingerprint):
+    """
+    Supply a dictionary to the details.html template consisting of relevant
+    values associated with a given fingerprint. Querying the database is done 
+    with raw SQL. This needs to be fixed.
+    """
 
     cursor = connection.cursor()
     cursor.execute('SELECT statusentry.nickname, statusentry.fingerprint, \

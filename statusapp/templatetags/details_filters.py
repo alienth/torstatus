@@ -29,7 +29,7 @@ def format_fing(fingerprint):
 @register.filter
 def onion_key(rawdesc):
     """
-    Gets the onion key from the raw descriptor
+    Get the onion key from the raw descriptor
     """
 
     return "\n".join(rawdesc.split("\n")[9:14])
@@ -37,7 +37,7 @@ def onion_key(rawdesc):
 @register.filter
 def signing_key(rawdesc):
     """
-    Gets the signing key from the raw descriptor
+    Get the signing key from the raw descriptor
     """
 
     return "\n".join(rawdesc.split("\n")[15:20])
@@ -45,7 +45,7 @@ def signing_key(rawdesc):
 @register.filter
 def exitinfo(rawdesc):
     """
-    Gets the detailed exit policy information from the raw descriptor
+    Get the detailed exit policy information from the raw descriptor
     """
 
     policy = []
@@ -59,7 +59,7 @@ def exitinfo(rawdesc):
 @register.filter
 def contact(rawdesc):
     """
-    Gets the contact information from the raw descriptor, if it exists
+    Get the contact information from the raw descriptor, if it exists
     """
 
     for line in rawdesc.split("\n"):
@@ -70,7 +70,7 @@ def contact(rawdesc):
 @register.filter
 def family(rawdesc):
     """
-    Returns the fingerprints of the routers defined to be in the family
+    Return the fingerprints of the routers defined to be in the family
     if a family is defined in the raw descriptor
     """
 
@@ -102,14 +102,17 @@ def family(rawdesc):
                     hours_back = 0
                     while (fingerprint == "" and hours_back < 25):
                         try:
-                            fingerprint = Statusentry.objects.get(nickname=entry, \
-                                    validafter=str(most_recent['last'] - datetime.timedelta(hours=i))).fingerprint
+                            fingerprint = Statusentry.objects.get(nickname=\
+                                    entry, validafter=str(most_recent['last'] \
+                                    - datetime.timedelta(hours=\
+                                    hours_back))).fingerprint
                         except:
                             hours_back += 1
                     if (fingerprint == ""):
                         links.append("(%s)" % entry)
                     else:
-                        links.append("<a href=\"/details/%s\">%s</a>" % (fingerprint, entry))
+                        links.append("<a href=\"/details/%s\">%s</a>" \
+                                % (fingerprint, entry))
                 except:
                     links.append("(%s)" % entry)
 
