@@ -70,7 +70,6 @@ td#mainLinks {
 	padding: 10px;
 }
 
-
 table.displayStatus {
 	width: 300px;
 	position: center;
@@ -149,9 +148,6 @@ table.advancedQuery {
     margin-right: auto;
     margin-left: auto;
     border-spacing: 1;
-
-
-
 }
 
 tr#row_appServerDetails:hover {
@@ -257,6 +253,3 @@ p#trademark {
     font-size: 12px;
     margin: 0 0 1px 0;
 }
-
-
-

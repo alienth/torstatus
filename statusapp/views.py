@@ -15,7 +15,6 @@ def index(request):
     database. Querying the database is done with raw SQL. This needs 
     to be fixed.
     """
-
     from django.db import connection
     import datetime
     import time # Processing time, in unix...
@@ -71,6 +70,60 @@ def index(request):
              'num_routers': num_routers, 'exp_time': 900}
     return render_to_response('index.html', template_values)
 
+def customindex(request, fingerprint):
+    # This method should probably not exist, and request.GET should be used
+    # in statusapp.views.index to make different queries.
+    """
+    List of variables passed from the html form:
+
+    sortlistings: what to sort by could be (router, fingerprint, country,
+    bandwidth, uptime, lastDescriptor, hostname, ip, ORPort, DirPort, platform,
+    contact, authority, badDirectory, badExit, exit, fast, guard, hibernating,
+    named)
+
+    sortorder: the order to sort by, could be (ascending, descending)
+
+    authority: require flags, could be (yes, no)
+
+    badDirectory: require flags, could be (yes, no)
+
+    BadExit: require flags, could be (yes, no)
+
+    Exit:  require flags, could be (yes, no)
+
+    Fast:  require flags, could be (yes, no)
+
+    Guard: require flags, could be (yes, no)
+
+    Hibernating: require flags, could be (yes, no)
+
+    Named:  require flags, could be (yes, no)
+
+    Stable:  require flags, could be (yes, no)
+
+    Running:  require flags, could be (yes, no)
+
+    Valid:  require flags, could be (yes, no)
+
+    V2Dir:  require flags, could be (yes, no)
+
+    criteria: the criteria for an advanced search could be (fingerprint,
+    nickname, country, bandwidth, uptime, published, address, hostname,
+    orport, dirport, platform, contact)
+
+    boolLogic: the logic we'd like to use could be 
+    (equals, contains, less, greater)
+
+    searchstuff: stuff to searchfor could be (any string)
+    """
+
+    if 'searchstuff' in request.GET:
+        if request.GET['searchstuff']:
+            message = 'You searched for: %r' % request.GET['searchstuff']
+        else:
+            message = 'You submitted an empty form.'
+    return HttpResponse(message)
+
 def details(request, fingerprint):
     """
     Supply a dictionary to the details.html template consisting of relevant
@@ -116,11 +169,12 @@ def details(request, fingerprint):
     return render_to_response('details.html', template_values)
 
 def exitnodequery(request):
+    # Unfinished. Easy access to the exit node information in 
+    # descriptor.rawdesc is almost necessary for this method.
     """
-    This method will present the client with a query result of an ip.
+    Present the client with a query result of an ip.
 
-
-    The variables recieved from the get method are:
+    The variables received from the get method are:
 
     queryAddress: the query address it will be an ip and this field is required
 
@@ -128,8 +182,6 @@ def exitnodequery(request):
 
     destinationPort: it will be a port number, it is also optional
     """
-    #This method also needs a lot of work. We need some way of maintaing a list
-    #of the ips. And we need to check them for the stuff inputted.
 
     variables = "TEMP STRING"
     message = ""
@@ -150,6 +202,7 @@ def exitnodequery(request):
     return render_to_response('nodequery.html', template_values)
 
 def csv_current_results(request):
+    # Does not work yet; waiting for query via Django's ORM.
     """
     """
     response = HttpResponse(mimetype='text/csv')
@@ -164,31 +217,33 @@ def csv_current_results(request):
     return response
 
 def networkstatisticgraphs(request):
-    variables = "TEMP STRING"
-
     # For now, this function is just a placeholder.
-    variables = "MWAHAHA"
+
+    variables = "TEMP STRING"
     template_values = {'variables': variables,}
     return render_to_response('nodequery.html', template_values)
 
 def columnpreferences(request):
+    # For now, this function is just a placeholder.
+
     variables = "TEMP STRING"
     template_values = {'variables': variables,}
     return render_to_response('columnpreferences.html', template_values)
 
 def networkstatisticgraphs(request):
+    # For now, this function is just a placeholder.
     """
     """
 
-    # For now, this function is just a placeholder.
-    variables = "mWAHAHA"
+    variables = "TEMP STRING"
     template_values = {'variables': variables,}
     return render_to_response('statisticgraphs.html', template_values)
 
 def unruly_passengers_csv(request):
+    # For now, this function is just a placeholder. We're using this to see
+    # if we can understand the csv module.
     """
     """
-    # For now, this function is just a placeholder.
     UNRULY_PASSENGERS = [146,184,235,200,226,251,299,273,281,304,203]
     
     # Create the HttpResponse object with the appropriate CSV header.
