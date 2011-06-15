@@ -2,7 +2,10 @@ from statusapp.models import Statusentry, Descriptor
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpRequest, Http404
 #from django.views.decorators.cache import cache_page
+from django.db import connection
 import csv
+import datetime
+import time # Processing time, in unix...
 
 # To do: get rid of javascript sorting: pass another argument
 # to this view function and sort the table accordingly.
@@ -15,15 +18,11 @@ def index(request):
     database. Querying the database is done with raw SQL. This needs 
     to be fixed.
     """
-    from django.db import connection
-    import datetime
-    import time # Processing time, in unix...
-
     start = datetime.datetime.now()
     tick = time.clock()
 
     # Search options should probably not be implemented this way in a 
-    # raw SQL query for security reasons.
+    # raw SQL query for security reasons:
     #ordering = ""
     #restrictions = ""
     #adv_search = ""
@@ -38,13 +37,16 @@ def index(request):
     # Problem: Query takes a LONG time (7.96 sec on wesleyan's server). This
     # should be cached.
     # When a foreign key relationship is defined, this query will be done
-    # through Django's ORM
+    # through Django's ORM.
+    # If a statusentry has no descriptor, then the entry is still passed on
+    # to the template, but the fields that belong to the descriptor tables
+    # are null.
     cursor.execute('SELECT sentry.isbadexit, sentry.isnamed, \
             sentry.fingerprint, sentry.nickname, descriptor.bandwidthobserved, \
             descriptor.uptime, sentry.address, sentry.isfast, sentry.isexit, \
             sentry.isguard, sentry.isstable, sentry.isauthority, \
-            descriptor.platform, sentry.orport, sentry.dirport, sentry.isv2dir FROM \
-            descriptor RIGHT JOIN (SELECT u.isbadexit, u.isnamed, \
+            descriptor.platform, sentry.orport, sentry.dirport, sentry.isv2dir \
+            FROM descriptor RIGHT JOIN (SELECT u.isbadexit, u.isnamed, \
             u.fingerprint, u.nickname, u.address, u.isfast, u.isexit, \
             u.isguard, u.isstable, u.isauthority, u.orport, u.dirport, \
             u.descriptor, u.isv2dir, q.validafter FROM statusentry AS u JOIN \
@@ -61,10 +63,11 @@ def index(request):
     end = datetime.datetime.now()
     tock = time.clock()
     # proc_time definitely is not accurate -- looks like it doesn't take into
-    # account work done with cursor
+    # account the SQL query work done with cursor
     proc_time = tock - tick
     gen_clock = end - start
     gen_time = str((gen_clock).seconds) + "." + str((gen_clock).microseconds)
+    # Note: cache_updated only has meaning if the cache is turned on.
     template_values = {'relay_list': relays, 'client_address': client_address, \
             'cache_updated': end, 'gen_time': gen_time, 'proc_time': proc_time,\
              'num_routers': num_routers, 'exp_time': 900}
