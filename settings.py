@@ -15,7 +15,7 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3', or 'oracle'.
         'NAME': 'tordir',                      # Or path to database file if using sqlite3.
         'USER': 'metrics',                      # Not used with sqlite3.
         'PASSWORD': 'meiD7go3',                  # Not used with sqlite3.
@@ -101,4 +101,4 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
 )
 
-CACHE_BACKEND = 'locmem:///'
+CACHE_BACKEND = 'locmem:///' # For development purposes
