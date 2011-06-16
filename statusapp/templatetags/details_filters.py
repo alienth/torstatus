@@ -1,3 +1,6 @@
+# TODO: rawdesc methods are part of the application logic, and should
+# exist in statusapp.views rather than here.
+
 from django import template
 
 register = template.Library()

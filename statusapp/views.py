@@ -172,36 +172,92 @@ def details(request, fingerprint):
     return render_to_response('details.html', template_values)
 
 def exitnodequery(request):
-    # Unfinished. Easy access to the exit node information in 
-    # descriptor.rawdesc is almost necessary for this method.
+    # TODO: given an IP, only one or zero routers are returned, but some
+    # routers have the same IP. This method should be fixed to reflect this.
     """
-    Present the client with a query result of an ip.
-
-    The variables received from the get method are:
-
-    queryAddress: the query address it will be an ip and this field is required
-
-    destinationAddress: the destination address, it will be an ip and it is optional
-
-    destinationPort: it will be a port number, it is also optional
+    Determine if an IP address is an active Tor server, and optionally
+    see if the server's exit policy would permit it to exit to a given
+    destination IP address and port.
     """
+    # Given by the client
+    source = ""
+    dest_ip = ""
+    dest_port = ""
+    if ('queryAddress' in request.GET and request.GET['queryAddress']):
+        source = request.GET['queryAddress']
+    if ('destinationAddress' in request.GET and \
+            request.GET['destinationAddress']):
+        dest_ip = request.GET['destinationAddress']
+    if ('destinationPort' in request.GET and request.GET['destinationPort']):
+        dest_port = request.GET['destinationPort']
 
-    variables = "TEMP STRING"
-    message = ""
-    if 'queryAddress' in request.GET:
-        if request.GET['queryAddress']:
-            from django.db.models import Max
-            ip_address = request.GET['queryAddress']
-            last_va = Statusentry.objects.aggregate\
-                    (last=Max('validafter'))['last']
-            if (Statusentry.objects.filter(address=ip_address, \
-                    validafter__gte=(last_va - \
-                    datetime.timedelta(days=1))).count() == 0):
-                message = "%s is not an active Tor server" % (ip_address)
-            else:
-                message = "%s is an active Tor server" % (ip_address)
-            #elif ( #Finish this later
-    template_values = {'variables': variables,'message': message}
+    # To render to response
+    is_router = False
+    router_fingerprint = ""
+    router_nickname = ""
+    exit_possible = False
+
+    if source:
+        from django.db.models import Max
+
+        last_va = Statusentry.objects.aggregate\
+                (last=Max('validafter'))['last']
+
+        recent_relays = Statusentry.objects.filter(address=source, \
+                validafter__gte=(last_va - datetime.timedelta(days=1)), \
+                ).order_by('-validafter')[:1]
+
+        if (recent_relays.count()):
+            is_router = True
+
+            statusentry = recent_relays[0]
+
+            router_nickname = statusentry.nickname
+            router_fingerprint = statusentry.fingerprint
+
+            if (dest_ip):
+                descriptor = Descriptor.objects.get(descriptor=\
+                        statusentry.descriptor)
+                router_exit_policy = _get_exit_policy(descriptor.rawdesc)
+
+                for policy_line in router_exit_policy:
+                    condition, network_line = (policy_line.strip()).split(' ')
+                    subnet, port_line = network_line.split(':')
+                    # port = port_line.split(',') # I don't think we need this
+
+                    if (_is_ip_in_subnet(dest_ip, subnet)):
+                        if (port_line == '*'):
+                            if (condition == 'accept'):
+                                exit_possible = True
+                                break
+                            else:
+                                exit_possible = False
+                                break
+
+                        elif ('-' in port_line):
+                            lower_port, upper_port = port_line.split('-')
+                            if (dest_port >= lower_port and dest_port <= \
+                                    upper_port):
+                                if (condition == 'accept'):
+                                    exit_possible = True
+                                    break
+                                else:
+                                    exit_possible = False
+                                    break
+
+                        else:
+                            if (dest_port == port_line):
+                                if (condition == 'accept'):
+                                    exit_possible = True
+                                    break
+                                else:
+                                    exit_possible = False
+                                    break
+                                    
+    template_values = {'is_router': is_router, 'router_fingerprint': \
+            router_fingerprint, 'router_nickname': router_nickname, \
+            'exit_possible': exit_possible, 'dest_ip': dest_ip, 'dest_port': \
+            dest_port, 'source': source}
     return render_to_response('nodequery.html', template_values)
 
 def csv_current_results(request):
@@ -260,3 +316,70 @@ def unruly_passengers_csv(request):
         writer.writerow([year, num])
 
     return response
+
+def _get_exit_policy(rawdesc):
+    """
+    Gets the exit policy information from the raw descriptor
+
+    @rtype      list of strings
+    @return     all lines in rawdesc that comprise the exit policy
+    """
+
+    policy = []
+    rawdesc_array = rawdesc.split("\n")
+    for line in rawdesc_array:
+        if (line.startswith(("accept", "reject"))):
+            policy.append(line)
+
+    return policy
+
+def _is_ip_in_subnet(ip, subnet):
+    """
+    Return true if the IP is in the subnet, return false otherwise.
+
+    With credit to the original TorStatus PHP function IsIPInSubnet.
+
+    >>> _is_ip_in_subnet('0.0.0.0', '0.0.0.0/16')
+    True
+    >>> _is_ip_in_subnet('0.0.255.255', '0.0.0.0/16')
+    True
+    >>> _is_ip_in_subnet('0.1.0.0', '0.0.0.0/16')
+    False
+    """
+    # If the subnet is a wildcard, the IP will always be in the subnet
+    if (subnet == '*'):
+        return True
+
+    # If the subnet is the IP, the IP is in the subnet
+    if (subnet == ip):
+        return True
+
+    # If the IP doesn't match and no bits are provided, the IP is not
+    # in the subnet
+    if ('/' not in subnet):
+        return False
+
+    # Separate the base from the bits and convert the base to an int
+    base, bits = subnet.split('/')
+
+    a, b, c, d = base.split('.')
+    subnet_as_int = (int(a) << 24) + (int(b) << 16) + (int(c) << 8) + int(d)
+
+    if (int(bits) == 0):
+        mask = 0
+    else:
+        mask = (~0 << (32 - int(bits)))
+
+    lower_bound = subnet_as_int & mask
+
+    upper_bound = subnet_as_int | (~mask & 0xFFFFFFFF)
+
+    # Convert the given IP to an integer
+    a, b, c, d = ip.split('.')
+    ip_as_int = (int(a) << 24) + (int(b) << 16) + (int(c) << 8) + int(d)
+
+    if (ip_as_int >= lower_bound and ip_as_int <= upper_bound):
+        return True
+    else:
+        return False
+

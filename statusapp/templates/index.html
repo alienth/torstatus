@@ -106,8 +106,8 @@
                     <a class="linkDetails" href="/details/{{ fingerprint }}">{{ nickname }}</a>
                 {% endifequal %}
             </td>
-            <td id="col_relayBandwidth">{% widthratio bandwidthobserved|floatformat 1024 1 %} KB/s</td>
-            <td id="col_relayUptime">{% widthratio uptime|floatformat 1024 1 %} d</td>
+            <td id="col_relayBandwidth">{{ bandwidthobserved|kilobytes_ps }} KB/s</td>
+            <td id="col_relayUptime">{{ uptime|days }} d</td>
             <td id="col_relayAddress">{{address}}</td>
             <td id="col_relayIcons">
 
