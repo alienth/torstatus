@@ -47,33 +47,35 @@
 </tr>
 <tr id="row_appServerDetails">
 	<td>Cache Last Updated (Local Server Time):</td>
-	<td>16:32:23 (GMT)</td>
+    <td>{{cache_updated}}</td>
 </tr>
 <tr id="row_appServerDetails">
 	<td>Last Update Cycle Processing Time (Seconds):</td>
-	<td>534</td>
+    <td>{{proc_time}}</td>
 </tr>
 <tr id="row_appServerDetails">
 	<td>Current Cache Expire Time (Seconds):</td>
-	<td>234</td>
+    <td>{{exp_time}}</td>
 </tr>
 <tr id="row_appServerDetails">
 	<td>Number of Routers In Cache:</td>
-	<td>765</td>
+    <td>{{num_routers}}</td>
 </tr>
 <tr id="row_appServerDetails">
 	<td>Number of Descriptors In Cache:</td>
-	<td>123</td>
+	<td>[[NUM_DESCS]]</td>
 </tr>
 <tr id="row_appServerDetails">
 	<td>Approximate Page Generation Time (Seconds):</td>
-	<td>534.34</td>
+    <td>{{gen_time}}</td>
 </tr>
 </table>
 
 {% endblock %}	
 	
 {% block mainPage %}
+
+{% load index_filters %}
 
 {% if relay_list %}
 <table class="relayTable sortable">
@@ -89,7 +91,7 @@
         <th class="sorttale_numeric" id="relayHeader">Bad Exit</th>
 	</tr>
 
-	{% for isbadexit, isnamed, fingerprint, nickname, bandwidthobserved, uptime, address, isfast, isexit, isguard, isstable, isauthority, platform, orport, dirport in relay_list %}
+	{% for isbadexit, isnamed, fingerprint, nickname, bandwidthobserved, uptime, address, isfast, isexit, isguard, isstable, isauthority, platform, orport, dirport, isv2dir in relay_list %}
 		<tr {% ifequal isbadexit 1 %} class="relayBadExit" {% else %} class="relay" {% endifequal %}>
 		
 		    <!-- Add: RELAY IS DOWN and RELAY IS HIBERNATING -->
@@ -99,18 +101,22 @@
 			
             <td id="col_relayName"> 
                 {% ifequal isnamed 1 %}
-                    <b><a class="linkDetails" href="/details/{{ fingerprint }}"> {{ nickname }}</a></b>
+                    <b><a class="linkDetails" href="/details/{{ fingerprint }}">{{ nickname }}</a></b>
                     {% else %}
-                    <a class="linkDetails" href="/details/{{ fingerprint }}"> {{ nickname }} </a>
+                    <a class="linkDetails" href="/details/{{ fingerprint }}">{{ nickname }}</a>
                 {% endifequal %}
             </td>
-            <td id="col_relayBandwidth">{% widthratio bandwidthobserved|floatformat 1024 1 %} KB/s</td>
-            <td id="col_relayUptime">{% widthratio uptime|floatformat 86000 1 %} d</td>
+            <td id="col_relayBandwidth">{{ bandwidthobserved|kilobytes_ps }} KB/s</td>
+            <td id="col_relayUptime">{{ uptime|days }} d</td>
             <td id="col_relayAddress">{{address}}</td>
             <td id="col_relayIcons">
 
                 {% ifequal isfast 1 %}
                     <img src="static/img/status/Fast.png" alt="Fast Server" title="Fast Server">
+                {% endifequal %}
+
+                {% ifequal isv2dir 1 %}
+                    <img src="static/img/status/Dir.png" alt="Directory Server" title="Directory Server">
                 {% endifequal %}
 
                 {% ifequal isexit 1 %}
@@ -321,28 +327,32 @@
 <tr>
     <td>
         <p>Sort Router Listing By:
-        <form action="custom/" method="get">
+        <form action="/" method="get">
         <select name="sortlistings">
-        <option value="router">Router Name</option>
+        <option value="nickname">Router Name</option>
         <option value="fingerprint">Fingerprint</option>
         <option value="country">Country Code</option>
         <option value="bandwidth">Bandwidth</option>
         <option value="uptime">Uptime</option>
-        <option value="lastDescriptor">Last Descriptor Published</option>
+        <option value="published">Last Descriptor Published</option>
         <option value="hostname">Hostname</option>
-        <option value="ip">IP Address</option>
-        <option value="ORPort">ORPort</option>
-        <option value="DirPort">DirPort</option>
+        <option value="address">IP Address</option>
+        <option value="orport">ORPort</option>
+        <option value="dirport">DirPort</option>
         <option value="platform">Platform</option>
         <option value="contact">Contact</option>
-        <option value="authority">Authority</option>
-        <option value="badDirectory">Bad Directory</option>
-        <option value="badExit">Bad Exit</option>
-        <option value="exit">Exit</option>
-        <option value="fast">Fast</option>
-        <option value="guard">Guard</option>
-        <option value="hibernating">Hibernating</option>
-        <option value="named">Named</option>
+        <option value="isauthority">Authority</option>
+        <option value="isbaddirectory">Bad Directory</option>
+        <option value="isbadexit">Bad Exit</option>
+        <option value="isexit">Exit</option>
+        <option value="isfast">Fast</option>
+        <option value="isguard">Guard</option>
+        <option value="ishibernating">Hibernating</option>
+        <option value="isnamed">Named</option>
+        <option value="isstable">Stable</option>
+        <option value="isrunning">Running</option>
+        <option value="isvalid">Valid</option>
+        <option value="isv2dir">Directory</option>
         </p>
     </td>
 </tr>
@@ -350,8 +360,8 @@
     <td>
         <p>Sort Order:
         <select name="sortorder">
-        <option value ="ascending">ascending</option>
-        <option value ="descending">descending</option>
+        <option value="ascending">Ascending</option>
+        <option value="descending">Descending</option>
         </select>
         </p>
     <td>
@@ -361,75 +371,75 @@
         <p>Require Flags:</p>
             <p>
             Authority:
-            <input type="radio" name="authority" value="off" />Off
-            <input type="radio" name="authority" value="yes" />Yes
-            <input type="radio" name="authority" value="no" />No
+            <input type="radio"/>Off
+            <input type="radio" name="isauthority" value="yes" />Yes
+            <input type="radio" name="isauthority" value="no" />No
             </p>
             <p>
             BadDirectory:
-            <input type="radio" name="badDirectory" value="off" />Off
-            <input type="radio" name="badDirectory" value="yes" />Yes
-            <input type="radio" name="badDirectory" value="no" />No
+            <input type="radio"/>Off
+            <input type="radio" name="isbaddirectory" value="yes" />Yes
+            <input type="radio" name="isbaddirectory" value="no" />No
             </p>
             <p>
             BadExit:
-            <input type="radio" name="BadExit" value="off" />Off
-            <input type="radio" name="BadExit" value="yes" />Yes
-            <input type="radio" name="BadExit" value="no" />No
+            <input type="radio"/>Off
+            <input type="radio" name="isbadexit" value="yes" />Yes
+            <input type="radio" name="isbadexit" value="no" />No
             </p>
             <p>
             Exit:
-            <input type="radio" name="Exit" value="off" />Off
-            <input type="radio" name="Exit" value="yes" />Yes
-            <input type="radio" name="Exit" value="no" />No
+            <input type="radio"/>Off
+            <input type="radio" name="isexit" value="yes" />Yes
+            <input type="radio" name="isexit" value="no" />No
             </p>
             <p>
             Fast:
-            <input type="radio" name="Fast" value="off" />Off
-            <input type="radio" name="Fast" value="yes" />Yes
-            <input type="radio" name="Fast" value="no" />No
+            <input type="radio"/>Off
+            <input type="radio" name="isfast" value="yes" />Yes
+            <input type="radio" name="isfast" value="no" />No
             </p>
             <p>
             Guard:
-            <input type="radio" name="Guard" value="off" />Off
-            <input type="radio" name="Guard" value="yes" />Yes
-            <input type="radio" name="Guard" value="no" />No
+            <input type="radio"/>Off
+            <input type="radio" name="isguard" value="yes" />Yes
+            <input type="radio" name="isguard" value="no" />No
             </p>
             <p>
             Hibernating:
-            <input type="radio" name="Hibernating" value="off" />Off
-            <input type="radio" name="Hibernating" value="yes" />Yes
-            <input type="radio" name="Hibernating" value="no" />No
+            <input type="radio"/>Off
+            <input type="radio" name="ishibernating" value="yes" />Yes
+            <input type="radio" name="ishibernating" value="no" />No
             </p>
             <p>
             Named:
-            <input type="radio" name="Named" value="off" />Off
-            <input type="radio" name="Named" value="yes" />Yes
-            <input type="radio" name="Named" value="no" />No
+            <input type="radio"/>Off
+            <input type="radio" name="isnamed" value="yes" />Yes
+            <input type="radio" name="isnamed" value="no" />No
             </p>
             <p>
             Stable:
-            <input type="radio" name="Stable" value="off" />Off
-            <input type="radio" name="Stable" value="yes" />Yes
-            <input type="radio" name="Stable" value="no" />No
+            <input type="radio"/>Off
+            <input type="radio" name="isstable" value="yes" />Yes
+            <input type="radio" name="isstable" value="no" />No
             </p>
             <p>
             Running:
-            <input type="radio" name="Running" value="off" />Off
-            <input type="radio" name="Running" value="yes" />Yes
-            <input type="radio" name="Running" value="no" />No
+            <input type="radio"/>Off
+            <input type="radio" name="isrunning" value="yes" />Yes
+            <input type="radio" name="isrunning" value="no" />No
             </p>
             <p>
             Valid:
-            <input type="radio" name="Valid" value="off" />Off
-            <input type="radio" name="Valid" value="yes" />Yes
-            <input type="radio" name="Valid" value="no" />No
+            <input type="radio"/>Off
+            <input type="radio" name="isvalid" value="yes" />Yes
+            <input type="radio" name="isvalid" value="no" />No
             </p>
             <p>
             V2Dir:
-            <input type="radio" name="vdir" value="off" />Off
-            <input type="radio" name="vdir" value="yes" />Yes
-            <input type="radio" name="vdir" value="no" />No
+            <input type="radio"/>Off
+            <input type="radio" name="isv2dir" value="yes" />Yes
+            <input type="radio" name="isv2dir" value="no" />No
             </p>
     <td>
 </tr>

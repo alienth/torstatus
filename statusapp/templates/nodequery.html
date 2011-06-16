@@ -19,17 +19,34 @@
     <td id="searchQInfo"> You can use this page to determine if an IP address is an active Tor server, and optionally see if that Tor server's Exit Policy would permit it to exit a certain destination IP address and port.</td>
 </tr>
 <tr>
-    <td id="searchQError"> -You must enter a Query IP, at minimum- </td>
+    <td id="searchQError">You must enter a Query IP, at minimum.</td>
 </tr>
 <tr>
-    <td id="searchQMessage"> {{ message }} </td>
+    <td id="searchQMessage"> 
+        {% if is_router %}
+            The IP address you entered, {{source}}, matches one or more active Tor servers:
+    </td></tr>
+    <tr><td>
+            Server name: <a href="/details/{{router_fingerprint}}">{{router_nickname}}</a>
+        <br>
+            {% if dest_ip %}
+                {% if dest_port %}
+                    {% if exit_possible %}
+                        <a href="/details/{{router_fingerprint}}">{{router_nickname}}</a> WOULD allow exiting to {{dest_ip}}:{{dest_port}}
+                    {% else %}
+                        <a href="/details/{{router_fingerprint}}">{{router_nickname}}</a> would NOT allow exiting to {{dest_ip}}:{{dest_port}}
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    </td>
 </tr>
 <tr>
     <td>
         <table class="ipSearch">
             <form action="" method="get">
             <tr>
-                <td id="ipSearch_AddressQ"> IP Address to Query: </td>
+                <td id="ipSearch_AddressQ">IP Address to Query:</td>
             </tr>
             <tr>
                 <td>
@@ -37,7 +54,7 @@
                 </td>
             </tr>
             <tr>
-                <td id="ipSearch_DestIP"> Destination IP Address: </td>
+                <td id="ipSearch_DestIP">Destination IP Address:<br><small>(optional)</small></td>
             </tr>
             <tr>
                 <td>
@@ -45,7 +62,7 @@
                 </td>
             </tr>
             <tr>
-                <td id="ipSearch_DestPort"> Destination Port: </td>
+                <td id="ipSearch_DestPort">Destination Port:<br><small>(optional)</small></td>
             </tr>
             <tr>
                 <td>
