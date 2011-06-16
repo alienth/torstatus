@@ -174,10 +174,14 @@
     <td>
         <table class="details">
             <tr>
-                <td id="details_boxTitle"> Exit Policy Information </td>
+                <td id="details_boxTitle" colspan=100%> Exit Policy Information </td>
             </tr>
             <tr>
-                <td><pre>{{rawdesc|exitinfo}}</pre></td>
+                <td id="detailBox">{% for line in rawdesc|exitinfo %} 
+                        {% if forloop.counter0|divisible_by:16 %}</td><td id="detailBox">{% endif %}   
+                        {{line}} <br />
+                    {% endfor %}
+                </td>
             </tr>
         </table>
     </td>

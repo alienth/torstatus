@@ -50,14 +50,12 @@ def exitinfo(rawdesc):
     """
     Get the detailed exit policy information from the raw descriptor
     """
-
     policy = []
     rawdesc_array = rawdesc.split("\n")
     for line in rawdesc_array:
         if (line.startswith(("accept", "reject"))):
             policy.append(line)
-
-    return "\n".join(policy)
+    return policy
 
 @register.filter
 def contact(rawdesc):
@@ -131,3 +129,13 @@ def hostname(address):
 
     from socket import getfqdn
     return getfqdn(address)
+    
+@register.filter
+def divisible_by(counter, rows):
+    """
+    Returns true if a % b == 0, false otherwise. 
+    Usefull for the Exit Policy Information table (in the Details page) -
+        to split the table in multiple columns.
+    @return boolean
+    """
+    return counter % rows == 0

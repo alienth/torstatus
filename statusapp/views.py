@@ -27,7 +27,6 @@ def index(request):
     #restrictions = ""
     #adv_search = ""
     #if request.GET:
-            
     cursor = connection.cursor()
 
     cursor.execute('SELECT MAX(validafter) FROM statusentry')
@@ -133,6 +132,8 @@ def details(request, fingerprint):
     values associated with a given fingerprint. Querying the database is done 
     with raw SQL. This needs to be fixed.
     """
+
+    from django.db import connection
 
     cursor = connection.cursor()
     cursor.execute('SELECT statusentry.nickname, statusentry.fingerprint, \
