@@ -119,6 +119,8 @@ def custom_index(request):
 
 def details(request, fingerprint):
 
+    from django.db import connection
+
     cursor = connection.cursor()
     cursor.execute('SELECT statusentry.nickname, statusentry.fingerprint, \
             statusentry.address, statusentry.orport, statusentry.dirport, \
