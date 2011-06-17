@@ -22,8 +22,8 @@
     <td id="searchQError">You must enter a Query IP, at minimum.</td>
 </tr>
 <tr>
-    <td id="searchQMessage"> 
-        {% if is_router %}
+    {% if is_router %}
+    <td id="searchQMessage">
             The IP address you entered, {{source}}, matches one or more active Tor servers:
     </td></tr>
     <tr><td>
@@ -37,7 +37,18 @@
                         <a href="/details/{{router_fingerprint}}">{{router_nickname}}</a> would NOT allow exiting to {{dest_ip}}:{{dest_port}}
                     {% endif %}
                 {% endif %}
-            {% endif %}
+                {% endif %}
+                {% else %}
+                {% ifequal source ""%}
+                {% else %}
+                {% if valid %}
+                <td id="searchQMessageError">
+                    The IP address you entered, is not valid.
+                    {% endif %}
+                <td id="searchQMessageError">
+                    -The IP Address you entered is NOT an active Tor server-
+            </td></tr>
+                {% endifequal %}
         {% endif %}
     </td>
 </tr>

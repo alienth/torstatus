@@ -6,6 +6,7 @@ from django.db import connection
 import csv
 from django.views.decorators.cache import cache_page
 import datetime
+import time
 
 
 # To do: get rid of javascript sorting: pass another argument
@@ -137,13 +138,12 @@ def customindex(request, fingerprint):
     return HttpResponse(message)
 
 def details(request, fingerprint):
+    import geoip
     """
     Supply a dictionary to the details.html template consisting of relevant
     values associated with a given fingerprint. Querying the database is done 
     with raw SQL. This needs to be fixed.
     """
-
-    from django.db import connection
 
     cursor = connection.cursor()
     cursor.execute('SELECT statusentry.nickname, statusentry.fingerprint, \
@@ -166,9 +166,13 @@ def details(request, fingerprint):
             isauthority, isbaddirectory, isbadexit, isexit, isfast, isguard, \
             isnamed, isstable, isrunning, isvalid, isv2dir, ports, rawdesc \
             = cursor.fetchone()
+
     except:
         raise Http404
     
+    country = ""
+    country = geoip.country(address)
+
     template_values = {'nickname': nickname, 'fingerprint': fingerprint, \
             'address': address, 'orport': orport, 'dirport': dirport, \
             'platform': platform, 'published': published, 'uptime': uptime, \
@@ -178,8 +182,9 @@ def details(request, fingerprint):
             'isexit': isexit, 'isfast': isfast, 'isguard': isguard, \
             'isnamed': isnamed, 'isstable': isstable, 'isrunning': isrunning, \
             'isvalid': isvalid, 'isv2dir': isv2dir, 'ports': ports, \
-            'rawdesc': rawdesc}
+            'rawdesc': rawdesc, 'country': country}
 
+    
     return render_to_response('details.html', template_values)
 
 def exitnodequery(request):
@@ -195,12 +200,15 @@ def exitnodequery(request):
     dest_ip = ""
     dest_port = ""
     if ('queryAddress' in request.GET and request.GET['queryAddress']):
-        source = request.GET['queryAddress']
+        source = request.GET['queryAddress'].strip()
     if ('destinationAddress' in request.GET and \
             request.GET['destinationAddress']):
-        dest_ip = request.GET['destinationAddress']
+        dest_ip = request.GET['destinationAddress'].strip()
     if ('destinationPort' in request.GET and request.GET['destinationPort']):
-        dest_port = request.GET['destinationPort']
+        dest_port = request.GET['destinationPort'].strip()
+
+    if (len(source) > 15):
+        valid = False
 
     # To render to response
     is_router = False

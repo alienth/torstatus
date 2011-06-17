@@ -124,7 +124,6 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
 )
 
-<<<<<<< HEAD
 CACHE_BACKEND = 'file:///home/dcalderon/status/django_cache'
 
 CACHE_MIDDLEWARE_SECONDS = 100

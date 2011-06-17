@@ -2,6 +2,7 @@
 # kilobytes_ps doesn't function properly, however.
 
 from django import template
+import geoip
 
 register = template.Library()
 
@@ -30,3 +31,8 @@ def days(seconds):
         return 0
     else:
         return int(seconds)/86000
+
+@register.filter
+def getcountry(ip):
+    return geoip.country(ip).lower()
+
