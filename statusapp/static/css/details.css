@@ -35,10 +35,10 @@ td#detailBox {
 	font: bold 0.625em; /*10pt Arial;*/
     border-style: solid;
     border-width: 1px;
-	text-align: center;
+	/*text-align: center;*/
 	position: center;
 	color: #000000; 
-	white-space: nowrap;
+    white-space: nowrap;
 }
 
 td#iconNo {

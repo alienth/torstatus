@@ -1,3 +1,6 @@
+# TODO: rawdesc methods are part of the application logic, and should
+# exist in statusapp.views rather than here.
+
 from django import template
 
 register = template.Library()
@@ -29,7 +32,7 @@ def format_fing(fingerprint):
 @register.filter
 def onion_key(rawdesc):
     """
-    Gets the onion key from the raw descriptor
+    Get the onion key from the raw descriptor
     """
 
     return "\n".join(rawdesc.split("\n")[9:14])
@@ -37,7 +40,7 @@ def onion_key(rawdesc):
 @register.filter
 def signing_key(rawdesc):
     """
-    Gets the signing key from the raw descriptor
+    Get the signing key from the raw descriptor
     """
 
     return "\n".join(rawdesc.split("\n")[15:20])
@@ -45,21 +48,19 @@ def signing_key(rawdesc):
 @register.filter
 def exitinfo(rawdesc):
     """
-    Gets the detailed exit policy information from the raw descriptor
+    Get the detailed exit policy information from the raw descriptor
     """
-
     policy = []
     rawdesc_array = rawdesc.split("\n")
     for line in rawdesc_array:
         if (line.startswith(("accept", "reject"))):
             policy.append(line)
-
-    return "\n".join(policy)
+    return policy
 
 @register.filter
 def contact(rawdesc):
     """
-    Gets the contact information from the raw descriptor, if it exists
+    Get the contact information from the raw descriptor, if it exists
     """
 
     for line in rawdesc.split("\n"):
@@ -70,7 +71,7 @@ def contact(rawdesc):
 @register.filter
 def family(rawdesc):
     """
-    Returns the fingerprints of the routers defined to be in the family
+    Return the fingerprints of the routers defined to be in the family
     if a family is defined in the raw descriptor
     """
 
@@ -102,14 +103,17 @@ def family(rawdesc):
                     hours_back = 0
                     while (fingerprint == "" and hours_back < 25):
                         try:
-                            fingerprint = Statusentry.objects.get(nickname=entry, \
-                                    validafter=str(most_recent['last'] - datetime.timedelta(hours=i))).fingerprint
+                            fingerprint = Statusentry.objects.get(nickname=\
+                                    entry, validafter=str(most_recent['last'] \
+                                    - datetime.timedelta(hours=\
+                                    hours_back))).fingerprint
                         except:
                             hours_back += 1
                     if (fingerprint == ""):
                         links.append("(%s)" % entry)
                     else:
-                        links.append("<a href=\"/details/%s\">%s</a>" % (fingerprint, entry))
+                        links.append("<a href=\"/details/%s\">%s</a>" \
+                                % (fingerprint, entry))
                 except:
                     links.append("(%s)" % entry)
 
@@ -125,3 +129,13 @@ def hostname(address):
 
     from socket import getfqdn
     return getfqdn(address)
+    
+@register.filter
+def divisible_by(counter, rows):
+    """
+    Returns true if a % b == 0, false otherwise. 
+    Usefull for the Exit Policy Information table (in the Details page) -
+        to split the table in multiple columns.
+    @return boolean
+    """
+    return counter % rows == 0
