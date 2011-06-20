@@ -1,6 +1,3 @@
-# These filters should replace the {% widthratio %} tags used in index.html.
-# kilobytes_ps doesn't function properly, however.
-
 from django import template
 
 register = template.Library()
@@ -8,9 +5,13 @@ register = template.Library()
 @register.filter
 def kilobytes_ps(bytes_ps):
     """
-    Convert a bandwidth value in bytes to a bandwidth value in kilobytes
-    """
+    Convert a bandwidth value in bytes to a bandwidth value in kilobytes.
 
+    @type bytes_ps: C{int}, C{float}, C{long}, or C{string}
+    @param bytes_ps: The bandwidth value, in bps.
+    @rtype: C{int}
+    @return: The bandwidth value in kbps.
+    """
     # As statusapp.views.details is written now, this value can 
     # be None sometimes.
     if (bytes_ps == None):
@@ -21,12 +22,16 @@ def kilobytes_ps(bytes_ps):
 @register.filter
 def days(seconds):
     """
-    Convert an uptime in seconds to an uptime in days, rounding down
-    """
+    Convert an duration in seconds to an uptime in days, rounding down.
 
+    @type seconds: C{int}, C{float}, C{long}, or C{string}
+    @param seconds: The duration in seconds. 
+    @rtype: C{int}
+    @return: The duration in days.
+    """
     # As statusapp.views.details is written now, this value can 
     # be None sometimes.
     if (seconds == None): 
         return 0
     else:
-        return int(seconds)/86000
+        return int(seconds)/86400

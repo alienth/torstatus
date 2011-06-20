@@ -205,7 +205,7 @@ def exitnodequery(request):
     router_nickname = ""
     exit_possible = False
 
-    if source and valid:
+    if (source and valid):
         from django.db.models import Max
 
         last_va = Statusentry.objects.aggregate\
@@ -349,11 +349,11 @@ def _is_ip_in_subnet(ip, subnet):
 
     With credit to the original TorStatus PHP function IsIPInSubnet.
 
-    >>> _is_ip_in_subnet('0.0.0.0', '0.0.0.0/16')
+    >>> _is_ip_in_subnet('0.0.0.0', '0.0.0.0/8')
     True
-    >>> _is_ip_in_subnet('0.0.255.255', '0.0.0.0/16')
+    >>> _is_ip_in_subnet('0.255.255.255', '0.0.0.0/8')
     True
-    >>> _is_ip_in_subnet('0.1.0.0', '0.0.0.0/16')
+    >>> _is_ip_in_subnet('1.0.0.0', '0.0.0.0/8')
     False
     """
     # If the subnet is a wildcard, the IP will always be in the subnet
