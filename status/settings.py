@@ -5,9 +5,6 @@ import time
 import sys
 import os
 
-sys.path.append("/home/dcalderon/status/django-debug-toolbar-0.8.5")
-
-
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -83,9 +80,10 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.cache.FetchFromCacheMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    #'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
+"""
 DEBUG_TOOLBAR_PANELS = (
     'debug_toolbar.panels.version.VersionDebugPanel',
     'debug_toolbar.panels.timer.TimerDebugPanel',
@@ -97,7 +95,7 @@ DEBUG_TOOLBAR_PANELS = (
     'debug_toolbar.panels.signals.SignalDebugPanel',
     'debug_toolbar.panels.logger.LoggingPanel',
 )
-
+"""
 
 INTERNAL_IPS = ('127.0.0.1',)
 
@@ -122,7 +120,7 @@ INSTALLED_APPS = (
     # @see: http://www.mail-archive.com/django-users@googlegroups.com/
     # msg78059.html
     'django.contrib.admin', 
-    'debug_toolbar',
+    #'debug_toolbar',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )

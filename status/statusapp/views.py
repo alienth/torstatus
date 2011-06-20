@@ -138,7 +138,7 @@ def customindex(request, fingerprint):
     return HttpResponse(message)
 
 def details(request, fingerprint):
-    import geoip
+    #import geoip
     """
     Supply a dictionary to the details.html template consisting of relevant
     values associated with a given fingerprint. Querying the database is done 
@@ -170,8 +170,8 @@ def details(request, fingerprint):
     except:
         raise Http404
     
-    country = ""
-    country = geoip.country(address)
+    #country = ""
+    #country = geoip.country(address)
 
     template_values = {'nickname': nickname, 'fingerprint': fingerprint, \
             'address': address, 'orport': orport, 'dirport': dirport, \
@@ -182,9 +182,8 @@ def details(request, fingerprint):
             'isexit': isexit, 'isfast': isfast, 'isguard': isguard, \
             'isnamed': isnamed, 'isstable': isstable, 'isrunning': isrunning, \
             'isvalid': isvalid, 'isv2dir': isv2dir, 'ports': ports, \
-            'rawdesc': rawdesc, 'country': country}
+            'rawdesc': rawdesc}#, 'country': country}
 
-    
     return render_to_response('details.html', template_values)
 
 def exitnodequery(request):
