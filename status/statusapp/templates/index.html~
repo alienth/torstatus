@@ -1,0 +1,491 @@
+{% extends "base.html" %}
+
+{% block mainCSS %}
+<link rel="stylesheet" type="text/css" href="static/css/style.css"></link>
+{% endblock %}
+
+{% block mainJS %}
+<script src="static/js/sorttable.js" type="text/javascript"></script>
+{% endblock %}
+
+{% block mainTitle %} TorStatus Main Page {% endblock %}
+
+{% block headerTitle %} TorStatus {% endblock %}
+
+{% block extraHeader %}
+<table cellspacing="2" cellpadding="2" class="displayStatus">
+<tr>
+	<td id="mainLinks">
+		<a class="link" href="https://check.torproject.org/"> Check if you are using Tor (via TorCheck)</a>
+		<br />
+		Your IP Address is: {{client_address}}
+	</td>
+</tr>
+</table>
+<br />
+<table cellspacing="1" cellpadding="2" class="legend">
+<tr> 
+	<td class="boxTitle">Legend</td>
+</tr>
+<tr>
+	<td class="relayOK">Router is ok</td>
+</tr>
+<tr>
+	<td class="relayHibernating">Router is hibernating</td>
+</tr>
+<tr>
+	<td class="relayDown">Router is currently down</td>
+</tr>
+<tr>
+	<td class="relayBadExit">Router is a bad exit node</td>
+</tr>
+</table>
+<br />
+<table class="appServerDetails" id="serverdetails">
+<tr>
+	<td class="boxTitle" colspan="2">Application Server Details</td>
+</tr>
+<tr id="row_appServerDetails">
+	<td>Cache Last Updated (Local Server Time):</td>
+    <td>{{cache_updated}}</td>
+</tr>
+<tr id="row_appServerDetails">
+	<td>Last Update Cycle Processing Time (Seconds):</td>
+    <td>{{proc_time}}</td>
+</tr>
+<tr id="row_appServerDetails">
+	<td>Current Cache Expire Time (Seconds):</td>
+    <td>{{exp_time}}</td>
+</tr>
+<tr id="row_appServerDetails">
+	<td>Number of Routers In Cache:</td>
+    <td>{{num_routers}}</td>
+</tr>
+<tr id="row_appServerDetails">
+	<td>Number of Descriptors In Cache:</td>
+	<td>[[NUM_DESCS]]</td>
+</tr>
+<tr id="row_appServerDetails">
+	<td>Approximate Page Generation Time (Seconds):</td>
+    <td>{{gen_time}}</td>
+</tr>
+</table>
+
+{% endblock %}	
+	
+{% block mainPage %}
+
+{% load index_filters %}
+
+{% if relay_list %}
+<table class="relayTable sortable">
+	<tr>
+        <th class="sorttable_alpha" id="relayHeader">&nbsp</th>
+		<th class="sorttable_alpha" id="relayHeader">Router Name</th>
+		<th class="sorttable_numeric" id="relayHeader">Bandwidth</th>
+        <th class="sorttable_numeric" id="relayHeader">Uptime</th>
+        <th class="sorttable_numeric" id="relayHeader">IP</th>
+		<th class="sorttable_nosort" id="relayHeaderInv">Icons</th>
+        <th class="sorttable_numeric" id="relayHeader">ORPort</th>
+        <th class="sorttable_numeric" id="relayHeader">DirPort</th>
+        <th class="sorttale_numeric" id="relayHeader">Bad Exit</th>
+	</tr>
+
+	{% for isbadexit, isnamed, fingerprint, nickname, bandwidthobserved, uptime, address, isfast, isexit, isguard, isstable, isauthority, platform, orport, dirport, isv2dir in relay_list %}
+		<tr {% ifequal isbadexit 1 %} class="relayBadExit" {% else %} class="relay" {% endifequal %}>
+		
+		    <!-- Add: RELAY IS DOWN and RELAY IS HIBERNATING -->
+		    
+			<td sorttable_customkey="us" id="col_relayName"><img src="static/img/flags/us.gif" alt="US" title="US"></td>
+			<!-- Note: sorttable_customkey="[[COUNTRY_PREFIX]]" -->
+			
+            <td id="col_relayName"> 
+                {% ifequal isnamed 1 %}
+                    <b><a class="linkDetails" href="/details/{{ fingerprint }}">{{ nickname }}</a></b>
+                    {% else %}
+                    <a class="linkDetails" href="/details/{{ fingerprint }}">{{ nickname }}</a>
+                {% endifequal %}
+            </td>
+            <!-- <td id="col_relayBandwidth">{% widthratio bandwidthobserved|floatformat 1024 1 %} KB/s</td>
+            <td id="col_relayUptime">{% widthratio uptime|floatformat 86000 1 %} d</td> -->
+            <td id="col_relayBandwidth">{{ bandwidthobserved|kilobytes_ps }} KB/s</td>
+            <td id="col_relayUptime">{{ uptime|days }} d</td>
+            <td id="col_relayAddress">{{address}}</td>
+            <td id="col_relayIcons">
+
+                {% ifequal isfast 1 %}
+                    <img src="static/img/status/Fast.png" alt="Fast Server" title="Fast Server">
+                {% endifequal %}
+
+                {% ifequal isv2dir 1 %}
+                    <img src="static/img/status/Dir.png" alt="Directory Server" title="Directory Server">
+                {% endifequal %}
+
+                {% ifequal isexit 1 %}
+                    <img src="static/img/status/Exit.png" alt="Exit Server" title="Exit Server">
+                {% endifequal %}
+
+                {% ifequal isguard 1 %}
+                    <img src="static/img/status/Guard.png" alt="Guard Server" title="Guard Server">
+                {% endifequal %}
+
+                {% ifequal isstable 1 %}
+                    <img src="static/img/status/Stable.png" alt="Stable Server" title="Stable Server">
+                {% endifequal %}
+
+                {% ifequal isauthority 1 %}
+                    <img src="static/img/status/Authority.png" alt="Authority Server" title="Authority Server">
+                {% endifequal %}
+
+                {% if "Linux" in platform %}
+                    <img src="static/img/os-icons/Linux.png" alt="Linux" title="{{platform}}">
+                {% else %}{% if "XP" in platform %}
+                    <img src="static/img/os-icons/WindowsXP.png" alt="WindowsXP" title="{{platform}}">
+                    {% else %}{% if "Windows" in platform and "Server" in platform %}
+                    <img src="static/img/os-icons/WindowsServer.png" alt="WindowsServer" title="{{platform}}">
+                {% else %}{% if "Windows" in platform %}
+                    <img src="static/img/os-icons/WindowsOther.png" alt="WindowsOther" title="{{platform}}">
+                {% else %}{% if "Darwin" in platform %}
+                    <img src="static/img/os-icons/Darwin.png" alt="Darwin" title="{{platform}}">
+                {% else %}{% if "FreeBSD" in platform %}
+                    <img src="static/img/os-icons/FreeBSD.png" alt="FreeBSD" title="{{platform}}">
+                {% else %}{% if "NetBSD" in platform %}
+                    <img src="static/img/os-icons/NetBSD.png" alt="NetBSD" title="{{platform}}">
+                {% else %}{% if "OpenBSD" in platform %}
+                    <img src="static/img/os-icons/OpenBSD.png" alt="OpenBSD" title="{{platform}}">
+                {% else %}{% if "SunOS" in platform %}
+                    <img src="static/img/os-icons/SunOS.png" alt="SunOS" title="{{platform}}">
+                {% else %}{% if "IRIX" in platform %}
+                    <img src="static/img/os-icons/IRIX64.png" alt="IRIX" title="{{platform}}">
+                {% else %}{% if "Cygwin" in platform %}
+                    <img src="static/img/os-icons/Cygwin.png" alt="Cygwin" title="{{platform}}">
+                {% else %}{% if "Dragon" in platform %}
+                    <img src="static/img/os-icons/DragonFly.png" alt ="Dragon" title="{{platform}}">
+                {% else %}
+                    <img src="static/img/os-icons/NotAvailable.png" alt="NotAvailable" title="Not Available">
+                {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
+            </td>
+            <td id="col_relayOrport">{{orport}}</td>
+            <td id="col_relayDirport">{% ifequal dirport 0 %}
+                    None
+                {% else %}
+                    {{ dirport }}
+                {% endifequal %}</td>
+            <td id="col_relayBadExit" {% ifequal isbadexit 1 %} sorttable_customkey="1">
+                	<img src="static/img/bg_yes.png" width="12" height="12" alt="Bad Exit" title="Bad Exit">
+                {% else %} sorttable_customkey="0">
+               		<img src="static/img/bg_no.png" width="12" height="12" alt="Not a Bad Exit" title="Not a Bad Exit">
+                {% endifequal %}
+            </td>
+		</tr>
+	{% endfor %}
+</table>
+{% endif %}
+
+<br />
+<br />
+
+<table class="aggStatisticSummary" id="networkstatisticsummary">
+<tr>
+    <td class="boxTitle" colspan="3">Aggregate Network Statistic Summary | 
+    <a class="link" href="network-statistic-graphs">Graphs / Details</a>
+    </td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Bandwidth of displayed Routers [K bytes/s]:</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">empty on TorStatus</td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of Routers:</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Routers in Current Query Result Set:</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of 'Authority' Routers"</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of 'Bad Directory' Routers:</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of 'Bad Exit' Routers:</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of 'Exit' Routers</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of 'Fast' Routers</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of 'Guard' Routers:</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of 'Hibernating' Routers</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of 'Named Routers:</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of 'Stable' Routers</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of 'Running' Routers:</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of 'Valid' Routers:</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of 'V2Dir' Routers:</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
+</tr>
+<tr id="row_aggStatisticSummary">
+	<td id="aggBox">Total Number of 'Directory Mirror' Routers:</td>
+    <td id="aggBox">some info</td>
+    <td id="aggBox">percentage%</td>
+</tr>
+</table>
+
+<br />
+
+<table class="aggStatisticSummary" id="advanceddisplayoptions">
+<tr>
+    <td class="boxTitle" colspan="1">Custom / Advanced Display Options</td>
+</tr>
+<tr>
+    <td><a class="link" href="column-preferences">Column Display Preference</a>
+</tr>
+</table>
+<br />
+
+<table class="aggStatisticSummary" id="opinionsource">
+<tr>
+    <td class="boxTitle" colspan="1">Network Status Opinion Source</td>
+</tr>
+<tr>
+    <td>
+        <p>Nickname:</p>
+        <p>Fingerprint:</p>
+        <p></p>
+        <p>Country Code:</p>
+        <p>SOMETHING</p>
+        <p>Contact:</p>
+        <p>SOMETHING!</p>
+        <p>Platform:</p>
+        <p>SOMETHING!</p>
+        <p></p>
+        <p>IP Address:</p>
+        <p></p>
+        <p>Hostname:</p>
+        <p></p>
+        <p>Onion Router Port:</p>
+        <p></p>
+        <p>Directory Server Port:</p>
+        <p></p>
+        <p>Last Published Descriptor (GMT):</p>
+        <p></p>
+        <p>Onion Key:</p>
+        <p></p>
+        <p>Signing Key:</p>
+        <p></p>
+        <p>Descriptor Signature:</p>
+        <p></p>
+    </td>
+</tr>
+</table>
+<br />
+
+<table class="advancedQuery" id="advancedquery">
+<tr>
+    <td class="boxTitle" colspan="1">Custom / Advanced Query Options</td>
+</tr>
+<tr>
+    <td>
+        <p>Sort Router Listing By:
+        <form action="/" method="get">
+        <select name="sortlistings">
+        <option value="nickname">Router Name</option>
+        <option value="fingerprint">Fingerprint</option>
+        <option value="country">Country Code</option>
+        <option value="bandwidth">Bandwidth</option>
+        <option value="uptime">Uptime</option>
+        <option value="published">Last Descriptor Published</option>
+        <option value="hostname">Hostname</option>
+        <option value="address">IP Address</option>
+        <option value="orport">ORPort</option>
+        <option value="dirport">DirPort</option>
+        <option value="platform">Platform</option>
+        <option value="contact">Contact</option>
+        <option value="isauthority">Authority</option>
+        <option value="isbaddirectory">Bad Directory</option>
+        <option value="isbadexit">Bad Exit</option>
+        <option value="isexit">Exit</option>
+        <option value="isfast">Fast</option>
+        <option value="isguard">Guard</option>
+        <option value="ishibernating">Hibernating</option>
+        <option value="isnamed">Named</option>
+        <option value="isstable">Stable</option>
+        <option value="isrunning">Running</option>
+        <option value="isvalid">Valid</option>
+        <option value="isv2dir">Directory</option>
+        </p>
+    </td>
+</tr>
+<tr>
+    <td>
+        <p>Sort Order:
+        <select name="sortorder">
+        <option value="ascending">Ascending</option>
+        <option value="descending">Descending</option>
+        </select>
+        </p>
+    <td>
+</tr>
+<tr>
+    <td>
+        <p>Require Flags:</p>
+            <p>
+            Authority:
+            <input type="radio"/>Off
+            <input type="radio" name="isauthority" value="yes" />Yes
+            <input type="radio" name="isauthority" value="no" />No
+            </p>
+            <p>
+            BadDirectory:
+            <input type="radio"/>Off
+            <input type="radio" name="isbaddirectory" value="yes" />Yes
+            <input type="radio" name="isbaddirectory" value="no" />No
+            </p>
+            <p>
+            BadExit:
+            <input type="radio"/>Off
+            <input type="radio" name="isbadexit" value="yes" />Yes
+            <input type="radio" name="isbadexit" value="no" />No
+            </p>
+            <p>
+            Exit:
+            <input type="radio"/>Off
+            <input type="radio" name="isexit" value="yes" />Yes
+            <input type="radio" name="isexit" value="no" />No
+            </p>
+            <p>
+            Fast:
+            <input type="radio"/>Off
+            <input type="radio" name="isfast" value="yes" />Yes
+            <input type="radio" name="isfast" value="no" />No
+            </p>
+            <p>
+            Guard:
+            <input type="radio"/>Off
+            <input type="radio" name="isguard" value="yes" />Yes
+            <input type="radio" name="isguard" value="no" />No
+            </p>
+            <p>
+            Hibernating:
+            <input type="radio"/>Off
+            <input type="radio" name="ishibernating" value="yes" />Yes
+            <input type="radio" name="ishibernating" value="no" />No
+            </p>
+            <p>
+            Named:
+            <input type="radio"/>Off
+            <input type="radio" name="isnamed" value="yes" />Yes
+            <input type="radio" name="isnamed" value="no" />No
+            </p>
+            <p>
+            Stable:
+            <input type="radio"/>Off
+            <input type="radio" name="isstable" value="yes" />Yes
+            <input type="radio" name="isstable" value="no" />No
+            </p>
+            <p>
+            Running:
+            <input type="radio"/>Off
+            <input type="radio" name="isrunning" value="yes" />Yes
+            <input type="radio" name="isrunning" value="no" />No
+            </p>
+            <p>
+            Valid:
+            <input type="radio"/>Off
+            <input type="radio" name="isvalid" value="yes" />Yes
+            <input type="radio" name="isvalid" value="no" />No
+            </p>
+            <p>
+            V2Dir:
+            <input type="radio"/>Off
+            <input type="radio" name="isv2dir" value="yes" />Yes
+            <input type="radio" name="isv2dir" value="no" />No
+            </p>
+    <td>
+</tr>
+
+<tr>
+    <td>
+        <p>Advanced Search:
+        <p>
+        <select name="criteria">
+        <option value ="fingerprint">Fingerprint</option>
+        <option value ="routername">Router Name</option>
+        <option value ="countrycode">Country Code</option>
+        <option value ="bandwidth">Bandwidth (kb/s)</option>
+        <option value ="uptime">Uptime (days)</option>
+        <option value ="lastdescriptorpublished">Last Descriptor Published</option>
+        <option value ="ipaddress">IP Address</option>
+        <option value ="hostname">Hostname</option>
+        <option value ="orport">Onion Router Port</option>
+        <option value ="dsport">Directory Sever Port</option>
+        <option value ="platform">Platform</option>
+        <option value ="contact">Contact</option>
+        </select>
+        <select name="boolLogic">
+        <option value ="equals">Equals</option>
+        <option value ="contains">Contains</option>
+        <option value ="less">Is Less Than</option>
+        <option value ="greater">Is Greater Than</option>
+        </select>
+        </p>
+        </p>
+    <td>
+</tr>
+<tr>
+    <td>
+    <input type="text" name="searchstuff" /><br />
+    </td>
+</tr>
+<tr>
+    <td>
+        <input type="submit" value="Apply Options" />
+    </td>
+</tr>
+</table>
+</form>
+<br />
+
+{% endblock %}

@@ -95,8 +95,11 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'statusapp',
-    # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
+    # Enabled this app in order to fix errors given when running tests with
+    # python manage.py test.
+    # @see: http://www.mail-archive.com/django-users@googlegroups.com/
+    # msg78059.html
+    'django.contrib.admin', 
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )

@@ -38,6 +38,11 @@
                     {% endif %}
                 {% endif %}
             {% endif %}
+        {% else %}
+            {% ifequal source "" %}
+            {% else %}
+                The IP address you entered, {{source}}, does NOT match an active Tor server.
+            {% endifequal %}
         {% endif %}
     </td>
 </tr>

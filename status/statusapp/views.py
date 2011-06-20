@@ -184,13 +184,20 @@ def exitnodequery(request):
     source = ""
     dest_ip = ""
     dest_port = ""
+    valid = True
     if ('queryAddress' in request.GET and request.GET['queryAddress']):
-        source = request.GET['queryAddress']
+        source = request.GET['queryAddress'].strip()
     if ('destinationAddress' in request.GET and \
             request.GET['destinationAddress']):
-        dest_ip = request.GET['destinationAddress']
+        dest_ip = request.GET['destinationAddress'].strip()
     if ('destinationPort' in request.GET and request.GET['destinationPort']):
-        dest_port = request.GET['destinationPort']
+        dest_port = request.GET['destinationPort'].strip()
+
+    # Scrub the given IP
+    if (len(source) > 15):
+        valid = False
+    if (len(source.split('.')) != 4):
+        valid = False
 
     # To render to response
     is_router = False
@@ -198,7 +205,7 @@ def exitnodequery(request):
     router_nickname = ""
     exit_possible = False
 
-    if source:
+    if source and valid:
         from django.db.models import Max
 
         last_va = Statusentry.objects.aggregate\
@@ -207,6 +214,9 @@ def exitnodequery(request):
         recent_relays = Statusentry.objects.filter(address=source, \
                 validafter__gte=(last_va - datetime.timedelta(days=1)), \
                 ).order_by('-validafter')[:1]
+        #recent_relays = Statusentry.objects.filter(address=source, \
+        #        validafter__gte=(last_va - datetime.timedelta(days=1)), \
+        #        ).order_by('-validafter').annotate('nickname')
 
         if (recent_relays.count()):
             is_router = True
@@ -224,7 +234,6 @@ def exitnodequery(request):
                 for policy_line in router_exit_policy:
                     condition, network_line = (policy_line.strip()).split(' ')
                     subnet, port_line = network_line.split(':')
-                    # port = port_line.split(',') # I don't think we need this
 
                     if (_is_ip_in_subnet(dest_ip, subnet)):
                         if (port_line == '*'):
@@ -258,7 +267,7 @@ def exitnodequery(request):
     template_values = {'is_router': is_router, 'router_fingerprint': \
             router_fingerprint, 'router_nickname': router_nickname, \
             'exit_possible': exit_possible, 'dest_ip': dest_ip, 'dest_port': \
-            dest_port, 'source': source}
+            dest_port, 'source': source, 'valid': valid}
     return render_to_response('nodequery.html', template_values)
 
 def csv_current_results(request):
@@ -329,7 +338,7 @@ def _get_exit_policy(rawdesc):
     policy = []
     rawdesc_array = rawdesc.split("\n")
     for line in rawdesc_array:
-        if (line.startswith(("accept", "reject"))):
+        if (line.startswith(("accept ", "reject "))):
             policy.append(line)
 
     return policy
