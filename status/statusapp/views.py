@@ -267,33 +267,13 @@ def exitnodequery(request):
                         # defined in the exit policy information. When a match
                         # is found, see if the condition is "accept" or "reject"
                         if (_is_ip_in_subnet(dest_ip, subnet)):
-                            if (port_line == '*'):
+                            if (_port_match(dest_port, port_line)):
                                 if (condition == 'accept'):
                                     exit_possible = True
-                                    break
                                 else:
                                     exit_possible = False
-                                    break
+                                break
 
-                            elif ('-' in port_line):
-                                lower_port, upper_port = port_line.split('-')
-                                if (dest_port >= lower_port and dest_port <= \
-                                        upper_port):
-                                    if (condition == 'accept'):
-                                        exit_possible = True
-                                        break
-                                    else:
-                                        exit_possible = False
-                                        break
-
-                            else:
-                                if (dest_port == port_line):
-                                    if (condition == 'accept'):
-                                        exit_possible = True
-                                        break
-                                    else:
-                                        exit_possible = False
-                                        break
                 relays.append((nickname, fingerprint, exit_possible))
           
     template_values = {'is_router': is_router, 'relays': relays, \
@@ -503,3 +483,29 @@ def _is_port(port):
         return False
 
     return True
+
+def _port_match(dest_port, port_line):
+    """
+    Find if dest_port is defined as "in" port_line.
+
+    @type dest_port: C{string}
+    @ivar dest_port: The port to test for membership in port_line
+    @type port_line: C{string}
+    @ivar port_line: The port_line that dest_port is to be checked for
+        membership in. Can contain * or -.
+    @rtype: C{boolean}
+    @return: True if dest_port is "in" port_line, False otherwise.
+    """
+    if (port_line == '*'):
+        return True
+    if ('-' in port_line):
+        lower_str, upper_str = port_line.split('-')
+        lower_bound = int(lower_str)
+        upper_bound = int(upper_str)
+        dest_port_int = int(dest_port)
+        if (dest_port_int >= lower_port and dest_port_int <= upper_port):
+            return True
+    if (dest_port == port_line):
+        return True
+    return False
+
