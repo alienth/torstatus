@@ -96,7 +96,7 @@
 		
 		    <!-- Add: RELAY IS DOWN and RELAY IS HIBERNATING -->
 		    
-			<td sorttable_customkey="us" id="col_relayName"><img src="static/img/flags/us.gif" alt="US" title="US"></td>
+            <td sorttable_customkey="us" id="col_relayName"><img src="static/img/flags/{{ address|getcountry }}.gif" alt={{ address|getcountry|upper }} title={{ address|getcountry }}></td>
 			<!-- Note: sorttable_customkey="[[COUNTRY_PREFIX]]" -->
 			
             <td id="col_relayName"> 

@@ -2,7 +2,11 @@
 
 # Module for setting up the proper Timezone.
 import time
+import sys
 import os
+
+sys.path.append("/home/dcalderon/status/django-debug-toolbar-0.8.5")
+
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -68,16 +72,34 @@ SECRET_KEY = 'p@y@6b2vc#6=rxe^p67ti4vlp_9n+@x27wac1g7mta)hfrmds2'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.cache.UpdateCacheMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.cache.FetchFromCacheMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
+
+DEBUG_TOOLBAR_PANELS = (
+    'debug_toolbar.panels.version.VersionDebugPanel',
+    'debug_toolbar.panels.timer.TimerDebugPanel',
+    'debug_toolbar.panels.settings_vars.SettingsVarsDebugPanel',
+    'debug_toolbar.panels.headers.HeaderDebugPanel',
+    #'debug_toolbar.panels.request_vars.RequestVarsDebugPanel', #This panel for some reason breaks the site.
+    'debug_toolbar.panels.template.TemplateDebugPanel',
+    'debug_toolbar.panels.sql.SQLDebugPanel',
+    'debug_toolbar.panels.signals.SignalDebugPanel',
+    'debug_toolbar.panels.logger.LoggingPanel',
+)
+
+
+INTERNAL_IPS = ('127.0.0.1',)
 
 ROOT_URLCONF = 'urls'
 
@@ -89,19 +111,24 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.sites',
-    'django.contrib.messages',
+    #'django.contrib.auth',
+    #'django.contrib.contenttypes',
+    #'django.contrib.sessions',
+    #'django.contrib.sites',
+    #'django.contrib.messages',
     'statusapp',
     # Enabled this app in order to fix errors given when running tests with
     # python manage.py test.
     # @see: http://www.mail-archive.com/django-users@googlegroups.com/
     # msg78059.html
     'django.contrib.admin', 
+    'debug_toolbar',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
 
-CACHE_BACKEND = 'locmem:///' # For development purposes
+CACHE_BACKEND = 'file:///home/dcalderon/status/django_cache'
+
+CACHE_MIDDLEWARE_SECONDS = 100
+
+CACHE_MIDDLEWARE_KEY_PREFIX = ""

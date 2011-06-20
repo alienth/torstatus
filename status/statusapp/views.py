@@ -4,8 +4,10 @@ from django.http import HttpResponse, HttpRequest, Http404
 #from django.views.decorators.cache import cache_page
 from django.db import connection
 import csv
+from django.views.decorators.cache import cache_page
 import datetime
-import time # Processing time, in unix...
+import time
+
 
 # To do: get rid of javascript sorting: pass another argument
 # to this view function and sort the table accordingly.
@@ -27,6 +29,7 @@ def index(request):
     #restrictions = ""
     #adv_search = ""
     #if request.GET:
+
     cursor = connection.cursor()
 
     cursor.execute('SELECT MAX(validafter) FROM statusentry')
@@ -71,6 +74,7 @@ def index(request):
             'cache_updated': end, 'gen_time': gen_time, 'proc_time': proc_time,\
              'num_routers': num_routers, 'exp_time': 900}
     return render_to_response('index.html', template_values)
+
 
 def customindex(request, fingerprint):
     # This method should probably not exist, and request.GET should be used
@@ -119,6 +123,13 @@ def customindex(request, fingerprint):
     searchstuff: stuff to searchfor could be (any string)
     """
 
+    #Lots of work to do here. A lot more complicated than initially thought.
+    #I need to create the custom index page from all these variables.
+    #This means creating tons of different possible tables. I'll get to it
+    #eventually.
+    #Could even merge with index
+
+
     if 'searchstuff' in request.GET:
         if request.GET['searchstuff']:
             message = 'You searched for: %r' % request.GET['searchstuff']
@@ -127,13 +138,12 @@ def customindex(request, fingerprint):
     return HttpResponse(message)
 
 def details(request, fingerprint):
+    import geoip
     """
     Supply a dictionary to the details.html template consisting of relevant
     values associated with a given fingerprint. Querying the database is done 
     with raw SQL. This needs to be fixed.
     """
-
-    from django.db import connection
 
     cursor = connection.cursor()
     cursor.execute('SELECT statusentry.nickname, statusentry.fingerprint, \
@@ -156,9 +166,13 @@ def details(request, fingerprint):
             isauthority, isbaddirectory, isbadexit, isexit, isfast, isguard, \
             isnamed, isstable, isrunning, isvalid, isv2dir, ports, rawdesc \
             = cursor.fetchone()
+
     except:
         raise Http404
     
+    country = ""
+    country = geoip.country(address)
+
     template_values = {'nickname': nickname, 'fingerprint': fingerprint, \
             'address': address, 'orport': orport, 'dirport': dirport, \
             'platform': platform, 'published': published, 'uptime': uptime, \
@@ -168,8 +182,9 @@ def details(request, fingerprint):
             'isexit': isexit, 'isfast': isfast, 'isguard': isguard, \
             'isnamed': isnamed, 'isstable': isstable, 'isrunning': isrunning, \
             'isvalid': isvalid, 'isv2dir': isv2dir, 'ports': ports, \
-            'rawdesc': rawdesc}
+            'rawdesc': rawdesc, 'country': country}
 
+    
     return render_to_response('details.html', template_values)
 
 def exitnodequery(request):

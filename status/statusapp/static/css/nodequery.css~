@@ -15,6 +15,10 @@ td#searchQMessage {
     color: green;
     font-style: italic;
 }
+
+td#searchQMessageError {
+    color: red;
+}
     
 
 td#searchQInfo {
