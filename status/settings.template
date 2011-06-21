@@ -14,12 +14,13 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+# FILL IN NAME, USER, PASSWORD, HOST, PORT
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3', or 'oracle'.
-        'NAME': 'tordir',                      # Or path to database file if using sqlite3.
-        'USER': 'metrics',                      # Not used with sqlite3.
-        'PASSWORD': 'meiD7go3',                  # Not used with sqlite3.
+        'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3', or 'oracle'.
+        'NAME': '',                      # Or path to database file if using sqlite3.
+        'USER': '',                      # Not used with sqlite3.
+        'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }
@@ -80,22 +81,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.cache.FetchFromCacheMiddleware',
-    #'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
-
-"""
-DEBUG_TOOLBAR_PANELS = (
-    'debug_toolbar.panels.version.VersionDebugPanel',
-    'debug_toolbar.panels.timer.TimerDebugPanel',
-    'debug_toolbar.panels.settings_vars.SettingsVarsDebugPanel',
-    'debug_toolbar.panels.headers.HeaderDebugPanel',
-    #'debug_toolbar.panels.request_vars.RequestVarsDebugPanel', #This panel for some reason breaks the site.
-    'debug_toolbar.panels.template.TemplateDebugPanel',
-    'debug_toolbar.panels.sql.SQLDebugPanel',
-    'debug_toolbar.panels.signals.SignalDebugPanel',
-    'debug_toolbar.panels.logger.LoggingPanel',
-)
-"""
 
 INTERNAL_IPS = ('127.0.0.1',)
 
@@ -120,13 +106,12 @@ INSTALLED_APPS = (
     # @see: http://www.mail-archive.com/django-users@googlegroups.com/
     # msg78059.html
     'django.contrib.admin', 
-    #'debug_toolbar',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
 
-CACHE_BACKEND = 'file:///home/dcalderon/status/django_cache'
+#CACHE_BACKEND = 'file:///locmem:'
 
-CACHE_MIDDLEWARE_SECONDS = 100
+#CACHE_MIDDLEWARE_SECONDS = 100
 
-CACHE_MIDDLEWARE_KEY_PREFIX = ""
+#CACHE_MIDDLEWARE_KEY_PREFIX = ""
