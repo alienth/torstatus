@@ -91,85 +91,85 @@
         <th class="sorttale_numeric" id="relayHeader">Bad Exit</th>
 	</tr>
 
-	{% for isbadexit, isnamed, fingerprint, nickname, bandwidthobserved, uptime, address, isfast, isexit, isguard, isstable, isauthority, platform, orport, dirport, isv2dir in relay_list %}
-		<tr {% ifequal isbadexit 1 %} class="relayBadExit" {% else %} class="relay" {% endifequal %}>
+	{% for relay in relay_list %}
+		<tr {% ifequal relay.isbadexit 1 %} class="relayBadExit" {% else %} class="relay" {% endifequal %}>
 		
 		    <!-- Add: RELAY IS DOWN and RELAY IS HIBERNATING -->
 		    
-            <td sorttable_customkey="us" id="col_relayName"><img src="static/img/flags/{{ address|getcountry }}.gif" alt={{ address|getcountry|upper }} title={{ address|getcountry }}></td>
+            <td sorttable_customkey="us" id="col_relayName"><img src="static/img/flags/{{ relay.address|getcountry }}.gif" alt={{ relay.address|getcountry|upper }} title={{ relay.address|getcountry }}></td>
 			<!-- Note: sorttable_customkey="[[COUNTRY_PREFIX]]" -->
 			
             <td id="col_relayName"> 
-                {% ifequal isnamed 1 %}
-                    <b><a class="linkDetails" href="/details/{{ fingerprint }}">{{ nickname }}</a></b>
+                {% ifequal relay.isnamed 1 %}
+                    <b><a class="linkDetails" href="/details/{{ relay.fingerprint }}">{{ relay.nickname }}</a></b>
                     {% else %}
-                    <a class="linkDetails" href="/details/{{ fingerprint }}">{{ nickname }}</a>
+                    <a class="linkDetails" href="/details/{{ relay.fingerprint }}">{{ relay.nickname }}</a>
                 {% endifequal %}
             </td>
-            <td id="col_relayBandwidth">{{ bandwidthobserved|kilobytes_ps }} KB/s</td>
-            <td id="col_relayUptime">{{ uptime|days }} d</td>
-            <td id="col_relayAddress">{{address}}</td>
+            <td id="col_relayBandwidth">{{ relay.bandwidthobserved }} KB/s</td>
+            <td id="col_relayUptime">{{ relay.uptime }} d</td>
+            <td id="col_relayAddress">{{ relay.address }}</td>
             <td id="col_relayIcons">
 
-                {% ifequal isfast 1 %}
+                {% ifequal relay.isfast 1 %}
                     <img src="static/img/status/Fast.png" alt="Fast Server" title="Fast Server">
                 {% endifequal %}
 
-                {% ifequal isv2dir 1 %}
+                {% ifequal relay.isv2dir 1 %}
                     <img src="static/img/status/Dir.png" alt="Directory Server" title="Directory Server">
                 {% endifequal %}
 
-                {% ifequal isexit 1 %}
+                {% ifequal relay.isexit 1 %}
                     <img src="static/img/status/Exit.png" alt="Exit Server" title="Exit Server">
                 {% endifequal %}
 
-                {% ifequal isguard 1 %}
+                {% ifequal relay.isguard 1 %}
                     <img src="static/img/status/Guard.png" alt="Guard Server" title="Guard Server">
                 {% endifequal %}
 
-                {% ifequal isstable 1 %}
+                {% ifequal relay.isstable 1 %}
                     <img src="static/img/status/Stable.png" alt="Stable Server" title="Stable Server">
                 {% endifequal %}
 
-                {% ifequal isauthority 1 %}
+                {% ifequal relay.isauthority 1 %}
                     <img src="static/img/status/Authority.png" alt="Authority Server" title="Authority Server">
                 {% endifequal %}
 
-                {% if "Linux" in platform %}
-                    <img src="static/img/os-icons/Linux.png" alt="Linux" title="{{platform}}">
-                {% else %}{% if "XP" in platform %}
-                    <img src="static/img/os-icons/WindowsXP.png" alt="WindowsXP" title="{{platform}}">
-                    {% else %}{% if "Windows" in platform and "Server" in platform %}
-                    <img src="static/img/os-icons/WindowsServer.png" alt="WindowsServer" title="{{platform}}">
-                {% else %}{% if "Windows" in platform %}
-                    <img src="static/img/os-icons/WindowsOther.png" alt="WindowsOther" title="{{platform}}">
-                {% else %}{% if "Darwin" in platform %}
-                    <img src="static/img/os-icons/Darwin.png" alt="Darwin" title="{{platform}}">
-                {% else %}{% if "FreeBSD" in platform %}
-                    <img src="static/img/os-icons/FreeBSD.png" alt="FreeBSD" title="{{platform}}">
-                {% else %}{% if "NetBSD" in platform %}
-                    <img src="static/img/os-icons/NetBSD.png" alt="NetBSD" title="{{platform}}">
-                {% else %}{% if "OpenBSD" in platform %}
-                    <img src="static/img/os-icons/OpenBSD.png" alt="OpenBSD" title="{{platform}}">
-                {% else %}{% if "SunOS" in platform %}
-                    <img src="static/img/os-icons/SunOS.png" alt="SunOS" title="{{platform}}">
-                {% else %}{% if "IRIX" in platform %}
-                    <img src="static/img/os-icons/IRIX64.png" alt="IRIX" title="{{platform}}">
-                {% else %}{% if "Cygwin" in platform %}
-                    <img src="static/img/os-icons/Cygwin.png" alt="Cygwin" title="{{platform}}">
-                {% else %}{% if "Dragon" in platform %}
-                    <img src="static/img/os-icons/DragonFly.png" alt ="Dragon" title="{{platform}}">
+                {% if "Linux" in relay.platform %}
+                    <img src="static/img/os-icons/Linux.png" alt="Linux" title="{{ relay.platform }}">
+                {% else %}{% if "XP" in relay.platform %}
+                    <img src="static/img/os-icons/WindowsXP.png" alt="WindowsXP" title="{{ relay.platform }}">
+                    {% else %}{% if "Windows" in relay.platform and "Server" in relay.platform %}
+                    <img src="static/img/os-icons/WindowsServer.png" alt="WindowsServer" title="{{ relay.platform }}">
+                {% else %}{% if "Windows" in relay.platform %}
+                    <img src="static/img/os-icons/WindowsOther.png" alt="WindowsOther" title="{{ relay.platform }}">
+                {% else %}{% if "Darwin" in relay.platform %}
+                    <img src="static/img/os-icons/Darwin.png" alt="Darwin" title="{{ relay.platform }}">
+                {% else %}{% if "FreeBSD" in relay.platform %}
+                    <img src="static/img/os-icons/FreeBSD.png" alt="FreeBSD" title="{{ relay.platform }}">
+                {% else %}{% if "NetBSD" in relay.platform %}
+                    <img src="static/img/os-icons/NetBSD.png" alt="NetBSD" title="{{ relay.platform }}">
+                {% else %}{% if "OpenBSD" in relay.platform %}
+                    <img src="static/img/os-icons/OpenBSD.png" alt="OpenBSD" title="{{ relay.platform }}">
+                {% else %}{% if "SunOS" in relay.platform %}
+                    <img src="static/img/os-icons/SunOS.png" alt="SunOS" title="{{ relay.platform }}">
+                {% else %}{% if "IRIX" in relay.platform %}
+                    <img src="static/img/os-icons/IRIX64.png" alt="IRIX" title="{{ relay.platform }}">
+                {% else %}{% if "Cygwin" in relay.platform %}
+                    <img src="static/img/os-icons/Cygwin.png" alt="Cygwin" title="{{ relay.platform }}">
+                {% else %}{% if "Dragon" in relay.platform %}
+                    <img src="static/img/os-icons/DragonFly.png" alt ="Dragon" title="{{ relay.platform }}">
                 {% else %}
                     <img src="static/img/os-icons/NotAvailable.png" alt="NotAvailable" title="Not Available">
                 {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
             </td>
-            <td id="col_relayOrport">{{orport}}</td>
-            <td id="col_relayDirport">{% ifequal dirport 0 %}
+            <td id="col_relayOrport">{{ relay.orport }}</td>
+            <td id="col_relayDirport">{% ifequal relay.dirport 0 %}
                     None
                 {% else %}
-                    {{ dirport }}
+                    {{ relay.dirport }}
                 {% endifequal %}</td>
-            <td id="col_relayBadExit" {% ifequal isbadexit 1 %} sorttable_customkey="1">
+            <td id="col_relayBadExit" {% ifequal relay.isbadexit 1 %} sorttable_customkey="1">
                 	<img src="static/img/bg_yes.png" width="12" height="12" alt="Bad Exit" title="Bad Exit">
                 {% else %} sorttable_customkey="0">
                		<img src="static/img/bg_no.png" width="12" height="12" alt="Not a Bad Exit" title="Not a Bad Exit">

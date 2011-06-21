@@ -98,7 +98,6 @@ DEBUG_TOOLBAR_PANELS = (
     'debug_toolbar.panels.logger.LoggingPanel',
 )
 
-
 INTERNAL_IPS = ('127.0.0.1',)
 
 ROOT_URLCONF = 'urls'
@@ -126,6 +125,6 @@ INSTALLED_APPS = (
 
 CACHE_BACKEND = 'file:///home/dcalderon/status/django_cache'
 
-CACHE_MIDDLEWARE_SECONDS = 100
+CACHE_MIDDLEWARE_SECONDS = 1
 
 CACHE_MIDDLEWARE_KEY_PREFIX = ""

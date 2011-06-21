@@ -28,17 +28,13 @@ def index(request):
     #adv_search = ""
     #if request.GET:
 
-    last_va = Statusentry.objects.aggregate\
-                (last=Max('validafter'))['last']
+    last_va = Statusentry.objects.aggregate(last=Max('validafter'))['last']
+    a = Statusentry.objects.filter(validafter__gte=(last_va - datetime.timedelta(days=1))).order_by('-validafter')
+    recent_entries = list(set(a))
 
-    recent_relays = Statusentry.objects.filter(validafter__gte=(last_va - \
-            datetime.timedelta(days=1)), \
-            ).order_by('-validafter')
-
-    num_routers = len(recent_relays)
+    num_routers = len(recent_entries)
     client_address = request.META['REMOTE_ADDR']
-    template_values = {'relay_list': recent_relays, 'client_address': client_address, \
-             'num_routers': num_routers, 'exp_time': 900}
+    template_values = {'relay_list': recent_entries, 'client_address': client_address, 'num_routers': num_routers, 'exp_time': 900}
     return render_to_response('index.html', template_values)
 
 
