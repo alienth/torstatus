@@ -166,7 +166,7 @@ class Bwhist(models.Model):
     documentation will refer to them as such. Field types are specified as
     their Django field classes, with parentheses indicating the python type
     they are validated against and treated as. When constructing 
-    an L{Bwhist} object, instance variables are specified as keyword 
+    a L{Bwhist} object, instance variables are specified as keyword 
     arguments in L{Bwhist} constructors.
 
     @type fingerprint: CharField (C{string})
@@ -222,7 +222,7 @@ class Statusentry(models.Model):
     documentation will refer to them as such. Field types are specified as
     their Django field classes, with parentheses indicating the python type
     they are validated against and treated as. When constructing 
-    an L{Bwhist} object, instance variables are specified as keyword 
+    a L{Bwhist} object, instance variables are specified as keyword 
     arguments in L{Bwhist} constructors.
 
     @type validafter: DateTimeField (C{datetime})
@@ -336,7 +336,7 @@ class Consensus(models.Model):
     documentation will refer to them as such. Field types are specified as
     their Django field classes, with parentheses indicating the python type
     they are validated against and treated as. When constructing 
-    an L{Consensus} object, instance variables are specified as keyword 
+    a L{Consensus} object, instance variables are specified as keyword 
     arguments in L{Consensus} constructors.
 
     @type validafter: DateTimeField (C{datetime})
@@ -362,7 +362,7 @@ class Vote(models.Model):
     documentation will refer to them as such. Field types are specified as
     their Django field classes, with parentheses indicating the python type
     they are validated against and treated as. When constructing 
-    an L{Vote} object, instance variables are specified as keyword 
+    a L{Vote} object, instance variables are specified as keyword 
     arguments in L{Vote} constructors.
 
     @type validafter: DateTimeField (C{datetime})
@@ -410,7 +410,7 @@ class NetworkSize(models.Model):
     documentation will refer to them as such. Field types are specified as
     their Django field classes, with parentheses indicating the python type
     they are validated against and treated as. When constructing 
-    an L{NetworkSize} object, instance variables are specified as keyword 
+    a L{NetworkSize} object, instance variables are specified as keyword 
     arguments in L{NetworkSize} constructors.
 
     @type date: DateField (C{datetime})
@@ -449,7 +449,7 @@ class NetworkSizeHour(models.Model):
     documentation will refer to them as such. Field types are specified as
     their Django field classes, with parentheses indicating the python type
     they are validated against and treated as. When constructing 
-    an L{NetworkSizeHour} object, instance variables are specified as keyword 
+    a L{NetworkSizeHour} object, instance variables are specified as keyword 
     arguments in L{NetworkSizeHour} constructors.
 
     @type validafter: DateField (C{datetime})
@@ -486,7 +486,7 @@ class RelayCountries(models.Model):
     documentation will refer to them as such. Field types are specified as
     their Django field classes, with parentheses indicating the python type
     they are validated against and treated as. When constructing 
-    an L{RelayCountries} object, instance variables are specified as keyword 
+    a L{RelayCountries} object, instance variables are specified as keyword 
     arguments in L{RelayCountries} constructors.
 
     @type date: DateField (C{datetime})
@@ -519,7 +519,7 @@ class RelayPlatforms(models.Model):
     documentation will refer to them as such. Field types are specified as
     their Django field classes, with parentheses indicating the python type
     they are validated against and treated as. When constructing 
-    an L{RelayPlatforms} object, instance variables are specified as keyword 
+    a L{RelayPlatforms} object, instance variables are specified as keyword 
     arguments in L{RelayPlatforms} constructors.
 
     @type date: DateField (C{datetime})
@@ -562,7 +562,7 @@ class RelayVersions(models.Model):
     documentation will refer to them as such. Field types are specified as
     their Django field classes, with parentheses indicating the python type
     they are validated against and treated as. When constructing 
-    an L{RelayVersions} object, instance variables are specified as keyword 
+    a L{RelayVersions} object, instance variables are specified as keyword 
     arguments in L{RelayVersions} constructors.
 
     @type date: DateField (C{datetime})
@@ -595,7 +595,7 @@ class TotalBandwidth(models.Model):
     documentation will refer to them as such. Field types are specified as
     their Django field classes, with parentheses indicating the python type
     they are validated against and treated as. When constructing 
-    an L{TotalBandwidth} object, instance variables are specified as keyword 
+    a L{TotalBandwidth} object, instance variables are specified as keyword 
     arguments in L{TotalBandwidth} constructors.
 
     @type date: DateField (C{string})
@@ -630,7 +630,7 @@ class TotalBwhist(models.Model):
     documentation will refer to them as such. Field types are specified as
     their Django field classes, with parentheses indicating the python type
     they are validated against and treated as. When constructing 
-    an L{TotalBwhist} object, instance variables are specified as keyword 
+    a L{TotalBwhist} object, instance variables are specified as keyword 
     arguments in L{TotalBwhist} constructors.
 
     @type date: DateField (C{datetime})
@@ -670,6 +670,10 @@ class BwhistFlags(models.Model):
         return str(self.date) + ": " + self.isexit + ", " + self.isguard
 
 class UserStats(models.Model):
+    #TODO: Don't know what each field means, guessing:
+    # read, directory write, directory read, d r/w, ?, ...
+    # @see LINES 652- here: https://gitweb.torproject.org/metrics-web.git/
+    # blob/HEAD:/db/tordir.sql
     """
     Model for the aggregate statistics on directory requests and byte 
     histories used to estimate user numbers.
@@ -679,23 +683,25 @@ class UserStats(models.Model):
     documentation will refer to them as such. Field types are specified as
     their Django field classes, with parentheses indicating the python type
     they are validated against and treated as. When constructing 
-    an L{UserStats} object, instance variables are specified as keyword 
+    a L{UserStats} object, instance variables are specified as keyword 
     arguments in L{UserStats} constructors.
 
     @type date: DateField (C{datetime})
     @ivar date: The date that corresponds to the L{UserStats} object.
+    @type country: CharField (C{string})
+    @ivar country: The country that corresponds to the L{UserStats} object.
     @type r:
     @ivar r:
     @type dw:
-    @ivar dw:
+    @ivar dw: Dir written
     @type dr:
-    @ivar dr:
+    @ivar dr: Dir read
     @type drw:
-    @ivar drw:
+    @ivar drw: Directory requests written
     @type drr:
-    @ivar drr:
+    @ivar drr: Director requests read
     @type bw:
-    @ivar br:
+    @ivar br: 
     @type bwd:
     @ivar bwd:
     @type brd:
@@ -710,15 +716,12 @@ class UserStats(models.Model):
     @ivar brdr:
     @type bwp:
     @ivar bwp:
-    @type 
-    @ivar 
-    @type 
-    @ivar 
-    @type 
-    @ivar 
-    @type 
-    @ivar 
-
+    @type brp:
+    @ivar brp:
+    @type bwn:
+    @ivar bwn:
+    @type brn:
+    @ivar brn:
     """
     date = models.DateField()
     country = models.CharField(max_length=2, primary_key=True) # This field type is a guess.
@@ -748,6 +751,24 @@ class UserStats(models.Model):
         return str(self.date) + ": " + self.country
 
 class RelayStatusesPerDay(models.Model):
+    # TODO: What is count used for?
+    """
+    Model for the helper table which is used to update the other tables.
+
+    Django uses class variables to specify model fields, but these fields are
+    practically used and thought of as instance variables, so this
+    documentation will refer to them as such. Field types are specified as
+    their Django field classes, with parentheses indicating the python type
+    they are validated against and treated as. When constructing 
+    a L{RelayStatusesPerDay} object, instance variables are specified as 
+    keyword arguments in L{RelayStatusesPerDay} constructors.
+
+    @type date: DateField (C{datetime})
+    @ivar date: The date that corresponds to the L{RelayStatusesPerDay}
+        object.
+    @type count: IntegerField (C{datetime})
+    @ivar count: 
+    """
     date = models.DateField(primary_key=True)
     count = models.IntegerField()
     class Meta:
@@ -758,6 +779,22 @@ class RelayStatusesPerDay(models.Model):
         return str(self.date)
 
 class ScheduledUpdates(models.Model):
+    """
+    Model for the dates to be included in the next refresh run.
+
+    Django uses class variables to specify model fields, but these fields are
+    practically used and thought of as instance variables, so this
+    documentation will refer to them as such. Field types are specified as
+    their Django field classes, with parentheses indicating the python type
+    they are validated against and treated as. When constructing 
+    a L{ScheduledUpdates} object, instance variables are specified as 
+    keyword arguments in L{ScheduledUpdates} constructors.
+
+    @type id: IntegerField (C{int})
+    @ivar id: The index of the L{ScheduledUpdates} object.
+    @type date: DateField (C{datetime})
+    @ivar date: The date that corresponds to the L{ScheduledUpdates} object.
+    """
     id = models.IntegerField(primary_key=True)
     date = models.DateField()
     class Meta:
@@ -768,6 +805,22 @@ class ScheduledUpdates(models.Model):
         return str(self.date) + ": " + self.id
 
 class Updates(models.Model):
+    """
+    Model for the dates in the current refresh run.
+
+    Django uses class variables to specify model fields, but these fields are
+    practically used and thought of as instance variables, so this
+    documentation will refer to them as such. Field types are specified as
+    their Django field classes, with parentheses indicating the python type
+    they are validated against and treated as. When constructing 
+    an L{Updates} object, instance variables are specified as 
+    keyword arguments in L{Updates} constructors.
+
+    @type id: IntegerField (C{int})
+    @ivar id: The index of the L{Updates} object.
+    @type date: DateField (C{datetime})
+    @ivar date: The date that corresponds to the L{Updates} object.
+    """
     id = models.IntegerField(primary_key=True)
     date = models.DateField()
     class Meta:
@@ -778,6 +831,34 @@ class Updates(models.Model):
         return str(self.date) + ": " + self.id
 
 class Geoipdb(models.Model):
+    """
+    Model for the GeoIP database that resolves IP addresses to country
+    codes, latitudes, and longitudes.
+
+    Django uses class variables to specify model fields, but these fields are
+    practically used and thought of as instance variables, so this
+    documentation will refer to them as such. Field types are specified as
+    their Django field classes, with parentheses indicating the python type
+    they are validated against and treated as. When constructing 
+    a L{Geoipdb} object, instance variables are specified as 
+    keyword arguments in L{Geoipdb} constructors.
+
+    @type id: IntegerField (C{int})
+    @ivar id: The index associated with the L{Geoipdb} object.
+    @type ipstart: IPAddressField (C{string})
+    @ivar ipstart: The lower bound of an IP address associated with the 
+        L{Geoipdb} object.
+    @type ipend: IPAddressField (C{string})
+    @ivar ipend: The upper bound of an IP address associated with the
+        L{Geoipdb} object.
+    @type country: CharField (C{string})
+    @ivar country: The two-letter country code associated with the
+        L{Geoipdb} object.
+    @type latitude: DecimalField (C{float})
+    @ivar latitude: The latitude associated with the L{Geoipdb} object.
+    @type longitude: DecimalField (C{float})
+    @ivar longitude: The longitude associated with the L{Geoipdb} object.
+    """
     id = models.IntegerField(primary_key=True)
     ipstart = models.IPAddressField()
     ipend = models.IPAddressField()
@@ -792,6 +873,57 @@ class Geoipdb(models.Model):
         return self.ipstart + ", " + self.ipend
 
 class RelaysMonthlySnapshots(models.Model):
+    """
+    Model for the first known consensuses of all months in the database.
+
+    Django uses class variables to specify model fields, but these fields are
+    practically used and thought of as instance variables, so this
+    documentation will refer to them as such. Field types are specified as
+    their Django field classes, with parentheses indicating the python type
+    they are validated against and treated as. When constructing 
+    a L{RelaysMonthlySnapshots} object, instance variables are specified as 
+    keyword arguments in L{RelaysMonthlySnapshots} constructors.
+
+    @type validafter: DateTimeField (C{datetime})
+    @ivar validafter: The time that the consensus was published.
+    @type fingerprint: CharField (C{string})
+    @ivar fingerprint: The unique fingerprint hash of the router that the
+        L{Statusentry} describes.
+    @type nickname: CharField (C{string})
+    @ivar nickname: The nickname of the router that the L{Statusentry}
+        describes.
+    @type address: CharField (C{string})
+    @ivar address: The IP address of the relay that the L{Statusentry}
+        describes.
+    @type country: CharField (C{string})
+    @ivar country: The two-letter country code associated with the relay.
+    @type latitude: DecimalField (C{string})
+    @ivar latitude: The latitude of the relay.
+    @type longitude: DecimalField (C{string})
+    @ivar longitude: The longitude of the relay.
+    @type isexit: BooleanField (C{boolean})
+    @ivar isexit: True if the relay is an exit relay, False otherwise.
+    @type isfast: BooleanField (C{boolean})
+    @ivar isfast: True if the relay is a fast server, False otherwise.
+    @type isguard: BooleanField (C{boolean})
+    @ivar isguard: True if the relay is a guard server, False otherwise.
+    @type isstable: BooleanField (C{boolean})
+    @ivar isstable: True if the relay is stable, False otherwise.
+    @type version: CharField (C{string})
+    @ivar version: The version of Tor that the relay is running.
+    @type ports: TextField (C{string})
+    @ivar ports: The ports that the relay does or does not allow exiting to.
+        Includes the keywords "reject" and "accept"
+    @type bandwidthavg: BigIntegerField (C{long})
+    @ivar bandwidthavg: The average bandwidth of the relay in bytes 
+        per second.
+    @type bandwidthburst: BigIntegerField (C{long})
+    @ivar bandwidthburst: The burst bandwidth of the relay in bytes 
+        per second.
+    @type bandwidthobserved: BigIntegerField (C{long})
+    @ivar bandwidthobserved: The observed bandwidth of the relay in bytes
+        per second.
+    """
     validafter = models.DateTimeField(primary_key=True)
     fingerprint = models.CharField(max_length=40) # This field type is a guess.
     nickname = models.CharField(max_length=19)
@@ -817,6 +949,22 @@ class RelaysMonthlySnapshots(models.Model):
         return str(self.validafter) + ": " + self.fingerprint
 
 class BridgeNetworkSize(models.Model):
+    """
+    Model for the average number of running bridges.
+
+    Django uses class variables to specify model fields, but these fields are
+    practically used and thought of as instance variables, so this
+    documentation will refer to them as such. Field types are specified as
+    their Django field classes, with parentheses indicating the python type
+    they are validated against and treated as. When constructing 
+    a L{BridgeNetworkSize} object, instance variables are specified as 
+    keyword arguments in L{BridgeNetworkSize} constructors.
+    @type date: DateField (C{datetime})
+    @ivar date: The date associated with the L{BridgeNetworkSize} object.
+    @type avg_running: IntegerField (C{int})
+    @ivar avg_running: The average number of running relays associated with
+        the L{date}.
+    """
     date = models.DateField(primary_key=True)
     avg_running = models.IntegerField()
     class Meta:
@@ -825,6 +973,31 @@ class BridgeNetworkSize(models.Model):
         return str(self.date)
 
 class DirreqStats(models.Model):
+    #TODO: guesses in here as to what the fields are, one blank.
+    """
+    Model for the daily users by country.
+
+    Django uses class variables to specify model fields, but these fields are
+    practically used and thought of as instance variables, so this
+    documentation will refer to them as such. Field types are specified as
+    their Django field classes, with parentheses indicating the python type
+    they are validated against and treated as. When constructing 
+    a L{DirreqStats} object, instance variables are specified as 
+    keyword arguments in L{DirreqStats} constructors.
+    
+    @type source: CharField (C{string})
+    @ivar source: The source associated with the L{DirreqStats} object.
+    @type statsend: DateTimeField (C{datetime})
+    @ivar statsend: The last date that the statistics of this entry were
+        gathered.
+    @type seconds: IntegerField (C{int})
+    @ivar seconds:
+    @type country: CharField (C{string})
+    @ivar country: The country associated with the L{DirreqStats} object.
+    @type requests: IntegerField (C{int})
+    @ivar requests: The number of requests associated with the
+        L{DirreqStats} object.
+    """
     source = models.CharField(max_length=40) # This field type is a guess.
     statsend = models.DateTimeField()
     seconds = models.IntegerField()
@@ -840,6 +1013,25 @@ class DirreqStats(models.Model):
                 + ", " + self.seconds
 
 class BridgeStats(models.Model):
+    """
+    Model for the daily bridge users by country.
+
+    Django uses class variables to specify model fields, but these fields are
+    practically used and thought of as instance variables, so this
+    documentation will refer to them as such. Field types are specified as
+    their Django field classes, with parentheses indicating the python type
+    they are validated against and treated as. When constructing 
+    a L{BridgeStats} object, instance variables are specified as 
+    keyword arguments in L{BridgeStats} constructors.
+
+    @type date: DateField (C{datetime})
+    @ivar date: The date associated with the L{BridgeStats} object.
+    @type country: CharField (C{string})
+    @ivar country: The country that the bridges are associated with.
+    @type users: IntegerField (C{int})
+    @ivar users: The number of users associated with the given L{date} and
+        L{country}
+    """
     date = models.DateField()
     country = models.CharField(max_length=2, primary_key=True) # This field type is a guess.
     users = models.IntegerField()
@@ -852,6 +1044,35 @@ class BridgeStats(models.Model):
         return str(self.date) + ": " + self.country
 
 class TorperfStats(models.Model):
+    # TODO: Don't understand what the fields here are used for.
+    """
+    Model for the quantiles and medians of daily torperf results.
+
+    Django uses class variables to specify model fields, but these fields are
+    practically used and thought of as instance variables, so this
+    documentation will refer to them as such. Field types are specified as
+    their Django field classes, with parentheses indicating the python type
+    they are validated against and treated as. When constructing 
+    a L{TorperfStats} object, instance variables are specified as 
+    keyword arguments in L{TorperfStats} constructors.
+    
+    @type date: DateField (C{datetime})
+    @ivar date:
+    @type source: CharField (C{string})
+    @ivar source:
+    @type q1: IntegerField (C{int})
+    @ivar q1:
+    @type md: IntegerField (C{int})
+    @ivar md:
+    @type q3: IntegerField (C{int})
+    @ivar q3:
+    @type timeouts: IntegerField (C{int})
+    @ivar timeouts:
+    @type failures: IntegerField (C{int})
+    @ivar failures:
+    @type requests: IntegerField (C{int})
+    @ivar requests:
+    """
     date = models.DateField()
     source = models.CharField(max_length=32, primary_key=True)
     q1 = models.IntegerField()
@@ -869,6 +1090,25 @@ class TorperfStats(models.Model):
         return str(self.date) + ": " + self.source
 
 class GettorStats(models.Model):
+    # TODO: Don't know what the fields here are used for, either.
+    """
+    Model for the packages requested from GetTor.
+
+    Django uses class variables to specify model fields, but these fields are
+    practically used and thought of as instance variables, so this
+    documentation will refer to them as such. Field types are specified as
+    their Django field classes, with parentheses indicating the python type
+    they are validated against and treated as. When constructing 
+    a L{TorperfStats} object, instance variables are specified as 
+    keyword arguments in L{TorperfStats} constructors.
+
+    @type date: DateField (C{datetime})
+    @ivar date:
+    @type bundle: CharField (C{string})
+    @ivar bundle:
+    @type downloads: IntegerField (C{int})
+    @ivar downloads:
+    """
     date = models.DateField()
     bundle = models.CharField(max_length=64, primary_key=True)
     downloads = models.IntegerField()
@@ -879,4 +1119,3 @@ class GettorStats(models.Model):
         db_table = u'gettor_stats'
     def __unicode__(self):
         return str(self.date) + ": " + self.bundle
-
