@@ -320,10 +320,85 @@ def networkstatisticgraphs(request):
     return render_to_response('nodequery.html', template_values)
 
 def columnpreferences(request):
-    # For now, this function is just a placeholder.
-
-    variables = "TEMP STRING"
-    template_values = {'variables': variables,}
+    '''
+    Let the user choose what columns should be displayed on the index page.
+    This view makes use of the sessions in order to store two array-list 
+    objects (currentColumns and availableColumns) in a "cookie" file so that
+    the implementation of the "REMOVE", "ADD", "UP" and "DOWN" options
+    from the page could be possible. 
+    It orders the two array-lists by using the user input, through a GET 
+    single selection HTML form.
+    
+    @param: request
+    @return: renders to the page the currently selected columns, the available 
+        columns and the previous selection
+    '''
+    #
+    #NOTE: The view is currently using sessions and it's storing the session
+    #   into a file in the folder tmp/ from the status/ folder.
+    #
+    #TODO: Give the Session ID a reasonable "life-time" - so it wouldn't stay
+    #   on the system forever (or until it is manually deleted).
+    #TODO: Integrate the array-list into the index page so it will actually 
+    #   display only the desired information.
+    #TODO: Clean the code of unnecessary pieces.
+    #
+    
+    currentColumns = []
+    availableColumns = []
+    
+    if not ('currentColumns' in request.session and 'availableColumns' in request.session):
+        DEFAULT_currentColumns = ["Country Code", "Uptime", "Hostname", "ORPort", "DirPort", "IP", \
+                    "Exit", "Authority", "Fast", "Guard", "Named", "Stable", "Running", "Valid", \
+                    "Bandwidth", "V2Dir", "Platform", "Hibernating", "BadExit",]
+        DEFAULT_availableColumns = ["Fingerprint", "LastDescriptorPublished", "Contact", "BadDir", "BadExit"]
+        request.session['currentColumns'] = DEFAULT_currentColumns
+        request.session['availableColumns'] = DEFAULT_availableColumns
+        currentColumns = DEFAULT_currentColumns
+        availableColumns = DEFAULT_availableColumns
+    else:
+        currentColumns = request.session['currentColumns']
+        availableColumns = request.session['availableColumns']
+    
+    selection = ''
+    if ('removeColumn' in request.GET and 'selected_removeColumn' in request.GET):
+        selection = request.GET['selected_removeColumn']
+        availableColumns.append(selection)
+        currentColumns.remove(selection)
+        request.session['currentColumns'] = currentColumns
+        request.session['availableColumns'] = availableColumns
+        
+        
+    if ('addColumn' in request.GET and 'selected_addColumn' in request.GET):
+        selection = request.GET['selected_addColumn']
+        currentColumns.append(selection)
+        availableColumns.remove(selection)
+        request.session['currentColumns'] = currentColumns
+        request.session['availableColumns'] = availableColumns
+    
+    if ('upButton' in request.GET and 'selected_removeColumn' in request.GET):
+        selection = request.GET['selected_removeColumn']
+        selectionPos = currentColumns.index(selection)
+        if (selectionPos > 0):
+            aux = currentColumns[selectionPos - 1]
+            currentColumns[selectionPos - 1] = currentColumns[selectionPos]
+            currentColumns[selectionPos] = aux
+        request.session['currentColumns'] = currentColumns
+        request.session['availableColumns'] = availableColumns
+    
+    if ('downButton' in request.GET and 'selected_removeColumn' in request.GET):
+        selection = request.GET['selected_removeColumn']
+        selectionPos = currentColumns.index(selection)
+        if (selectionPos < len(currentColumns) - 1):
+            aux = currentColumns[selectionPos + 1]
+            currentColumns[selectionPos + 1] = currentColumns[selectionPos]
+            currentColumns[selectionPos] = aux
+        request.session['currentColumns'] = currentColumns
+        request.session['availableColumns'] = availableColumns
+        
+    
+    template_values = {'currentColumns': currentColumns, 'availableColumns': availableColumns, \
+                    'selectedEntry': selection}
     return render_to_response('columnpreferences.html', template_values)
 
 def networkstatisticgraphs(request):

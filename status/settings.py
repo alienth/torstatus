@@ -2,7 +2,6 @@
 
 # Module for setting up the proper Timezone.
 import time
-import sys
 import os
 
 DEBUG = True
@@ -73,29 +72,16 @@ TEMPLATE_LOADERS = (
 )
 
 MIDDLEWARE_CLASSES = (
+    'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.cache.UpdateCacheMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.cache.FetchFromCacheMiddleware',
-    #'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
-"""
-DEBUG_TOOLBAR_PANELS = (
-    'debug_toolbar.panels.version.VersionDebugPanel',
-    'debug_toolbar.panels.timer.TimerDebugPanel',
-    'debug_toolbar.panels.settings_vars.SettingsVarsDebugPanel',
-    'debug_toolbar.panels.headers.HeaderDebugPanel',
-    #'debug_toolbar.panels.request_vars.RequestVarsDebugPanel', #This panel for some reason breaks the site.
-    'debug_toolbar.panels.template.TemplateDebugPanel',
-    'debug_toolbar.panels.sql.SQLDebugPanel',
-    'debug_toolbar.panels.signals.SignalDebugPanel',
-    'debug_toolbar.panels.logger.LoggingPanel',
-)
-"""
+SESSION_ENGINE = 'django.contrib.sessions.backends.file'
+
+SESSION_FILE_PATH = os.path.join(os.path.dirname(__file__), 'tmp/')
 
 INTERNAL_IPS = ('127.0.0.1',)
 
@@ -111,7 +97,7 @@ TEMPLATE_DIRS = (
 INSTALLED_APPS = (
     #'django.contrib.auth',
     #'django.contrib.contenttypes',
-    #'django.contrib.sessions',
+    'django.contrib.sessions',
     #'django.contrib.sites',
     #'django.contrib.messages',
     'statusapp',
@@ -124,9 +110,3 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
-
-CACHE_BACKEND = 'file:///home/dcalderon/status/django_cache'
-
-CACHE_MIDDLEWARE_SECONDS = 100
-
-CACHE_MIDDLEWARE_KEY_PREFIX = ""
