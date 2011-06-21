@@ -47,6 +47,8 @@ class Descriptor(models.Model):
     a L{Descriptor} object, instance variables are specified as keyword 
     arguments in L{Descriptor} constructors.
     
+    @type descriptorid: IntegerField (C{int})
+    @ivar descriptorid: An auto-incrementing index.
     @type descriptor: CharField (C{string})
     @ivar descriptor: The L{Descriptor}'s unique descriptor hash.
     @type nickname: CharField (C{string})
@@ -84,6 +86,7 @@ class Descriptor(models.Model):
     @ivar rawdesc: Raw descriptor information that may or may not be present
         in other fields of the L{Descriptor} object
     """
+    descriptorid = models.IntegerField(primary_key=True)
     descriptor = models.CharField(max_length=40, primary_key=True) # This field type is a guess
     nickname = models.CharField(max_length=19)
     address = models.CharField(max_length=15)
@@ -237,6 +240,8 @@ class Statusentry(models.Model):
     @ivar descriptor: The unique descriptor hash of the router that the
         L{Statusentry} describes. References an entry in the L{Descriptor}
         table, but this entry may or may not be added to the table yet.
+    @type descriptorid: ForeignKey
+    @ivar descriptorid: References a L{Descriptor} object or is null.
     @type published: DateTimeField (C{datetime})
     @ivar published: The time that the entry was published.
     @type address: CharField (C{string})
@@ -296,6 +301,7 @@ class Statusentry(models.Model):
     nickname = models.CharField(max_length=19)
     fingerprint = models.CharField(max_length=40) # This field type is a guess.
     descriptor = models.CharField(max_length=40) # This field type is a guess.
+    descriptorid = models.ForeignKey(Descriptor, db_column='descriptorid')    
     published = models.DateTimeField()
     address = models.CharField(max_length=15)
     orport = models.IntegerField()
