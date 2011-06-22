@@ -96,7 +96,7 @@
 		
 		    <!-- Add: RELAY IS DOWN and RELAY IS HIBERNATING -->
 		    
-            <td sorttable_customkey="us" id="col_relayName"><img src="static/img/flags/{{ relay.address|getcountry }}.gif" alt={{ relay.address|getcountry|upper }} title={{ relay.address|getcountry }}></td>
+            <td sorttable_customkey="us" id="col_relayName"><img src="static/img/flags/us.gif" alt=us title=us></td>
 			<!-- Note: sorttable_customkey="[[COUNTRY_PREFIX]]" -->
 			
             <td id="col_relayName"> 
@@ -106,8 +106,8 @@
                     <a class="linkDetails" href="/details/{{ relay.fingerprint }}">{{ relay.nickname }}</a>
                 {% endifequal %}
             </td>
-            <td id="col_relayBandwidth">{{ relay.bandwidthobserved|kilobytes_ps }} KB/s</td>
-            <td id="col_relayUptime">{{ relay.uptime|days }} d</td>
+            <td id="col_relayBandwidth">{{ relay.descriptorid.bandwidthobserved|kilobytes_ps }} KB/s</td>
+            <td id="col_relayUptime">{{ relay.descriptorid.uptime|days }} d</td>
             <td id="col_relayAddress">{{ relay.address }}</td>
             <td id="col_relayIcons">
 
@@ -135,30 +135,30 @@
                     <img src="static/img/status/Authority.png" alt="Authority Server" title="Authority Server">
                 {% endifequal %}
 
-                {% if "Linux" in relay.platform %}
-                    <img src="static/img/os-icons/Linux.png" alt="Linux" title="{{ relay.platform }}">
-                {% else %}{% if "XP" in relay.platform %}
-                    <img src="static/img/os-icons/WindowsXP.png" alt="WindowsXP" title="{{ relay.platform }}">
-                    {% else %}{% if "Windows" in relay.platform and "Server" in relay.platform %}
-                    <img src="static/img/os-icons/WindowsServer.png" alt="WindowsServer" title="{{ relay.platform }}">
-                {% else %}{% if "Windows" in relay.platform %}
-                    <img src="static/img/os-icons/WindowsOther.png" alt="WindowsOther" title="{{ relay.platform }}">
-                {% else %}{% if "Darwin" in relay.platform %}
-                    <img src="static/img/os-icons/Darwin.png" alt="Darwin" title="{{ relay.platform }}">
-                {% else %}{% if "FreeBSD" in relay.platform %}
-                    <img src="static/img/os-icons/FreeBSD.png" alt="FreeBSD" title="{{ relay.platform }}">
-                {% else %}{% if "NetBSD" in relay.platform %}
-                    <img src="static/img/os-icons/NetBSD.png" alt="NetBSD" title="{{ relay.platform }}">
-                {% else %}{% if "OpenBSD" in relay.platform %}
-                    <img src="static/img/os-icons/OpenBSD.png" alt="OpenBSD" title="{{ relay.platform }}">
-                {% else %}{% if "SunOS" in relay.platform %}
-                    <img src="static/img/os-icons/SunOS.png" alt="SunOS" title="{{ relay.platform }}">
-                {% else %}{% if "IRIX" in relay.platform %}
-                    <img src="static/img/os-icons/IRIX64.png" alt="IRIX" title="{{ relay.platform }}">
-                {% else %}{% if "Cygwin" in relay.platform %}
-                    <img src="static/img/os-icons/Cygwin.png" alt="Cygwin" title="{{ relay.platform }}">
-                {% else %}{% if "Dragon" in relay.platform %}
-                    <img src="static/img/os-icons/DragonFly.png" alt ="Dragon" title="{{ relay.platform }}">
+                {% if "Linux" in relay.descriptorid.platform %}
+                    <img src="static/img/os-icons/Linux.png" alt="Linux" title="{{ relay.descriptorid.platform }}">
+                {% else %}{% if "XP" in relay.descriptorid.platform %}
+                    <img src="static/img/os-icons/WindowsXP.png" alt="WindowsXP" title="{{ relay.descriptorid.platform }}">
+                    {% else %}{% if "Windows" in relay.descriptorid.platform and "Server" in relay.descriptorid.platform %}
+                    <img src="static/img/os-icons/WindowsServer.png" alt="WindowsServer" title="{{ relay.descriptorid.platform }}">
+                {% else %}{% if "Windows" in relay.descriptorid.platform %}
+                    <img src="static/img/os-icons/WindowsOther.png" alt="WindowsOther" title="{{ relay.descriptorid.platform }}">
+                {% else %}{% if "Darwin" in relay.descriptorid.platform %}
+                    <img src="static/img/os-icons/Darwin.png" alt="Darwin" title="{{ relay.descriptorid.platform }}">
+                {% else %}{% if "FreeBSD" in relay.descriptorid.platform %}
+                    <img src="static/img/os-icons/FreeBSD.png" alt="FreeBSD" title="{{ relay.descriptorid.platform }}">
+                {% else %}{% if "NetBSD" in relay.descriptorid.platform %}
+                    <img src="static/img/os-icons/NetBSD.png" alt="NetBSD" title="{{ relay.descriptorid.platform }}">
+                {% else %}{% if "OpenBSD" in relay.descriptorid.platform %}
+                    <img src="static/img/os-icons/OpenBSD.png" alt="OpenBSD" title="{{ relay.descriptorid.platform }}">
+                {% else %}{% if "SunOS" in relay.descriptorid.platform %}
+                    <img src="static/img/os-icons/SunOS.png" alt="SunOS" title="{{ relay.descriptorid.platform }}">
+                {% else %}{% if "IRIX" in relay.descriptorid.platform %}
+                    <img src="static/img/os-icons/IRIX64.png" alt="IRIX" title="{{ relay.descriptorid.platform }}">
+                {% else %}{% if "Cygwin" in relay.descriptorid.platform %}
+                    <img src="static/img/os-icons/Cygwin.png" alt="Cygwin" title="{{ relay.descriptorid.platform }}">
+                {% else %}{% if "Dragon" in relay.descriptorid.platform %}
+                    <img src="static/img/os-icons/DragonFly.png" alt ="Dragon" title="{{ relay.descriptorid.platform }}">
                 {% else %}
                     <img src="static/img/os-icons/NotAvailable.png" alt="NotAvailable" title="Not Available">
                 {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}

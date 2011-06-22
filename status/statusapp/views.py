@@ -1,12 +1,17 @@
+"""
+The views module for TorStatus (Django is idiosyncratic in that it
+names controllers 'views'; models are still models and views are called
+templates). This module contains a single controller for each page type.
+"""
+import time
+import datetime
+import csv
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpRequest, Http404
 from django.db import connection
-import csv
-from statusapp.models import Statusentry, Descriptor, Bwhist
 from django.views.decorators.cache import cache_page
-import datetime
-import time
 from django.db.models import Max
+from statusapp.models import Statusentry, Descriptor, Bwhist
 
 
 # To do: get rid of javascript sorting: pass another argument
@@ -15,13 +20,10 @@ from django.db.models import Max
                       # but it works.
 def index(request):
     """
-    Supply a dictionary to the index.html template consisting of keys
-    equivalent to columns in the statusentry and descriptor tables in the
-    database. Querying the database is done with raw SQL. This needs 
-    to be fixed.
+    Supply a dictionary to the index.html template consisting of a list
+    of active relays.
     """
-
-    # Search options should probably not be implemented this way in a 
+    # Search options should probably not be implemented this way in a
     # raw SQL query for security reasons:
     #ordering = ""
     #restrictions = ""
@@ -29,18 +31,20 @@ def index(request):
     #if request.GET:
 
     last_va = Statusentry.objects.aggregate(last=Max('validafter'))['last']
-    a = Statusentry.objects.filter(validafter__gte=(last_va - datetime.timedelta(days=1))).order_by('-validafter')
+    a = Statusentry.objects.filter(validafter__gte=(last_va - datetime.\
+            timedelta(days=1))).order_by('-validafter')
     recent_entries = list(set(a))
 
     num_routers = len(recent_entries)
     client_address = request.META['REMOTE_ADDR']
-    template_values = {'relay_list': recent_entries, 'client_address': client_address, 'num_routers': num_routers, 'exp_time': 900}
+    template_values = {'relay_list': recent_entries, 'client_address':
+            client_address, 'num_routers': num_routers, 'exp_time': 900}
     return render_to_response('index.html', template_values)
 
 
 def customindex(request, fingerprint):
-    # This method should probably not exist, and request.GET should be used
-    # in statusapp.views.index to make different queries.
+    # TODO: This method should probably not exist, and request.GET
+    # should be used in statusapp.views.index to make different queries.
     """
     List of variables passed from the html form:
 
@@ -79,18 +83,11 @@ def customindex(request, fingerprint):
     nickname, country, bandwidth, uptime, published, address, hostname,
     orport, dirport, platform, contact)
 
-    boolLogic: the logic we'd like to use could be 
+    boolLogic: the logic we'd like to use could be
     (equals, contains, less, greater)
 
     searchstuff: stuff to searchfor could be (any string)
     """
-
-    #Lots of work to do here. A lot more complicated than initially thought.
-    #I need to create the custom index page from all these variables.
-    #This means creating tons of different possible tables. I'll get to it
-    #eventually.
-    #Could even merge with index
-
 
     if 'searchstuff' in request.GET:
         if request.GET['searchstuff']:
@@ -99,12 +96,13 @@ def customindex(request, fingerprint):
             message = 'You submitted an empty form.'
     return HttpResponse(message)
 
+
 def details(request, fingerprint):
-    #import geoip
+    # TODO: Querying the database is done with raw SQL. This needs
+    # to be fixed.
     """
     Supply a dictionary to the details.html template consisting of relevant
-    values associated with a given fingerprint. Querying the database is done 
-    with raw SQL. This needs to be fixed.
+    values associated with a given fingerprint.
     """
 
     cursor = connection.cursor()
@@ -120,39 +118,46 @@ def details(request, fingerprint):
             descriptor.rawdesc FROM statusentry JOIN descriptor ON \
             statusentry.descriptor = descriptor.descriptor WHERE \
             statusentry.fingerprint = %s ORDER BY \
-            statusentry.validafter DESC LIMIT 1', [fingerprint]) 
+            statusentry.validafter DESC LIMIT 1', [fingerprint])
 
-    try: 
-        nickname, fingerprint, address, orport, dirport, platform, published, \
-            uptime, bandwidthburst, bandwidthavg, bandwidthobserved, \
-            isauthority, isbaddirectory, isbadexit, isexit, isfast, isguard, \
-            isnamed, isstable, isrunning, isvalid, isv2dir, ports, rawdesc \
-            = cursor.fetchone()
+    try:
+        nickname, fingerprint, address, orport, dirport, platform, \
+                  published, uptime, bandwidthburst, bandwidthavg, \
+                  bandwidthobserved, isauthority, isbaddirectory, \
+                  isbadexit, isexit, isfast, isguard, isnamed, isstable, \
+                  isrunning, isvalid, isv2dir, ports, rawdesc = \
+                  cursor.fetchone()
+    except TypeError:  # TODO: don't raise Http404, write a helpful page that
+        raise Http404  # extends base.html
 
-    except:
-        raise Http404
-    
-    #country = ""
-    #country = geoip.country(address)
-
-    template_values = {'nickname': nickname, 'fingerprint': fingerprint, \
-            'address': address, 'orport': orport, 'dirport': dirport, \
-            'platform': platform, 'published': published, 'uptime': uptime, \
-            'bandwidthburst': bandwidthburst, 'bandwidthavg': bandwidthavg, \
-            'bandwidthobserved': bandwidthobserved, 'isauthority': isauthority,\
-             'isbaddirectory': isbaddirectory, 'isbadexit': isbadexit, \
-            'isexit': isexit, 'isfast': isfast, 'isguard': isguard, \
-            'isnamed': isnamed, 'isstable': isstable, 'isrunning': isrunning, \
-            'isvalid': isvalid, 'isv2dir': isv2dir, 'ports': ports, \
-            'rawdesc': rawdesc}#, 'country': country}
+    template_values = {'nickname': nickname, 'fingerprint': fingerprint,
+            'address': address, 'orport': orport, 'dirport': dirport,
+            'platform': platform, 'published': published, 'uptime': uptime,
+            'bandwidthburst': bandwidthburst, 'bandwidthavg': bandwidthavg,
+            'bandwidthobserved': bandwidthobserved, 'isauthority': isauthority,
+             'isbaddirectory': isbaddirectory, 'isbadexit': isbadexit,
+            'isexit': isexit, 'isfast': isfast, 'isguard': isguard,
+            'isnamed': isnamed, 'isstable': isstable, 'isrunning': isrunning,
+            'isvalid': isvalid, 'isv2dir': isv2dir, 'ports': ports,
+            'rawdesc': rawdesc}
 
     return render_to_response('details.html', template_values)
 
+
 def exitnodequery(request):
+    # TODO: See code reviews from 21 June
     """
     Determine if an IP address is an active Tor server, and optionally
     see if the server's exit policy would permit it to exit to a given
     destination IP address and port.
+
+    This method aims to provide meaningful information to the client in
+    the case of unconventional input by returning both the information
+    requested as well as the input that the client provided. If the
+    information requested is not retrievable, this method is able to
+    give a useful and informative error message by passing both the text
+    input provided by the user as well as whether or not that text input
+    was valid to the template.
     """
     # Given by the client
     source = ""
@@ -162,22 +167,22 @@ def exitnodequery(request):
     dest_ip_valid = False
     dest_port_valid = False
 
-    if ('queryAddress' in request.GET and request.GET['queryAddress']):
-        source = request.GET['queryAddress'].strip()
-        if (_is_ipaddress(source)):
-            source_valid = True
-    if ('destinationAddress' in request.GET and \
-            request.GET['destinationAddress']):
-        dest_ip = request.GET['destinationAddress'].strip()
-        if (_is_ipaddress(dest_ip)):
-            dest_ip_valid = True
-    if ('destinationPort' in request.GET and request.GET['destinationPort']):
-        dest_port = request.GET['destinationPort'].strip()
-        if (_is_port(dest_port)):
-            dest_port_valid = True
+    # Get the source, dest_ip, and dest_port from the HttpRequest object
+    # if they exist, and declare them valid if they are valid.
+    source = _get_if_exists(request, 'queryAddress')
+    if (_is_ipaddress(source)):
+        source_valid = True
+
+    dest_ip = _get_if_exists(request, 'destinationAddress')
+    if (_is_ipaddress(dest_ip)):
+        dest_ip_valid = True
+
+    dest_port = _get_if_exists(request, 'destinationPort')
+    if (_is_port(dest_port)):
+        dest_port_valid = True
 
     # Some users may assume exiting on port 80. If a destination IP address is
-    # given, but no port, assume that the user means port 80.
+    # given without a port, assume that the user means port 80.
     if (dest_ip_valid == True and dest_port_valid == False):
         dest_port = "80"
         dest_port_valid = True
@@ -193,30 +198,30 @@ def exitnodequery(request):
 
         # Don't search entries published over 24 hours
         # from the most recent entries.
-        last_va = Statusentry.objects.aggregate\
-                (last=Max('validafter'))['last']
+        last_va = Statusentry.objects.aggregate(\
+                last=Max('validafter'))['last']
         oldest_tolerable = last_va - datetime.timedelta(days=1)
 
-        recent_entries = Statusentry.objects.filter(address=source, \
-                validafter__gte=oldest_tolerable)
+        fingerprints = Statusentry.objects.filter(address=source, \
+                validafter__gte=oldest_tolerable).values('fingerprint')\
+                .annotate(Count('fingerprint'))
 
         # Group by fingerprints, which are unique. If at least one fingerprint
         # is found, there is a match, so for each fingerprint, get the
         # fingerprint and nickname.
-        # TODO: This query is costly; there must be a better way to do it.
-        fingerprints = recent_entries.values('fingerprint').annotate(Count('fingerprint'))
-        if (fingerprints.count() > 0):
+        if (fingerprints):
             is_router = True
 
-            # For each entry, gather the nickname and fingerprint. If a 
+            # For each entry, gather the nickname and fingerprint. If a
             # destination IP and port are defined, also find whether or not
             # the entries will allow exiting to the given IP and port.
             for fp_entry in fingerprints:
-                # Note that the trailing [:1] is djangonese for "LIMIT 1", 
+                # Note that the trailing [:1] is djangonese for "LIMIT 1",
                 # so this query should not be expensive.
-                statusentry_set = Statusentry.objects.filter(fingerprint=\
-                        fp_entry['fingerprint'], validafter__gte=\
-                        (oldest_tolerable)).order_by('-validafter')[:1]
+                statusentry_set = Statusentry.objects.filter(\
+                        fingerprint=fp_entry['fingerprint'], \
+                        validafter__gte=(oldest_tolerable))\
+                        .order_by('-validafter')[:1]
                 statusentry = statusentry_set[0]
 
                 nickname = statusentry.nickname
@@ -226,9 +231,10 @@ def exitnodequery(request):
                 # If the client also wants to test the relay's exit policy,
                 # dest_ip and dest_port cannot be empty strings.
                 if (dest_ip_valid and dest_port_valid):
-                    descriptor = Descriptor.objects.get(descriptor=\
-                            statusentry.descriptor)
-                    router_exit_policy = _get_exit_policy(descriptor.rawdesc)
+                    #descriptor = Descriptor.objects.get(descriptor=\
+                    #        statusentry.descriptor)
+                    router_exit_policy = _get_exit_policy(statusentry.\
+                            descriptorid.rawdesc)
 
                     # Search the exit policy information for a case in which
                     # the given IP is in a subnet defined in the exit policy
@@ -241,7 +247,8 @@ def exitnodequery(request):
                         # When the IP is in the given subnet, check to ensure
                         # that the given destination port is also in the port
                         # defined in the exit policy information. When a match
-                        # is found, see if the condition is "accept" or "reject"
+                        # is found, see if the condition is "accept"
+                        # or "reject"
                         if (_is_ip_in_subnet(dest_ip, subnet)):
                             if (_port_match(dest_port, port_line)):
                                 if (condition == 'accept'):
@@ -251,7 +258,7 @@ def exitnodequery(request):
                                 break
 
                 relays.append((nickname, fingerprint, exit_possible))
-          
+
     template_values = {'is_router': is_router, 'relays': relays, \
             'dest_ip': dest_ip, 'dest_port': dest_port, 'source': source, \
             'source_valid': source_valid, 'dest_ip_valid': dest_ip_valid, \
@@ -274,25 +281,27 @@ def csv_current_results(request):
 
     return response
 
+
 def networkstatisticgraphs(request):
     # For now, this function is just a placeholder.
 
     variables = "TEMP STRING"
-    template_values = {'variables': variables,}
+    template_values = {'variables': variables}
     return render_to_response('nodequery.html', template_values)
+
 
 def columnpreferences(request):
     '''
     Let the user choose what columns should be displayed on the index page.
-    This view makes use of the sessions in order to store two array-list 
+    This view makes use of the sessions in order to store two array-list
     objects (currentColumns and availableColumns) in a "cookie" file so that
     the implementation of the "REMOVE", "ADD", "UP" and "DOWN" options
-    from the page could be possible. 
-    It orders the two array-lists by using the user input, through a GET 
+    from the page could be possible.
+    It orders the two array-lists by using the user input, through a GET
     single selection HTML form.
-    
+
     @param: request
-    @return: renders to the page the currently selected columns, the available 
+    @return: renders to the page the currently selected columns, the available
         columns and the previous selection
     '''
     #
@@ -301,19 +310,23 @@ def columnpreferences(request):
     #
     #TODO: Give the Session ID a reasonable "life-time" - so it wouldn't stay
     #   on the system forever (or until it is manually deleted).
-    #TODO: Integrate the array-list into the index page so it will actually 
+    #TODO: Integrate the array-list into the index page so it will actually
     #   display only the desired information.
     #TODO: Clean the code of unnecessary pieces.
     #
-    
+
     currentColumns = []
     availableColumns = []
-    
-    if not ('currentColumns' in request.session and 'availableColumns' in request.session):
-        DEFAULT_currentColumns = ["Country Code", "Uptime", "Hostname", "ORPort", "DirPort", "IP", \
-                    "Exit", "Authority", "Fast", "Guard", "Named", "Stable", "Running", "Valid", \
-                    "Bandwidth", "V2Dir", "Platform", "Hibernating", "BadExit",]
-        DEFAULT_availableColumns = ["Fingerprint", "LastDescriptorPublished", "Contact", "BadDir", "BadExit"]
+
+    if not ('currentColumns' in request.session and 'availableColumns' in
+            request.session):
+        DEFAULT_currentColumns = ["Country Code", "Uptime", "Hostname",
+                "ORPort", "DirPort", "IP", "Exit", "Authority", "Fast",
+                "Guard", "Named", "Stable", "Running", "Valid",
+                "Bandwidth", "V2Dir", "Platform", "Hibernating",
+                "BadExit"]
+        DEFAULT_availableColumns = ["Fingerprint", "LastDescriptorPublished",
+                "Contact", "BadDir", "BadExit"]
         request.session['currentColumns'] = DEFAULT_currentColumns
         request.session['availableColumns'] = DEFAULT_availableColumns
         currentColumns = DEFAULT_currentColumns
@@ -321,23 +334,23 @@ def columnpreferences(request):
     else:
         currentColumns = request.session['currentColumns']
         availableColumns = request.session['availableColumns']
-    
+
     selection = ''
-    if ('removeColumn' in request.GET and 'selected_removeColumn' in request.GET):
+    if ('removeColumn' in request.GET and 'selected_removeColumn' in
+            request.GET):
         selection = request.GET['selected_removeColumn']
         availableColumns.append(selection)
         currentColumns.remove(selection)
         request.session['currentColumns'] = currentColumns
         request.session['availableColumns'] = availableColumns
-        
-        
+
     if ('addColumn' in request.GET and 'selected_addColumn' in request.GET):
         selection = request.GET['selected_addColumn']
         currentColumns.append(selection)
         availableColumns.remove(selection)
         request.session['currentColumns'] = currentColumns
         request.session['availableColumns'] = availableColumns
-    
+
     if ('upButton' in request.GET and 'selected_removeColumn' in request.GET):
         selection = request.GET['selected_removeColumn']
         selectionPos = currentColumns.index(selection)
@@ -347,8 +360,9 @@ def columnpreferences(request):
             currentColumns[selectionPos] = aux
         request.session['currentColumns'] = currentColumns
         request.session['availableColumns'] = availableColumns
-    
-    if ('downButton' in request.GET and 'selected_removeColumn' in request.GET):
+
+    if ('downButton' in request.GET and 'selected_removeColumn' in
+            request.GET):
         selection = request.GET['selected_removeColumn']
         selectionPos = currentColumns.index(selection)
         if (selectionPos < len(currentColumns) - 1):
@@ -357,11 +371,11 @@ def columnpreferences(request):
             currentColumns[selectionPos] = aux
         request.session['currentColumns'] = currentColumns
         request.session['availableColumns'] = availableColumns
-        
-    
-    template_values = {'currentColumns': currentColumns, 'availableColumns': availableColumns, \
-                    'selectedEntry': selection}
+
+    template_values = {'currentColumns': currentColumns, 'availableColumns':
+            availableColumns, 'selectedEntry': selection}
     return render_to_response('columnpreferences.html', template_values)
+
 
 def networkstatisticgraphs(request):
     # For now, this function is just a placeholder.
@@ -369,16 +383,18 @@ def networkstatisticgraphs(request):
     """
 
     variables = "TEMP STRING"
-    template_values = {'variables': variables,}
+    template_values = {'variables': variables}
     return render_to_response('statisticgraphs.html', template_values)
+
 
 def unruly_passengers_csv(request):
     # For now, this function is just a placeholder. We're using this to see
     # if we can understand the csv module.
     """
     """
-    UNRULY_PASSENGERS = [146,184,235,200,226,251,299,273,281,304,203]
-    
+    UNRULY_PASSENGERS = [146, 184, 235, 200, 226, 251, 299, 273, 281, 304,
+            203]
+
     # Create the HttpResponse object with the appropriate CSV header.
     response = HttpResponse(mimetype='text/csv')
     response['Content-Disposition'] = 'attachment; filename=test_data.csv'
@@ -391,21 +407,24 @@ def unruly_passengers_csv(request):
 
     return response
 
+
 def _get_exit_policy(rawdesc):
     """
     Gets the exit policy information from the raw descriptor
 
+    @type rawdesc: C{string} or C{buffer}
+    @param rawdesc: The raw descriptor of a relay.
     @rtype      list of strings
     @return     all lines in rawdesc that comprise the exit policy
     """
-
     policy = []
-    rawdesc_array = rawdesc.split("\n")
+    rawdesc_array = str(rawdesc).split("\n")
     for line in rawdesc_array:
         if (line.startswith(("accept ", "reject "))):
             policy.append(line)
 
     return policy
+
 
 def _is_ip_in_subnet(ip, subnet):
     """
@@ -421,9 +440,9 @@ def _is_ip_in_subnet(ip, subnet):
     False
 
     @type ip: C{string}
-    @ivar ip: The IP address to check for membership in the subnet.
+    @param ip: The IP address to check for membership in the subnet.
     @type subnet: C{string}
-    @ivar subnet: The subnet that the given IP address may or may not be in.
+    @param subnet: The subnet that the given IP address may or may not be in.
     @rtype: C{boolean}
     @return: True if the IP address is in the subnet, false otherwise.
     """
@@ -462,12 +481,12 @@ def _is_ip_in_subnet(ip, subnet):
     # Calculate the lower and upper bounds using the mask.
     # For example, 255.255.128.0/16 should have lower bound 255.255.0.0
     # and upper bound 255.255.255.255. 255.255.128.0/16 is the same as
-    # 11111111.11111111.10000000.00000000 with mask 
+    # 11111111.11111111.10000000.00000000 with mask
     # 11111111.11111111.00000000.00000000. Then using the bitwise and
     # operator, the lower bound would be 11111111.11111111.00000000.00000000.
     lower_bound = subnet_as_int & mask
 
-    # Similarly, ~mask would be 00000000.00000000.11111111.11111111, 
+    # Similarly, ~mask would be 00000000.00000000.11111111.11111111,
     # so ~mask & 0xFFFFFFFF = ~mask & 11111111.11111111.11111111.11111111, or
     # 00000000.00000000.11111111.11111111. Then
     # 11111111.11111111.10000000.00000000 | (~mask % 0xFFFFFFFF) is
@@ -483,13 +502,14 @@ def _is_ip_in_subnet(ip, subnet):
     else:
         return False
 
+
 def _is_ipaddress(ip):
     """
     Return True if the given supposed IP address could be a valid IP address,
     False otherwise.
 
     @type ip: C{string}
-    @ivar ip: The IP address to test for validity.
+    @param ip: The IP address to test for validity.
     @rtype: C{boolean}
     @return: True if the IP address could be a valid IP address,
         False otherwise.
@@ -508,24 +528,26 @@ def _is_ipaddress(ip):
     # the given IP address is certainly not a valid IP address.
     a, b, c, d = ip.split('.')
     try:
-        if (int(a) > 255 or int(a) < 0 or int(b) > 255 or int(b) < 0 or int(c) > 255 or int(c) < 0 or int(d) > 255 or int(d) < 0):
+        if (int(a) > 255 or int(a) < 0 or int(b) > 255 or int(b) < 0 or
+                int(c) > 255 or int(c) < 0 or int(d) > 255 or int(d) < 0):
             return False
     except:
         return False
 
     return True
 
+
 def _is_port(port):
     """
-    Return True if the given supposed port could be a valid port, 
+    Return True if the given supposed port could be a valid port,
     False otherwise.
 
     @type port: C{string}
-    @ivar port: The port to test for validity.
+    @param port: The port to test for validity.
     @rtype: C{boolean}
     @return: True if the given port could be a valid port, False otherwise.
     """
-    # Ports must be integers and between 0 and 65535, inclusive. If the given 
+    # Ports must be integers and between 0 and 65535, inclusive. If the given
     # port cannot be casted as an int, it cannot be a valid port.
     try:
         if (int(port) > 65535 or int(port) < 0):
@@ -535,14 +557,15 @@ def _is_port(port):
 
     return True
 
+
 def _port_match(dest_port, port_line):
     """
     Find if dest_port is defined as "in" port_line.
 
     @type dest_port: C{string}
-    @ivar dest_port: The port to test for membership in port_line
+    @param dest_port: The port to test for membership in port_line
     @type port_line: C{string}
-    @ivar port_line: The port_line that dest_port is to be checked for
+    @param port_line: The port_line that dest_port is to be checked for
         membership in. Can contain * or -.
     @rtype: C{boolean}
     @return: True if dest_port is "in" port_line, False otherwise.
@@ -560,3 +583,28 @@ def _port_match(dest_port, port_line):
         return True
     return False
 
+
+def _get_if_exists(request, title):
+    """
+    Process the HttpRequest provided to see if a value, L{title}, is
+    provided and retrievable by means of a C{GET}.
+
+    If so, the data itself is returned; if not, an empty string is
+    returned.
+
+    @type request: HttpRequest object
+        (@see: https://docs.djangoproject.com/en/1.2/ref/request-
+        response/#httprequest-objects
+    @param request: The HttpRequest object that contains metadata
+        about the request.
+    @type title: C{string}
+    @param title: The name of the data that may be provided by the
+        request.
+    @rtype: C{string}
+    @return: The data with L{title} referenced in the request, if it
+        exists.
+    """
+    if (title in request.GET and request.GET[title]):
+        return request.GET[title].strip()
+    else:
+        return ""

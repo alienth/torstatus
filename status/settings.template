@@ -16,12 +16,19 @@ MANAGERS = ADMINS
 # FILL IN NAME, USER, PASSWORD, HOST, PORT
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3', or 'oracle'.
-        'NAME': '',                      # Or path to database file if using sqlite3.
-        'USER': '',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3',
+        # or 'oracle'.
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        # Or path to database file if using sqlite3.
+        'NAME': '',
+        # Not used with sqlite3.
+        'USER': '',
+        # Not used with sqlite3.
+        'PASSWORD': '',
+        # Set to empty string for localhost. Not used with sqlite3.
+        'HOST': '',
+        # Set to empty string for default. Not used with sqlite3.
+        'PORT': '',
     }
 }
 
@@ -30,8 +37,8 @@ DATABASES = {
 # although not all choices may be available on all operating systems.
 # On Unix systems, a value of None will cause Django to use the same
 # timezone as the operating system.
-# If running in a Windows environment this must be set to the same as your
-# system time zone.
+# If running in a Windows environment this must be set to the same as
+# your system time zone.
 TIME_ZONE = 'GMT' + str((time.timezone / 3600) - time.daylight)
 
 # Language code for this installation. All choices can be found here:
@@ -50,7 +57,8 @@ USE_L10N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = os.path.join(os.path.dirname(__file__),'statusapp/static/')
+MEDIA_ROOT = os.path.join(os.path.dirname(__file__),
+        'statusapp/static/')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
@@ -89,8 +97,9 @@ INTERNAL_IPS = ('127.0.0.1',)
 ROOT_URLCONF = 'urls'
 
 TEMPLATE_DIRS = (
-	os.path.join(os.path.dirname(__file__),'statusapp/templates'),
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+    os.path.join(os.path.dirname(__file__), 'statusapp/templates'),
+    # Put strings here, like "/home/html/django_templates" or
+    # "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
 )
@@ -102,11 +111,11 @@ INSTALLED_APPS = (
     #'django.contrib.sites',
     #'django.contrib.messages',
     'statusapp',
-    # Enabled this app in order to fix errors given when running tests with
-    # python manage.py test.
+    # Enabled this app in order to fix errors given when running tests
+    # with python manage.py test.
     # @see: http://www.mail-archive.com/django-users@googlegroups.com/
     # msg78059.html
-    'django.contrib.admin', 
+    'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
