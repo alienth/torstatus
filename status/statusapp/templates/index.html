@@ -88,15 +88,17 @@
 		<th class="sorttable_nosort" id="relayHeaderInv">Icons</th>
         <th class="sorttable_numeric" id="relayHeader">ORPort</th>
         <th class="sorttable_numeric" id="relayHeader">DirPort</th>
-        <th class="sorttale_numeric" id="relayHeader">Bad Exit</th>
+        <th class="sorttable_numeric" id="relayHeader">Bad Exit</th>
 	</tr>
-
+	
 	{% for relay in relay_list %}
 		<tr {% ifequal relay.isbadexit 1 %} class="relayBadExit" {% else %} class="relay" {% endifequal %}>
 		
 		    <!-- Add: RELAY IS DOWN and RELAY IS HIBERNATING -->
 		    
-            <td sorttable_customkey="us" id="col_relayName"><img src="static/img/flags/{{ relay.address|getcountry }}.gif" alt={{ relay.address|getcountry|upper }} title={{ relay.address|getcountry }}></td>
+            <td sorttable_customkey="{{ relay.address|getcountry }}" id="col_relayName"><img \
+            src="static/img/flags/{{ relay.address|getcountry }}.gif" alt="{{ relay.address|getcountry|upper }}" \
+            title="{{ relay.address|getcountry }}"></td>
 			<!-- Note: sorttable_customkey="[[COUNTRY_PREFIX]]" -->
 			
             <td id="col_relayName"> 
@@ -106,8 +108,8 @@
                     <a class="linkDetails" href="/details/{{ relay.fingerprint }}">{{ relay.nickname }}</a>
                 {% endifequal %}
             </td>
-            <td id="col_relayBandwidth">{{ relay.bandwidthobserved|kilobytes_ps }} KB/s</td>
-            <td id="col_relayUptime">{{ relay.uptime|days }} d</td>
+            <td id="col_relayBandwidth">{{ relay.descriptorid.bandwidthobserved|kilobytes_ps }} KB/s</td>
+            <td id="col_relayUptime">{{ relay.descriptorid.uptime|days }} d</td>
             <td id="col_relayAddress">{{ relay.address }}</td>
             <td id="col_relayIcons">
 

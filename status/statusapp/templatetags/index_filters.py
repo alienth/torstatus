@@ -1,5 +1,5 @@
 from django import template
-#import geoip
+import geoip
 
 register = template.Library()
 
@@ -15,7 +15,7 @@ def kilobytes_ps(bytes_ps):
     """
     # As statusapp.views.details is written now, this value can 
     # be None sometimes.
-    if (bytes_ps == None):
+    if (bytes_ps == ''):
         return 0
     else:
         return int(bytes_ps)/1024
@@ -32,11 +32,11 @@ def days(seconds):
     """
     # As statusapp.views.details is written now, this value can 
     # be None sometimes.
-    if (seconds == None): 
+    if (seconds == ''): 
         return 0
     else:
         return int(seconds)/86400
 
-#@register.filter
-#def getcountry(ip):
-#    return geoip.country(ip).lower()
+@register.filter
+def getcountry(ip):
+    return geoip.country(ip).lower()

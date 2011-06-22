@@ -332,6 +332,10 @@ class Statusentry(models.Model):
         db_table = u'statusentry'
     def __unicode__(self):
         return str(self.validafter) + ": " + self.fingerprint
+    def __eq__(self, other):
+        return self.fingerprint == other.fingerprint
+    def __hash__(self):
+        return hash(self.fingerprint)
 
 class Consensus(models.Model):
     """

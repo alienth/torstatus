@@ -310,34 +310,33 @@ def columnpreferences(request):
     availableColumns = []
     
     if not ('currentColumns' in request.session and 'availableColumns' in request.session):
-        DEFAULT_currentColumns = ["Country Code", "Uptime", "Hostname", "ORPort", "DirPort", "IP", \
+        currentColumns = ["Country Code", "Uptime", "Hostname", "ORPort", "DirPort", "IP", \
                     "Exit", "Authority", "Fast", "Guard", "Named", "Stable", "Running", "Valid", \
                     "Bandwidth", "V2Dir", "Platform", "Hibernating", "BadExit",]
-        DEFAULT_availableColumns = ["Fingerprint", "LastDescriptorPublished", "Contact", "BadDir", "BadExit"]
-        request.session['currentColumns'] = DEFAULT_currentColumns
-        request.session['availableColumns'] = DEFAULT_availableColumns
-        currentColumns = DEFAULT_currentColumns
-        availableColumns = DEFAULT_availableColumns
+        availableColumns = ["Fingerprint", "LastDescriptorPublished", "Contact", "BadDir", "BadExit"]
+        request.session['currentColumns'] = currentColumns
+        request.session['availableColumns'] = availableColumns
     else:
         currentColumns = request.session['currentColumns']
         availableColumns = request.session['availableColumns']
     
+    '''
     selection = ''
+    
     if ('removeColumn' in request.GET and 'selected_removeColumn' in request.GET):
         selection = request.GET['selected_removeColumn']
         availableColumns.append(selection)
         currentColumns.remove(selection)
         request.session['currentColumns'] = currentColumns
         request.session['availableColumns'] = availableColumns
-        
-        
+          
     if ('addColumn' in request.GET and 'selected_addColumn' in request.GET):
         selection = request.GET['selected_addColumn']
         currentColumns.append(selection)
         availableColumns.remove(selection)
         request.session['currentColumns'] = currentColumns
         request.session['availableColumns'] = availableColumns
-    
+        
     if ('upButton' in request.GET and 'selected_removeColumn' in request.GET):
         selection = request.GET['selected_removeColumn']
         selectionPos = currentColumns.index(selection)
@@ -357,11 +356,54 @@ def columnpreferences(request):
             currentColumns[selectionPos] = aux
         request.session['currentColumns'] = currentColumns
         request.session['availableColumns'] = availableColumns
-        
+    '''
     
+    columnLists = [currentColumns, availableColumns, '']
+    if ('removeColumn' in request.GET and 'selected_removeColumn' in request.GET):
+        returnedLists = _buttonChoice(request, 'removeColumn', 'selected_removeColumn', columnLists)
+    if ('addColumn' in request.GET and 'selected_addColumn' in request.GET):
+        returnedLists = _buttonChoice(request, 'addColumn', 'selected_addColumn', columnLists)
+    if ('upButton' in request.GET and 'selected_removeColumn' in request.GET):
+        returnedLists = _buttonChoice(request, 'upButton', 'selected_removeColumn', columnLists)
+    if ('downButton' in request.GET and 'selected_removeColumn' in request.GET):
+        returnedLists = _buttonChoice(request, 'downButton', 'selected_removeColumn', columnLists)
+    
+    '''
     template_values = {'currentColumns': currentColumns, 'availableColumns': availableColumns, \
                     'selectedEntry': selection}
+    '''
+    template_values = {'currentColumns': columnLists[0], 'availableColumns': columnLists[1], \
+                    'selectedEntry': columnLists[2]}
+    
     return render_to_response('columnpreferences.html', template_values)
+    
+def _buttonChoice(request, button, field, columnLists): 
+    selection = request.GET[field]
+    if (button == 'removeColumn'):
+        availableColumns.append(selection)
+        currentColumns.remove(selection)
+    elif (button == 'addColumn'):
+        currentColumns.append(selection)
+        availableColumns.remove(selection)
+    elif (button == 'upButton'):
+        selectionPos = currentColumns.index(selection)
+        if (selectionPos > 0):
+            aux = currentColumns[selectionPos - 1]
+            currentColumns[selectionPos - 1] = currentColumns[selectionPos]
+            currentColumns[selectionPos] = aux
+    elif (button == 'downButton'):
+        selectionPos = currentColumns.index(selection)
+        if (selectionPos < len(currentColumns) - 1):
+            aux = currentColumns[selectionPos + 1]
+            currentColumns[selectionPos + 1] = currentColumns[selectionPos]
+            currentColumns[selectionPos] = aux
+    request.session['currentColumns'] = currentColumns
+    request.session['availableColumns'] = availableColumns
+    columnLists[0] = currentColumns
+    columnLists[1] = availableColumns
+    columnLists[3] = selection
+    return columnLists
+    
 
 def networkstatisticgraphs(request):
     # For now, this function is just a placeholder.
