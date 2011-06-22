@@ -10,7 +10,7 @@ def words(seconds):
     """
     Convert a duration in seconds to a duration in words
     """
-
+    seconds = int(seconds)
     days = seconds/86000
     hours = (seconds % 86000)/3600
     minutes = (seconds % 3600)/60
@@ -35,7 +35,7 @@ def onion_key(rawdesc):
     Get the onion key from the raw descriptor
     """
 
-    return "\n".join(rawdesc.split("\n")[9:14])
+    return "\n".join(str(rawdesc).split("\n")[9:14])
 
 @register.filter
 def signing_key(rawdesc):
@@ -43,7 +43,7 @@ def signing_key(rawdesc):
     Get the signing key from the raw descriptor
     """
 
-    return "\n".join(rawdesc.split("\n")[15:20])
+    return "\n".join(str(rawdesc).split("\n")[15:20])
 
 @register.filter
 def exitinfo(rawdesc):
@@ -51,7 +51,7 @@ def exitinfo(rawdesc):
     Get the detailed exit policy information from the raw descriptor
     """
     policy = []
-    rawdesc_array = rawdesc.split("\n")
+    rawdesc_array = str(rawdesc).split("\n")
     for line in rawdesc_array:
         if (line.startswith(("accept", "reject"))):
             policy.append(line)
@@ -63,7 +63,7 @@ def contact(rawdesc):
     Get the contact information from the raw descriptor, if it exists
     """
 
-    for line in rawdesc.split("\n"):
+    for line in str(rawdesc).split("\n"):
         if (line.startswith("contact")):
             return line[8:]
     return "No contact information given"
@@ -76,7 +76,7 @@ def family(rawdesc):
     """
 
     fingerprints_and_nicknames = []
-    for line in rawdesc.split("\n"):
+    for line in str(rawdesc).split("\n"):
         if (line.startswith("family")):
             fingerprints_and_nicknames = line[7:].split()
 

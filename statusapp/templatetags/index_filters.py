@@ -11,13 +11,7 @@ def kilobytes_ps(bytes_ps):
     """
     Convert a bandwidth value in bytes to a bandwidth value in kilobytes
     """
-
-    # As statusapp.views.details is written now, this value can 
-    # be None sometimes.
-    if (bytes_ps == None):
-        return 0
-    else:
-        return int(bytes_ps)/1024
+    return int(bytes_ps)/1024
 
 @register.filter
 def days(seconds):
@@ -27,7 +21,7 @@ def days(seconds):
 
     # As statusapp.views.details is written now, this value can 
     # be None sometimes.
-    if (seconds == None): 
+    if (seconds == ''): 
         return 0
     else:
         return int(seconds)/86000
@@ -35,4 +29,3 @@ def days(seconds):
 @register.filter
 def getcountry(ip):
     return geoip.country(ip).lower()
-

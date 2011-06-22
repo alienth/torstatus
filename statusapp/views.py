@@ -6,13 +6,13 @@ from statusapp.models import Statusentry, Descriptor, Bwhist
 from django.views.decorators.cache import cache_page
 import datetime
 import time
+from django.core.cache import cache
 from django.db.models import Max
 
 
 # To do: get rid of javascript sorting: pass another argument
 # to this view function and sort the table accordingly.
-#@cache_page(60 * 15) # Cache is turned off for development,
-                      # but it works.
+
 def index(request):
     """
     Supply a dictionary to the index.html template consisting of keys
@@ -20,23 +20,29 @@ def index(request):
     database. Querying the database is done with raw SQL. This needs 
     to be fixed.
     """
-
-    # Search options should probably not be implemented this way in a 
-    # raw SQL query for security reasons:
-    #ordering = ""
-    #restrictions = ""
-    #adv_search = ""
-    #if request.GET:
-
+    #if cache.get('day_entries'):
     last_va = Statusentry.objects.aggregate(last=Max('validafter'))['last']
-    a = Statusentry.objects.filter(validafter__gte=(last_va - datetime.timedelta(days=1))).order_by('-validafter')
-    recent_entries = list(set(a))
+    day_entries = Statusentry.objects.filter(validafter__gte=(last_va - datetime.timedelta(days=1))).order_by('-validafter')
+    descriptor_bandwidth = []
+    descriptor_uptime = []
+    recent_entries = list(set(day_entries[:1000]))
+    #recent_entries = list(set(day_entries))
+
+    """
+    for entry in recent_entries:
+        descriptor_bandwidth.append(entry.descriptorid.bandwidthobserved)
+        descriptor_uptime.append(entry.descriptorid.uptime)
+    #recent_entries = list(set(day_entries[:3000]))
+
+    zip_test = zip(recent_entries, descriptor_bandwidth, descriptor_uptime)
+    """
 
     num_routers = len(recent_entries)
     client_address = request.META['REMOTE_ADDR']
+    
+    #template_values = {'zip_test': zip_test, 'client_address': client_address, 'num_routers': num_routers, 'exp_time': 900}
     template_values = {'relay_list': recent_entries, 'client_address': client_address, 'num_routers': num_routers, 'exp_time': 900}
     return render_to_response('index.html', template_values)
-
 
 def customindex(request, fingerprint):
     # This method should probably not exist, and request.GET should be used
@@ -91,7 +97,6 @@ def customindex(request, fingerprint):
     #eventually.
     #Could even merge with index
 
-
     if 'searchstuff' in request.GET:
         if request.GET['searchstuff']:
             message = 'You searched for: %r' % request.GET['searchstuff']
@@ -99,55 +104,173 @@ def customindex(request, fingerprint):
             message = 'You submitted an empty form.'
     return HttpResponse(message)
 
-def details(request, fingerprint):
+def details(request, descriptor_fingerprint):
     import geoip
-    """
-    Supply a dictionary to the details.html template consisting of relevant
-    values associated with a given fingerprint. Querying the database is done 
-    with raw SQL. This needs to be fixed.
-    """
-
-    cursor = connection.cursor()
-    cursor.execute('SELECT statusentry.nickname, statusentry.fingerprint, \
-            statusentry.address, statusentry.orport, statusentry.dirport, \
-            descriptor.platform, descriptor.published, descriptor.uptime, \
-            descriptor.bandwidthburst, descriptor.bandwidthavg, \
-            descriptor.bandwidthobserved, statusentry.isauthority, \
-            statusentry.isbaddirectory, statusentry.isbadexit, \
-            statusentry.isexit, statusentry.isfast, statusentry.isguard, \
-            statusentry.isnamed, statusentry.isstable, statusentry.isrunning, \
-            statusentry.isvalid, statusentry.isv2dir, statusentry.ports, \
-            descriptor.rawdesc FROM statusentry JOIN descriptor ON \
-            statusentry.descriptor = descriptor.descriptor WHERE \
-            statusentry.fingerprint = %s ORDER BY \
-            statusentry.validafter DESC LIMIT 1', [fingerprint]) 
-
-    try: 
-        nickname, fingerprint, address, orport, dirport, platform, published, \
-            uptime, bandwidthburst, bandwidthavg, bandwidthobserved, \
-            isauthority, isbaddirectory, isbadexit, isexit, isfast, isguard, \
-            isnamed, isstable, isrunning, isvalid, isv2dir, ports, rawdesc \
-            = cursor.fetchone()
-
-    except:
-        raise Http404
+    from statusapp.models import Statusentry, Descriptor, Bwhist
     
-    country = ""
-    country = geoip.country(address)
+    #This block gets the specific descriptor and statusentry that the client asked for
+    last_va = Statusentry.objects.aggregate(last=Max('validafter'))['last']
+    day_entries = Statusentry.objects.filter(validafter__gte=(last_va - datetime.timedelta(days=1))).order_by('-validafter')
+    entry = list(day_entries.filter(fingerprint = descriptor_fingerprint))[0]
+    descriptor = entry.descriptorid
+    template_values = {'descriptor': descriptor, 'statusentry': entry}
 
-    template_values = {'nickname': nickname, 'fingerprint': fingerprint, \
-            'address': address, 'orport': orport, 'dirport': dirport, \
-            'platform': platform, 'published': published, 'uptime': uptime, \
-            'bandwidthburst': bandwidthburst, 'bandwidthavg': bandwidthavg, \
-            'bandwidthobserved': bandwidthobserved, 'isauthority': isauthority,\
-             'isbaddirectory': isbaddirectory, 'isbadexit': isbadexit, \
-            'isexit': isexit, 'isfast': isfast, 'isguard': isguard, \
-            'isnamed': isnamed, 'isstable': isstable, 'isrunning': isrunning, \
-            'isvalid': isvalid, 'isv2dir': isv2dir, 'ports': ports, \
-            'rawdesc': rawdesc, 'country': country}
-
-    
     return render_to_response('details.html', template_values)
+
+def graph1(request):
+    from statusapp.models import Statusentry, Descriptor, Bwhist
+    import matplotlib
+    from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+    from matplotlib.figure import Figure
+    from matplotlib.dates import DateFormatter
+
+
+    last_va = Statusentry.objects.aggregate(last=Max('validafter'))['last']
+    day_entries = Statusentry.objects.filter(validafter__gte=(last_va - datetime.timedelta(days=1))).order_by('-validafter')
+    entry = list(day_entries.filter(fingerprint = descriptor_fingerprint))[0]
+    descriptor = entry.descriptorid
+    bandwidthobject = Bwhist.objects.filter(fingerprint=descriptor_fingerprint)[0]
+    """
+    matplotlib.rcParams['figure.subplot.left'] = 0.04
+    matplotlib.rcParams['figure.subplot.right'] = 0.999
+    matplotlib.rcParams['figure.subplot.top'] = 0.94
+    matplotlib.rcParams['figure.subplot.bottom'] = 0.10
+    """
+    #
+    #
+    #
+    #    FIRST MAKE GRAPH 1
+    #       which is the recent write history graph
+    #
+    #
+    
+    x_series = range(0,24)
+    y_series = [ bandwidthobject.written[0] for i in x_series]
+    pyplot.plot( x_series, y_series, '-')
+    pyplot.title( 'Plotting Write history' )
+    pyplot.xlabel( 'Hour' )
+    pyplot.ylabel( 'Write Speed' )
+    pyplot
+    
+
+    """
+    fig1 = Figure(facecolor='white', edgecolor='black', figsize=(20,5), frameon=False)
+    ax = fig.add_subplot(111)
+
+    x = matplotlib.numpy.arange(24)
+    """
+
+    p = get_object_or_404(Poll, pk=poll_id)
+    #fig = Figure()
+    fig = Figure(facecolor='white', edgecolor='black', figsize=(20, 5), frameon=False)
+    ax = fig.add_subplot(111)
+	
+    x = matplotlib.numpy.arange(p.choice_set.count())
+    choices = p.choice_set.all()
+    choice_votes = [choice.votes for choice in choices][:90]
+    choice_names = [choice.choice for choice in choices][:90]
+	
+    #choice_totalNumber = p.choice_set.count()
+    choice_totalNumber = len(choice_names)
+    choice_index = matplotlib.numpy.arange(choice_totalNumber)
+    
+    cols = ['lightblue']
+    #cols = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'indigo'] * 10
+
+    cols = cols[0:len(choice_index)]
+    bar_width = 0.3
+    ax.bar(choice_index, choice_votes, color=cols, width=bar_width)
+    ax.set_xticks(choice_index + (bar_width/2.0))
+    ax.set_xticklabels(choice_names, fontstyle='italic', fontsize='10', fontweight='light', rotation='vertical', fontname='Others')
+    ax.set_xlabel("Choices")
+    ax.set_ylabel("Votes")
+    chart_title = "Results for poll: %s" % p.question
+    ax.set_title(chart_title)
+    ax.grid(color='r', linestyle='-', linewidth=.1)
+    for index in choice_index:
+        ax.text(index, choice_votes[index], str(choice_votes[index]), fontsize='10')
+    canvas = FigureCanvas(fig)
+    response = HttpResponse(content_type='image/png')
+    canvas.print_png(response, ha="center")
+    return response
+
+def graph2(request):
+    #
+    #
+    #       SECOND MAKE SECOND GRAPH
+    #           which is the recent read history
+    #
+    #
+
+    from statusapp.models import Statusentry, Descriptor, Bwhist
+    import matplotlib
+    from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+    from matplotlib.figure import Figure
+    from matplotlib.dates import DateFormatter
+
+
+    last_va = Statusentry.objects.aggregate(last=Max('validafter'))['last']
+    day_entries = Statusentry.objects.filter(validafter__gte=(last_va - datetime.timedelta(days=1))).order_by('-validafter')
+    entry = list(day_entries.filter(fingerprint = descriptor_fingerprint))[0]
+    descriptor = entry.descriptorid
+    bandwidthobject = Bwhist.objects.filter(fingerprint=descriptor_fingerprint)[0]
+    """
+    matplotlib.rcParams['figure.subplot.left'] = 0.04
+    matplotlib.rcParams['figure.subplot.right'] = 0.999
+    matplotlib.rcParams['figure.subplot.top'] = 0.94
+    matplotlib.rcParams['figure.subplot.bottom'] = 0.10
+    """
+    
+    x_series = range(0,24)
+    y_series = [ bandwidthobject.written[0] for i in x_series]
+    pyplot.plot( x_series, y_series, '-')
+    pyplot.title( 'Plotting Write history' )
+    pyplot.xlabel( 'Hour' )
+    pyplot.ylabel( 'Write Speed' )
+    pyplot
+    
+
+    """
+    fig1 = Figure(facecolor='white', edgecolor='black', figsize=(20,5), frameon=False)
+    ax = fig.add_subplot(111)
+
+    x = matplotlib.numpy.arange(24)
+    """
+
+    p = get_object_or_404(Poll, pk=poll_id)
+    #fig = Figure()
+    fig = Figure(facecolor='white', edgecolor='black', figsize=(20, 5), frameon=False)
+    ax = fig.add_subplot(111)
+    
+    x = matplotlib.numpy.arange(p.choice_set.count())
+    choices = p.choice_set.all()
+    choice_votes = [choice.votes for choice in choices][:90]
+    choice_names = [choice.choice for choice in choices][:90]
+    
+    #choice_totalNumber = p.choice_set.count()
+    choice_totalNumber = len(choice_names)
+    choice_index = matplotlib.numpy.arange(choice_totalNumber)
+    
+    cols = ['lightblue']
+    #cols = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'indigo'] * 10
+
+    cols = cols[0:len(choice_index)]
+    bar_width = 0.3
+    ax.bar(choice_index, choice_votes, color=cols, width=bar_width)
+    ax.set_xticks(choice_index + (bar_width/2.0))
+    ax.set_xticklabels(choice_names, fontstyle='italic', fontsize='10', fontweight='light', rotation='vertical', fontname='Others')
+    ax.set_xlabel("Choices")
+    ax.set_ylabel("Votes")
+    chart_title = "Results for poll: %s" % p.question
+    ax.set_title(chart_title)
+    ax.grid(color='r', linestyle='-', linewidth=.1)
+    for index in choice_index:
+        ax.text(index, choice_votes[index], str(choice_votes[index]), fontsize='10')
+    canvas = FigureCanvas(fig)
+    response = HttpResponse(content_type='image/png')
+    canvas.print_png(response, ha="center")
+    return response
+
 
 def exitnodequery(request):
     # TODO: given an IP, only one or zero routers are returned, but some
