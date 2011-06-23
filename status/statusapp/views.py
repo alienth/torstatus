@@ -18,7 +18,8 @@ def index(request):
     Supply a dictionary to the index.html template consisting of keys
     equivalent to columns in the statusentry and descriptor tables in the
     database. Querying the database is done with raw SQL. This needs 
-    to be fixed.
+    to be fixed. Also, returning an array-list of the column names to
+    be displayed.
     """
 
     # Search options should probably not be implemented this way in a 
@@ -345,6 +346,12 @@ def columnpreferences(request):
     return render_to_response('columnpreferences.html', template_values)
     
 def _buttonChoice(request, button, field, currentColumns, availableColumns): 
+    '''
+    Helper function that manages the changes in the column preferences array-lists.
+    @see: columnpreferences
+    @rtype: list(list(int), list(int), string)
+    @return: columnLists
+    '''
     selection = request.GET[field]
     if (button == 'removeColumn'):
         availableColumns.append(selection)

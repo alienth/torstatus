@@ -126,12 +126,12 @@
             <td id="col_relayName"> 
                 {% if "Named" in currentColumns %}
                 {% ifequal relay.isnamed 1 %}
-                    <b><a class="linkDetails" href="/details/{{ relay.fingerprint }}">{{ relay.nickname }}</a></b>
+                    <b><a class="linkDetails" href="/details/{{ relay.fingerprint }}" target="_BLANK">{{ relay.nickname }}</a></b>
                     {% else %}
-                    <a class="linkDetails" href="/details/{{ relay.fingerprint }}">{{ relay.nickname }}</a>
+                    <a class="linkDetails" href="/details/{{ relay.fingerprint }}" target="_BLANK">{{ relay.nickname }}</a>
                 {% endifequal %}
                 {% else %}
-                    <a class="linkDetails" href="/details/{{ relay.fingerprint }}">{{ relay.nickname }}</a>
+                    <a class="linkDetails" href="/details/{{ relay.fingerprint }}" target="_BLANK">{{ relay.nickname }}</a>
                 {% endif %}                    
             </td>
             
