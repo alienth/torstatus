@@ -54,7 +54,7 @@ def onion_key(rawdesc):
 
     # We can assume that the onion key will always be the 10-14th lines
     # in the raw descriptor, starting with line 1.
-    return "\n".join(rawdesc.split("\n")[9:14])
+    return "\n".join(str(rawdesc).split("\n")[9:14])
 
 @register.filter
 def signing_key(rawdesc):
@@ -69,7 +69,7 @@ def signing_key(rawdesc):
 
     # We can assume that the signing key will always be the 16-20th lines
     # in the raw descriptor, starting with line 1.
-    return "\n".join(rawdesc.split("\n")[15:20])
+    return "\n".join(str(rawdesc).split("\n")[15:20])
 
 @register.filter
 def exitinfo(rawdesc):
@@ -82,7 +82,7 @@ def exitinfo(rawdesc):
     @return: The exit policy information of the relay.
     """
     policy = []
-    rawdesc_array = rawdesc.split("\n")
+    rawdesc_array = str(rawdesc).split("\n")
     for line in rawdesc_array:
         if (line.startswith(("accept", "reject"))):
             policy.append(line)
@@ -102,7 +102,7 @@ def contact(rawdesc):
     @return: The contact information of the relay.
     """
 
-    for line in rawdesc.split("\n"):
+    for line in str(rawdesc).split("\n"):
         if (line.startswith("contact")):
             return line[8:]
     return "No contact information given"
@@ -125,7 +125,7 @@ def family(rawdesc):
     # Family information is given in terms of nicknames or fingerprints.
     # First, get all family information.
     fingerprints_and_nicknames = []
-    for line in rawdesc.split("\n"):
+    for line in str(rawdesc).split("\n"):
         if (line.startswith("family")):
             fingerprints_and_nicknames = line[7:].split()
 

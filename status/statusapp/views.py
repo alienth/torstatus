@@ -27,6 +27,15 @@ def index(request):
     #restrictions = ""
     #adv_search = ""
     #if request.GET:
+    
+    currentColumns = []
+    if not ('currentColumns' in request.session):
+        currentColumns = ["Country Code", "Uptime", "Hostname", "ORPort", "DirPort", "IP", \
+                    "Exit", "Authority", "Fast", "Guard", "Named", "Stable", "Running", "Valid", \
+                    "Bandwidth", "V2Dir", "Platform", "Hibernating", "BadExit",]
+        request.session['currentColumns'] = currentColumns
+    else:
+        currentColumns = request.session['currentColumns']
 
     last_va = Statusentry.objects.aggregate(last=Max('validafter'))['last']
     a = Statusentry.objects.filter(validafter__gte=(last_va - datetime.timedelta(days=1))).order_by('-validafter')
@@ -34,7 +43,8 @@ def index(request):
 
     num_routers = len(recent_entries)
     client_address = request.META['REMOTE_ADDR']
-    template_values = {'relay_list': recent_entries, 'client_address': client_address, 'num_routers': num_routers, 'exp_time': 900}
+    template_values = {'relay_list': recent_entries, 'client_address': client_address, 'num_routers': num_routers, 'exp_time': 900, \
+                    'currentColumns': currentColumns}
     return render_to_response('index.html', template_values)
 
 
@@ -291,7 +301,6 @@ def columnpreferences(request):
     It orders the two array-lists by using the user input, through a GET 
     single selection HTML form.
     
-    @param: request
     @return: renders to the page the currently selected columns, the available 
         columns and the previous selection
     '''
@@ -313,71 +322,29 @@ def columnpreferences(request):
         currentColumns = ["Country Code", "Uptime", "Hostname", "ORPort", "DirPort", "IP", \
                     "Exit", "Authority", "Fast", "Guard", "Named", "Stable", "Running", "Valid", \
                     "Bandwidth", "V2Dir", "Platform", "Hibernating", "BadExit",]
-        availableColumns = ["Fingerprint", "LastDescriptorPublished", "Contact", "BadDir", "BadExit"]
+        availableColumns = ["Fingerprint", "LastDescriptorPublished", "Contact", "BadDir"]
         request.session['currentColumns'] = currentColumns
         request.session['availableColumns'] = availableColumns
     else:
         currentColumns = request.session['currentColumns']
         availableColumns = request.session['availableColumns']
     
-    '''
-    selection = ''
-    
-    if ('removeColumn' in request.GET and 'selected_removeColumn' in request.GET):
-        selection = request.GET['selected_removeColumn']
-        availableColumns.append(selection)
-        currentColumns.remove(selection)
-        request.session['currentColumns'] = currentColumns
-        request.session['availableColumns'] = availableColumns
-          
-    if ('addColumn' in request.GET and 'selected_addColumn' in request.GET):
-        selection = request.GET['selected_addColumn']
-        currentColumns.append(selection)
-        availableColumns.remove(selection)
-        request.session['currentColumns'] = currentColumns
-        request.session['availableColumns'] = availableColumns
-        
-    if ('upButton' in request.GET and 'selected_removeColumn' in request.GET):
-        selection = request.GET['selected_removeColumn']
-        selectionPos = currentColumns.index(selection)
-        if (selectionPos > 0):
-            aux = currentColumns[selectionPos - 1]
-            currentColumns[selectionPos - 1] = currentColumns[selectionPos]
-            currentColumns[selectionPos] = aux
-        request.session['currentColumns'] = currentColumns
-        request.session['availableColumns'] = availableColumns
-    
-    if ('downButton' in request.GET and 'selected_removeColumn' in request.GET):
-        selection = request.GET['selected_removeColumn']
-        selectionPos = currentColumns.index(selection)
-        if (selectionPos < len(currentColumns) - 1):
-            aux = currentColumns[selectionPos + 1]
-            currentColumns[selectionPos + 1] = currentColumns[selectionPos]
-            currentColumns[selectionPos] = aux
-        request.session['currentColumns'] = currentColumns
-        request.session['availableColumns'] = availableColumns
-    '''
-    
     columnLists = [currentColumns, availableColumns, '']
     if ('removeColumn' in request.GET and 'selected_removeColumn' in request.GET):
-        returnedLists = _buttonChoice(request, 'removeColumn', 'selected_removeColumn', columnLists)
-    if ('addColumn' in request.GET and 'selected_addColumn' in request.GET):
-        returnedLists = _buttonChoice(request, 'addColumn', 'selected_addColumn', columnLists)
-    if ('upButton' in request.GET and 'selected_removeColumn' in request.GET):
-        returnedLists = _buttonChoice(request, 'upButton', 'selected_removeColumn', columnLists)
-    if ('downButton' in request.GET and 'selected_removeColumn' in request.GET):
-        returnedLists = _buttonChoice(request, 'downButton', 'selected_removeColumn', columnLists)
+        columnLists = _buttonChoice(request, 'removeColumn', 'selected_removeColumn', currentColumns, availableColumns)
+    elif ('addColumn' in request.GET and 'selected_addColumn' in request.GET):
+        columnLists = _buttonChoice(request, 'addColumn', 'selected_addColumn', currentColumns, availableColumns)
+    elif ('upButton' in request.GET and 'selected_removeColumn' in request.GET):
+        columnLists = _buttonChoice(request, 'upButton', 'selected_removeColumn', currentColumns, availableColumns)
+    elif ('downButton' in request.GET and 'selected_removeColumn' in request.GET):
+        columnLists = _buttonChoice(request, 'downButton', 'selected_removeColumn', currentColumns, availableColumns)
     
-    '''
-    template_values = {'currentColumns': currentColumns, 'availableColumns': availableColumns, \
-                    'selectedEntry': selection}
-    '''
     template_values = {'currentColumns': columnLists[0], 'availableColumns': columnLists[1], \
                     'selectedEntry': columnLists[2]}
     
     return render_to_response('columnpreferences.html', template_values)
     
-def _buttonChoice(request, button, field, columnLists): 
+def _buttonChoice(request, button, field, currentColumns, availableColumns): 
     selection = request.GET[field]
     if (button == 'removeColumn'):
         availableColumns.append(selection)
@@ -399,9 +366,10 @@ def _buttonChoice(request, button, field, columnLists):
             currentColumns[selectionPos] = aux
     request.session['currentColumns'] = currentColumns
     request.session['availableColumns'] = availableColumns
-    columnLists[0] = currentColumns
-    columnLists[1] = availableColumns
-    columnLists[3] = selection
+    columnLists = []
+    columnLists.append(currentColumns)
+    columnLists.append(availableColumns)
+    columnLists.append(selection)
     return columnLists
     
 
