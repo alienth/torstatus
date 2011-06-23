@@ -1,0 +1,40 @@
+TorStatus Design Documentation
+==============================
+.. This file is written in reStructuredText.
+
+Software
+--------
+This implementation of TorStatus was developed using Django 1.2.3,
+Python 2.6.6, psycopg 2.2.1-1, and a postgreSQL Tor Metrics database.
+While it is possible that TorStatus will run on newer versions of this
+software, we cannot guarantee that TorStatus will function properly.
+
+Django
+------
+TorStatus is written in django to take advantage of Django's
+object-relational mapper (ORM) for straight-forward database access.
+In Django, a database table is analogous to a class, rows are
+analogous to objects of that class, and columns are analogous to the
+fields of that class. Data can be directly accessed by way of Django's
+models, each of which maps to a table in the database and can be
+utilized as an object. Django's adaptation of the model-view-controller
+schema is a bit confusing: controllers are stored in a module named
+views.py and views are called templates (but models are still,
+thankfully, called models).
+
+Directory Structure
+-------------------
+While the directory structure in commit 237303b...00cc7ed seems to be
+the most djangonic file structure that we've used yet, the directory
+structure is not yet settled.
+
+Modules in statusapp
+--------------------
+models.py
+.........
+tests.py
+........
+urls.py
+.......
+views.py
+........

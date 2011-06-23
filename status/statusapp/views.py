@@ -1,7 +1,9 @@
 """
-The views module for TorStatus (Django is idiosyncratic in that it
-names controllers 'views'; models are still models and views are called
-templates). This module contains a single controller for each page type.
+The views module for TorStatus.
+
+Django is idiosyncratic in that it names controllers 'views'; models
+are still models and views are called templates. This module contains a
+single controller for each page type.
 """
 import time
 import datetime
@@ -152,7 +154,7 @@ def exitnodequery(request):
     destination IP address and port.
 
     This method aims to provide meaningful information to the client in
-    the case of unconventional input by returning both the information
+    the case of unparsable input by returning both the information
     requested as well as the input that the client provided. If the
     information requested is not retrievable, this method is able to
     give a useful and informative error message by passing both the text
@@ -181,8 +183,9 @@ def exitnodequery(request):
     if (_is_port(dest_port)):
         dest_port_valid = True
 
-    # Some users may assume exiting on port 80. If a destination IP address is
-    # given without a port, assume that the user means port 80.
+    # Some users may assume exiting on port 80. If a destination IP
+    # address is given without a port, assume that the user means
+    # port 80.
     if (dest_ip_valid == True and dest_port_valid == False):
         dest_port = "80"
         dest_port_valid = True
@@ -206,18 +209,19 @@ def exitnodequery(request):
                 validafter__gte=oldest_tolerable).values('fingerprint')\
                 .annotate(Count('fingerprint'))
 
-        # Group by fingerprints, which are unique. If at least one fingerprint
-        # is found, there is a match, so for each fingerprint, get the
-        # fingerprint and nickname.
+        # Grouped by fingerprints, which are unique. If at least one
+        # fingerprint is found, there is a match, so for each
+        # fingerprint, get the fingerprint and nickname.
         if (fingerprints):
             is_router = True
 
             # For each entry, gather the nickname and fingerprint. If a
-            # destination IP and port are defined, also find whether or not
-            # the entries will allow exiting to the given IP and port.
+            # destination IP and port are defined, also find whether or
+            # not the entries will allow exiting to the given
+            # IP and port.
             for fp_entry in fingerprints:
-                # Note that the trailing [:1] is djangonese for "LIMIT 1",
-                # so this query should not be expensive.
+                # Note that the trailing [:1] is djangonese for
+                # "LIMIT 1", so this query should not be expensive.
                 statusentry_set = Statusentry.objects.filter(\
                         fingerprint=fp_entry['fingerprint'], \
                         validafter__gte=(oldest_tolerable))\
@@ -228,27 +232,25 @@ def exitnodequery(request):
                 fingerprint = statusentry.fingerprint
                 exit_possible = False
 
-                # If the client also wants to test the relay's exit policy,
-                # dest_ip and dest_port cannot be empty strings.
+                # If the client also wants to test the relay's exit
+                # policy, dest_ip and dest_port cannot be empty strings.
                 if (dest_ip_valid and dest_port_valid):
-                    #descriptor = Descriptor.objects.get(descriptor=\
-                    #        statusentry.descriptor)
                     router_exit_policy = _get_exit_policy(statusentry.\
                             descriptorid.rawdesc)
 
-                    # Search the exit policy information for a case in which
-                    # the given IP is in a subnet defined in the exit policy
-                    # information of a relay.
+                    # Search the exit policy information for a case in
+                    # which the given IP is in a subnet defined in the
+                    # exit policy information of a relay.
                     for policy_line in router_exit_policy:
                         condition, network_line = (policy_line.strip())\
                                 .split(' ')
                         subnet, port_line = network_line.split(':')
 
-                        # When the IP is in the given subnet, check to ensure
-                        # that the given destination port is also in the port
-                        # defined in the exit policy information. When a match
-                        # is found, see if the condition is "accept"
-                        # or "reject"
+                        # When the IP is in the given subnet, check to
+                        # ensure that the given destination port is also
+                        # in the port defined in the exit policy
+                        # information. When a match is found, see if the
+                        # condition is "accept" or "reject".
                         if (_is_ip_in_subnet(dest_ip, subnet)):
                             if (_port_match(dest_port, port_line)):
                                 if (condition == 'accept'):
@@ -259,10 +261,10 @@ def exitnodequery(request):
 
                 relays.append((nickname, fingerprint, exit_possible))
 
-    template_values = {'is_router': is_router, 'relays': relays, \
-            'dest_ip': dest_ip, 'dest_port': dest_port, 'source': source, \
-            'source_valid': source_valid, 'dest_ip_valid': dest_ip_valid, \
-            'dest_port_valid': dest_port_valid}
+    template_values = {'is_router': is_router, 'relays': relays,
+            'dest_ip': dest_ip, 'dest_port': dest_port, 'source':
+            source, 'source_valid': source_valid, 'dest_ip_valid':
+            dest_ip_valid, 'dest_port_valid': dest_port_valid}
     return render_to_response('nodequery.html', template_values)
 
 
@@ -273,7 +275,8 @@ def csv_current_results(request):
     response = HttpResponse(mimetype='text/csv')
     response['Content-Disposition'] = 'attachment; filename=test.csv'
 
-    # Table is undefined now, but it should be what is returned by the query.
+    # Table is undefined now, but it should be what is returned by the
+    # query.
     writer = csv.writer(response)
     writer.writerow(['variables', 'go', 'here'])
     for row in table:
@@ -292,17 +295,17 @@ def networkstatisticgraphs(request):
 
 def columnpreferences(request):
     '''
-    Let the user choose what columns should be displayed on the index page.
-    This view makes use of the sessions in order to store two array-list
-    objects (currentColumns and availableColumns) in a "cookie" file so that
-    the implementation of the "REMOVE", "ADD", "UP" and "DOWN" options
-    from the page could be possible.
-    It orders the two array-lists by using the user input, through a GET
-    single selection HTML form.
+    Let the user choose what columns should be displayed on the index
+    page. This view makes use of the sessions in order to store two
+    array-listobjects (currentColumns and availableColumns) in a
+    "cookie" file so that the implementation of the "REMOVE", "ADD",
+    "UP" and "DOWN" options from the page could be possible. It orders
+    the two array-lists by using the user input, through a GET single
+    selection HTML form.
 
     @param: request
-    @return: renders to the page the currently selected columns, the available
-        columns and the previous selection
+    @return: renders to the page the currently selected columns, the
+        available columns and the previous selection.
     '''
     #
     #NOTE: The view is currently using sessions and it's storing the session
@@ -414,8 +417,8 @@ def _get_exit_policy(rawdesc):
 
     @type rawdesc: C{string} or C{buffer}
     @param rawdesc: The raw descriptor of a relay.
-    @rtype      list of strings
-    @return     all lines in rawdesc that comprise the exit policy
+    @rtype: C{list} of C{string}
+    @return: all lines in rawdesc that comprise the exit policy.
     """
     policy = []
     rawdesc_array = str(rawdesc).split("\n")
@@ -428,9 +431,9 @@ def _get_exit_policy(rawdesc):
 
 def _is_ip_in_subnet(ip, subnet):
     """
-    Return true if the IP is in the subnet, return false otherwise.
+    Return True if the IP is in the subnet, return False otherwise.
 
-    With credit to the original TorStatus PHP function IsIPInSubnet.
+    This implementation uses bitwise arithmetic and operators on subnets.
 
     >>> _is_ip_in_subnet('0.0.0.0', '0.0.0.0/8')
     True
@@ -442,9 +445,13 @@ def _is_ip_in_subnet(ip, subnet):
     @type ip: C{string}
     @param ip: The IP address to check for membership in the subnet.
     @type subnet: C{string}
-    @param subnet: The subnet that the given IP address may or may not be in.
+    @param subnet: The subnet that the given IP address may or may not
+        be in.
     @rtype: C{boolean}
     @return: True if the IP address is in the subnet, false otherwise.
+
+    @see: U{http://www.webopedia.com/TERM/S/subnet_mask.html}
+    @see: U{http://wiki.python.org/moin/BitwiseOperators}
     """
     # If the subnet is a wildcard, the IP will always be in the subnet
     if (subnet == '*'):
@@ -459,16 +466,13 @@ def _is_ip_in_subnet(ip, subnet):
     if ('/' not in subnet):
         return False
 
-    """This implementation uses bitwise arithmetic and operators on subnets.
-    @see: U{http://www.webopedia.com/TERM/S/subnet_mask.html}
-    @see: U{http://wiki.python.org/moin/BitwiseOperators}"""
-
     # Separate the base from the bits and convert the base to an int
     base, bits = subnet.split('/')
 
     # a.b.c.d becomes a*2^24 + b*2^16 + c*2^8 + d
     a, b, c, d = base.split('.')
-    subnet_as_int = (int(a) << 24) + (int(b) << 16) + (int(c) << 8) + int(d)
+    subnet_as_int = (int(a) << 24) + (int(b) << 16) + (int(c) << 8) + \
+            int(d)
 
     # Example: if 8 bits are specified, then the mask is calculated by
     # taking a 32-bit integer consisting of 1s and doing a bitwise shift
@@ -483,12 +487,13 @@ def _is_ip_in_subnet(ip, subnet):
     # and upper bound 255.255.255.255. 255.255.128.0/16 is the same as
     # 11111111.11111111.10000000.00000000 with mask
     # 11111111.11111111.00000000.00000000. Then using the bitwise and
-    # operator, the lower bound would be 11111111.11111111.00000000.00000000.
+    # operator, the lower bound would be
+    # 11111111.11111111.00000000.00000000.
     lower_bound = subnet_as_int & mask
 
     # Similarly, ~mask would be 00000000.00000000.11111111.11111111,
-    # so ~mask & 0xFFFFFFFF = ~mask & 11111111.11111111.11111111.11111111, or
-    # 00000000.00000000.11111111.11111111. Then
+    # so ~mask & 0xFFFFFFFF = ~mask & 11111111.11111111.11111111.11111111,
+    # or 00000000.00000000.11111111.11111111. Then
     # 11111111.11111111.10000000.00000000 | (~mask % 0xFFFFFFFF) is
     # 11111111.11111111.11111111.11111111.
     upper_bound = subnet_as_int | (~mask & 0xFFFFFFFF)
@@ -505,8 +510,17 @@ def _is_ip_in_subnet(ip, subnet):
 
 def _is_ipaddress(ip):
     """
-    Return True if the given supposed IP address could be a valid IP address,
-    False otherwise.
+    Return True if the given supposed IP address could be a valid IP
+    address, False otherwise.
+
+    >>> _is_ipaddress('127.0.0.1')
+    True
+    >>> _is_ipaddress('a.b.c.d')
+    False
+    >>> _is_ipaddress('127.0.1')
+    False
+    >>> _is_ipaddress('127.256.0.1')
+    False
 
     @type ip: C{string}
     @param ip: The IP address to test for validity.
@@ -514,8 +528,8 @@ def _is_ipaddress(ip):
     @return: True if the IP address could be a valid IP address,
         False otherwise.
     """
-    # Including period separators, no IP as a string can have more than 15
-    # characters.
+    # Including period separators, no IP as a string can have more than
+    # 15 characters.
     if (len(ip) > 15):
         return False
 
@@ -523,13 +537,15 @@ def _is_ipaddress(ip):
     if (len(ip.split('.')) != 4):
         return False
 
-    # Users can give IP addresses a.b.c.d such that a, b, c, or d cannot be
-    # casted to an integer. If a, b, c, or d cannot be casted to an integer,
-    # the given IP address is certainly not a valid IP address.
+    # Users can give IP addresses a.b.c.d such that a, b, c, or d
+    # cannot be casted to an integer. If a, b, c, or d cannot be casted
+    # to an integer, the given IP address is certainly not a
+    # valid IP address.
     a, b, c, d = ip.split('.')
     try:
         if (int(a) > 255 or int(a) < 0 or int(b) > 255 or int(b) < 0 or
-                int(c) > 255 or int(c) < 0 or int(d) > 255 or int(d) < 0):
+                int(c) > 255 or int(c) < 0 or int(d) > 255 or
+                int(d) < 0):
             return False
     except:
         return False
@@ -542,17 +558,27 @@ def _is_port(port):
     Return True if the given supposed port could be a valid port,
     False otherwise.
 
+    >>> _is_port('80')
+    True
+    >>> _is_port('80.5')
+    False
+    >>> _is_port('65536')
+    False
+    >>> _is_port('foo')
+    False
+
     @type port: C{string}
     @param port: The port to test for validity.
     @rtype: C{boolean}
-    @return: True if the given port could be a valid port, False otherwise.
+    @return: True if the given port could be a valid port, False
+        otherwise.
     """
-    # Ports must be integers and between 0 and 65535, inclusive. If the given
-    # port cannot be casted as an int, it cannot be a valid port.
+    # Ports must be integers and between 0 and 65535, inclusive. If the
+    # given port cannot be casted as an int, it cannot be a valid port.
     try:
         if (int(port) > 65535 or int(port) < 0):
             return False
-    except:
+    except ValueError:
         return False
 
     return True
@@ -560,7 +586,17 @@ def _is_port(port):
 
 def _port_match(dest_port, port_line):
     """
-    Find if dest_port is defined as "in" port_line.
+    Find if a given port number, as a string, could be defined as "in"
+    an expression containing characters such as '*' and '-'.
+
+    >>> _port_match('80', '*')
+    True
+    >>> _port_match('80', '79-81')
+    True
+    >>> _port_match('80', '80')
+    True
+    >>> _port_match('80', '443-9050')
+    False
 
     @type dest_port: C{string}
     @param dest_port: The port to test for membership in port_line
@@ -572,15 +608,20 @@ def _port_match(dest_port, port_line):
     """
     if (port_line == '*'):
         return True
+
     if ('-' in port_line):
         lower_str, upper_str = port_line.split('-')
         lower_bound = int(lower_str)
         upper_bound = int(upper_str)
         dest_port_int = int(dest_port)
-        if (dest_port_int >= lower_port and dest_port_int <= upper_port):
+
+        if (dest_port_int >= lower_port and
+                dest_port_int <= upper_port):
             return True
+
     if (dest_port == port_line):
         return True
+
     return False
 
 
@@ -592,9 +633,10 @@ def _get_if_exists(request, title):
     If so, the data itself is returned; if not, an empty string is
     returned.
 
+    @see: U{https://docs.djangoproject.com/en/1.2/ref/request-response/
+    #httprequest-object}
+
     @type request: HttpRequest object
-        (@see: https://docs.djangoproject.com/en/1.2/ref/request-
-        response/#httprequest-objects
     @param request: The HttpRequest object that contains metadata
         about the request.
     @type title: C{string}

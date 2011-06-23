@@ -110,8 +110,8 @@ class Descriptor(models.Model):
         A simple string representation of the L{Descriptor} that
         consists of the L{Descriptor}'s unique hash.
 
-        @rtype str
-        @return A simple description of the L{Descriptor} object.
+        @rtype: str
+        @return: A simple description of the L{Descriptor} object.
         """
         return self.descriptor
 

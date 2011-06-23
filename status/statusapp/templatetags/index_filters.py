@@ -18,7 +18,7 @@ def kilobytes_ps(bytes_ps):
     """
     # As statusapp.views.details is written now, this value can
     # be None or an empty string sometimes.
-    if (bytes_ps == '' or bytes_ps == None or bytes_ps == 0):
+    if (bytes_ps == '' or bytes_ps is None):
         return 0
     else:
         return int(bytes_ps) / 1024
@@ -36,7 +36,7 @@ def days(seconds):
     """
     # As statusapp.views.details is written now, this value can
     # be None or an empty string sometimes.
-    if (seconds == '' or seconds == None or seconds == 0):
+    if (seconds == '' or seconds is None):
         return 0
     else:
         return int(seconds) / 86400

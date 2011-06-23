@@ -15,6 +15,9 @@ def words(seconds):
     """
     Convert a duration in seconds to a duration in words.
 
+    >>> words('100000')
+    '1 day(s), 3 hour(s), 46 minute(s), 40 second(s)'
+
     @type seconds: C{int}, C{float}, C{long}, C{string}, or C{buffer}
     @param seconds: The duration in seconds.
     @rtype: C{string}
@@ -34,12 +37,17 @@ def words(seconds):
 @register.filter
 def format_fing(fingerprint):
     """
-    Convert a fingerprint abc123def456... to a fingerprint ABC1 23DE F456...
+    Format a fingerprint by capitalizing it and adding spaces every
+    four characters.
+
+    >>> format_fing('abc123def456ghi789jkl012mno345pqr678stu9')
+    'ABC1 23DE F456 GHI7 89JK L012 MNO3 45PQ R678 STU9'
 
     @type fingerprint: C{string} or C{buffer}
     @param fingerprint: The 40-character fingerprint.
     @rtype: C{string}
-    @return: The capitalized fingerprint with spaces every four characters.
+    @return: The capitalized fingerprint with spaces every four
+    characters.
     """
 
     fingerprint_list = [str(fingerprint)[i:(i + 4)] for i in
@@ -165,7 +173,8 @@ def family(rawdesc):
                         .order_by('-validafter')
 
                 # Fingerprints are unique, so either an entry with the
-                # fingerprint is found or not. Use only the most recent entry.
+                # fingerprint is found or not. Use only the most
+                # recent entry.
                 if (len(poss_entries) > 0):
                     nickname = poss_entries[0].nickname
                     links.append("<a href=\"/details/%s\">%s</a>" % \
@@ -176,18 +185,20 @@ def family(rawdesc):
 
             else:
                 # Assume the entry is a nickname.
-                poss_entries = Statusentry.objects.filter(nickname=entry, \
+                poss_entries = Statusentry.objects.filter(\
+                        nickname=entry, \
                         validafter__gte=oldest_usable)
                 poss_fingerprints = poss_entries.values('fingerprint')\
                         .annotate(Count('fingerprint'))
 
-                if (len(poss_fingerprints) == 0):
-                    # Can't find a fingerprint, so just return the nickname.
+                if not poss_fingerprints:
+                    # Can't find a fingerprint, so just return the
+                    # nickname.
                     links.append("(%s)" % entry)
 
                 elif (len(poss_fingerprints) == 1):
-                    # Found a unique fingerprint, so return the nickname with
-                    # a hyperlink.
+                    # Found a unique fingerprint, so return the nickname
+                    # with a hyperlink.
                     fingerprint = poss_fingerprints[0]['fingerprint']
                     links.append("<a href=\"/details/%s\">%s</a>" % \
                             (fingerprint, entry))

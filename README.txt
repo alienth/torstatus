@@ -1,18 +1,29 @@
-===============================================================================
-README - Updated 2011-06-14 17:00:00 GMT-5
-===============================================================================
+TorStatus README
+================
+.. Updated 2011-06-23 11:00:00 GMT-5
+.. This file is written in reStructuredText.
 
-Algorithm to test this code:
+Installation
+------------
+For help installing and running TorStatus, consult doc/INSTALL.
 
-If you are Professor Danner, just change 'NAME', 'USER', and 'PASSWORD' in
-settings.py to the appropriate values to use the metrics database that we
-created, then run "python manage.py runserver [port]".
+Generating the API
+------------------
+To generate the TorStatus API, install epydoc (available at
+http://epydoc.sourceforge.net/installing.html) and run:
 
-If you are Karsten, Damian, or anyone else with access to a Tor Metrics
-database, make sure you have a postgreSQL backend (psycopg2 or psycopg) 
-installed for python. Then, change the fields in settings.py to appropriate
-values to test our code with the/a Tor Metrics database. Then run
-"python manage.py runserver [port]".
+    $ epydoc . --config config/epydoc_config.py
 
-If you are somebody else, we don't have instructions for how to setup such a
-database quite yet; check back in a few weeks.
+Design Documentation
+--------------------
+Design documentation, like this README, is written in reStructuredText.
+To generate HTML-formatted design documentation using reStructuredText,
+install docutils (available at http://docutils.sourceforge.net/)
+and run the following:
+
+    | $ cd doc/
+    | $ rst2html design.txt design.html
+
+To view the documentation, open design.html using your favorite web
+browser. If you'd rather view the plaintext documentation, open 
+design.txt
