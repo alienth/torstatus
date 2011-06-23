@@ -23,14 +23,16 @@
         <td id="searchQError">You must enter a Query IP, at minimum.</td>
     </tr>
     {% endifequal %}
-    {% if dest_ip %}
-        {% if dest_ip_valid %}
-            {% if dest_port_valid %}
+    {% if source_valid %}
+        {% if dest_ip %}
+            {% if dest_ip_valid %}
+                {% if dest_port_valid %}
+                {% else %}
+                    <tr><td id="searchQError">The destination port you supplied, {{dest_port}}, is not a valid port.</td></tr>
+                {% endif %}
             {% else %}
-                <tr><td id="searchQError">The destination port you supplied, {{dest_port}}, is not a valid port.</td></tr>
+                <tr><td id="searchQError">The destination IP address you supplied, {{dest_ip}}, is not a valid IP address.</td></tr>
             {% endif %}
-        {% else %}
-            <tr><td id="searchQError">The destination IP address you supplied, {{dest_ip}}, is not a valid IP address.</td></tr>
         {% endif %}
     {% endif %}
 <tr>
@@ -52,11 +54,6 @@
                 {% endif %}
                 <br>
             {% endfor %}
-        {% else %}
-            {% ifequal source "" %}
-            {% else %}
-                The IP address you entered, {{source}}, does NOT match an active Tor server.
-            {% endifequal %}
         {% endif %}
     </td>
 </tr>

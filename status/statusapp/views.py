@@ -302,6 +302,7 @@ def columnpreferences(request):
     It orders the two array-lists by using the user input, through a GET 
     single selection HTML form.
     
+    @see: _buttonChoice
     @return: renders to the page the currently selected columns, the available 
         columns and the previous selection
     '''

@@ -40,13 +40,13 @@ table.ipSearch {
 }
 
 input#ipSearch_AddressQ {
-    background-color: #7BD4F7;
+    background-color: #95E4AF;
 }
 
 input#ipSearch_DestIP {
-    background-color: #7BD4F7;
+    background-color: #95E4AF;
 }
 
 input#ipSearch_DestPort {
-    background-color: #7BD4F7;
+    background-color: #95E4AF;
 }

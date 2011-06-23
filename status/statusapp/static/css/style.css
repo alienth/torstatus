@@ -118,7 +118,7 @@ a.linkDetails {
 
 .relayHibernating {
 	font: 0.625em; /*Arial;*/
-	background-color: #FEEED0;
+	background-color: #F9BD67;
 }
 
 .relayDown {
@@ -261,4 +261,35 @@ table.bottomTables1 {
     margin-left: auto;
     margin-right: auto;
 }
-    
+
+table#sortRouterListing {
+    font-size: 19px;
+    width:auto;
+    padding: 10px;
+    border-spacing: 3px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+select#sortRouterListing {
+    background-color: #95E4AF;
+}
+
+input#sortRouterListing {
+    background-color: #95E4AF;
+}
+
+input#sortRouterListing_Button {
+    width: 200px;
+}
+
+td#sortRouterListing {
+	font: bold 0.625em; /*10pt Arial;*/
+	background-color: #7BD4F7;
+	text-align: center;
+	position: center;
+	color: #000000; 
+	border-top: 1px solid black;
+	border-bottom: 1px solid black;
+	white-space:nowrap;
+}
