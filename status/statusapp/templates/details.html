@@ -1,11 +1,7 @@
 {% extends "base.html" %}
 
-{% block mainCSS %} 
-<link rel="stylesheet" type="text/css" href="../../static/css/style.css"></link>
-{% endblock %}
-
 {% block auxCSS %}
-<link rel="stylesheet" type="text/css" href="../../static/css/details.css"></link>
+<link rel="stylesheet" type="text/css" href="/static/css/details.css"></link>
 {% endblock %}
 
 {% block mainTitle %} TorStatus Router Details -- {{nickname}} {% endblock %}
@@ -92,8 +88,8 @@
     <td class="boxTitle" colspan="2"> Graphs </td>
 </tr>
 <tr id="row_aggStatisticSummary">
-	<td id="aggBox"><img src="../../static/img/graph_old.png" width="480px" height="300px" alt="GRAPH 1"  title="GRAPH 1"> </td>
-    <td id="aggBox"><img src="../../static/img/graph_old.png" width="480px" height="300px" alt="GRAPH 2"  title="GRAPH 2"> </td>
+	<td id="aggBox"><img src="/static/img/graph_old.png" width="480px" height="300px" alt="GRAPH 1"  title="GRAPH 1"> </td>
+    <td id="aggBox"><img src="/static/img/graph_old.png" width="480px" height="300px" alt="GRAPH 2"  title="GRAPH 2"> </td>
 </tr>
 </table>
 
