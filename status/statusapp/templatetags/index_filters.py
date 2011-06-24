@@ -40,3 +40,61 @@ def days(seconds):
         return 0
     else:
         return int(seconds) / 86400
+
+
+@register.filter
+def percent(a, b):
+    """
+    Return C{a / b} as a percent.
+
+    @type a: C{int}
+    @param a: The numerator of the percent.
+    @type b: C{int}
+    @param b: The denominator of the percent.
+    @rtype: C{string}
+    @return: C{a / b} as a percent as a string.
+    """
+    return '%0.2f%%' % (100.0 * a / b)
+
+
+@register.filter
+def country(geoip):
+    """
+    Get the two-letter lowercase country code from a GeoIP string.
+
+    @type geoip: C{string} or C{buffer}
+    @param geoip: A string formatted as a tuple with entries country
+        code, latitude, and longitude.
+    @rtype: C{string}
+    @return: The lowercase two-letter country code associated with
+        C{geoip}.
+    """
+    return str(geoip).strip('()').split(',')[0].lower()
+
+
+@register.filter
+def latitude(geoip):
+    """
+    Get the latitude from a GeoIP string.
+
+    @type geoip: C{string} or C{buffer}
+    @param geoip: A string formatted as a tuple with entries country
+        code, latitude, and longitude.
+    @rtype: C{string}
+    @return: The latitude associated with C{geoip}.
+    """
+    return str(geoip).split(',')[1]
+
+
+@register.filter
+def longitude(geoip):
+    """
+    Get the longitude from a GeoIP string.
+
+    @type geoip: C{string} or C{buffer}
+    @param geoip: A string formatted as a tuple with entries country
+        code, latitude, and longitude.
+    @rtype: C{string}
+    @return: The longitude associated with C{geoip}.
+    """
+    return str(geoip).strip('()').split(',')[2]

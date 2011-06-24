@@ -59,6 +59,8 @@ def format_fing(fingerprint):
 
 @register.filter
 def onion_key(rawdesc):
+    # TODO: authorities have extra line in raw descriptor, so method
+    # can fail.
     """
     Get the onion key of a relay from its raw descriptor.
 
@@ -75,6 +77,8 @@ def onion_key(rawdesc):
 
 @register.filter
 def signing_key(rawdesc):
+    # TODO: authorities have extra line in raw descriptor, so method
+    # can fail.
     """
     Get the signing key of a relay from its raw descriptor.
 
@@ -150,7 +154,7 @@ def family(rawdesc):
         if (line.startswith("family")):
             fingerprints_and_nicknames = line[7:].split()
 
-    if (len(fingerprints_and_nicknames) != 0):
+    if fingerprints_and_nicknames:
         from statusapp.models import Statusentry
         from django.db.models import Max, Count
         import datetime
@@ -175,7 +179,7 @@ def family(rawdesc):
                 # Fingerprints are unique, so either an entry with the
                 # fingerprint is found or not. Use only the most
                 # recent entry.
-                if (len(poss_entries) > 0):
+                if poss_entries:
                     nickname = poss_entries[0].nickname
                     links.append("<a href=\"/details/%s\">%s</a>" % \
                             (fingerprint, nickname))
@@ -230,7 +234,7 @@ def hostname(address):
 @register.filter
 def divisible_by(counter, rows):
     """
-    Returns True if rows divides counter, False otherwise.
+    Return True if rows divides counter, False otherwise.
 
     This method is used to divide entries (rows) in the exit policy
     information table into a given number of columns.
@@ -243,3 +247,46 @@ def divisible_by(counter, rows):
     @return: True if rows divides counter, False otherwise.
     """
     return counter % rows == 0
+
+
+@register.filter
+def country(geoip):
+    """
+    Get the two-letter lowercase country code from a GeoIP string.
+
+    @type geoip: C{string} or C{buffer}
+    @param geoip: A string formatted as a tuple with entries country
+        code, latitude, and longitude.
+    @rtype: C{string}
+    @return: The lowercase two-letter country code associated with
+        C{geoip}.
+    """
+    return str(geoip).strip('()').split(',')[0].lower()
+
+
+@register.filter
+def latitude(geoip):
+    """
+    Get the latitude from a GeoIP string.
+
+    @type geoip: C{string} or C{buffer}
+    @param geoip: A string formatted as a tuple with entries country
+        code, latitude, and longitude.
+    @rtype: C{string}
+    @return: The latitude associated with C{geoip}.
+    """
+    return str(geoip).split(',')[1]
+
+
+@register.filter
+def longitude(geoip):
+    """
+    Get the longitude from a GeoIP string.
+
+    @type geoip: C{string} or C{buffer}
+    @param geoip: A string formatted as a tuple with entries country
+        code, latitude, and longitude.
+    @rtype: C{string}
+    @return: The longitude associated with C{geoip}.
+    """
+    return str(geoip).strip('()').split(',')[2]

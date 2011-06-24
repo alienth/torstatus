@@ -8,7 +8,7 @@
 <link rel="stylesheet" type="text/css" href="../../static/css/details.css"></link>
 {% endblock %}
 
-{% block mainTitle %} TorStatus Router Details -- {{nickname}} {% endblock %}
+{% block mainTitle %} TorStatus Router Details -- {{ relay.nickname}} {% endblock %}
 
 {% block headerTitle %} TorStatus {% endblock %}
 
@@ -19,7 +19,7 @@
 <table cellspacing="2" cellpadding="2" class="displayStatus">
 <tr>
 	<td id="mainLinks">
-        Details for Relay: {{nickname}}
+        Details for Relay: {{ relay.nickname }}
 	</td>
 </tr>
 </table>
@@ -33,55 +33,58 @@
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Router Name:</td>
-    <td id="aggBox">{{nickname}}</td>
+    <td id="aggBox">{{ relay.nickname}}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Fingerprint:</td>
-    <td id="aggBox">{{fingerprint|format_fing}}</td>
+    <td id="aggBox">{{ relay.fingerprint|format_fing}}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Contact:</td>
-    <td id="aggBox">{{rawdesc|contact}}</td>
+    <td id="aggBox">{{ relay.descriptorid.rawdesc|contact}}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">IP Address:</td>
-    <td id="aggBox">{{address}}</td>
+    <td id="aggBox">{{ relay.address}}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Hostname:</td>
-    <td id="aggBox">{{address|hostname}}</td>
+    <td id="aggBox">{{ relay.address|hostname}}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Onion Router Port:</td>
-    <td id="aggBox">{{orport}}</td>
+    <td id="aggBox">{{ relay.orport}}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Directory Server Port:</td>
-    <td id="aggBox">{{dirport}}</td>
+    <td id="aggBox">{{ relay.dirport}}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Country Code:</td>
-    <td id="aggBox">{{ country }}</td>
+    <td id="aggBox">{{ relay.geoip|country }}</td>
 </tr>
+<tr id="row_aggStatisticSummary"
+    <td id="aggBox">Location (coordinates):</td>
+    <td id="aggBox">{{ relay.geoip|latitude }}, {{ relay.geoip|longitude }}</td>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Platform / Version:</td>
-    <td id="aggBox">{{platform}}</td>
+    <td id="aggBox">{{ relay.descriptorid.platform}}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Last Descriptor Published (GMT):</td>
-    <td id="aggBox">{{published}}</td>
+    <td id="aggBox">{{ relay.descriptorid.published}}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Current Uptime:</td>
-    <td id="aggBox">{{uptime|words}}</td>
+    <td id="aggBox">{{ relay.descriptorid.uptime|words}}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Bandwidth (Burst/Avg/Observed - In Bps):</td>
-    <td id="aggBox">{{bandwidthburst}} / {{bandwidthavg}} / {{bandwidthobserved}}</td>
+    <td id="aggBox">{{ relay.descriptorid.bandwidthburst}} / {{ relay.descriptorid.bandwidthavg}} / {{ relay.descriptorid.bandwidthobserved}}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Family:</td>
-    <td id="aggBox">{{rawdesc|family|safe}}</td> <!-- |safe|linebreaks}}</td> -->
+    <td id="aggBox">{{ relay.descriptorid.rawdesc|family|safe}}</td> <!-- |safe|linebreaks}}</td> -->
 </tr>
 </table>
 
@@ -108,10 +111,10 @@
                 <td id="details_boxTitle"> Router Keys </td>
             </tr>
             <tr>
-                <td>Onion Key:<pre>{{rawdesc|onion_key}}</pre></td>
+                <td>Onion Key:<pre>{{ relay.descriptorid.rawdesc|onion_key}}</pre></td>
             </tr>
             <tr>
-                <td>Signing Key:<pre>{{rawdesc|signing_key}}</pre></td>
+                <td>Signing Key:<pre>{{ relay.descriptorid.rawdesc|signing_key}}</pre></td>
             </tr>
         </table>
     </td>
@@ -123,51 +126,51 @@
             
             <tr> 
                 <td id="detailBox"> Authority: </td>
-                <td {% if isauthority %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+                <td {% if relay.isauthority %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
             <tr> 
                 <td id="detailBox"> Bad Directory: </td>
-                <td {% if isbaddirectory %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+                <td {% if relay.isbaddirectory %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
             <tr> 
                 <td id="detailBox"> Bad Exit: </td>
-                <td {% if isbadexit %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+                <td {% if relay.isbadexit %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
             <tr> 
                 <td id="detailBox"> Exit: </td>
-                <td {% if isexit %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+                <td {% if relay.isexit %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
             <tr> 
                 <td id="detailBox"> Fast: </td>
-                <td {% if isfast %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+                <td {% if relay.isfast %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
             <tr> 
                 <td id="detailBox"> Guard: </td>
-                <td {% if isguard %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+                <td {% if relay.isguard %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
             <tr> 
                 <td id="detailBox"> Hibernating: </td>
-                <td {% if ishibernating %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+                <td {% if relay.ishibernating %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
             <tr> 
                 <td id="detailBox"> Named: </td>
-                <td {% if isnamed %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+                <td {% if relay.isnamed %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
             <tr> 
                 <td id="detailBox"> Stable: </td>
-                <td {% if isstable %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+                <td {% if relay.isstable %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
             <tr> 
                 <td id="detailBox"> Running: </td>
-                <td {% if isrunning %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+                <td {% if relay.isrunning %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
             <tr> 
                 <td id="detailBox"> Valid: </td>
-                <td {% if isvalid %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+                <td {% if relay.isvalid %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
             <tr> 
                 <td id="detailBox"> V2Dir: </td>
-                <td {% if isauthority %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+                <td {% if relay.isauthority %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
         </table>
     </td>
@@ -177,9 +180,9 @@
                 <td id="details_boxTitle" colspan=100%> Exit Policy Information </td>
             </tr>
             <tr>
-                <td id="detailBox">{% for line in rawdesc|exitinfo %} 
+                <td id="detailBox">{% for line in relay.descriptorid.rawdesc|exitinfo %} 
                         {% if forloop.counter0|divisible_by:16 %}</td><td id="detailBox">{% endif %}   
-                        {{line}} <br />
+                        {{ line}} <br />
                     {% endfor %}
                 </td>
             </tr>

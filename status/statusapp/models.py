@@ -19,24 +19,62 @@ in the object's constructors.
     L{BridgeNetworkSize}, L{DirreqStats}, L{BridgeStats},
     L{TorperfStats}, L{GettorStats}
 """
-
 from django.db import models
+# What follows is a custom typecast for psycopg2. psycopg2, by default,
+# casts a BIGINT[] in PostgreSQL to a python list, removing the indices
+# given, e.g. [86:86]={2563637}. These are necessary, however, to gather
+# 96 data points consisting of (date, bandwidth) pairs for use in
+# bandwidth history graphs.
+# This function is only included here for development; it will be moved
+# somewhere else when we know where that proper "somewhere else" is.
+import psycopg2
+conn_string = "host='localhost' dbname='tordir' user='metrics' password='meiD7go3'"
+conn = psycopg2.connect(conn_string)
+cursor = conn.cursor()
+
+def __none_to_zero(string):
+    if (string.lower() == "none" or string.lower() == "null"):
+        return '0'
+    else:
+        return string
+
+def cast_array(value, cur):
+    if value is None:
+        return None
+
+    value = str(value)
+    indices, arraystr = value.split('=')
+
+    startstr, endstr = indices.strip('[]').split(':')
+    start = int(startstr)
+    end = int(endstr)
+
+    # Make all 'null' or 'none' entries '0', then convert the entries
+    # in the array to integers
+    array = map(lambda x: int(__none_to_zero(x)),
+            arraystr.strip('{}').split(','))
+    return (start, end, array)
+ARRAY = psycopg2.extensions.new_type((1016,), "BIGINT[]", cast_array)
+psycopg2.extensions.register_type(ARRAY)
+# End
 
 
 # CUSTOM FIELDS -------------------------------------------------------
 # ---------------------------------------------------------------------
 class BigIntegerArrayField(models.Field):
 
+    description = "An array of large integers"
+
+    __metaclass__ = models.SubfieldBase
+
+    def __init__(self, *args, **kwargs):
+        super(BigIntegerArrayField, self).__init__(*args, **kwargs)
+
     def db_type(self, connection):
         return 'BIGINT[]'
 
     def to_python(self, value):
-        if isinstance(value, list):
-            return value
-        # Assume we can cast it as a string
-        else:
-            return (value.strip('[]')).split(', ')
-
+        return value
 
 # MODELS --------------------------------------------------------------
 # ---------------------------------------------------------------------

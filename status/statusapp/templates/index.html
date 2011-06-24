@@ -71,8 +71,8 @@
 </tr>
 </table>
 
-{% endblock %}	
-	
+{% endblock %}
+
 {% block mainPage %}
 
 {% load index_filters %}
@@ -93,12 +93,12 @@
 
 	{% for relay in relay_list %}
 		<tr {% ifequal relay.isbadexit 1 %} class="relayBadExit" {% else %} class="relay" {% endifequal %}>
-		
+
 		    <!-- Add: RELAY IS DOWN and RELAY IS HIBERNATING -->
-		    
-            <td sorttable_customkey="us" id="col_relayName"><img src="static/img/flags/us.gif" alt=us title=us></td>
+
+            <td sorttable_customkey={{ relay.geoip|country }} id="col_relayName"><a href="http://www.openstreetmap.org/?mlon={{ relay.geoip|longitude }}&mlat={{ relay.geoip|latitude }}&zoom=6"<img src="static/img/flags/{{ relay.geoip|country }}.gif" alt={{ relay.geoip|country }} title="{{ relay.geoip|country }}: {{ relay.geoip|latitude }}, {{ relay.geoip|longitude }}"></a></td>
 			<!-- Note: sorttable_customkey="[[COUNTRY_PREFIX]]" -->
-			
+
             <td id="col_relayName"> 
                 {% ifequal relay.isnamed 1 %}
                     <b><a class="linkDetails" href="/details/{{ relay.fingerprint }}">{{ relay.nickname }}</a></b>
@@ -188,93 +188,92 @@
 <td>
 <table class="aggStatisticSummary" id="networkstatisticsummary">
 <tr>
-    <td class="boxTitle" colspan="3">Aggregate Network Statistic Summary | 
+    <td class="boxTitle" colspan="3">Aggregate Network Statistic Summary |
     <a class="link" href="network-statistic-graphs">Graphs / Details</a>
     </td>
 </tr>
 <tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total Bandwidth of displayed Routers [K bytes/s]:</td>
-    <td id="aggBox">some info</td>
-    <td id="aggBox">empty on TorStatus</td>
+	<td id="aggBox">Total average bandwidth of displayed routers [KB/s]:</td>
+    <td id="aggBox">{{ counts.bandwidthavg|kilobytes_ps }}</td>
+    <td id="aggBox"></td>
 </tr>
 <tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total Number of Routers:</td>
-    <td id="aggBox">some info</td>
-    <td id="aggBox">percentage%</td>
+	<td id="aggBox">Total burst bandwidth of displayed routers [KB/s]:</td>
+    <td id="aggBox">{{ counts.bandwidthburst|kilobytes_ps }}</td>
+    <td id="aggBox"></td>
 </tr>
 <tr id="row_aggStatisticSummary">
-	<td id="aggBox">Routers in Current Query Result Set:</td>
-    <td id="aggBox">some info</td>
-    <td id="aggBox">percentage%</td>
+	<td id="aggBox">Total observed bandwidth of displayed routers [KB/s]:</td>
+    <td id="aggBox">{{ counts.bandwidthobserved|kilobytes_ps }}</td>
+    <td id="aggBox"></td>
 </tr>
 <tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total Number of 'Authority' Routers"</td>
-    <td id="aggBox">some info</td>
-    <td id="aggBox">percentage%</td>
+	<td id="aggBox">Total number of Routers:</td>
+    <td id="aggBox">{{ num_routers }}</td>
+    <td id="aggBox">{{ num_routers|percent:num_routers }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total Number of 'Bad Directory' Routers:</td>
-    <td id="aggBox">some info</td>
-    <td id="aggBox">percentage%</td>
+	<td id="aggBox">Routers in current query result set:</td>
+    <td id="aggBox">{{ num_routers }}</td>
+    <td id="aggBox">{{ num_routers|percent:num_routers }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total Number of 'Bad Exit' Routers:</td>
-    <td id="aggBox">some info</td>
-    <td id="aggBox">percentage%</td>
+	<td id="aggBox">Total number of 'authority' routers:</td>
+    <td id="aggBox">{{ counts.isauthority }}</td>
+    <td id="aggBox">{{ counts.isauthority|percent:num_routers }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total Number of 'Exit' Routers</td>
-    <td id="aggBox">some info</td>
-    <td id="aggBox">percentage%</td>
+	<td id="aggBox">Total number of 'bad directory' routers:</td>
+    <td id="aggBox">{{ counts.isbaddirectory }}</td>
+    <td id="aggBox">{{ counts.isbaddirectory|percent:num_routers }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total Number of 'Fast' Routers</td>
-    <td id="aggBox">some info</td>
-    <td id="aggBox">percentage%</td>
+	<td id="aggbox">Total number of 'bad exit' routers:</td>
+    <td id="aggBox">{{ counts.isbadexit }}</td>
+    <td id="aggBox">{{ counts.isbadexit|percent:num_routers }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total Number of 'Guard' Routers:</td>
-    <td id="aggBox">some info</td>
-    <td id="aggBox">percentage%</td>
+	<td id="aggBox">Total number of 'exit' routers</td>
+    <td id="aggBox">{{ counts.isexit }}</td>
+    <td id="aggBox">{{ counts.isexit|percent:num_routers }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total Number of 'Hibernating' Routers</td>
-    <td id="aggBox">some info</td>
-    <td id="aggBox">percentage%</td>
+	<td id="aggBox">Total number of 'fast' routers</td>
+    <td id="aggBox">{{ counts.isfast }}</td>
+    <td id="aggBox">{{ counts.isfast|percent:num_routers }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total Number of 'Named Routers:</td>
-    <td id="aggBox">some info</td>
-    <td id="aggBox">percentage%</td>
+	<td id="aggBox">Total number of 'guard' routers:</td>
+    <td id="aggBox">{{ counts.isguard }}</td>
+    <td id="aggBox">{{ counts.isguard|percent:num_routers }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total Number of 'Stable' Routers</td>
-    <td id="aggBox">some info</td>
-    <td id="aggBox">percentage%</td>
+	<td id="aggBox">Total number of 'named' routers:</td>
+    <td id="aggBox">{{ counts.isnamed }}</td>
+    <td id="aggBox">{{ counts.isnamed|percent:num_routers }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total Number of 'Running' Routers:</td>
-    <td id="aggBox">some info</td>
-    <td id="aggBox">percentage%</td>
+	<td id="aggBox">Total number of 'stable' routers</td>
+    <td id="aggBox">{{ counts.isstable }}</td>
+    <td id="aggBox">{{ counts.isstable|percent:num_routers }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total Number of 'Valid' Routers:</td>
-    <td id="aggBox">some info</td>
-    <td id="aggBox">percentage%</td>
+	<td id="aggBox">Total number of 'running' routers:</td>
+    <td id="aggBox">{{ counts.isrunning }}</td>
+    <td id="aggBox">{{ counts.isrunning|percent:num_routers }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total Number of 'V2Dir' Routers:</td>
-    <td id="aggBox">some info</td>
-    <td id="aggBox">percentage%</td>
+	<td id="aggBox">Total number of 'valid' routers:</td>
+    <td id="aggBox">{{ counts.isvalid }}</td>
+    <td id="aggBox">{{ counts.isvalid|percent:num_routers }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total Number of 'Directory Mirror' Routers:</td>
-    <td id="aggBox">some info</td>
-    <td id="aggBox">percentage%</td>
+	<td id="aggBox">Total number of 'v2dir' routers:</td>
+    <td id="aggBox">{{ counts.isv2dir }}</td>
+    <td id="aggBox">{{ counts.isv2dir|percent:num_routers }}</td>
 </tr>
 </table>
 </td>
-<!-- <br /> -->
 <td>
 <table class="aggStatisticSummary" id="advanceddisplayoptions">
 <tr>
@@ -289,7 +288,6 @@
 <tr>
 <td>
 
-<!-- <br /> -->
 
 <table class="aggStatisticSummary" id="opinionsource">
 <tr>
@@ -328,7 +326,6 @@
 </table>
 </td>
 <td>
-<!-- <br /> -->
 
 <table class="aggStatisticSummary" id="advancedquery">
 <tr>

@@ -12,8 +12,10 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpRequest, Http404
 from django.db import connection
 from django.views.decorators.cache import cache_page
-from django.db.models import Max
-from statusapp.models import Statusentry, Descriptor, Bwhist
+from django.db.models import Max, Sum
+from statusapp.models import Statusentry, Descriptor, Bwhist, Geoipdb, \
+        TotalBandwidth
+from custom.aggregate import CountCase
 
 
 # To do: get rid of javascript sorting: pass another argument
@@ -25,123 +27,71 @@ def index(request):
     Supply a dictionary to the index.html template consisting of a list
     of active relays.
     """
-    # Search options should probably not be implemented this way in a
-    # raw SQL query for security reasons:
-    #ordering = ""
-    #restrictions = ""
-    #adv_search = ""
-    #if request.GET:
+    last_va = Statusentry.objects.aggregate(\
+            last=Max('validafter'))['last']
 
-    last_va = Statusentry.objects.aggregate(last=Max('validafter'))['last']
-    a = Statusentry.objects.filter(validafter__gte=(last_va - datetime.\
-            timedelta(days=1))).order_by('-validafter')
-    recent_entries = list(set(a))
+    # This snippet gets relays active in the last 24 hours, but the
+    # current TorStatus implementation only gets relays in the last
+    # published consensus.
+    """
+    day_statusentries = Statusentry.objects.filter(\
+            validafter__gte=(last_va - datetime.timedelta(days=1)))\
+            .order_by('-validafter')
+    recent_entries = list(set(day_statusentries))
+    """
 
-    num_routers = len(recent_entries)
+    # This is closer to what the current TorStatus implementation does.
+    # It might not be good design, though.
+    statusentries = Statusentry.objects.filter(validafter=last_va)\
+            .extra(select={'geoip':
+            'geoip_lookup(address)'}).order_by('nickname')
+
+    counts = statusentries.aggregate(
+            isauthority=CountCase('isauthority', when=True),
+            isbaddirectory=CountCase('isbaddirectory', when=True),
+            isbadexit=CountCase('isbadexit', when=True),
+            isexit=CountCase('isexit', when=True),
+            isfast=CountCase('isfast', when=True),
+            isguard=CountCase('isguard', when=True),
+            isnamed=CountCase('isnamed', when=True),
+            isstable=CountCase('isstable', when=True),
+            isrunning=CountCase('isrunning', when=True),
+            isvalid=CountCase('isvalid', when=True),
+            isv2dir=CountCase('isv2dir', when=True),
+            bandwidthavg=Sum('descriptorid__bandwidthavg'),
+            bandwidthburst=Sum('descriptorid__bandwidthburst'),
+            bandwidthobserved=Sum('descriptorid__bandwidthobserved'))
+
+    total_bw = TotalBandwidth.objects.all()\
+            .order_by('-date')[:1][0].bwobserved
+
+    num_routers = statusentries.count()
+
     client_address = request.META['REMOTE_ADDR']
-    template_values = {'relay_list': recent_entries, 'client_address':
-            client_address, 'num_routers': num_routers, 'exp_time': 900}
+    template_values = {'relay_list': statusentries, 'client_address':
+            client_address, 'num_routers': num_routers, 'exp_time': 900,
+            'counts': counts, 'total_bw': total_bw}
     return render_to_response('index.html', template_values)
 
 
-def customindex(request, fingerprint):
-    # TODO: This method should probably not exist, and request.GET
-    # should be used in statusapp.views.index to make different queries.
-    """
-    List of variables passed from the html form:
-
-    sortlistings: what to sort by could be (router, fingerprint, country,
-    bandwidth, uptime, lastDescriptor, hostname, ip, ORPort, DirPort, platform,
-    contact, authority, badDirectory, badExit, exit, fast, guard, hibernating,
-    named)
-
-    sortorder: the order to sort by, could be (ascending, descending)
-
-    authority: require flags, could be (yes, no)
-
-    badDirectory: require flags, could be (yes, no)
-
-    BadExit: require flags, could be (yes, no)
-
-    Exit:  require flags, could be (yes, no)
-
-    Fast:  require flags, could be (yes, no)
-
-    Guard: require flags, could be (yes, no)
-
-    Hibernating: require flags, could be (yes, no)
-
-    Named:  require flags, could be (yes, no)
-
-    Stable:  require flags, could be (yes, no)
-
-    Running:  require flags, could be (yes, no)
-
-    Valid:  require flags, could be (yes, no)
-
-    V2Dir:  require flags, could be (yes, no)
-
-    criteria: the criteria for an advanced search could be (fingerprint,
-    nickname, country, bandwidth, uptime, published, address, hostname,
-    orport, dirport, platform, contact)
-
-    boolLogic: the logic we'd like to use could be
-    (equals, contains, less, greater)
-
-    searchstuff: stuff to searchfor could be (any string)
-    """
-
-    if 'searchstuff' in request.GET:
-        if request.GET['searchstuff']:
-            message = 'You searched for: %r' % request.GET['searchstuff']
-        else:
-            message = 'You submitted an empty form.'
-    return HttpResponse(message)
-
-
 def details(request, fingerprint):
-    # TODO: Querying the database is done with raw SQL. This needs
-    # to be fixed.
     """
-    Supply a dictionary to the details.html template consisting of relevant
-    values associated with a given fingerprint.
+    Supply the L{Statusentry} and L{Geoipdb} objects associated with a
+    relay with a given fingerprint to the details.html template.
+    """
+    # [:1] is djangonese for 'LIMIT 1'; [0] gets the object rather than
+    # the set.
+    statusentry = Statusentry.objects.filter(fingerprint=fingerprint)\
+            .extra(select={'geoip': 'geoip_lookup(address)'})\
+            .order_by('-validafter')[:1][0]
+
+    # Fails miserably -- gte and lte don't behave properly.
+    """
+    geoip = Geoipdb.objects.filter(ipstart__gte=statusentry.address,
+            ipend__lte=statusentry.address)[:1][0]
     """
 
-    cursor = connection.cursor()
-    cursor.execute('SELECT statusentry.nickname, statusentry.fingerprint, \
-            statusentry.address, statusentry.orport, statusentry.dirport, \
-            descriptor.platform, descriptor.published, descriptor.uptime, \
-            descriptor.bandwidthburst, descriptor.bandwidthavg, \
-            descriptor.bandwidthobserved, statusentry.isauthority, \
-            statusentry.isbaddirectory, statusentry.isbadexit, \
-            statusentry.isexit, statusentry.isfast, statusentry.isguard, \
-            statusentry.isnamed, statusentry.isstable, statusentry.isrunning, \
-            statusentry.isvalid, statusentry.isv2dir, statusentry.ports, \
-            descriptor.rawdesc FROM statusentry JOIN descriptor ON \
-            statusentry.descriptor = descriptor.descriptor WHERE \
-            statusentry.fingerprint = %s ORDER BY \
-            statusentry.validafter DESC LIMIT 1', [fingerprint])
-
-    try:
-        nickname, fingerprint, address, orport, dirport, platform, \
-                  published, uptime, bandwidthburst, bandwidthavg, \
-                  bandwidthobserved, isauthority, isbaddirectory, \
-                  isbadexit, isexit, isfast, isguard, isnamed, isstable, \
-                  isrunning, isvalid, isv2dir, ports, rawdesc = \
-                  cursor.fetchone()
-    except TypeError:  # TODO: don't raise Http404, write a helpful page that
-        raise Http404  # extends base.html
-
-    template_values = {'nickname': nickname, 'fingerprint': fingerprint,
-            'address': address, 'orport': orport, 'dirport': dirport,
-            'platform': platform, 'published': published, 'uptime': uptime,
-            'bandwidthburst': bandwidthburst, 'bandwidthavg': bandwidthavg,
-            'bandwidthobserved': bandwidthobserved, 'isauthority': isauthority,
-             'isbaddirectory': isbaddirectory, 'isbadexit': isbadexit,
-            'isexit': isexit, 'isfast': isfast, 'isguard': isguard,
-            'isnamed': isnamed, 'isstable': isstable, 'isrunning': isrunning,
-            'isvalid': isvalid, 'isv2dir': isv2dir, 'ports': ports,
-            'rawdesc': rawdesc}
+    template_values = {'relay': statusentry} #'geoip': geoip}
 
     return render_to_response('details.html', template_values)
 
