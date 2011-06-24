@@ -23,6 +23,27 @@
 </tr>
 </table>
 <br />
+
+{% load index_filters %}
+<!-- ########################  -->
+<p> QUERYOPTIONS DICTIONARY:
+{% if queryOptions %}
+    <p> WE HAVE QUERYOPTIONS! 
+    <p> {{queryOptions}}
+    <p> {{queryOptions|key:'isstable'}}
+    <br />
+    {% for option, value in queryOptions.items %}
+    <p> {{option}}, {{value}}
+    <br />
+{% endfor %}
+
+{% else %}
+    <p> NO QUERY OPTIONS!
+    <p> {{queryOptions}}
+{% endif %}
+<br />
+<!-- ########################  -->
+
 <table cellspacing="1" cellpadding="2" class="legend">
 <tr> 
 	<td class="boxTitle">Legend</td>
@@ -434,7 +455,7 @@
             <td>
                 <form action="/" method="get">
                 <select id="sortRouterListing" name="sortListings">
-                <option value="nickname">Router Name</option>
+                <option value="no">Router Name</option>
                 <option value="fingerprint">Fingerprint</option>
                 <option value="country">Country Code</option>
                 <option value="bandwidth">Bandwidth</option>
@@ -464,7 +485,7 @@
             <td> Sort Order: </td>
             <td>
                 <select id="sortRouterListing" name="sortOrder">
-                <option value="ascending">Ascending</option>
+                <option value="no">Ascending</option>
                 <option value="descending">Descending</option>
                 </select>
             </td>
@@ -563,9 +584,12 @@
         <tr>
             <td> V2Dir: </td>
             <td>
-            <input type="radio" name="isv2dir" value="" CHECKED />Off
-            <input type="radio" name="isv2dir" value="yes" />Yes
-            <input type="radio" name="isv2dir" value="no" />No
+            <input type="radio" name="isv2dir" value="" {% if not queryOptions or queryOptions|key:'isv2dir' == "" %} 
+                                                            CHECKED {% endif %}/>Off
+            <input type="radio" name="isv2dir" value="yes" {% if queryOptions and queryOptions|key:'isv2dir' == "yes" %} 
+                                                            CHECKED {% endif %}/>Yes
+            <input type="radio" name="isv2dir" value="no" {% if queryOptions and queryOptions|key:'isv2dir' == "no" %}
+                                                            CHECKED {% endif %}/>No
             </td>
         </tr>
         </table>
@@ -579,7 +603,7 @@
         <tr>
             <td>
             <select id="sortRouterListing" name="criteria">
-            <option value ="fingerprint">Fingerprint</option>
+            <option value ="no">Fingerprint</option>
             <option value ="routername">Router Name</option>
             <option value ="countrycode">Country Code</option>
             <option value ="bandwidth">Bandwidth (kb/s)</option>
@@ -595,7 +619,7 @@
             </td>
             <td>
             <select id="sortRouterListing" name="boolLogic">
-            <option value ="equals">Equals</option>
+            <option value ="no">Equals</option>
             <option value ="contains">Contains</option>
             <option value ="less">Is Less Than</option>
             <option value ="greater">Is Greater Than</option>

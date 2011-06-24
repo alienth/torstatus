@@ -21,13 +21,15 @@ def index(request):
     to be fixed. Also, returning an array-list of the column names to
     be displayed.
     """
-
-    # Search options should probably not be implemented this way in a 
-    # raw SQL query for security reasons:
-    #ordering = ""
-    #restrictions = ""
-    #adv_search = ""
-    #if request.GET:
+    
+    queryOptions = {}
+    if ('queryOptions' in request.session):
+        queryOptions = request.session['queryOptions']
+    
+    if (request.GET):
+        queryOptions = request.GET    
+        request.session['queryOptions'] = queryOptions
+    
     
     currentColumns = []
     if not ('currentColumns' in request.session):
@@ -40,12 +42,60 @@ def index(request):
 
     last_va = Statusentry.objects.aggregate(last=Max('validafter'))['last']
     a = Statusentry.objects.filter(validafter__gte=(last_va - datetime.timedelta(days=1))).order_by('-validafter')
+    
+    #############################################################
+    if queryOptions:
+        if queryOptions['isauthority'] == 'yes':
+            a = a.filter(isauthority=1)
+        elif queryOptions['isauthority'] == 'no': 
+            a = a.filter(isauthority=0)
+        if queryOptions['isbaddirectory'] == 'yes':
+            a = a.filter(isbaddirectory=1)
+        elif queryOptions['isbaddirectory'] == 'no':  
+            a = a.filter(isbaddirectory=0)
+        if queryOptions['isbadexit'] == 'yes':
+            a = a.filter(isbadexit=1)
+        elif queryOptions['isbadexit'] == 'no': 
+            a = a.filter(isbadexit=0)
+        if queryOptions['isexit'] == 'yes':
+            a = a.filter(isexit=1)
+        elif queryOptions['isexit'] == 'no': 
+            a = a.filter(isexit=0)
+        '''
+        if queryOptions['ishibernating'] == 'yes':
+            a = a.filter(ishibernating=1)
+        elif queryOptions['ishibernating'] == 'no': 
+            a = a.filter(ishibernating=0)
+        '''
+        if queryOptions['isnamed'] == 'yes':
+            a = a.filter(isnamed=1)
+        elif queryOptions['isnamed'] == 'no': 
+            a = a.filter(isnamed=0)
+        if queryOptions['isstable'] == 'yes':
+            a = a.filter(isstable=1)
+        elif queryOptions['isstable'] == 'no': 
+            a = a.filter(isstable=0)
+        if queryOptions['isrunning'] == 'yes':
+            a = a.filter(isrunning=1)
+        elif queryOptions['isrunning'] == 'no': 
+            a = a.filter(isrunning=0)
+        if queryOptions['isvalid'] == 'yes':
+            a = a.filter(isvalid=1)
+        elif queryOptions['isvalid'] == 'no': 
+            a = a.filter(isvalid=0)
+        if queryOptions['isv2dir'] == 'yes':
+            a = a.filter(isv2dir=1)
+        elif queryOptions['isv2dir'] == 'no': 
+            a = a.filter(isv2dir=0)
+    #############################################################
+        
+        
     recent_entries = list(set(a))
-
+    
     num_routers = len(recent_entries)
     client_address = request.META['REMOTE_ADDR']
     template_values = {'relay_list': recent_entries, 'client_address': client_address, 'num_routers': num_routers, 'exp_time': 900, \
-                    'currentColumns': currentColumns}
+                    'currentColumns': currentColumns, 'queryOptions': queryOptions}
     return render_to_response('index.html', template_values)
 
 

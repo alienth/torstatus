@@ -40,3 +40,7 @@ def days(seconds):
 @register.filter
 def getcountry(ip):
     return geoip.country(ip).lower()
+    
+@register.filter
+def key(d, key_name):
+    return d[key_name]
