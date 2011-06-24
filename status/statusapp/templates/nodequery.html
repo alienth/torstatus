@@ -19,10 +19,8 @@
     <td id="searchQInfo"> You can use this page to determine if an IP address is an active Tor server, and optionally see if that Tor server's Exit Policy would permit it to exit a certain destination IP address and port.</td>
 </tr>
     {% ifequal source "" %}
-    <tr>
         <td id="searchQError">You must enter a Query IP, at minimum.</td>
-    </tr>
-    {% endifequal %}
+    {% else %}
     {% if source_valid %}
         {% if dest_ip %}
             {% if dest_ip_valid %}
@@ -34,7 +32,10 @@
                 <tr><td id="searchQError">The destination IP address you supplied, {{dest_ip}}, is not a valid IP address.</td></tr>
             {% endif %}
         {% endif %}
+    {% else %}
+    <tr><td id="searchQError">The Querry IP address you supplied, {{source}}, is not a valid IP
     {% endif %}
+    {% endifequal %}
 <tr>
     <td id="searchQMessage"> 
         {% if is_router %}
