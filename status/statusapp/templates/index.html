@@ -24,26 +24,6 @@
 </table>
 <br />
 
-{% load index_filters %}
-<!-- ########################  -->
-<p> QUERYOPTIONS DICTIONARY:
-{% if queryOptions %}
-    <p> WE HAVE QUERYOPTIONS! 
-    <p> {{queryOptions}}
-    <p> {{queryOptions|key:'isstable'}}
-    <br />
-    {% for option, value in queryOptions.items %}
-    <p> {{option}}, {{value}}
-    <br />
-{% endfor %}
-
-{% else %}
-    <p> NO QUERY OPTIONS!
-    <p> {{queryOptions}}
-{% endif %}
-<br />
-<!-- ########################  -->
-
 <table cellspacing="1" cellpadding="2" class="legend">
 <tr> 
 	<td class="boxTitle">Legend</td>
