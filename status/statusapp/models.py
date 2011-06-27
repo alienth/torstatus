@@ -20,41 +20,6 @@ in the object's constructors.
     L{TorperfStats}, L{GettorStats}
 """
 from django.db import models
-# What follows is a custom typecast for psycopg2. psycopg2, by default,
-# casts a BIGINT[] in PostgreSQL to a python list, removing the indices
-# given, e.g. [86:86]={2563637}. These are necessary, however, to gather
-# 96 data points consisting of (date, bandwidth) pairs for use in
-# bandwidth history graphs.
-# This function is only included here for development; it will be moved
-# somewhere else when we know where that proper "somewhere else" is.
-import psycopg2
-conn_string = "host='localhost' dbname='tordir' user='metrics' password='meiD7go3'"
-conn = psycopg2.connect(conn_string)
-cursor = conn.cursor()
-
-def __none_to_zero(string):
-    if (string.lower() == "none" or string.lower() == "null"):
-        return '0'
-    else:
-        return string
-
-def cast_array(value, cur):
-    if value is None:
-        return None
-    value = str(value)
-    indices, arraystr = value.split('=')
-    startstr, endstr = indices.strip('[]').split(':')
-    start = int(startstr)
-    end = int(endstr)
-    # Make all 'null' or 'none' entries '0', then convert the entries
-    # in the array to integers
-    array = map(lambda x: int(__none_to_zero(x)),
-            arraystr.strip('{}').split(','))
-    return (start, end, array)
-
-ARRAY = psycopg2.extensions.new_type((1016,), "BIGINT[]", cast_array)
-psycopg2.extensions.register_type(ARRAY)
-# End
 
 
 # CUSTOM FIELDS -------------------------------------------------------
@@ -73,6 +38,7 @@ class BigIntegerArrayField(models.Field):
 
     def to_python(self, value):
         return value
+
 
 # MODELS --------------------------------------------------------------
 # ---------------------------------------------------------------------
@@ -126,7 +92,6 @@ class Descriptor(models.Model):
     address = models.CharField(max_length=15)
     orport = models.IntegerField()
     dirport = models.IntegerField()
-    #fingerprint = models.TextField()
     fingerprint = models.CharField(max_length=40)
     bandwidthavg = models.BigIntegerField()
     bandwidthburst = models.BigIntegerField()
@@ -134,7 +99,6 @@ class Descriptor(models.Model):
     platform = models.CharField(max_length=256, blank=True)
     published = models.DateTimeField()
     uptime = models.BigIntegerField(blank=True)
-    #extrainfo = models.TextField()
     extrainfo = models.CharField(max_length=40, blank=True)
     rawdesc = models.TextField()
 

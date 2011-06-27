@@ -17,8 +17,7 @@ from statusapp.models import Statusentry, Descriptor, Bwhist, Geoipdb, \
         TotalBandwidth
 from custom.aggregate import CountCase
 
-
-# To do: get rid of javascript sorting: pass another argument
+# TODO: get rid of javascript sorting: pass another argument
 # to this view function and sort the table accordingly.
 #@cache_page(60 * 15) # Cache is turned off for development,
                       # but it works.
@@ -26,6 +25,11 @@ def index(request):
     """
     Supply a dictionary to the index.html template consisting of a list
     of active relays.
+
+    @rtype: HttpRequest
+    @return: A dictionary consisting of information about each router
+        in the network as well as aggregate information about the
+        network itself.
     """
     last_va = Statusentry.objects.aggregate(\
             last=Max('validafter'))['last']
@@ -78,18 +82,21 @@ def details(request, fingerprint):
     """
     Supply the L{Statusentry} and L{Geoipdb} objects associated with a
     relay with a given fingerprint to the details.html template.
+
+    @type fingerprint: C{string}
+    @param fingerprint: The fingerprint of the router to display the
+        details of.
+    @rtype: HttpResponse
+    @return: The L{Statusentry}, L{Descriptor}, and L{Geoipdb}
+        information of the router.
     """
-    # [:1] is djangonese for 'LIMIT 1'; [0] gets the object rather than
-    # the set.
+    # The SQL function 'geoip_lookup' is used here, since greater than
+    # and less than are incorrectly implemented for IPAddressFields.
+    # [:1] is djangonese for 'LIMIT 1', and
+    # [0] gets the object rather than the QuerySet.
     statusentry = Statusentry.objects.filter(fingerprint=fingerprint)\
             .extra(select={'geoip': 'geoip_lookup(address)'})\
             .order_by('-validafter')[:1][0]
-
-    # Fails miserably -- gte and lte don't behave properly.
-    """
-    geoip = Geoipdb.objects.filter(ipstart__gte=statusentry.address,
-            ipend__lte=statusentry.address)[:1][0]
-    """
 
     template_values = {'relay': statusentry} #'geoip': geoip}
 
@@ -97,12 +104,29 @@ def details(request, fingerprint):
 
 
 def readhist(request, fingerprint):
+    """
+    Create a graph of read bandwidth history for the last twenty-four
+    hours available for a router with a given fingerprint.
 
+    Currently, this method simply displays the most recent information
+    available; it is not necessary that the router be active recently.
+
+    @type fingerprint: C{string}
+    @param fingerprint: The fingerprint of the router to gather
+        bandwidth history information on.
+    @rtype: HttpRequest
+    @return: A PNG image that is the graph of the read bandwidth
+        history information for the given router.
+    """
     from django.core.exceptions import ObjectDoesNotExist
     import matplotlib
-    from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+    from matplotlib.backends.backend_agg import \
+            FigureCanvasAgg as FigureCanvas
     from matplotlib.figure import Figure
     from matplotlib.dates import DateFormatter
+
+    # Draw the graph such that the labels and title are visible,
+    # and remove excess whitespace.
     matplotlib.rcParams['figure.subplot.left'] = 0.2
     matplotlib.rcParams['figure.subplot.right'] = 0.99
     matplotlib.rcParams['figure.subplot.top'] = 0.87
@@ -129,6 +153,8 @@ def readhist(request, fingerprint):
     end_time = start_time + datetime.timedelta(days=1) - \
             datetime.timedelta(minutes=15)
 
+    # If less than 96 entries in the array, get earlier entries.
+    # If they don't exist, fill in the array with '0' values.
     if to_fill:
         day_before = last_hist.date - datetime.timedelta(days=1)
         try:
@@ -146,7 +172,8 @@ def readhist(request, fingerprint):
             frameon=False)
     ax = fig.add_subplot(111)
 
-    bps = map(lambda x: x / (15 + 60), tr_list)
+    # Return bytes per seconds, not total bandwidth for 15 minutes.
+    bps = map(lambda x: x / (15 * 60), tr_list)
     times = []
     for i in range(0, 104, 8):
         to_add_date = start_time + datetime.timedelta(minutes=(15 * i))
@@ -154,18 +181,27 @@ def readhist(request, fingerprint):
         times.append(to_add_str)
 
     dates = range(96)
+
     ax.plot(dates, bps, color='#68228B')
-    ax.set_xlabel("time", fontsize='12')
+    ax.fill_between(dates, 0, bps, color='#DAC8E2')
+
+    ax.set_xlabel("Time (GMT)", fontsize='12')
     ax.set_xticks(range(0, 104, 8))
     ax.set_xticklabels(times, fontsize='9')
-    ax.set_ylabel("bandwidth (bytes/s)", fontsize='12')
+
+    ax.set_ylabel("Bandwidth (bytes/sec)", fontsize='12')
+
+    # Don't extend the y-axis to negative numbers, in any circumstance.
+    ax.set_ylim(ymin=0)
+
+    # Don't use scientific notation.
     ax.yaxis.major.formatter.set_scientific(False)
     for tick in ax.yaxis.get_major_ticks():
         tick.label1.set_fontsize('9')
 
-    ax.set_title("Average Bandwidth Read History (bytes/sec) (GMT):\n" + start_time.strftime(\
-            "%Y-%m-%d %H:%M") + " to " + end_time.strftime(\
-            "%Y-%m-%d %H:%M"), fontsize='12')
+    ax.set_title("Average Bandwidth Read History:\n"
+            + start_time.strftime("%Y-%m-%d %H:%M") + " to "
+            + end_time.strftime("%Y-%m-%d %H:%M"), fontsize='12')
 
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
@@ -174,12 +210,29 @@ def readhist(request, fingerprint):
 
 
 def writehist(request, fingerprint):
+    """
+    Create a graph of written bandwidth history for the last twenty-four
+    hours available for a router with a given fingerprint.
 
+    Currently, this method simply displays the most recent information
+    available; it is not necessary that the router be active recently.
+
+    @type fingerprint: C{string}
+    @param fingerprint: The fingerprint of the router to gather
+        bandwidth history information on.
+    @rtype: HttpRequest
+    @return: A PNG image that is the graph of the written bandwidth
+        history information for the given router.
+    """
     from django.core.exceptions import ObjectDoesNotExist
     import matplotlib
-    from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+    from matplotlib.backends.backend_agg import \
+            FigureCanvasAgg as FigureCanvas
     from matplotlib.figure import Figure
     from matplotlib.dates import DateFormatter
+
+    # Draw the graph such that the labels and title are visible,
+    # and remove excess whitespace.
     matplotlib.rcParams['figure.subplot.left'] = 0.2
     matplotlib.rcParams['figure.subplot.right'] = 0.99
     matplotlib.rcParams['figure.subplot.top'] = 0.87
@@ -206,6 +259,8 @@ def writehist(request, fingerprint):
     end_time = start_time + datetime.timedelta(days=1) - \
             datetime.timedelta(minutes=15)
 
+    # If less than 96 entries in the array, get earlier entries.
+    # If they don't exist, fill in the array with '0' values.
     if to_fill:
         day_before = last_hist.date - datetime.timedelta(days=1)
         try:
@@ -223,7 +278,9 @@ def writehist(request, fingerprint):
             frameon=False)
     ax = fig.add_subplot(111)
 
-    bps = map(lambda x: x / (15 + 60), tr_list)
+    # Return bytes per seconds, not total bandwidth for 15 minutes.
+    bps = map(lambda x: x / (15 * 60), tr_list)
+
     times = []
     for i in range(0, 104, 8):
         to_add_date = start_time + datetime.timedelta(minutes=(15 * i))
@@ -231,17 +288,27 @@ def writehist(request, fingerprint):
         times.append(to_add_str)
 
     dates = range(96)
+
     ax.plot(dates, bps, color='#66CD00')
-    ax.set_xlabel("time", fontsize='12')
+    ax.fill_between(dates, 0, bps, color='#D9F3C0')
+
+    ax.set_xlabel("Time (GMT)", fontsize='12')
     ax.set_xticks(range(0, 104, 8))
     ax.set_xticklabels(times, fontsize='9')
-    ax.set_ylabel("bandwidth (bytes/s)", fontsize='12')
+
+    ax.set_ylabel("Bandwidth (bytes/sec)", fontsize='12')
+
+    # Don't extend the y-axis to negative numbers, in any circumstance.
+    ax.set_ylim(ymin=0)
+
+    # Don't use scientific notation.
     ax.yaxis.major.formatter.set_scientific(False)
     for tick in ax.yaxis.get_major_ticks():
         tick.label1.set_fontsize('9')
 
-    ax.set_title("Average Bandwidth Write History (bytes/sec) (GMT):\n" + start_time.strftime("%Y-%m-%d %H:%M") + " to " + end_time.strftime(\
-            "%Y-%m-%d %H:%M"), fontsize='12')
+    ax.set_title("Average Bandwidth Write History:\n"
+            + start_time.strftime("%Y-%m-%d %H:%M") + " to "
+            + end_time.strftime("%Y-%m-%d %H:%M"), fontsize='12')
 
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
@@ -263,6 +330,12 @@ def exitnodequery(request):
     give a useful and informative error message by passing both the text
     input provided by the user as well as whether or not that text input
     was valid to the template.
+
+    @rtype: HttpResponse
+    @return: Information such as whether or not the IP address given is
+        a router in the Tor network, whether or not that router would
+        allow exiting to a given IP address and port, and other helpful
+        information in the case of unparsable input.
     """
     # Given by the client
     source = ""
@@ -372,7 +445,7 @@ def exitnodequery(request):
 
 
 def csv_current_results(request):
-    # Does not work yet; waiting for query via Django's ORM.
+    # TODO
     """
     """
     response = HttpResponse(mimetype='text/csv')
@@ -389,6 +462,7 @@ def csv_current_results(request):
 
 
 def networkstatisticgraphs(request):
+    #TODO
     # For now, this function is just a placeholder.
 
     variables = "TEMP STRING"
@@ -481,37 +555,6 @@ def columnpreferences(request):
     template_values = {'currentColumns': currentColumns, 'availableColumns':
             availableColumns, 'selectedEntry': selection}
     return render_to_response('columnpreferences.html', template_values)
-
-
-def networkstatisticgraphs(request):
-    # For now, this function is just a placeholder.
-    """
-    """
-
-    variables = "TEMP STRING"
-    template_values = {'variables': variables}
-    return render_to_response('statisticgraphs.html', template_values)
-
-
-def unruly_passengers_csv(request):
-    # For now, this function is just a placeholder. We're using this to see
-    # if we can understand the csv module.
-    """
-    """
-    UNRULY_PASSENGERS = [146, 184, 235, 200, 226, 251, 299, 273, 281, 304,
-            203]
-
-    # Create the HttpResponse object with the appropriate CSV header.
-    response = HttpResponse(mimetype='text/csv')
-    response['Content-Disposition'] = 'attachment; filename=test_data.csv'
-
-    # Create the CSV writer using the HttpResponse as the "file."
-    writer = csv.writer(response)
-    writer.writerow(['Year', 'Unruly Airline Passengers'])
-    for (year, num) in zip(range(1995, 2006), UNRULY_PASSENGERS):
-        writer.writerow([year, num])
-
-    return response
 
 
 def _get_exit_policy(rawdesc):
