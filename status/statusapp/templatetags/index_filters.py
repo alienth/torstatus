@@ -6,25 +6,14 @@ register = template.Library()
 @register.filter
 def kilobytes_ps(bytes_ps):
     """
-<<<<<<< HEAD:statusapp/templatetags/index_filters.py
     Convert a bandwidth value in bytes to a bandwidth value in kilobytes
-    """
-    return int(bytes_ps)/1024
-=======
-    Convert a bandwidth value in bytes to a bandwidth value in kilobytes.
 
     @type bytes_ps: C{int}, C{float}, C{long}, or C{string}
     @param bytes_ps: The bandwidth value, in bps.
     @rtype: C{int}
     @return: The bandwidth value in kbps.
     """
-    # As statusapp.views.details is written now, this value can 
-    # be None sometimes.
-    if (bytes_ps == ''):
-        return 0
-    else:
-        return int(bytes_ps)/1024
->>>>>>> 7724860d6e6e7634424b53b2c2d934523c40871b:status/statusapp/templatetags/index_filters.py
+    return int(bytes_ps)/1024
 
 @register.filter
 def days(seconds):
@@ -46,10 +35,7 @@ def days(seconds):
 @register.filter
 def getcountry(ip):
     return geoip.country(ip).lower()
-<<<<<<< HEAD:statusapp/templatetags/index_filters.py
-=======
-    
+
 @register.filter
 def key(d, key_name):
     return d[key_name]
->>>>>>> 7724860d6e6e7634424b53b2c2d934523c40871b:status/statusapp/templatetags/index_filters.py

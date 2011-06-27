@@ -4,7 +4,7 @@
 <link rel="stylesheet" type="text/css" href="/static/css/details.css"></link>
 {% endblock %}
 
-{% block mainTitle %} TorStatus Router Details -- {{nickname}} {% endblock %}
+{% block mainTitle %} TorStatus Router Details -- {{descriptor.nickname}} {% endblock %}
 
 {% block headerTitle %} TorStatus {% endblock %}
 
@@ -15,7 +15,7 @@
 <table cellspacing="2" cellpadding="2" class="displayStatus">
 <tr>
 	<td id="mainLinks">
-        Details for Relay: {{nickname}}
+        Details for Relay: {{descriptor.nickname}}
 	</td>
 </tr>
 </table>
@@ -88,13 +88,8 @@
     <td class="boxTitle" colspan="2"> Graphs </td>
 </tr>
 <tr id="row_aggStatisticSummary">
-<<<<<<< HEAD:statusapp/templates/details.html
-	<td id="aggBox"><img src="../../static/img/graph1.png" width="480px" height="300px" alt="GRAPH 1"  title="GRAPH 1"> </td>
-    <td id="aggBox"><img src="../../static/img/graph2.png" width="480px" height="300px" alt="GRAPH 2"  title="GRAPH 2"> </td>
-=======
-	<td id="aggBox"><img src="/static/img/graph_old.png" width="480px" height="300px" alt="GRAPH 1"  title="GRAPH 1"> </td>
-    <td id="aggBox"><img src="/static/img/graph_old.png" width="480px" height="300px" alt="GRAPH 2"  title="GRAPH 2"> </td>
->>>>>>> 7724860d6e6e7634424b53b2c2d934523c40871b:status/statusapp/templates/details.html
+	<td id="aggBox"><img src="/static/img/graph1.png" width="480px" height="300px" alt="GRAPH 1"  title="GRAPH 1"> </td>
+    <td id="aggBox"><img src="/static/img/graph2.png" width="480px" height="300px" alt="GRAPH 2"  title="GRAPH 2"> </td>
 </tr>
 </table>
 

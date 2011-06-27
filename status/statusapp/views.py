@@ -41,7 +41,7 @@ def index(request):
         currentColumns = request.session['currentColumns']
 
     last_va = Statusentry.objects.aggregate(last=Max('validafter'))['last']
-    a = Statusentry.objects.filter(validafter__gte=(last_va - datetime.timedelta(days=1))).order_by('-validafter')
+    a = Statusentry.objects.filter(validafter__gte=(last_va - datetime.timedelta(days=1))).order_by('-validafter')[:1000]
     
     #############################################################
     if queryOptions:
@@ -98,114 +98,16 @@ def index(request):
                     'currentColumns': currentColumns, 'queryOptions': queryOptions}
     return render_to_response('index.html', template_values)
 
-
-def customindex(request, fingerprint):
-    # This method should probably not exist, and request.GET should be used
-    # in statusapp.views.index to make different queries.
-    """
-    List of variables passed from the html form:
-
-    sortlistings: what to sort by could be (router, fingerprint, country,
-    bandwidth, uptime, lastDescriptor, hostname, ip, ORPort, DirPort, platform,
-    contact, authority, badDirectory, badExit, exit, fast, guard, hibernating,
-    named)
-
-    sortorder: the order to sort by, could be (ascending, descending)
-
-    authority: require flags, could be (yes, no)
-
-    badDirectory: require flags, could be (yes, no)
-
-    BadExit: require flags, could be (yes, no)
-
-    Exit:  require flags, could be (yes, no)
-
-    Fast:  require flags, could be (yes, no)
-
-    Guard: require flags, could be (yes, no)
-
-    Hibernating: require flags, could be (yes, no)
-
-    Named:  require flags, could be (yes, no)
-
-    Stable:  require flags, could be (yes, no)
-
-    Running:  require flags, could be (yes, no)
-
-    Valid:  require flags, could be (yes, no)
-
-    V2Dir:  require flags, could be (yes, no)
-
-    criteria: the criteria for an advanced search could be (fingerprint,
-    nickname, country, bandwidth, uptime, published, address, hostname,
-    orport, dirport, platform, contact)
-
-    boolLogic: the logic we'd like to use could be 
-    (equals, contains, less, greater)
-
-    searchstuff: stuff to searchfor could be (any string)
-    """
-
-    #Lots of work to do here. A lot more complicated than initially thought.
-    #I need to create the custom index page from all these variables.
-    #This means creating tons of different possible tables. I'll get to it
-    #eventually.
-    #Could even merge with index
-
-
-    if 'searchstuff' in request.GET:
-        if request.GET['searchstuff']:
-            message = 'You searched for: %r' % request.GET['searchstuff']
-        else:
-            message = 'You submitted an empty form.'
-    return HttpResponse(message)
-
-def details(request, fingerprint):
-    #import geoip
-    """
-    Supply a dictionary to the details.html template consisting of relevant
-    values associated with a given fingerprint. Querying the database is done 
-    with raw SQL. This needs to be fixed.
-    """
-
-    cursor = connection.cursor()
-    cursor.execute('SELECT statusentry.nickname, statusentry.fingerprint, \
-            statusentry.address, statusentry.orport, statusentry.dirport, \
-            descriptor.platform, descriptor.published, descriptor.uptime, \
-            descriptor.bandwidthburst, descriptor.bandwidthavg, \
-            descriptor.bandwidthobserved, statusentry.isauthority, \
-            statusentry.isbaddirectory, statusentry.isbadexit, \
-            statusentry.isexit, statusentry.isfast, statusentry.isguard, \
-            statusentry.isnamed, statusentry.isstable, statusentry.isrunning, \
-            statusentry.isvalid, statusentry.isv2dir, statusentry.ports, \
-            descriptor.rawdesc FROM statusentry JOIN descriptor ON \
-            statusentry.descriptor = descriptor.descriptor WHERE \
-            statusentry.fingerprint = %s ORDER BY \
-            statusentry.validafter DESC LIMIT 1', [fingerprint]) 
-
-    try: 
-        nickname, fingerprint, address, orport, dirport, platform, published, \
-            uptime, bandwidthburst, bandwidthavg, bandwidthobserved, \
-            isauthority, isbaddirectory, isbadexit, isexit, isfast, isguard, \
-            isnamed, isstable, isrunning, isvalid, isv2dir, ports, rawdesc \
-            = cursor.fetchone()
-
-    except:
-        raise Http404
+def details(request, descriptor_fingerprint):
+    import geoip
+    from statusapp.models import Statusentry, Descriptor, Bwhist
     
-    #country = ""
-    #country = geoip.country(address)
-
-    template_values = {'nickname': nickname, 'fingerprint': fingerprint, \
-            'address': address, 'orport': orport, 'dirport': dirport, \
-            'platform': platform, 'published': published, 'uptime': uptime, \
-            'bandwidthburst': bandwidthburst, 'bandwidthavg': bandwidthavg, \
-            'bandwidthobserved': bandwidthobserved, 'isauthority': isauthority,\
-             'isbaddirectory': isbaddirectory, 'isbadexit': isbadexit, \
-            'isexit': isexit, 'isfast': isfast, 'isguard': isguard, \
-            'isnamed': isnamed, 'isstable': isstable, 'isrunning': isrunning, \
-            'isvalid': isvalid, 'isv2dir': isv2dir, 'ports': ports, \
-            'rawdesc': rawdesc}#, 'country': country}
+    #This block gets the specific descriptor and statusentry that the client asked for
+    last_va = Statusentry.objects.aggregate(last=Max('validafter'))['last']
+    day_entries = Statusentry.objects.filter(validafter__gte=(last_va - datetime.timedelta(days=1))).order_by('-validafter')
+    entry = list(day_entries.filter(fingerprint = descriptor_fingerprint))[0]
+    descriptor = entry.descriptorid
+    template_values = {'descriptor': descriptor, 'statusentry': entry}
 
     return render_to_response('details.html', template_values)
 
@@ -335,6 +237,25 @@ def csv_current_results(request):
 
     return response
 
+def unruly_passengers_csv(request):
+    # For now, this function is just a placeholder. We're using this to see
+    # if we can understand the csv module.
+    """
+    """
+    UNRULY_PASSENGERS = [146,184,235,200,226,251,299,273,281,304,203]
+    
+    # Create the HttpResponse object with the appropriate CSV header.
+    response = HttpResponse(mimetype='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=test_data.csv'
+
+    # Create the CSV writer using the HttpResponse as the "file."
+    writer = csv.writer(response)
+    writer.writerow(['Year', 'Unruly Airline Passengers'])
+    for (year, num) in zip(range(1995, 2006), UNRULY_PASSENGERS):
+        writer.writerow([year, num])
+
+    return response
+
 def networkstatisticgraphs(request):
     # For now, this function is just a placeholder.
 
@@ -395,7 +316,160 @@ def columnpreferences(request):
                     'selectedEntry': columnLists[2]}
     
     return render_to_response('columnpreferences.html', template_values)
+
+def graph1(request):
+    from statusapp.models import Statusentry, Descriptor, Bwhist
+    import matplotlib
+    from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+    from matplotlib.figure import Figure
+    from matplotlib.dates import DateFormatter
+
+
+    last_va = Statusentry.objects.aggregate(last=Max('validafter'))['last']
+    day_entries = Statusentry.objects.filter(validafter__gte=(last_va - datetime.timedelta(days=1))).order_by('-validafter')
+    entry = list(day_entries.filter(fingerprint = descriptor_fingerprint))[0]
+    descriptor = entry.descriptorid
+    bandwidthobject = Bwhist.objects.filter(fingerprint=descriptor_fingerprint)[0]
+    """
+    matplotlib.rcParams['figure.subplot.left'] = 0.04
+    matplotlib.rcParams['figure.subplot.right'] = 0.999
+    matplotlib.rcParams['figure.subplot.top'] = 0.94
+    matplotlib.rcParams['figure.subplot.bottom'] = 0.10
+    """
+    #
+    #
+    #
+    #    FIRST MAKE GRAPH 1
+    #       which is the recent write history graph
+    #
+    #
     
+    x_series = range(0,24)
+    y_series = [ bandwidthobject.written[0] for i in x_series]
+    pyplot.plot( x_series, y_series, '-')
+    pyplot.title( 'Plotting Write history' )
+    pyplot.xlabel( 'Hour' )
+    pyplot.ylabel( 'Write Speed' )
+    pyplot
+    
+    """
+    fig1 = Figure(facecolor='white', edgecolor='black', figsize=(20,5), frameon=False)
+    ax = fig.add_subplot(111)
+
+    x = matplotlib.numpy.arange(24)
+    """
+
+    p = get_object_or_404(Poll, pk=poll_id)
+    #fig = Figure()
+    fig = Figure(facecolor='white', edgecolor='black', figsize=(20, 5), frameon=False)
+    ax = fig.add_subplot(111)
+	
+    x = matplotlib.numpy.arange(p.choice_set.count())
+    choices = p.choice_set.all()
+    choice_votes = [choice.votes for choice in choices][:90]
+    choice_names = [choice.choice for choice in choices][:90]
+	
+    #choice_totalNumber = p.choice_set.count()
+    choice_totalNumber = len(choice_names)
+    choice_index = matplotlib.numpy.arange(choice_totalNumber)
+    
+    cols = ['lightblue']
+    #cols = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'indigo'] * 10
+
+    cols = cols[0:len(choice_index)]
+    bar_width = 0.3
+    ax.bar(choice_index, choice_votes, color=cols, width=bar_width)
+    ax.set_xticks(choice_index + (bar_width/2.0))
+    ax.set_xticklabels(choice_names, fontstyle='italic', fontsize='10', fontweight='light', rotation='vertical', fontname='Others')
+    ax.set_xlabel("Choices")
+    ax.set_ylabel("Votes")
+    chart_title = "Results for poll: %s" % p.question
+    ax.set_title(chart_title)
+    ax.grid(color='r', linestyle='-', linewidth=.1)
+    for index in choice_index:
+        ax.text(index, choice_votes[index], str(choice_votes[index]), fontsize='10')
+    canvas = FigureCanvas(fig)
+    response = HttpResponse(content_type='image/png')
+    canvas.print_png(response, ha="center")
+    return response
+
+def graph2(request):
+    #
+    #
+    #       SECOND MAKE SECOND GRAPH
+    #           which is the recent read history
+    #
+    #
+
+    from statusapp.models import Statusentry, Descriptor, Bwhist
+    import matplotlib
+    from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+    from matplotlib.figure import Figure
+    from matplotlib.dates import DateFormatter
+
+
+    last_va = Statusentry.objects.aggregate(last=Max('validafter'))['last']
+    day_entries = Statusentry.objects.filter(validafter__gte=(last_va - datetime.timedelta(days=1))).order_by('-validafter')
+    entry = list(day_entries.filter(fingerprint = descriptor_fingerprint))[0]
+    descriptor = entry.descriptorid
+    bandwidthobject = Bwhist.objects.filter(fingerprint=descriptor_fingerprint)[0]
+    """
+    matplotlib.rcParams['figure.subplot.left'] = 0.04
+    matplotlib.rcParams['figure.subplot.right'] = 0.999
+    matplotlib.rcParams['figure.subplot.top'] = 0.94
+    matplotlib.rcParams['figure.subplot.bottom'] = 0.10
+    """
+    
+    x_series = range(0,24)
+    y_series = [ bandwidthobject.written[0] for i in x_series]
+    pyplot.plot( x_series, y_series, '-')
+    pyplot.title( 'Plotting Write history' )
+    pyplot.xlabel( 'Hour' )
+    pyplot.ylabel( 'Write Speed' )
+    pyplot
+    
+
+    """
+    fig1 = Figure(facecolor='white', edgecolor='black', figsize=(20,5), frameon=False)
+    ax = fig.add_subplot(111)
+
+    x = matplotlib.numpy.arange(24)
+    """
+
+    p = get_object_or_404(Poll, pk=poll_id)
+    #fig = Figure()
+    fig = Figure(facecolor='white', edgecolor='black', figsize=(20, 5), frameon=False)
+    ax = fig.add_subplot(111)
+    
+    x = matplotlib.numpy.arange(p.choice_set.count())
+    choices = p.choice_set.all()
+    choice_votes = [choice.votes for choice in choices][:90]
+    choice_names = [choice.choice for choice in choices][:90]
+    
+    #choice_totalNumber = p.choice_set.count()
+    choice_totalNumber = len(choice_names)
+    choice_index = matplotlib.numpy.arange(choice_totalNumber)
+    
+    cols = ['lightblue']
+    #cols = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'indigo'] * 10
+
+    cols = cols[0:len(choice_index)]
+    bar_width = 0.3
+    ax.bar(choice_index, choice_votes, color=cols, width=bar_width)
+    ax.set_xticks(choice_index + (bar_width/2.0))
+    ax.set_xticklabels(choice_names, fontstyle='italic', fontsize='10', fontweight='light', rotation='vertical', fontname='Others')
+    ax.set_xlabel("Choices")
+    ax.set_ylabel("Votes")
+    chart_title = "Results for poll: %s" % p.question
+    ax.set_title(chart_title)
+    ax.grid(color='r', linestyle='-', linewidth=.1)
+    for index in choice_index:
+        ax.text(index, choice_votes[index], str(choice_votes[index]), fontsize='10')
+    canvas = FigureCanvas(fig)
+    response = HttpResponse(content_type='image/png')
+    canvas.print_png(response, ha="center")
+    return response
+
 def _buttonChoice(request, button, field, currentColumns, availableColumns): 
     '''
     Helper function that manages the changes in the column preferences array-lists.
@@ -429,35 +503,6 @@ def _buttonChoice(request, button, field, currentColumns, availableColumns):
     columnLists.append(availableColumns)
     columnLists.append(selection)
     return columnLists
-    
-
-def networkstatisticgraphs(request):
-    # For now, this function is just a placeholder.
-    """
-    """
-
-    variables = "TEMP STRING"
-    template_values = {'variables': variables,}
-    return render_to_response('statisticgraphs.html', template_values)
-
-def unruly_passengers_csv(request):
-    # For now, this function is just a placeholder. We're using this to see
-    # if we can understand the csv module.
-    """
-    """
-    UNRULY_PASSENGERS = [146,184,235,200,226,251,299,273,281,304,203]
-    
-    # Create the HttpResponse object with the appropriate CSV header.
-    response = HttpResponse(mimetype='text/csv')
-    response['Content-Disposition'] = 'attachment; filename=test_data.csv'
-
-    # Create the CSV writer using the HttpResponse as the "file."
-    writer = csv.writer(response)
-    writer.writerow(['Year', 'Unruly Airline Passengers'])
-    for (year, num) in zip(range(1995, 2006), UNRULY_PASSENGERS):
-        writer.writerow([year, num])
-
-    return response
 
 def _get_exit_policy(rawdesc):
     """
@@ -627,4 +672,3 @@ def _port_match(dest_port, port_line):
     if (dest_port == port_line):
         return True
     return False
-
