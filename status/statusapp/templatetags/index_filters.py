@@ -1,5 +1,4 @@
 from django import template
-import geoip
 
 register = template.Library()
 
@@ -33,8 +32,9 @@ def days(seconds):
         return int(seconds)/86400
 
 @register.filter
-def getcountry(ip):
-    return geoip.country(ip).lower()
+def getcountry(location):
+    #the location returned contains the country and the coordinates.
+    return location.split(',')[0][1:3]
 
 @register.filter
 def key(d, key_name):

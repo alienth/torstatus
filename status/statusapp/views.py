@@ -3,7 +3,6 @@ from django.http import HttpResponse, HttpRequest, Http404
 from django.db import connection
 import csv
 from statusapp.models import Statusentry, Descriptor, Bwhist
-from django.views.decorators.cache import cache_page
 import datetime
 import time
 from django.db.models import Max
@@ -41,7 +40,8 @@ def index(request):
         currentColumns = request.session['currentColumns']
 
     last_va = Statusentry.objects.aggregate(last=Max('validafter'))['last']
-    a = Statusentry.objects.filter(validafter__gte=(last_va - datetime.timedelta(days=1))).order_by('-validafter')[:1000]
+    #a = Statusentry.objects.filter(validafter=last_va).extra(select={'geoip': 'geoip_lookup(address)'}).order_by('nickname')[:100]
+    a = Statusentry.objects.filter(validafter=last_va).extra(select={'geoip': 'geoip_lookup(address)'}).order_by('nickname')
     
     #############################################################
     if queryOptions:
@@ -88,8 +88,7 @@ def index(request):
         elif queryOptions['isv2dir'] == 'no': 
             a = a.filter(isv2dir=0)
     #############################################################
-        
-        
+    
     recent_entries = list(set(a))
     
     num_routers = len(recent_entries)
@@ -100,7 +99,6 @@ def index(request):
 
 def details(request, descriptor_fingerprint):
     import geoip
-    from statusapp.models import Statusentry, Descriptor, Bwhist
     
     #This block gets the specific descriptor and statusentry that the client asked for
     last_va = Statusentry.objects.aggregate(last=Max('validafter'))['last']

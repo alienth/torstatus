@@ -117,9 +117,9 @@
 		
 		    <!-- Add: RELAY IS DOWN and RELAY IS HIBERNATING -->
 		    {% if "Country Code" in currentColumns %}
-            <td sorttable_customkey="{{ relay.address|getcountry }}" id="col_relayName"><img \
-            src="static/img/flags/{{ relay.address|getcountry }}.gif" alt="{{ relay.address|getcountry|upper }}" \
-            title="{{ relay.address|getcountry }}">
+            <td sorttable_customkey="{{ relay.geoip|getcountry }}" id="col_relayName"><img \
+            src="static/img/flags/{{ relay.geoip|getcountry|lower }}.gif" alt="{{ relay.geoip|getcountry|upper }}" \
+            title="{{ relay.geoip|getcountry }}">
             </td>
 			<!-- Note: sorttable_customkey="[[COUNTRY_PREFIX]]" -->
 			{% endif %}
