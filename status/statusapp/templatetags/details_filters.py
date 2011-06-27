@@ -92,6 +92,7 @@ def signing_key(rawdesc):
 
     return "\n".join(raw_list[(i + 1):(i + 6)])
 
+
 @register.filter
 def exitinfo(rawdesc):
     """

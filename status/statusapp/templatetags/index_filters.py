@@ -16,7 +16,7 @@ def kilobytes_ps(bytes_ps):
     @rtype: C{int}
     @return: The bandwidth value in kbps.
     """
-    
+
     # As statusapp.views.details is written now, this value can
     # be None or an empty string sometimes.
     if (bytes_ps == '' or bytes_ps is None):
@@ -42,6 +42,7 @@ def days(seconds):
         return 0
     else:
         return int(seconds) / 86400
+
 
 @register.filter
 def key(d, key_name):
