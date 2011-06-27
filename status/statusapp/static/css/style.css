@@ -15,7 +15,7 @@ th {
     line-height:75%;
 }
 
-th#relayHeader {
+th.relayHeader {
 	text-align: left;
 	font-weight: bold; 
 	font-size: 0.6875em;
@@ -24,7 +24,22 @@ th#relayHeader {
 	border-bottom: 2px solid black;
 }
 
-th#relayHeader:hover {
+th#routerName {
+	text-align: left;
+	font-weight: bold; 
+	font-size: 0.6875em;
+	background-color: #7BD4F7;
+	border-top: 2px solid black;
+	border-bottom: 2px solid black;
+	min-width: 100px;
+}
+
+th#routerName:hover {
+    background-color: #89FB69;	
+	cursor: pointer;
+}
+
+th.relayHeader:hover {
 	background-color: #89FB69;	
 	cursor: pointer;
 }
