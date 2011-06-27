@@ -133,12 +133,13 @@ def index(request):
             'currentColumns': currentColumns, 'queryOptions': queryOptions, 'counts': counts, 'total_bw': total_bw}
     return render_to_response('index.html', template_values)
 
-def details(request, descriptor_fingerprint):
+def details(request, fingerprint):
     
     #This block gets the specific descriptor and statusentry that the client asked for
+
     last_va = Statusentry.objects.aggregate(last=Max('validafter'))['last']
-    day_entries = Statusentry.objects.filter(fingerprint=fingerprint).order_by('-validafter')[0]
-    entry = list(day_entries.filter(fingerprint = descriptor_fingerprint))[0]
+    a = Statusentry.objects.filter(validafter=last_va).extra(select={'geoip': 'geoip_lookup(address)'}).order_by('nickname')
+    entry = a.filter(fingerprint = fingerprint).order_by('validafter')[0]
     descriptor = entry.descriptorid
     template_values = {'descriptor': descriptor, 'statusentry': entry}
     return render_to_response('details.html', template_values)

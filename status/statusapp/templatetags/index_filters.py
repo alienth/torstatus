@@ -99,3 +99,7 @@ def longitude(geoip):
     @return: The longitude associated with C{geoip}.
     """
     return str(geoip).strip('()').split(',')[2]
+
+@register.filter
+def key(d, key_name):
+    return d[key_name]
