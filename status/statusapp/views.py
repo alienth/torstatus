@@ -31,8 +31,13 @@ def index(request):
         currentColumns = request.session['currentColumns']
 
     last_va = Statusentry.objects.aggregate(last=Max('validafter'))['last']
-    #a = Statusentry.objects.filter(validafter=last_va).extra(select={'geoip': 'geoip_lookup(address)'}).order_by('nickname')[:100]
     a = Statusentry.objects.filter(validafter=last_va).extra(select={'geoip': 'geoip_lookup(address)'}).order_by('nickname')
+    
+    #MIGHT WORKS BUT DOESN'T SORT BY CERTAIN PARAMATERS SUCH AS COUNTRY
+    #if 'sortListings' in request.GET:
+    #    a = Statusentry.objects.filter(validafter=last_va).extra(select={'geoip': 'geoip_lookup(address)'}).order_by(request.GET['sortListings'])
+    #else:
+    #    a = Statusentry.objects.filter(validafter=last_va).extra(select={'geoip': 'geoip_lookup(address)'}).order_by('nickname')
     
     #############################################################
     

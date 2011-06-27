@@ -292,6 +292,7 @@ select#sortRouterListing {
 
 input#sortRouterListing {
     background-color: #95E4AF;
+    width: 100%
 }
 
 input#sortRouterListing_Button {
