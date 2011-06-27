@@ -37,18 +37,6 @@ def index(request):
     last_va = Statusentry.objects.aggregate(\
             last=Max('validafter'))['last']
 
-    # This snippet gets relays active in the last 24 hours, but the
-    # current TorStatus implementation only gets relays in the last
-    # published consensus.
-    """
-    day_statusentries = Statusentry.objects.filter(\
-            validafter__gte=(last_va - datetime.timedelta(days=1)))\
-            .order_by('-validafter')
-    recent_entries = list(set(day_statusentries))
-    """
-
-    # This is closer to what the current TorStatus implementation does.
-    # It might not be good design, though.
     statusentries = Statusentry.objects.filter(validafter=last_va)\
             .extra(select={'geoip':
             'geoip_lookup(address)'}).order_by('nickname')
@@ -537,13 +525,113 @@ def csv_current_results(request):
 
 
 def networkstatisticgraphs(request):
-    #TODO
-    # For now, this function is just a placeholder.
+    """
+    Render an HTML template to response.
+    """
+    # As this page is written now, each graph does it's own querying.
+    # Either this structure should be fixed or the queries should be
+    # cached.
+    return render_to_response('statisticgraphs.html')
 
-    variables = "TEMP STRING"
-    template_values = {'variables': variables}
-    return render_to_response('nodequery.html', template_values)
 
+def bycountrycode(request):
+    return HttpResponse("don't break everything")
+
+
+def exitbycountrycode(request):
+    return HttpResponse("don't break everything")
+
+
+def bytimerunning(request):
+    return HttpResponse("don't break everything")
+
+
+def byobservedbandwidth(request):
+    return HttpResponse("don't break everything")
+
+
+def byplatform(request):
+    return HttpResponse("don't break everything")
+
+
+def aggregatesummary(request):
+    """
+    Return a graph representing an aggregate summary of the routers on
+    the network as an HttpResponse object.
+
+    @rtype: HttpResponse
+    @return: A graph representing an aggregate summary of the routers on
+        the Tor network.
+    """
+    import matplotlib
+    from matplotlib.backends.backend_agg import \
+            FigureCanvasAgg as FigureCanvas
+    from matplotlib.figure import Figure
+    from matplotlib.dates import DateFormatter
+
+    # Draw the graph such that the labels and title are visible,
+    # and remove excess whitespace.
+    matplotlib.rcParams['figure.subplot.left'] = 0.04
+    matplotlib.rcParams['figure.subplot.right'] = 0.99
+    matplotlib.rcParams['figure.subplot.top'] = 0.95
+    matplotlib.rcParams['figure.subplot.bottom'] = 0.04
+
+    last_va = Statusentry.objects.aggregate(\
+            last=Max('validafter'))['last']
+
+    statusentries = Statusentry.objects.filter(validafter=last_va)
+
+    total = statusentries.count()
+    counts = Statusentry.objects.filter(validafter=last_va).aggregate(\
+            isauthority=CountCase('isauthority', when=True),
+            isbaddirectory=CountCase('isbaddirectory', when=True),
+            isbadexit=CountCase('isbadexit', when=True),
+            isexit=CountCase('isexit', when=True),
+            isfast=CountCase('isfast', when=True),
+            isguard=CountCase('isguard', when=True),
+            isnamed=CountCase('isnamed', when=True),
+            isstable=CountCase('isstable', when=True),
+            isrunning=CountCase('isrunning', when=True),
+            isvalid=CountCase('isvalid', when=True),
+            isv2dir=CountCase('isv2dir', when=True))
+
+    keys = ['isauthority', 'isbaddirectory', 'isbadexit', 'isexit',
+            'isfast', 'isguard', 'isnamed', 'isstable', 'isrunning',
+            'isvalid', 'isv2dir']
+    labels = ['Total', 'Authority', 'BadDirectory', 'BadExit', 'Exit',
+            'Fast', 'Guard', 'Named', 'Stable', 'Running', 'Valid',
+            'V2Dir']
+    num_params = len(labels)
+    xs = range(num_params)
+    x_index = matplotlib.numpy.arange(num_params)
+
+    ys = []
+    ys.append(total)
+    for count in keys:
+        ys.append(counts[count])
+
+    fig = Figure(facecolor='white', edgecolor='black', figsize=(12, 6),
+            frameon=False)
+    ax = fig.add_subplot(111)
+
+    bar_width = 0.5
+    ax.bar(xs, ys, color='#66CD00', width=bar_width)
+    for i in range(num_params):
+        ax.text(xs[i] + (bar_width / 2.0), ys[i] + 10, str(ys[i]),
+                fontsize='9', horizontalalignment='center')
+    ax.set_xticks(x_index + (bar_width / 2.0))
+    ax.set_xticklabels(labels, fontsize='9')
+
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label1.set_fontsize('9')
+
+    ax.set_title("Aggregate Summary -- Number of Routers Matching "
+            + "Specified Criteria", fontsize='12')
+
+    canvas = FigureCanvas(fig)
+    response = HttpResponse(content_type='image/png')
+    canvas.print_png(response, ha="center")
+    return response
 
 def columnpreferences(request):
     '''

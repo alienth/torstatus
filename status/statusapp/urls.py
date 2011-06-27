@@ -21,4 +21,6 @@ urlpatterns = patterns('',
         'statusapp.views.readhist'),
     (r'^details/(?P<fingerprint>\w{40})/writehist.png$',
         'statusapp.views.writehist'),
+    (r'^network-statistic-graphs/aggregatesummary.png$',
+        'statusapp.views.aggregatesummary'),
 )

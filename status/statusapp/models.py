@@ -705,7 +705,6 @@ class UserStats(models.Model):
 
 
 class RelayStatusesPerDay(models.Model):
-    # TODO: What is count used for?
     """
     Model for the helper table which is used to update the other tables.
 
@@ -713,7 +712,7 @@ class RelayStatusesPerDay(models.Model):
     @ivar date: The date that corresponds to the L{RelayStatusesPerDay}
         object.
     @type count: IntegerField (C{datetime})
-    @ivar count:
+    @ivar count: The number of relay statuses per day.
     """
     date = models.DateField(primary_key=True)
     count = models.IntegerField()
