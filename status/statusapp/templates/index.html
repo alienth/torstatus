@@ -82,29 +82,29 @@
 <table class="relayTable sortable">
 	<tr>
 	    {% if "Country Code" in currentColumns %}
-        <th class="sorttable_alpha" id="relayHeader">&nbsp</th>
+        <th class="sorttable_alpha relayHeader">&nbsp</th>
         {% endif %}
-		<th class="sorttable_alpha" id="relayHeader">Router Name</th>
+		<th class="sorttable_alpha relayHeader" id="routerName">Router Name</th>
 		{% if "Bandwidth" in currentColumns %}
-		<th class="sorttable_numeric" id="relayHeader">Bandwidth</th>
+		<th class="sorttable_numeric relayHeader">Bandwidth</th>
 		{% endif %}
 		{% if "Uptime" in currentColumns %}
-        <th class="sorttable_numeric" id="relayHeader">Uptime</th>
+        <th class="sorttable_numeric relayHeader">Uptime</th>
         {% endif %}
         {% if "IP" in currentColumns %}
-        <th class="sorttable_numeric" id="relayHeader">IP</th>
+        <th class="sorttable_numeric relayHeader">IP</th>
         {% endif %}
         {% if "DirPort" in currentColumns or "Exit" in currentColumns or "Authority" in currentColumns or "Fast" in currentColumns or "Guard" in currentColumns or "V2Dir" in currentColumns or "Platform" in currentColumns or "Stable" in currentColumns %}
 		<th class="sorttable_nosort" id="relayHeaderInv">Icons</th>
 		{% endif %}
 		{% if "ORPort" in currentColumns %}
-        <th class="sorttable_numeric" id="relayHeader">ORPort</th>
+        <th class="sorttable_numeric relayHeader">ORPort</th>
         {% endif %}
         {% if "DirPort" in currentColumns %}
-        <th class="sorttable_numeric" id="relayHeader">DirPort</th>
+        <th class="sorttable_numeric relayHeader">DirPort</th>
         {% endif %}
         {% if "BadExit" in currentColumns %}
-        <th class="sorttable_numeric" id="relayHeader">Bad Exit</th>
+        <th class="sorttable_numeric relayHeader">Bad Exit</th>
         {% endif %}
 	</tr>
 	
@@ -430,6 +430,20 @@
 <tr>
     <td>
         <table id="sortRouterListing">
+        <tr>
+            <td colspan="2">
+                <form action="/" method="get">
+                    <input type="hidden" name="resetQuery" value="resetQuery" />
+                    <input id="sortRouterListing_Button" type="submit" value="Reset the Query to DEFAULT" />
+                </form>
+            </td>
+        </tr>
+        </table>
+    </td>
+</tr>
+<tr>
+    <td>
+        <table id="sortRouterListing">
         <tr> 
             <td> Sort Router Listing By: </td>
             <td>
@@ -476,100 +490,133 @@
         <tr>
             <td> Authority: </td>
             <td>
-            <input type="radio" name="isauthority" value="" CHECKED />Off
-            <input type="radio" name="isauthority" value="yes" />Yes
-            <input type="radio" name="isauthority" value="no" />No
+            <input type="radio" name="isauthority" value="" {% if not queryOptions or queryOptions|key:'isauthority' == "" %} 
+                                                            CHECKED {% endif %} />Off
+            <input type="radio" name="isauthority" value="yes" {% if queryOptions and queryOptions|key:'isauthority' == "yes" %} 
+                                                            CHECKED {% endif %} />Yes
+            <input type="radio" name="isauthority" value="no" {% if queryOptions and queryOptions|key:'isauthority' == "no" %} 
+                                                            CHECKED {% endif %} />No
             </td>
         </tr>
         <tr>
             <td> BadDirectory: </td>
             <td>
-            <input type="radio" name="isbaddirectory" value="" CHECKED />Off
-            <input type="radio" name="isbaddirectory" value="yes" />Yes
-            <input type="radio" name="isbaddirectory" value="no" />No
+            <input type="radio" name="isbaddirectory" value="" {% if not queryOptions or queryOptions|key:'isbaddirectory' == "" %} 
+                                                            CHECKED {% endif %} />Off
+            <input type="radio" name="isbaddirectory" value="yes" {% if queryOptions and queryOptions|key:'isbaddirectory' == "yes" %} 
+                                                            CHECKED {% endif %} />Yes
+            <input type="radio" name="isbaddirectory" value="no" {% if queryOptions and queryOptions|key:'isbaddirectory' == "no" %} 
+                                                            CHECKED {% endif %} />No
             </td>
         </tr>
         <tr>
             <td> BadExit: </td>
             <td>
-            <input type="radio" name="isbadexit" value="" CHECKED />Off
-            <input type="radio" name="isbadexit" value="yes" />Yes
-            <input type="radio" name="isbadexit" value="no" />No
+            <input type="radio" name="isbadexit" value="" {% if not queryOptions or queryOptions|key:'isbadexit' == "" %} 
+                                                            CHECKED {% endif %} />Off
+            <input type="radio" name="isbadexit" value="yes" {% if queryOptions and queryOptions|key:'isbadexit' == "yes" %} 
+                                                            CHECKED {% endif %} />Yes
+            <input type="radio" name="isbadexit" value="no" {% if queryOptions and queryOptions|key:'isbadexit' == "no" %} 
+                                                            CHECKED {% endif %} />No
             </td>
         </tr>
         <tr>
             <td> Exit: </td>
             <td>
-            <input type="radio" name="isexit" value="" CHECKED />Off
-            <input type="radio" name="isexit" value="yes" />Yes
-            <input type="radio" name="isexit" value="no" />No
+            <input type="radio" name="isexit" value="" {% if not queryOptions or queryOptions|key:'isexit' == "" %} 
+                                                            CHECKED {% endif %} />Off
+            <input type="radio" name="isexit" value="yes" {% if queryOptions and queryOptions|key:'isexit' == "yes" %} 
+                                                            CHECKED {% endif %} />Yes
+            <input type="radio" name="isexit" value="no" {% if queryOptions and queryOptions|key:'isexit' == "no" %} 
+                                                            CHECKED {% endif %} />No
             </td>
         </tr>
         <tr>
             <td> Fast: </td>
             <td>
-            <input type="radio" name="isfast" value="" CHECKED />Off
-            <input type="radio" name="isfast" value="yes" />Yes
-            <input type="radio" name="isfast" value="no" />No
+            <input type="radio" name="isfast" value="" {% if not queryOptions or queryOptions|key:'isfast' == "" %} 
+                                                            CHECKED {% endif %} />Off
+            <input type="radio" name="isfast" value="yes" {% if queryOptions and queryOptions|key:'isfast' == "yes" %} 
+                                                            CHECKED {% endif %} />Yes
+            <input type="radio" name="isfast" value="no" {% if queryOptions and queryOptions|key:'isfast' == "no" %} 
+                                                            CHECKED {% endif %} />No
             </td>
         </tr>
         <tr>
             <td> Guard: </td>
             <td>
-            <input type="radio" name="isguard" value="" CHECKED />Off
-            <input type="radio" name="isguard" value="yes" />Yes
-            <input type="radio" name="isguard" value="no" />No
+            <input type="radio" name="isguard" value="" {% if not queryOptions or queryOptions|key:'isguard' == "" %} 
+                                                            CHECKED {% endif %} />Off
+            <input type="radio" name="isguard" value="yes" {% if queryOptions and queryOptions|key:'isguard' == "yes" %} 
+                                                            CHECKED {% endif %} />Yes
+            <input type="radio" name="isguard" value="no" {% if queryOptions and queryOptions|key:'isguard' == "no" %} 
+                                                            CHECKED {% endif %} />No
             </td>
         </tr>
         <tr>
             <td> Hibernating: </td>
             <td>
-            <input type="radio" name="ishibernating" value="" CHECKED />Off
-            <input type="radio" name="ishibernating" value="yes" />Yes
-            <input type="radio" name="ishibernating" value="no" />No
+            <input type="radio" name="ishibernating" value="" {% if not queryOptions or queryOptions|key:'ishibernating' == "" %} 
+                                                            CHECKED {% endif %} />Off
+            <input type="radio" name="ishibernating" value="yes" {% if queryOptions and queryOptions|key:'ishibernating' == "yes" %} 
+                                                            CHECKED {% endif %} />Yes
+            <input type="radio" name="ishibernating" value="no" {% if queryOptions and queryOptions|key:'ishibernating' == "no" %} 
+                                                            CHECKED {% endif %} />No
             </td>
         </tr>
         <tr>
             <td> Named: </td>
             <td>
-            <input type="radio" name="isnamed" value="" CHECKED />Off
-            <input type="radio" name="isnamed" value="yes" />Yes
-            <input type="radio" name="isnamed" value="no" />No
+            <input type="radio" name="isnamed" value="" {% if not queryOptions or queryOptions|key:'isnamed' == "" %} 
+                                                            CHECKED {% endif %} />Off
+            <input type="radio" name="isnamed" value="yes" {% if queryOptions and queryOptions|key:'isnamed' == "yes" %} 
+                                                            CHECKED {% endif %} />Yes
+            <input type="radio" name="isnamed" value="no" {% if queryOptions and queryOptions|key:'isnamed' == "no" %} 
+                                                            CHECKED {% endif %} />No
             </td>
         </tr>
         <tr>
             <td> Stable: </td>
             <td>
-            <input type="radio" name="isstable" value="" CHECKED />Off
-            <input type="radio" name="isstable" value="yes" />Yes
-            <input type="radio" name="isstable" value="no" />No
+            <input type="radio" name="isstable" value="" {% if not queryOptions or queryOptions|key:'isstable' == "" %} 
+                                                            CHECKED {% endif %} />Off
+            <input type="radio" name="isstable" value="yes" {% if queryOptions and queryOptions|key:'isstable' == "yes" %} 
+                                                            CHECKED {% endif %} />Yes
+            <input type="radio" name="isstable" value="no" {% if queryOptions and queryOptions|key:'isstable' == "no" %} 
+                                                            CHECKED {% endif %} />No
             </td>
         </tr>
         <tr>
             <td> Running: </td>
             <td>
-            <input type="radio" name="isrunning" value="" CHECKED />Off
-            <input type="radio" name="isrunning" value="yes" />Yes
-            <input type="radio" name="isrunning" value="no" />No
+            <input type="radio" name="isrunning" value="" {% if not queryOptions or queryOptions|key:'isrunning' == "" %} 
+                                                            CHECKED {% endif %} />Off
+            <input type="radio" name="isrunning" value="yes" {% if queryOptions and queryOptions|key:'isrunning' == "yes" %} 
+                                                            CHECKED {% endif %} />Yes
+            <input type="radio" name="isrunning" value="no" {% if queryOptions and queryOptions|key:'isrunning' == "no" %} 
+                                                            CHECKED {% endif %} />No
             </td>
         </tr>
         <tr>
             <td> Valid: </td>
             <td>
-            <input type="radio" name="isvalid" value="" CHECKED />Off
-            <input type="radio" name="isvalid" value="yes" />Yes
-            <input type="radio" name="isvalid" value="no" />No
+            <input type="radio" name="isvalid" value="" {% if not queryOptions or queryOptions|key:'isvalid' == "" %} 
+                                                            CHECKED {% endif %} />Off
+            <input type="radio" name="isvalid" value="yes" {% if queryOptions and queryOptions|key:'isvalid' == "yes" %} 
+                                                            CHECKED {% endif %} />Yes
+            <input type="radio" name="isvalid" value="no" {% if queryOptions and queryOptions|key:'isvalid' == "no" %} 
+                                                            CHECKED {% endif %} />No
             </td>
         </tr>
         <tr>
             <td> V2Dir: </td>
             <td>
             <input type="radio" name="isv2dir" value="" {% if not queryOptions or queryOptions|key:'isv2dir' == "" %} 
-                                                            CHECKED {% endif %}/>Off
+                                                            CHECKED {% endif %} />Off
             <input type="radio" name="isv2dir" value="yes" {% if queryOptions and queryOptions|key:'isv2dir' == "yes" %} 
-                                                            CHECKED {% endif %}/>Yes
+                                                            CHECKED {% endif %} />Yes
             <input type="radio" name="isv2dir" value="no" {% if queryOptions and queryOptions|key:'isv2dir' == "no" %}
-                                                            CHECKED {% endif %}/>No
+                                                            CHECKED {% endif %} />No
             </td>
         </tr>
         </table>

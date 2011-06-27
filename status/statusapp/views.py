@@ -20,16 +20,7 @@ def index(request):
     database. Querying the database is done with raw SQL. This needs 
     to be fixed. Also, returning an array-list of the column names to
     be displayed.
-    """
-    
-    queryOptions = {}
-    if ('queryOptions' in request.session):
-        queryOptions = request.session['queryOptions']
-    
-    if (request.GET):
-        queryOptions = request.GET    
-        request.session['queryOptions'] = queryOptions
-    
+    """   
     
     currentColumns = []
     if not ('currentColumns' in request.session):
@@ -41,9 +32,21 @@ def index(request):
         currentColumns = request.session['currentColumns']
 
     last_va = Statusentry.objects.aggregate(last=Max('validafter'))['last']
-    a = Statusentry.objects.filter(validafter__gte=(last_va - datetime.timedelta(days=1))).order_by('-validafter')[:1000]
+    a = Statusentry.objects.filter(validafter=last_va).order_by('-validafter')
     
     #############################################################
+    
+    queryOptions = {}
+    if (request.GET):
+        if ('resetQuery' in request.GET):
+            if ('queryOptions' in request.session):
+                del request.session['queryOptions']
+        else:
+            queryOptions = request.GET    
+            request.session['queryOptions'] = queryOptions    
+    if (not queryOptions and 'queryOptions' in request.session):
+            queryOptions = request.session['queryOptions']
+
     if queryOptions:
         if queryOptions['isauthority'] == 'yes':
             a = a.filter(isauthority=1)
@@ -291,6 +294,10 @@ def columnpreferences(request):
     currentColumns = []
     availableColumns = []
     
+    if ('resetPreferences' in request.GET):
+        del request.session['currentColumns']
+        del request.session['availableColumns']
+
     if not ('currentColumns' in request.session and 'availableColumns' in request.session):
         currentColumns = ["Country Code", "Uptime", "Hostname", "ORPort", "DirPort", "IP", \
                     "Exit", "Authority", "Fast", "Guard", "Named", "Stable", "Running", "Valid", \
