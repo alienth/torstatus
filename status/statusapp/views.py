@@ -69,7 +69,6 @@ def index(request):
     #    a = Statusentry.objects.filter(validafter=last_va).extra(select={'geoip': 'geoip_lookup(address)'}).order_by('nickname')
     
     #############################################################
-    
     queryOptions = {}
     if (request.GET):
         if ('resetQuery' in request.GET):
@@ -83,6 +82,7 @@ def index(request):
 
     if queryOptions:
         if queryOptions['isauthority'] == 'yes':
+<<<<<<< HEAD
             a = a.filter(isauthority=1)
         elif queryOptions['isauthority'] == 'no': 
             a = a.filter(isauthority=0)
@@ -287,7 +287,6 @@ def unruly_passengers_csv(request):
     writer.writerow(['Year', 'Unruly Airline Passengers'])
     for (year, num) in zip(range(1995, 2006), UNRULY_PASSENGERS):
         writer.writerow([year, num])
-
     return response
 
 def networkstatisticgraphs(request):
@@ -296,7 +295,7 @@ def networkstatisticgraphs(request):
 
     variables = "TEMP STRING"
     template_values = {'variables': variables}
-    return render_to_response('nodequery.html', template_values)
+    return render_to_response('statisticgraphs.html', template_values)
 
 
 def columnpreferences(request):

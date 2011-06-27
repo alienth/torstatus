@@ -34,6 +34,35 @@ th#routerName {
 	min-width: 100px;
 }
 
+th#badDir {
+    text-align: left;
+	font-weight: bold; 
+	font-size: 0.6875em;
+	background-color: #7BD4F7;
+	border-top: 2px solid black;
+	border-bottom: 2px solid black;
+	min-width: 80px;
+}
+
+th#lastDescPub {
+    text-align: left;
+	font-weight: bold; 
+	font-size: 0.6875em;
+	background-color: #7BD4F7;
+	border-top: 2px solid black;
+	border-bottom: 2px solid black;
+	min-width: 150px;
+}
+
+th#lastDescPub:hover {
+    background-color: #89FB69;	
+	cursor: pointer;
+}
+th#badDir:hover {
+    background-color: #89FB69;	
+	cursor: pointer;
+}
+
 th#routerName:hover {
     background-color: #89FB69;	
 	cursor: pointer;
@@ -212,7 +241,6 @@ td#col_relayName {
     width: 20px;
 }
 
-
 td#col_relayName:hover {
     background-color: #69EEC8;
 }
@@ -240,6 +268,26 @@ td#col_relayDirport {
 }
 
 td#col_relayBadExit {
+    width: 50px;
+    text-align: center;
+}
+
+td#col_relayBadDir {
+    width: 50px;
+    text-align: center;
+}
+
+td#col_relayFingerprint {
+    width: 50px;
+    text-align: center;
+}
+
+td#col_relayContact {
+    width: 50px;
+    text-align: center;
+}
+
+td#col_relayLastDescPub {
     width: 50px;
     text-align: center;
 }

@@ -109,7 +109,6 @@ def exitinfo(rawdesc):
             policy.append(line)
     return policy
 
-
 @register.filter
 def contact(rawdesc):
     """

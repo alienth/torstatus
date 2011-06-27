@@ -94,6 +94,18 @@
         {% if "IP" in currentColumns %}
         <th class="sorttable_numeric relayHeader">IP</th>
         {% endif %}
+        {% if "Fingerprint" in currentColumns %}
+        <th class="sorttable_alpha relayHeader">Fingerprint</th>
+        {% endif %}
+        {% if "LastDescriptorPublished" in currentColumns %}
+        <th class="sorttable_numeric relayHeader" id="lastDescPub">Last Descriptor Published</th>
+        {% endif %}
+        {% if "Contact" in currentColumns %}
+        <th class="sorttable_alpha relayHeader">Contact</th>
+        {% endif %}
+        {% if "BadDir" in currentColumns %}
+        <th class="sorttable_numeric relayHeader" id="badDir">Bad Directory</th>
+        {% endif %}
         {% if "DirPort" in currentColumns or "Exit" in currentColumns or "Authority" in currentColumns or "Fast" in currentColumns or "Guard" in currentColumns or "V2Dir" in currentColumns or "Platform" in currentColumns or "Stable" in currentColumns %}
 		<th class="sorttable_nosort" id="relayHeaderInv">Icons</th>
 		{% endif %}
@@ -137,6 +149,28 @@
             {% if "IP" in currentColumns %}
             <td id="col_relayAddress">{{ relay.address }}</td>
             {% endif %}
+            
+            {% if "Fingerprint" in currentColumns %}
+            <td id="col_relayFingerprint">{{ relay.fingerprint }}</td>
+            {% endif %}
+            
+            {% if "LastDescriptorPublished" in currentColumns %}
+            {% load details_filters %}
+            <td id="col_relayLastDescPub">{{ relay.published }}</td>
+            {% endif %}
+            
+            {% if "Contact" in currentColumns %}
+            <td id="col_relayContact">{{ relay.descriptorid.rawdesc|contact }}</td>
+            {% endif %}
+            
+            {% if "BadDir" in currentColumns %}
+            <td id="col_relayBadDir" {% ifequal relay.isbaddirectory 1 %} sorttable_customkey="1">
+                	<img src="static/img/bg_yes.png" width="12" height="12" alt="Bad Directory" title="Bad Directory">
+                {% else %} sorttable_customkey="0">
+               		<img src="static/img/bg_no.png" width="12" height="12" alt="Not a Bad Directory" title="Not a Bad Directory">
+                {% endifequal %}</td>
+            {% endif %}
+            
             {% if "DirPort" in currentColumns or "Exit" in currentColumns or "Authority" in currentColumns or "Fast" in currentColumns or "Guard" in currentColumns or "V2Dir" in currentColumns or "Platform" in currentColumns or "Stable" in currentColumns %}
             <td id="col_relayIcons">
                 
@@ -177,7 +211,6 @@
                 {% endif %}
                 
                 {% if "Platform" in currentColumns %}
-
                 {% if "Linux" in relay.descriptorid.platform %}
                     <img src="static/img/os-icons/Linux.png" alt="Linux" title="{{ relay.descriptorid.platform }}">
                 {% else %}{% if "XP" in relay.descriptorid.platform %}
@@ -344,7 +377,6 @@
 </tr>
 <tr>
 <td>
-
 
 <table class="aggStatisticSummary" id="opinionsource">
 <tr>
