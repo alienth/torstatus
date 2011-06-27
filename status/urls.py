@@ -4,5 +4,5 @@ from django.conf import settings
 
 
 urlpatterns = patterns('',
-    (r'^', include('statusapp.urls')), 
+    (r'^', include('statusapp.urls')),
 )

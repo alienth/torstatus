@@ -88,13 +88,12 @@
     <td class="boxTitle" colspan="2"> Graphs </td>
 </tr>
 <tr id="row_aggStatisticSummary">
-	<td id="aggBox"><img src="/static/img/graph1.png" width="480px" height="300px" alt="GRAPH 1"  title="GRAPH 1"> </td>
-    <td id="aggBox"><img src="/static/img/graph2.png" width="480px" height="300px" alt="GRAPH 2"  title="GRAPH 2"> </td>
+    <td id="aggBox"><img src="{{ relay.fingerprint }}/readhist.png" alt="Read Bandwidth History Graph" title="Read Bandwidth History Graph"></td>
+    <td id="aggBox"><img src="{{ relay.fingerprint }}/writehist.png" alt="Write Bandwidth History Graph" title="Write Bandwidth History Graph"></td>1
 </tr>
 </table>
 
 <br />
-
 
 <table class="mainDetails">
 <tr>
@@ -175,7 +174,7 @@
             <tr>
                 <td id="detailBox">{% for line in descriptor.rawdesc|exitinfo %} 
                         {% if forloop.counter0|divisible_by:16 %}</td><td id="detailBox">{% endif %}   
-                        {{line}} <br />
+                        {{ line}} <br />
                     {% endfor %}
                 </td>
             </tr>

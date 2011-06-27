@@ -18,8 +18,8 @@ urlpatterns = patterns('',
     (r'^Tor-IP-List-All.csv','statusapp.views.unruly_passengers_csv'),#ditto
     (r'^Tor-IP-List-Exit.csv','statusapp.views.unruly_passengers_csv'),#ditto
     (r'^custom/$', 'statusapp.views.custom_index'),
-    (r'^details/\w{40}/graph1.png', 'statusapp.views.graph1'),
-    (r'^details/\w{40}/graph2.png', 'statusapp.views.graph2'),
+    (r'^details/\w{40}/readhist.png', 'statusapp.views.readhist'),
+    (r'^details/\w{40}/writehist.png', 'statusapp.views.writehist'),
     #Figure out how to make a method or methods that is capable of
     #taking all the custom parameters and generate a custom index page.
 )
