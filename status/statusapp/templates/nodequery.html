@@ -18,37 +18,43 @@
 <tr>
     <td id="searchQInfo"> You can use this page to determine if an IP address is an active Tor server, and optionally see if that Tor server's Exit Policy would permit it to exit a certain destination IP address and port.</td>
 </tr>
+    {% ifequal source "" %}
+        <td id="searchQError">You must enter a Query IP, at minimum.</td>
+    {% else %}
+    {% if source_valid %}
+        {% if dest_ip %}
+            {% if dest_ip_valid %}
+                {% if dest_port_valid %}
+                {% else %}
+                    <tr><td id="searchQError">The destination port you supplied, {{dest_port}}, is not a valid port.</td></tr>
+                {% endif %}
+            {% else %}
+                <tr><td id="searchQError">The destination IP address you supplied, {{dest_ip}}, is not a valid IP address.</td></tr>
+            {% endif %}
+        {% endif %}
+    {% else %}
+    <tr><td id="searchQError">The Querry IP address you supplied, {{source}}, is not a valid IP
+    {% endif %}
+    {% endifequal %}
 <tr>
-    <td id="searchQError">You must enter a Query IP, at minimum.</td>
-</tr>
-<tr>
-    {% if is_router %}
-    <td id="searchQMessage">
-            The IP address you entered, {{source}}, matches one or more active Tor servers:
+    <td id="searchQMessage"> 
+        {% if is_router %}
+        The IP address you entered, {{source}}, matches one or more active Tor servers:
     </td></tr>
     <tr><td>
-            Server name: <a href="/details/{{router_fingerprint}}">{{router_nickname}}</a>
-        <br>
-            {% if dest_ip %}
-                {% if dest_port %}
-                    {% if exit_possible %}
-                        <a href="/details/{{router_fingerprint}}">{{router_nickname}}</a> WOULD allow exiting to {{dest_ip}}:{{dest_port}}
-                    {% else %}
-                        <a href="/details/{{router_fingerprint}}">{{router_nickname}}</a> would NOT allow exiting to {{dest_ip}}:{{dest_port}}
+            {% for nickname, fingerprint, exit_possible in relays %}
+            Server name: <a href="/details/{{fingerprint}}">{{nickname}}</a>
+                {% if dest_ip_valid %}
+                    {% if dest_port_valid %}
+                        {% if exit_possible %}
+                            WOULD allow exiting to {{dest_ip}}:{{dest_port}}
+                        {% else %}
+                            would NOT allow exiting to {{dest_ip}}:{{dest_port}}
+                        {% endif %}
                     {% endif %}
                 {% endif %}
-                {% endif %}
-                {% else %}
-                {% ifequal source ""%}
-                {% else %}
-                {% if valid %}
-                <td id="searchQMessageError">
-                    The IP address you entered, is not valid.
-                    {% endif %}
-                <td id="searchQMessageError">
-                    -The IP Address you entered is NOT an active Tor server-
-            </td></tr>
-                {% endifequal %}
+                <br>
+            {% endfor %}
         {% endif %}
     </td>
 </tr>

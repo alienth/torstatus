@@ -118,7 +118,7 @@ a.linkDetails {
 
 .relayHibernating {
 	font: 0.625em; /*Arial;*/
-	background-color: #FEEED0;
+	background-color: #F9BD67;
 }
 
 .relayDown {
@@ -159,7 +159,7 @@ table.aggStatisticSummary {
     width: 325px;
     border-style: solid;
     border-color: black;
-    border-width: 4px;
+    border-width: 1px;
     margin-left: auto;
     margin-right: auto;
     border-spacing: 1;
@@ -231,7 +231,6 @@ td#col_relayBadExit {
 
 td {
     font-size: 0.5625em;
-    /*font-family: FreeSans, Arial, Helvetica, sans-serif;*/
 }
 
 table.relayTable {
@@ -252,4 +251,45 @@ p#trademark {
     text-align: center;
     font-size: 12px;
     margin: 0 0 1px 0;
+}
+
+table.bottomTables1 {
+    font-size: 30px;
+    width: auto;
+    padding: 10px;
+    border-spacing: 10px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+table#sortRouterListing {
+    font-size: 19px;
+    width:auto;
+    padding: 10px;
+    border-spacing: 3px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+select#sortRouterListing {
+    background-color: #95E4AF;
+}
+
+input#sortRouterListing {
+    background-color: #95E4AF;
+}
+
+input#sortRouterListing_Button {
+    width: 200px;
+}
+
+td#sortRouterListing {
+	font: bold 0.625em; /*10pt Arial;*/
+	background-color: #7BD4F7;
+	text-align: center;
+	position: center;
+	color: #000000; 
+	border-top: 1px solid black;
+	border-bottom: 1px solid black;
+	white-space:nowrap;
 }

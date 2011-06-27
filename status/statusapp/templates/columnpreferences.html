@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block mainCSS %}
+<link rel="stylesheet" type="text/css" href="../../static/css/style.css"></link>
+{% endblock %}
+
+{% block auxCSS %}
+<link rel="stylesheet" type="text/css" href="../../static/css/columnpreferences.css"></link>
+{% endblock %}
+
+{% block mainTitle %} TorStatus Column Display Preferences {% endblock %}
+
+{% block headerTitle %} TorStatus {% endblock %}
+
+{% block mainPage %}
+
+{% if test %}
+    <p> {{test}} 
+{% endif %}
+<table class="displayPref">
+<tr>
+    <td class="boxTitle" colspan="1">Column Display Preferences Detail</td>
+</tr>
+<tr>
+    <td>
+    <form action='' method='get'>
+    <table class="selectionLists">
+    <tr>
+        <td id="selectForm">
+            <input id='removeList' name='removeColumn' type='submit' value="Remove Column &gt;&gt;" />
+                <br />
+                <select name="selected_removeColumn" size='20' id='selectForm_removeColumn'>
+                
+                {% for entry in currentColumns %}
+                    <option value="{{entry}}" {% ifequal entry selectedEntry %} SELECTED {% endifequal %}>{{entry}}</option>
+                {% endfor %}
+                
+                </select>
+                
+                <p id='selectForm_text'>Currently Selected Columns
+        </td>
+        <td>
+            <input id='upButton' name='upButton' type='submit' value='Up' />
+            <br />
+            <input id='downButton' name='downButton' type='submit' value='Down' />
+        </td>
+        <td id="selectForm">
+            <input id='addList' name='addColumn' type='submit' value="&lt;&lt; Add Column" />
+                <br />
+                <select name="selected_addColumn" size='20' id='selectForm_addColumn'>
+                
+                {% for entry in availableColumns %}
+                    <option value="{{entry}}">{{entry}}</option>
+                {% endfor %}
+                
+                </select>
+                
+                <p id='selectForm_text'>Available Columns
+        </td>
+    </tr>
+    </table>
+    </form>
+    </td>
+</tr>    
+<tr>
+    <td id="selectForm"><a class="link" href="/">Done / Return to Main Page</a></td>
+</tr>
+</table>
+
+{% endblock %}

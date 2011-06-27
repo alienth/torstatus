@@ -13,6 +13,7 @@ table.searchQuery {
 
 td#searchQMessage {
     color: green;
+    font-style: italic;
 }
 
 td#searchQMessageError {

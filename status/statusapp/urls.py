@@ -4,7 +4,13 @@ from django.conf import settings
 
 urlpatterns = patterns('',
 	(r'^$', 'statusapp.views.index'),
+<<<<<<< HEAD:statusapp/urls.py
     (r'^details/(?P<descriptor_fingerprint>\w{40})', 'statusapp.views.details'),
+=======
+    (r'^details/(?P<fingerprint>\w{40})', 'statusapp.views.details'),
+    (r'^details/(?P<fingerprint>\w{40})/graph1.png', 'statusapp.views.graph1'),
+    (r'^details/(?P<fingerprint>\w{40})/graph2.png', 'statusapp.views.graph2'),
+>>>>>>> 7724860d6e6e7634424b53b2c2d934523c40871b:status/statusapp/urls.py
     (r'^flags/(?P<country_code>\w\w).gif', 'statusapp.views.displayFlag'),
     (r'^static/(?P<path>.*)$', 'django.views.static.serve', \
             {'document_root': settings.MEDIA_ROOT}),
