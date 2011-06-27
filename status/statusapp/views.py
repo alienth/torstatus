@@ -172,12 +172,13 @@ def readhist(request, fingerprint):
             frameon=False)
     ax = fig.add_subplot(111)
 
-    # Return bytes per seconds, not total bandwidth for 15 minutes.
+    # Return bytes per second, not total bandwidth for 15 minutes.
     bps = map(lambda x: x / (15 * 60), tr_list)
     times = []
     for i in range(0, 104, 8):
         to_add_date = start_time + datetime.timedelta(minutes=(15 * i))
-        to_add_str = str(to_add_date.hour) + ":" + str(to_add_date.minute)
+        to_add_str = "%0*d:%0*d" % (2, to_add_date.hour,
+                                    2, to_add_date.minute)
         times.append(to_add_str)
 
     dates = range(96)
@@ -278,13 +279,14 @@ def writehist(request, fingerprint):
             frameon=False)
     ax = fig.add_subplot(111)
 
-    # Return bytes per seconds, not total bandwidth for 15 minutes.
+    # Return bytes per second, not total bandwidth for 15 minutes.
     bps = map(lambda x: x / (15 * 60), tr_list)
 
     times = []
     for i in range(0, 104, 8):
         to_add_date = start_time + datetime.timedelta(minutes=(15 * i))
-        to_add_str = str(to_add_date.hour) + ":" + str(to_add_date.minute)
+        to_add_str = "%0*d:%0*d" % (2, to_add_date.hour,
+                                    2, to_add_date.minute)
         times.append(to_add_str)
 
     dates = range(96)
