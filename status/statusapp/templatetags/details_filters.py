@@ -59,8 +59,6 @@ def format_fing(fingerprint):
 
 @register.filter
 def onion_key(rawdesc):
-    # TODO: authorities have extra line in raw descriptor, so method
-    # can fail.
     """
     Get the onion key of a relay from its raw descriptor.
 
@@ -69,16 +67,16 @@ def onion_key(rawdesc):
     @rtype: C{string}
     @return: The onion key of the relay.
     """
+    raw_list = str(rawdesc).split("\n")
+    i = 0
+    while not raw_list[i].startswith("onion-key"):
+        i += 1
 
-    # We can assume that the onion key will always be the 10-14th lines
-    # in the raw descriptor, starting with line 1.
-    return "\n".join(str(rawdesc).split("\n")[9:14])
+    return "\n".join(raw_list[(i + 1):(i + 6)])
 
 
 @register.filter
 def signing_key(rawdesc):
-    # TODO: authorities have extra line in raw descriptor, so method
-    # can fail.
     """
     Get the signing key of a relay from its raw descriptor.
 
@@ -87,10 +85,12 @@ def signing_key(rawdesc):
     @rtype: C{string}
     @return: The signing key of the relay.
     """
+    raw_list = str(rawdesc).split("\n")
+    i = 0
+    while not raw_list[i].startswith("signing-key"):
+        i += 1
 
-    # We can assume that the signing key will always be the 16-20th
-    # lines in the raw descriptor, starting with line 1.
-    return "\n".join(str(rawdesc).split("\n")[15:20])
+    return "\n".join(raw_list[(i + 1):(i + 6)])
 
 
 @register.filter
@@ -125,7 +125,6 @@ def contact(rawdesc):
     @rtype: C{string}
     @return: The contact information of the relay.
     """
-
     for line in str(rawdesc).split("\n"):
         if (line.startswith("contact")):
             return line[8:]
@@ -146,7 +145,6 @@ def family(rawdesc):
     @rtype: C{string}
     @return: The family of a relay.
     """
-
     # Family information is given in terms of nicknames or fingerprints.
     # First, get all family information.
     fingerprints_and_nicknames = []

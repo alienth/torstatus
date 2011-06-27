@@ -96,6 +96,159 @@ def details(request, fingerprint):
     return render_to_response('details.html', template_values)
 
 
+def readhist(request, fingerprint):
+
+    from django.core.exceptions import ObjectDoesNotExist
+    import matplotlib
+    from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+    from matplotlib.figure import Figure
+    from matplotlib.dates import DateFormatter
+    matplotlib.rcParams['figure.subplot.left'] = 0.2
+    matplotlib.rcParams['figure.subplot.right'] = 0.99
+    matplotlib.rcParams['figure.subplot.top'] = 0.87
+
+    last_hist = Bwhist.objects.filter(fingerprint=fingerprint)\
+            .order_by('-date')[:1][0]
+
+    t_start, t_end, tr_list = last_hist.read
+
+    recent_date = last_hist.date
+    recent_time = datetime.datetime.combine(recent_date,
+            datetime.time())
+
+    # It's possible that we might be missing some entries at the
+    # beginning; add values of 0 in this case.
+    tr_list[0:0] = ([0] * t_start)
+
+    # We want to have 96 data points in our graph; if we don't have
+    # them, get some data points from the day before, if we can.
+    to_fill = 96 - len(tr_list)
+
+    start_time = recent_time - datetime.timedelta(\
+            minutes=(15 * to_fill))
+    end_time = start_time + datetime.timedelta(days=1) - \
+            datetime.timedelta(minutes=15)
+
+    if to_fill:
+        day_before = last_hist.date - datetime.timedelta(days=1)
+        try:
+            day_before_hist = Bwhist.objects.get(\
+                    fingerprint=fingerprint,
+                    date=str(day_before))
+            y_start, y_end, y_list = day_before_hist.read
+            y_list.extend([0] * (95 - y_end))
+            y_list[0:0] = ([0] * y_start)
+        except ObjectDoesNotExist:
+            y_list = ([0] * 96)
+        tr_list[0:0] = y_list[(-1 * to_fill):]
+
+    fig = Figure(facecolor='white', edgecolor='black', figsize=(6, 4),
+            frameon=False)
+    ax = fig.add_subplot(111)
+
+    bps = map(lambda x: x / (15 + 60), tr_list)
+    times = []
+    for i in range(0, 104, 8):
+        to_add_date = start_time + datetime.timedelta(minutes=(15 * i))
+        to_add_str = str(to_add_date.hour) + ":" + str(to_add_date.minute)
+        times.append(to_add_str)
+
+    dates = range(96)
+    ax.plot(dates, bps, color='#68228B')
+    ax.set_xlabel("time", fontsize='12')
+    ax.set_xticks(range(0, 104, 8))
+    ax.set_xticklabels(times, fontsize='9')
+    ax.set_ylabel("bandwidth (bytes/s)", fontsize='12')
+    ax.yaxis.major.formatter.set_scientific(False)
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label1.set_fontsize('9')
+
+    ax.set_title("Average Bandwidth Read History (bytes/sec) (GMT):\n" + start_time.strftime(\
+            "%Y-%m-%d %H:%M") + " to " + end_time.strftime(\
+            "%Y-%m-%d %H:%M"), fontsize='12')
+
+    canvas = FigureCanvas(fig)
+    response = HttpResponse(content_type='image/png')
+    canvas.print_png(response, ha="center")
+    return response
+
+
+def writehist(request, fingerprint):
+
+    from django.core.exceptions import ObjectDoesNotExist
+    import matplotlib
+    from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+    from matplotlib.figure import Figure
+    from matplotlib.dates import DateFormatter
+    matplotlib.rcParams['figure.subplot.left'] = 0.2
+    matplotlib.rcParams['figure.subplot.right'] = 0.99
+    matplotlib.rcParams['figure.subplot.top'] = 0.87
+
+    last_hist = Bwhist.objects.filter(fingerprint=fingerprint)\
+            .order_by('-date')[:1][0]
+
+    t_start, t_end, tr_list = last_hist.written
+
+    recent_date = last_hist.date
+    recent_time = datetime.datetime.combine(recent_date,
+            datetime.time())
+
+    # It's possible that we might be missing some entries at the
+    # beginning; add values of 0 in this case.
+    tr_list[0:0] = ([0] * t_start)
+
+    # We want to have 96 data points in our graph; if we don't have
+    # them, get some data points from the day before, if we can.
+    to_fill = 96 - len(tr_list)
+
+    start_time = recent_time - datetime.timedelta(\
+            minutes=(15 * to_fill))
+    end_time = start_time + datetime.timedelta(days=1) - \
+            datetime.timedelta(minutes=15)
+
+    if to_fill:
+        day_before = last_hist.date - datetime.timedelta(days=1)
+        try:
+            day_before_hist = Bwhist.objects.get(\
+                    fingerprint=fingerprint,
+                    date=str(day_before))
+            y_start, y_end, y_list = day_before_hist.written
+            y_list.extend([0] * (95 - y_end))
+            y_list[0:0] = ([0] * y_start)
+        except ObjectDoesNotExist:
+            y_list = ([0] * 96)
+        tr_list[0:0] = y_list[(-1 * to_fill):]
+
+    fig = Figure(facecolor='white', edgecolor='black', figsize=(6, 4),
+            frameon=False)
+    ax = fig.add_subplot(111)
+
+    bps = map(lambda x: x / (15 + 60), tr_list)
+    times = []
+    for i in range(0, 104, 8):
+        to_add_date = start_time + datetime.timedelta(minutes=(15 * i))
+        to_add_str = str(to_add_date.hour) + ":" + str(to_add_date.minute)
+        times.append(to_add_str)
+
+    dates = range(96)
+    ax.plot(dates, bps, color='#66CD00')
+    ax.set_xlabel("time", fontsize='12')
+    ax.set_xticks(range(0, 104, 8))
+    ax.set_xticklabels(times, fontsize='9')
+    ax.set_ylabel("bandwidth (bytes/s)", fontsize='12')
+    ax.yaxis.major.formatter.set_scientific(False)
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label1.set_fontsize('9')
+
+    ax.set_title("Average Bandwidth Write History (bytes/sec) (GMT):\n" + start_time.strftime("%Y-%m-%d %H:%M") + " to " + end_time.strftime(\
+            "%Y-%m-%d %H:%M"), fontsize='12')
+
+    canvas = FigureCanvas(fig)
+    response = HttpResponse(content_type='image/png')
+    canvas.print_png(response, ha="center")
+    return response
+
+
 def exitnodequery(request):
     # TODO: See code reviews from 21 June
     """

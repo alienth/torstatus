@@ -41,19 +41,17 @@ def __none_to_zero(string):
 def cast_array(value, cur):
     if value is None:
         return None
-
     value = str(value)
     indices, arraystr = value.split('=')
-
     startstr, endstr = indices.strip('[]').split(':')
     start = int(startstr)
     end = int(endstr)
-
     # Make all 'null' or 'none' entries '0', then convert the entries
     # in the array to integers
     array = map(lambda x: int(__none_to_zero(x)),
             arraystr.strip('{}').split(','))
     return (start, end, array)
+
 ARRAY = psycopg2.extensions.new_type((1016,), "BIGINT[]", cast_array)
 psycopg2.extensions.register_type(ARRAY)
 # End

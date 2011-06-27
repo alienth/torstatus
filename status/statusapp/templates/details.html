@@ -63,9 +63,10 @@
 	<td id="aggBox">Country Code:</td>
     <td id="aggBox">{{ relay.geoip|country }}</td>
 </tr>
-<tr id="row_aggStatisticSummary"
+<tr id="row_aggStatisticSummary">
     <td id="aggBox">Location (coordinates):</td>
     <td id="aggBox">{{ relay.geoip|latitude }}, {{ relay.geoip|longitude }}</td>
+</tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Platform / Version:</td>
     <td id="aggBox">{{ relay.descriptorid.platform}}</td>
@@ -79,7 +80,7 @@
     <td id="aggBox">{{ relay.descriptorid.uptime|words}}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
-	<td id="aggBox">Bandwidth (Burst/Avg/Observed - In Bps):</td>
+	<td id="aggBox">Bandwidth (Burst/Avg/Observed (bytes/sec)):</td>
     <td id="aggBox">{{ relay.descriptorid.bandwidthburst}} / {{ relay.descriptorid.bandwidthavg}} / {{ relay.descriptorid.bandwidthobserved}}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
@@ -95,8 +96,8 @@
     <td class="boxTitle" colspan="2"> Graphs </td>
 </tr>
 <tr id="row_aggStatisticSummary">
-	<td id="aggBox"><img src="../../static/img/graph_old.png" width="480px" height="300px" alt="GRAPH 1"  title="GRAPH 1"> </td>
-    <td id="aggBox"><img src="../../static/img/graph_old.png" width="480px" height="300px" alt="GRAPH 2"  title="GRAPH 2"> </td>
+    <td id="aggBox"><img src="{{ relay.fingerprint }}/readhist.png" alt="Read Bandwidth History Graph" title="Read Bandwidth History Graph"></td>
+    <td id="aggBox"><img src="{{ relay.fingerprint }}/writehist.png" alt="Write Bandwidth History Graph" title="Write Bandwidth History Graph"></td>
 </tr>
 </table>
 
