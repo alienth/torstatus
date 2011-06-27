@@ -9,13 +9,14 @@ register = template.Library()
 @register.filter
 def kilobytes_ps(bytes_ps):
     """
-    Convert a bandwidth value in bytes to a bandwidth value in kilobytes.
+    Convert a bandwidth value in bytes to a bandwidth value in kilobytes
 
     @type bytes_ps: C{int}, C{float}, C{long}, or C{string}
     @param bytes_ps: The bandwidth value, in bps.
     @rtype: C{int}
     @return: The bandwidth value in kbps.
     """
+    
     # As statusapp.views.details is written now, this value can
     # be None or an empty string sometimes.
     if (bytes_ps == '' or bytes_ps is None):
@@ -34,12 +35,17 @@ def days(seconds):
     @rtype: C{int}
     @return: The duration in days.
     """
+
     # As statusapp.views.details is written now, this value can
     # be None or an empty string sometimes.
     if (seconds == '' or seconds is None):
         return 0
     else:
         return int(seconds) / 86400
+
+@register.filter
+def key(d, key_name):
+    return d[key_name]
 
 
 @register.filter

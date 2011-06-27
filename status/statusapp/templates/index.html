@@ -23,6 +23,7 @@
 </tr>
 </table>
 <br />
+
 <table cellspacing="1" cellpadding="2" class="legend">
 <tr> 
 	<td class="boxTitle">Legend</td>
@@ -80,61 +81,143 @@
 {% if relay_list %}
 <table class="relayTable sortable">
 	<tr>
-        <th class="sorttable_alpha" id="relayHeader">&nbsp</th>
-		<th class="sorttable_alpha" id="relayHeader">Router Name</th>
-		<th class="sorttable_numeric" id="relayHeader">Bandwidth</th>
-        <th class="sorttable_numeric" id="relayHeader">Uptime</th>
-        <th class="sorttable_numeric" id="relayHeader">IP</th>
+	    {% if "Country Code" in currentColumns %}
+        <th class="sorttable_alpha relayHeader">&nbsp</th>
+        {% endif %}
+		<th class="sorttable_alpha relayHeader" id="routerName">Router Name</th>
+		{% if "Bandwidth" in currentColumns %}
+		<th class="sorttable_numeric relayHeader">Bandwidth</th>
+		{% endif %}
+		{% if "Uptime" in currentColumns %}
+        <th class="sorttable_numeric relayHeader">Uptime</th>
+        {% endif %}
+        {% if "IP" in currentColumns %}
+        <th class="sorttable_numeric relayHeader">IP</th>
+        {% endif %}
+        {% if "Fingerprint" in currentColumns %}
+        <th class="sorttable_alpha relayHeader">Fingerprint</th>
+        {% endif %}
+        {% if "LastDescriptorPublished" in currentColumns %}
+        <th class="sorttable_numeric relayHeader" id="lastDescPub">Last Descriptor Published</th>
+        {% endif %}
+        {% if "Contact" in currentColumns %}
+        <th class="sorttable_alpha relayHeader">Contact</th>
+        {% endif %}
+        {% if "BadDir" in currentColumns %}
+        <th class="sorttable_numeric relayHeader" id="badDir">Bad Directory</th>
+        {% endif %}
+        {% if "DirPort" in currentColumns or "Exit" in currentColumns or "Authority" in currentColumns or "Fast" in currentColumns or "Guard" in currentColumns or "V2Dir" in currentColumns or "Platform" in currentColumns or "Stable" in currentColumns %}
 		<th class="sorttable_nosort" id="relayHeaderInv">Icons</th>
-        <th class="sorttable_numeric" id="relayHeader">ORPort</th>
-        <th class="sorttable_numeric" id="relayHeader">DirPort</th>
-        <th class="sorttale_numeric" id="relayHeader">Bad Exit</th>
+		{% endif %}
+		{% if "ORPort" in currentColumns %}
+        <th class="sorttable_numeric relayHeader">ORPort</th>
+        {% endif %}
+        {% if "DirPort" in currentColumns %}
+        <th class="sorttable_numeric relayHeader">DirPort</th>
+        {% endif %}
+        {% if "BadExit" in currentColumns %}
+        <th class="sorttable_numeric relayHeader">Bad Exit</th>
+        {% endif %}
 	</tr>
-
+	
 	{% for relay in relay_list %}
+	    {% if "BadExit" in currentColumns %}
 		<tr {% ifequal relay.isbadexit 1 %} class="relayBadExit" {% else %} class="relay" {% endifequal %}>
-
+		{% else %}
+		<tr class="relay">
+		{% endif %}
+		
 		    <!-- Add: RELAY IS DOWN and RELAY IS HIBERNATING -->
-
+		    {% if "Country Code" in currentColumns %}
             <td sorttable_customkey={{ relay.geoip|country }} id="col_relayName"><a href="http://www.openstreetmap.org/?mlon={{ relay.geoip|longitude }}&mlat={{ relay.geoip|latitude }}&zoom=6"<img src="static/img/flags/{{ relay.geoip|country }}.gif" alt={{ relay.geoip|country }} title="{{ relay.geoip|country }}: {{ relay.geoip|latitude }}, {{ relay.geoip|longitude }}"></a></td>
 			<!-- Note: sorttable_customkey="[[COUNTRY_PREFIX]]" -->
-
+			{% endif %}
+			
             <td id="col_relayName"> 
+                {% if "Named" in currentColumns %}
                 {% ifequal relay.isnamed 1 %}
-                    <b><a class="linkDetails" href="/details/{{ relay.fingerprint }}">{{ relay.nickname }}</a></b>
+                    <b><a class="linkDetails" href="/details/{{ relay.fingerprint }}" target="_BLANK">{{ relay.nickname }}</a></b>
                     {% else %}
-                    <a class="linkDetails" href="/details/{{ relay.fingerprint }}">{{ relay.nickname }}</a>
+                    <a class="linkDetails" href="/details/{{ relay.fingerprint }}" target="_BLANK">{{ relay.nickname }}</a>
                 {% endifequal %}
+                {% else %}
+                    <a class="linkDetails" href="/details/{{ relay.fingerprint }}" target="_BLANK">{{ relay.nickname }}</a>
+                {% endif %}                    
             </td>
-            <td id="col_relayBandwidth">{{ relay.descriptorid.bandwidthobserved|kilobytes_ps }} KB/s</td>
-            <td id="col_relayUptime">{{ relay.descriptorid.uptime|days }} d</td>
-            <td id="col_relayAddress">{{ relay.address }}</td>
-            <td id="col_relayIcons">
 
+            {% if "Bandwidth" in currentColumns %}
+            <td id="col_relayBandwidth">{{ relay.descriptorid.bandwidthobserved|kilobytes_ps }} KB/s</td>
+            {% endif %}
+            
+            {% if "Uptime" in currentColumns %}
+            <td id="col_relayUptime">{{ relay.descriptorid.uptime|days }} d</td>
+            {% endif %}
+            
+            {% if "IP" in currentColumns %}
+            <td id="col_relayAddress">{{ relay.address }}</td>
+            {% endif %}
+            
+            {% if "Fingerprint" in currentColumns %}
+            <td id="col_relayFingerprint">{{ relay.fingerprint }}</td>
+            {% endif %}
+            
+            {% if "LastDescriptorPublished" in currentColumns %}
+            {% load details_filters %}
+            <td id="col_relayLastDescPub">{{ relay.published }}</td>
+            {% endif %}
+            
+            {% if "Contact" in currentColumns %}
+            <td id="col_relayContact">{{ relay.descriptorid.rawdesc|contact }}</td>
+            {% endif %}
+            
+            {% if "BadDir" in currentColumns %}
+            <td id="col_relayBadDir" {% ifequal relay.isbaddirectory 1 %} sorttable_customkey="1">
+                	<img src="static/img/bg_yes.png" width="12" height="12" alt="Bad Directory" title="Bad Directory">
+                {% else %} sorttable_customkey="0">
+               		<img src="static/img/bg_no.png" width="12" height="12" alt="Not a Bad Directory" title="Not a Bad Directory">
+                {% endifequal %}</td>
+            {% endif %}
+            
+            {% if "DirPort" in currentColumns or "Exit" in currentColumns or "Authority" in currentColumns or "Fast" in currentColumns or "Guard" in currentColumns or "V2Dir" in currentColumns or "Platform" in currentColumns or "Stable" in currentColumns %}
+            <td id="col_relayIcons">
+                
+                {% if "Fast" in currentColumns %}
                 {% ifequal relay.isfast 1 %}
                     <img src="static/img/status/Fast.png" alt="Fast Server" title="Fast Server">
                 {% endifequal %}
+                {% endif %}
 
+                {% if "V2Dir" in currentColumns %}
                 {% ifequal relay.isv2dir 1 %}
                     <img src="static/img/status/Dir.png" alt="Directory Server" title="Directory Server">
                 {% endifequal %}
-
+                {% endif %}
+                
+                {% if "Exit" in currentColumns %}
                 {% ifequal relay.isexit 1 %}
                     <img src="static/img/status/Exit.png" alt="Exit Server" title="Exit Server">
                 {% endifequal %}
-
+                {% endif %}
+                
+                {% if "Guard" in currentColumns %}
                 {% ifequal relay.isguard 1 %}
                     <img src="static/img/status/Guard.png" alt="Guard Server" title="Guard Server">
                 {% endifequal %}
-
+                {% endif %}
+                
+                {% if "Stable" in currentColumns %}
                 {% ifequal relay.isstable 1 %}
                     <img src="static/img/status/Stable.png" alt="Stable Server" title="Stable Server">
                 {% endifequal %}
-
+                {% endif %}
+                
+                {% if "Authority" in currentColumns %}
                 {% ifequal relay.isauthority 1 %}
                     <img src="static/img/status/Authority.png" alt="Authority Server" title="Authority Server">
                 {% endifequal %}
-
+                {% endif %}
+                
+                {% if "Platform" in currentColumns %}
                 {% if "Linux" in relay.descriptorid.platform %}
                     <img src="static/img/os-icons/Linux.png" alt="Linux" title="{{ relay.descriptorid.platform }}">
                 {% else %}{% if "XP" in relay.descriptorid.platform %}
@@ -162,19 +245,32 @@
                 {% else %}
                     <img src="static/img/os-icons/NotAvailable.png" alt="NotAvailable" title="Not Available">
                 {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
+                {% endif %}
             </td>
+            {% endif %}
+            
+            {% if "ORPort" in currentColumns %}
             <td id="col_relayOrport">{{ relay.orport }}</td>
-            <td id="col_relayDirport">{% ifequal relay.dirport 0 %}
-                    None
-                {% else %}
-                    {{ relay.dirport }}
-                {% endifequal %}</td>
+            {% endif %}
+            
+            {% if "DirPort" in currentColumns %}
+            <td id="col_relayDirport">
+            {% ifequal relay.dirport 0 %}
+                None
+            {% else %}
+                {{ relay.dirport }}
+            {% endifequal %}
+            </td>
+            {% endif %}
+            
+            {% if "BadExit" in currentColumns %}
             <td id="col_relayBadExit" {% ifequal relay.isbadexit 1 %} sorttable_customkey="1">
                 	<img src="static/img/bg_yes.png" width="12" height="12" alt="Bad Exit" title="Bad Exit">
                 {% else %} sorttable_customkey="0">
                		<img src="static/img/bg_no.png" width="12" height="12" alt="Not a Bad Exit" title="Not a Bad Exit">
                 {% endifequal %}
             </td>
+            {% endif %}
 		</tr>
 	{% endfor %}
 </table>
@@ -280,7 +376,7 @@
     <td class="boxTitle" colspan="1">Custom / Advanced Display Options</td>
 </tr>
 <tr>
-    <td><a class="link" href="column-preferences">Column Display Preference</a></td>
+    <td id="aggBox" ><a class="link" href="column-preferences">Column Display Preference</a></td>
 </tr>
 </table>
 </td>
@@ -295,32 +391,60 @@
 </tr>
 <tr>
     <td>
-        <p>Nickname:</p>
-        <p>Fingerprint:</p>
-        <p></p>
-        <p>Country Code:</p>
-        <p>SOMETHING</p>
-        <p>Contact:</p>
-        <p>SOMETHING!</p>
-        <p>Platform:</p>
-        <p>SOMETHING!</p>
-        <p></p>
-        <p>IP Address:</p>
-        <p></p>
-        <p>Hostname:</p>
-        <p></p>
-        <p>Onion Router Port:</p>
-        <p></p>
-        <p>Directory Server Port:</p>
-        <p></p>
-        <p>Last Published Descriptor (GMT):</p>
-        <p></p>
-        <p>Onion Key:</p>
-        <p></p>
-        <p>Signing Key:</p>
-        <p></p>
-        <p>Descriptor Signature:</p>
-        <p></p>
+        <table id="sortRouterListing">
+        <tr>
+            <td> Nickname: </td>
+            <td> [[NICKNAME]] </td>
+        </tr>
+        <tr>
+            <td> Fingerprint: </td>
+            <td> [[FINGERPRINT]] </td>
+        </tr>
+        <tr>
+            <td> Country Code: </td>
+            <td> [[COUNTRY_CODE]] </td>
+        </tr>
+        <tr>
+            <td> Contact: </td>
+            <td> [[CONTACT]] </td>
+        </tr>
+        <tr>
+            <td> Platform: </td>
+            <td> [[PLATFORM]] </td>
+        </tr>
+        <tr>
+            <td> IP Address: </td>
+            <td> [[IP_ADDRESS]] </td>
+        </tr>
+        <tr>
+            <td> Hostname: </td>
+            <td> [[HOSTNAME]] </td>
+        </tr>
+        <tr>
+            <td> Onion Router Port: </td>
+            <td> [[ORPORT]] </td>
+        </tr>
+        <tr>
+            <td> Directory Server Port: </td>
+            <td> [[DIRPORT]] </td>
+        </tr>
+        <tr>
+            <td> Last Published Descriptor (GMT): </td>
+            <td> [[LAST_PUB_DESCRIPTOR]] </td>
+        </tr>
+        <tr>
+            <td> Onion Key: </td>
+            <td> [[ONION_KEY]] </td>
+        </tr>
+        <tr>
+            <td> Signing Key: </td>
+            <td> [[SIGNING_KEY]] </td>
+        </tr>
+        <tr>
+            <td> Descriptor Signature: </td>
+            <td> [[DESCR_SIGNATURE]] </td>
+        </tr>
+        </table>
     </td>
 </tr>
 </table>
@@ -333,160 +457,246 @@
 </tr>
 <tr>
     <td>
-        <p>Sort Router Listing By:
-        <form action="/" method="get">
-        <select name="sortlistings">
-        <option value="nickname">Router Name</option>
-        <option value="fingerprint">Fingerprint</option>
-        <option value="country">Country Code</option>
-        <option value="bandwidth">Bandwidth</option>
-        <option value="uptime">Uptime</option>
-        <option value="published">Last Descriptor Published</option>
-        <option value="hostname">Hostname</option>
-        <option value="address">IP Address</option>
-        <option value="orport">ORPort</option>
-        <option value="dirport">DirPort</option>
-        <option value="platform">Platform</option>
-        <option value="contact">Contact</option>
-        <option value="isauthority">Authority</option>
-        <option value="isbaddirectory">Bad Directory</option>
-        <option value="isbadexit">Bad Exit</option>
-        <option value="isexit">Exit</option>
-        <option value="isfast">Fast</option>
-        <option value="isguard">Guard</option>
-        <option value="ishibernating">Hibernating</option>
-        <option value="isnamed">Named</option>
-        <option value="isstable">Stable</option>
-        <option value="isrunning">Running</option>
-        <option value="isvalid">Valid</option>
-        <option value="isv2dir">Directory</option>
-        </p>
+        <table id="sortRouterListing">
+        <tr>
+            <td colspan="2">
+                <form action="/" method="get">
+                    <input type="hidden" name="resetQuery" value="resetQuery" />
+                    <input id="sortRouterListing_Button" type="submit" value="Reset the Query to DEFAULT" />
+                </form>
+            </td>
+        </tr>
+        </table>
     </td>
 </tr>
 <tr>
     <td>
-        <p>Sort Order:
-        <select name="sortorder">
-        <option value="ascending">Ascending</option>
-        <option value="descending">Descending</option>
-        </select>
-        </p>
-    <td>
+        <table id="sortRouterListing">
+        <tr> 
+            <td> Sort Router Listing By: </td>
+            <td>
+                <form action="/" method="get">
+                <select id="sortRouterListing" name="sortListings">
+                <option value="no">Router Name</option>
+                <option value="fingerprint">Fingerprint</option>
+                <option value="country">Country Code</option>
+                <option value="bandwidth">Bandwidth</option>
+                <option value="uptime">Uptime</option>
+                <option value="published">Last Descriptor Published</option>
+                <option value="hostname">Hostname</option>
+                <option value="address">IP Address</option>
+                <option value="orport">ORPort</option>
+                <option value="dirport">DirPort</option>
+                <option value="platform">Platform</option>
+                <option value="contact">Contact</option>
+                <option value="isauthority">Authority</option>
+                <option value="isbaddirectory">Bad Directory</option>
+                <option value="isbadexit">Bad Exit</option>
+                <option value="isexit">Exit</option>
+                <option value="isfast">Fast</option>
+                <option value="isguard">Guard</option>
+                <option value="ishibernating">Hibernating</option>
+                <option value="isnamed">Named</option>
+                <option value="isstable">Stable</option>
+                <option value="isrunning">Running</option>
+                <option value="isvalid">Valid</option>
+                <option value="isv2dir">Directory</option>
+            </td>
+        </tr>
+        <tr>
+            <td> Sort Order: </td>
+            <td>
+                <select id="sortRouterListing" name="sortOrder">
+                <option value="no">Ascending</option>
+                <option value="descending">Descending</option>
+                </select>
+            </td>
+        </tr>
+        <tr> 
+            <td id="sortRouterListing" colspan="2"> Require Flags </td>
+        </tr>
+        <tr>
+            <td> Authority: </td>
+            <td>
+            <input type="radio" name="isauthority" value="" {% if not queryOptions or queryOptions|key:'isauthority' == "" %} 
+                                                            CHECKED {% endif %} />Off
+            <input type="radio" name="isauthority" value="yes" {% if queryOptions and queryOptions|key:'isauthority' == "yes" %} 
+                                                            CHECKED {% endif %} />Yes
+            <input type="radio" name="isauthority" value="no" {% if queryOptions and queryOptions|key:'isauthority' == "no" %} 
+                                                            CHECKED {% endif %} />No
+            </td>
+        </tr>
+        <tr>
+            <td> BadDirectory: </td>
+            <td>
+            <input type="radio" name="isbaddirectory" value="" {% if not queryOptions or queryOptions|key:'isbaddirectory' == "" %} 
+                                                            CHECKED {% endif %} />Off
+            <input type="radio" name="isbaddirectory" value="yes" {% if queryOptions and queryOptions|key:'isbaddirectory' == "yes" %} 
+                                                            CHECKED {% endif %} />Yes
+            <input type="radio" name="isbaddirectory" value="no" {% if queryOptions and queryOptions|key:'isbaddirectory' == "no" %} 
+                                                            CHECKED {% endif %} />No
+            </td>
+        </tr>
+        <tr>
+            <td> BadExit: </td>
+            <td>
+            <input type="radio" name="isbadexit" value="" {% if not queryOptions or queryOptions|key:'isbadexit' == "" %} 
+                                                            CHECKED {% endif %} />Off
+            <input type="radio" name="isbadexit" value="yes" {% if queryOptions and queryOptions|key:'isbadexit' == "yes" %} 
+                                                            CHECKED {% endif %} />Yes
+            <input type="radio" name="isbadexit" value="no" {% if queryOptions and queryOptions|key:'isbadexit' == "no" %} 
+                                                            CHECKED {% endif %} />No
+            </td>
+        </tr>
+        <tr>
+            <td> Exit: </td>
+            <td>
+            <input type="radio" name="isexit" value="" {% if not queryOptions or queryOptions|key:'isexit' == "" %} 
+                                                            CHECKED {% endif %} />Off
+            <input type="radio" name="isexit" value="yes" {% if queryOptions and queryOptions|key:'isexit' == "yes" %} 
+                                                            CHECKED {% endif %} />Yes
+            <input type="radio" name="isexit" value="no" {% if queryOptions and queryOptions|key:'isexit' == "no" %} 
+                                                            CHECKED {% endif %} />No
+            </td>
+        </tr>
+        <tr>
+            <td> Fast: </td>
+            <td>
+            <input type="radio" name="isfast" value="" {% if not queryOptions or queryOptions|key:'isfast' == "" %} 
+                                                            CHECKED {% endif %} />Off
+            <input type="radio" name="isfast" value="yes" {% if queryOptions and queryOptions|key:'isfast' == "yes" %} 
+                                                            CHECKED {% endif %} />Yes
+            <input type="radio" name="isfast" value="no" {% if queryOptions and queryOptions|key:'isfast' == "no" %} 
+                                                            CHECKED {% endif %} />No
+            </td>
+        </tr>
+        <tr>
+            <td> Guard: </td>
+            <td>
+            <input type="radio" name="isguard" value="" {% if not queryOptions or queryOptions|key:'isguard' == "" %} 
+                                                            CHECKED {% endif %} />Off
+            <input type="radio" name="isguard" value="yes" {% if queryOptions and queryOptions|key:'isguard' == "yes" %} 
+                                                            CHECKED {% endif %} />Yes
+            <input type="radio" name="isguard" value="no" {% if queryOptions and queryOptions|key:'isguard' == "no" %} 
+                                                            CHECKED {% endif %} />No
+            </td>
+        </tr>
+        <tr>
+            <td> Hibernating: </td>
+            <td>
+            <input type="radio" name="ishibernating" value="" {% if not queryOptions or queryOptions|key:'ishibernating' == "" %} 
+                                                            CHECKED {% endif %} />Off
+            <input type="radio" name="ishibernating" value="yes" {% if queryOptions and queryOptions|key:'ishibernating' == "yes" %} 
+                                                            CHECKED {% endif %} />Yes
+            <input type="radio" name="ishibernating" value="no" {% if queryOptions and queryOptions|key:'ishibernating' == "no" %} 
+                                                            CHECKED {% endif %} />No
+            </td>
+        </tr>
+        <tr>
+            <td> Named: </td>
+            <td>
+            <input type="radio" name="isnamed" value="" {% if not queryOptions or queryOptions|key:'isnamed' == "" %} 
+                                                            CHECKED {% endif %} />Off
+            <input type="radio" name="isnamed" value="yes" {% if queryOptions and queryOptions|key:'isnamed' == "yes" %} 
+                                                            CHECKED {% endif %} />Yes
+            <input type="radio" name="isnamed" value="no" {% if queryOptions and queryOptions|key:'isnamed' == "no" %} 
+                                                            CHECKED {% endif %} />No
+            </td>
+        </tr>
+        <tr>
+            <td> Stable: </td>
+            <td>
+            <input type="radio" name="isstable" value="" {% if not queryOptions or queryOptions|key:'isstable' == "" %} 
+                                                            CHECKED {% endif %} />Off
+            <input type="radio" name="isstable" value="yes" {% if queryOptions and queryOptions|key:'isstable' == "yes" %} 
+                                                            CHECKED {% endif %} />Yes
+            <input type="radio" name="isstable" value="no" {% if queryOptions and queryOptions|key:'isstable' == "no" %} 
+                                                            CHECKED {% endif %} />No
+            </td>
+        </tr>
+        <tr>
+            <td> Running: </td>
+            <td>
+            <input type="radio" name="isrunning" value="" {% if not queryOptions or queryOptions|key:'isrunning' == "" %} 
+                                                            CHECKED {% endif %} />Off
+            <input type="radio" name="isrunning" value="yes" {% if queryOptions and queryOptions|key:'isrunning' == "yes" %} 
+                                                            CHECKED {% endif %} />Yes
+            <input type="radio" name="isrunning" value="no" {% if queryOptions and queryOptions|key:'isrunning' == "no" %} 
+                                                            CHECKED {% endif %} />No
+            </td>
+        </tr>
+        <tr>
+            <td> Valid: </td>
+            <td>
+            <input type="radio" name="isvalid" value="" {% if not queryOptions or queryOptions|key:'isvalid' == "" %} 
+                                                            CHECKED {% endif %} />Off
+            <input type="radio" name="isvalid" value="yes" {% if queryOptions and queryOptions|key:'isvalid' == "yes" %} 
+                                                            CHECKED {% endif %} />Yes
+            <input type="radio" name="isvalid" value="no" {% if queryOptions and queryOptions|key:'isvalid' == "no" %} 
+                                                            CHECKED {% endif %} />No
+            </td>
+        </tr>
+        <tr>
+            <td> V2Dir: </td>
+            <td>
+            <input type="radio" name="isv2dir" value="" {% if not queryOptions or queryOptions|key:'isv2dir' == "" %} 
+                                                            CHECKED {% endif %} />Off
+            <input type="radio" name="isv2dir" value="yes" {% if queryOptions and queryOptions|key:'isv2dir' == "yes" %} 
+                                                            CHECKED {% endif %} />Yes
+            <input type="radio" name="isv2dir" value="no" {% if queryOptions and queryOptions|key:'isv2dir' == "no" %}
+                                                            CHECKED {% endif %} />No
+            </td>
+        </tr>
+        </table>
 </tr>
 <tr>
     <td>
-        <p>Require Flags:</p>
-            <p>
-            Authority:
-            <input type="radio"/>Off
-            <input type="radio" name="isauthority" value="yes" />Yes
-            <input type="radio" name="isauthority" value="no" />No
-            </p>
-            <p>
-            BadDirectory:
-            <input type="radio"/>Off
-            <input type="radio" name="isbaddirectory" value="yes" />Yes
-            <input type="radio" name="isbaddirectory" value="no" />No
-            </p>
-            <p>
-            BadExit:
-            <input type="radio"/>Off
-            <input type="radio" name="isbadexit" value="yes" />Yes
-            <input type="radio" name="isbadexit" value="no" />No
-            </p>
-            <p>
-            Exit:
-            <input type="radio"/>Off
-            <input type="radio" name="isexit" value="yes" />Yes
-            <input type="radio" name="isexit" value="no" />No
-            </p>
-            <p>
-            Fast:
-            <input type="radio"/>Off
-            <input type="radio" name="isfast" value="yes" />Yes
-            <input type="radio" name="isfast" value="no" />No
-            </p>
-            <p>
-            Guard:
-            <input type="radio"/>Off
-            <input type="radio" name="isguard" value="yes" />Yes
-            <input type="radio" name="isguard" value="no" />No
-            </p>
-            <p>
-            Hibernating:
-            <input type="radio"/>Off
-            <input type="radio" name="ishibernating" value="yes" />Yes
-            <input type="radio" name="ishibernating" value="no" />No
-            </p>
-            <p>
-            Named:
-            <input type="radio"/>Off
-            <input type="radio" name="isnamed" value="yes" />Yes
-            <input type="radio" name="isnamed" value="no" />No
-            </p>
-            <p>
-            Stable:
-            <input type="radio"/>Off
-            <input type="radio" name="isstable" value="yes" />Yes
-            <input type="radio" name="isstable" value="no" />No
-            </p>
-            <p>
-            Running:
-            <input type="radio"/>Off
-            <input type="radio" name="isrunning" value="yes" />Yes
-            <input type="radio" name="isrunning" value="no" />No
-            </p>
-            <p>
-            Valid:
-            <input type="radio"/>Off
-            <input type="radio" name="isvalid" value="yes" />Yes
-            <input type="radio" name="isvalid" value="no" />No
-            </p>
-            <p>
-            V2Dir:
-            <input type="radio"/>Off
-            <input type="radio" name="isv2dir" value="yes" />Yes
-            <input type="radio" name="isv2dir" value="no" />No
-            </p>
-    <td>
-</tr>
-
-<tr>
-    <td>
-        <p>Advanced Search:
-        <p>
-        <select name="criteria">
-        <option value ="fingerprint">Fingerprint</option>
-        <option value ="routername">Router Name</option>
-        <option value ="countrycode">Country Code</option>
-        <option value ="bandwidth">Bandwidth (kb/s)</option>
-        <option value ="uptime">Uptime (days)</option>
-        <option value ="lastdescriptorpublished">Last Descriptor Published</option>
-        <option value ="ipaddress">IP Address</option>
-        <option value ="hostname">Hostname</option>
-        <option value ="orport">Onion Router Port</option>
-        <option value ="dsport">Directory Sever Port</option>
-        <option value ="platform">Platform</option>
-        <option value ="contact">Contact</option>
-        </select>
-        <select name="boolLogic">
-        <option value ="equals">Equals</option>
-        <option value ="contains">Contains</option>
-        <option value ="less">Is Less Than</option>
-        <option value ="greater">Is Greater Than</option>
-        </select>
-        </p>
-        </p>
-    <td>
-</tr>
-<tr>
-    <td>
-    <input type="text" name="searchstuff" /><br />
+        <table id="sortRouterListing">
+        <tr>
+            <td id="sortRouterListing" colspan="3"> Advanced Search </td>
+        </tr>
+        <tr>
+            <td>
+            <select id="sortRouterListing" name="criteria">
+            <option value ="no">Fingerprint</option>
+            <option value ="routername">Router Name</option>
+            <option value ="countrycode">Country Code</option>
+            <option value ="bandwidth">Bandwidth (kb/s)</option>
+            <option value ="uptime">Uptime (days)</option>
+            <option value ="lastdescriptorpublished">Last Descriptor Published</option>
+            <option value ="ipaddress">IP Address</option>
+            <option value ="hostname">Hostname</option>
+            <option value ="orport">Onion Router Port</option>
+            <option value ="dsport">Directory Sever Port</option>
+            <option value ="platform">Platform</option>
+            <option value ="contact">Contact</option>
+            </select>
+            </td>
+            <td>
+            <select id="sortRouterListing" name="boolLogic">
+            <option value ="no">Equals</option>
+            <option value ="contains">Contains</option>
+            <option value ="less">Is Less Than</option>
+            <option value ="greater">Is Greater Than</option>
+            </select>
+            </td>
+            <td>
+            <input id="sortRouterListing" type="text" name="searchValue" />
+            </td>
+        </tr>
+        </table>
     </td>
 </tr>
 <tr>
     <td>
-        <input type="submit" value="Apply Options" />
+        <table id="sortRouterListing">
+        <tr>
+            <td colspan="2">
+                <input id="sortRouterListing_Button" type="submit" value="Apply Options" />
+            </td>
+        </tr>
+        </table>
+        </form>
     </td>
 </tr>
 </table>
@@ -494,7 +704,6 @@
 </tr>
 </table>
 
-</form>
 <br />
 
 {% endblock %}

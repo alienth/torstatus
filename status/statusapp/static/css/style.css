@@ -15,7 +15,7 @@ th {
     line-height:75%;
 }
 
-th#relayHeader {
+th.relayHeader {
 	text-align: left;
 	font-weight: bold; 
 	font-size: 0.6875em;
@@ -24,7 +24,51 @@ th#relayHeader {
 	border-bottom: 2px solid black;
 }
 
-th#relayHeader:hover {
+th#routerName {
+	text-align: left;
+	font-weight: bold; 
+	font-size: 0.6875em;
+	background-color: #7BD4F7;
+	border-top: 2px solid black;
+	border-bottom: 2px solid black;
+	min-width: 100px;
+}
+
+th#badDir {
+    text-align: left;
+	font-weight: bold; 
+	font-size: 0.6875em;
+	background-color: #7BD4F7;
+	border-top: 2px solid black;
+	border-bottom: 2px solid black;
+	min-width: 80px;
+}
+
+th#lastDescPub {
+    text-align: left;
+	font-weight: bold; 
+	font-size: 0.6875em;
+	background-color: #7BD4F7;
+	border-top: 2px solid black;
+	border-bottom: 2px solid black;
+	min-width: 150px;
+}
+
+th#lastDescPub:hover {
+    background-color: #89FB69;	
+	cursor: pointer;
+}
+th#badDir:hover {
+    background-color: #89FB69;	
+	cursor: pointer;
+}
+
+th#routerName:hover {
+    background-color: #89FB69;	
+	cursor: pointer;
+}
+
+th.relayHeader:hover {
 	background-color: #89FB69;	
 	cursor: pointer;
 }
@@ -118,7 +162,7 @@ a.linkDetails {
 
 .relayHibernating {
 	font: 0.625em; /*Arial;*/
-	background-color: #FEEED0;
+	background-color: #F9BD67;
 }
 
 .relayDown {
@@ -229,6 +273,26 @@ td#col_relayBadExit {
     text-align: center;
 }
 
+td#col_relayBadDir {
+    width: 50px;
+    text-align: center;
+}
+
+td#col_relayFingerprint {
+    width: 50px;
+    text-align: center;
+}
+
+td#col_relayContact {
+    width: 50px;
+    text-align: center;
+}
+
+td#col_relayLastDescPub {
+    width: 50px;
+    text-align: center;
+}
+
 td {
     font-size: 0.5625em;
 }
@@ -261,4 +325,35 @@ table.bottomTables1 {
     margin-left: auto;
     margin-right: auto;
 }
-    
+
+table#sortRouterListing {
+    font-size: 19px;
+    width:auto;
+    padding: 10px;
+    border-spacing: 3px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+select#sortRouterListing {
+    background-color: #95E4AF;
+}
+
+input#sortRouterListing {
+    background-color: #95E4AF;
+}
+
+input#sortRouterListing_Button {
+    width: 200px;
+}
+
+td#sortRouterListing {
+	font: bold 0.625em; /*10pt Arial;*/
+	background-color: #7BD4F7;
+	text-align: center;
+	position: center;
+	color: #000000; 
+	border-top: 1px solid black;
+	border-bottom: 1px solid black;
+	white-space:nowrap;
+}

@@ -92,7 +92,6 @@ def signing_key(rawdesc):
 
     return "\n".join(raw_list[(i + 1):(i + 6)])
 
-
 @register.filter
 def exitinfo(rawdesc):
     """
@@ -125,6 +124,7 @@ def contact(rawdesc):
     @rtype: C{string}
     @return: The contact information of the relay.
     """
+
     for line in str(rawdesc).split("\n"):
         if (line.startswith("contact")):
             return line[8:]

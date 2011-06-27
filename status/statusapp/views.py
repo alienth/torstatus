@@ -31,6 +31,7 @@ def index(request):
         in the network as well as aggregate information about the
         network itself.
     """
+        
     last_va = Statusentry.objects.aggregate(\
             last=Max('validafter'))['last']
 
@@ -70,11 +71,79 @@ def index(request):
             .order_by('-date')[:1][0].bwobserved
 
     num_routers = statusentries.count()
+    
+    #############################################################
+    
+    currentColumns = []
+    if not ('currentColumns' in request.session):
+        currentColumns = ["Country Code", "Uptime", "Hostname", "ORPort", "DirPort", "IP", \
+                    "Exit", "Authority", "Fast", "Guard", "Named", "Stable", "Running", "Valid", \
+                    "Bandwidth", "V2Dir", "Platform", "Hibernating", "BadExit",]
+        request.session['currentColumns'] = currentColumns
+    else:
+        currentColumns = request.session['currentColumns']
+    
+    queryOptions = {}
+    if (request.GET):
+        if ('resetQuery' in request.GET):
+            if ('queryOptions' in request.session):
+                del request.session['queryOptions']
+        else:
+            queryOptions = request.GET    
+            request.session['queryOptions'] = queryOptions    
+    if (not queryOptions and 'queryOptions' in request.session):
+            queryOptions = request.session['queryOptions']
 
+    if queryOptions:
+        if queryOptions['isauthority'] == 'yes':
+            statusentries = statusentries.filter(isauthority=1)
+        elif queryOptions['isauthority'] == 'no': 
+            statusentries = statusentries.filter(isauthority=0)
+        if queryOptions['isbaddirectory'] == 'yes':
+            statusentries = statusentries.filter(isbaddirectory=1)
+        elif queryOptions['isbaddirectory'] == 'no':  
+            statusentries = statusentries.filter(isbaddirectory=0)
+        if queryOptions['isbadexit'] == 'yes':
+            statusentries = statusentries.filter(isbadexit=1)
+        elif queryOptions['isbadexit'] == 'no': 
+            statusentries = statusentries.filter(isbadexit=0)
+        if queryOptions['isexit'] == 'yes':
+            statusentries = statusentries.filter(isexit=1)
+        elif queryOptions['isexit'] == 'no': 
+            statusentries = statusentries.filter(isexit=0)
+        '''
+        if queryOptions['ishibernating'] == 'yes':
+            statusentries = statusentries.filter(ishibernating=1)
+        elif queryOptions['ishibernating'] == 'no': 
+            statusentries = statusentries.filter(ishibernating=0)
+        '''
+        if queryOptions['isnamed'] == 'yes':
+            statusentries = statusentries.filter(isnamed=1)
+        elif queryOptions['isnamed'] == 'no': 
+            statusentries = statusentries.filter(isnamed=0)
+        if queryOptions['isstable'] == 'yes':
+            statusentries = statusentries.filter(isstable=1)
+        elif queryOptions['isstable'] == 'no': 
+            statusentries = statusentries.filter(isstable=0)
+        if queryOptions['isrunning'] == 'yes':
+            statusentries = statusentries.filter(isrunning=1)
+        elif queryOptions['isrunning'] == 'no': 
+            statusentries = statusentries.filter(isrunning=0)
+        if queryOptions['isvalid'] == 'yes':
+            statusentries = statusentries.filter(isvalid=1)
+        elif queryOptions['isvalid'] == 'no': 
+            statusentries = statusentries.filter(isvalid=0)
+        if queryOptions['isv2dir'] == 'yes':
+            statusentries = statusentries.filter(isv2dir=1)
+        elif queryOptions['isv2dir'] == 'no': 
+            statusentries = statusentries.filter(isv2dir=0)
+    #############################################################
+    
     client_address = request.META['REMOTE_ADDR']
     template_values = {'relay_list': statusentries, 'client_address':
             client_address, 'num_routers': num_routers, 'exp_time': 900,
-            'counts': counts, 'total_bw': total_bw}
+            'counts': counts, 'total_bw': total_bw, 'currentColumns': currentColumns, 
+            'queryOptions': queryOptions}
     return render_to_response('index.html', template_values)
 
 
@@ -462,7 +531,6 @@ def csv_current_results(request):
 
     return response
 
-
 def networkstatisticgraphs(request):
     #TODO
     # For now, this function is just a placeholder.
@@ -499,65 +567,71 @@ def columnpreferences(request):
 
     currentColumns = []
     availableColumns = []
+    
+    if ('resetPreferences' in request.GET):
+        del request.session['currentColumns']
+        del request.session['availableColumns']
 
-    if not ('currentColumns' in request.session and 'availableColumns' in
-            request.session):
-        DEFAULT_currentColumns = ["Country Code", "Uptime", "Hostname",
-                "ORPort", "DirPort", "IP", "Exit", "Authority", "Fast",
-                "Guard", "Named", "Stable", "Running", "Valid",
-                "Bandwidth", "V2Dir", "Platform", "Hibernating",
-                "BadExit"]
-        DEFAULT_availableColumns = ["Fingerprint", "LastDescriptorPublished",
-                "Contact", "BadDir", "BadExit"]
-        request.session['currentColumns'] = DEFAULT_currentColumns
-        request.session['availableColumns'] = DEFAULT_availableColumns
-        currentColumns = DEFAULT_currentColumns
-        availableColumns = DEFAULT_availableColumns
+    if not ('currentColumns' in request.session and 'availableColumns' in request.session):
+        currentColumns = ["Country Code", "Uptime", "Hostname", "ORPort", "DirPort", "IP", \
+                    "Exit", "Authority", "Fast", "Guard", "Named", "Stable", "Running", "Valid", \
+                    "Bandwidth", "V2Dir", "Platform", "Hibernating", "BadExit",]
+        availableColumns = ["Fingerprint", "LastDescriptorPublished", "Contact", "BadDir"]
+        request.session['currentColumns'] = currentColumns
+        request.session['availableColumns'] = availableColumns
     else:
         currentColumns = request.session['currentColumns']
         availableColumns = request.session['availableColumns']
+    
+    columnLists = [currentColumns, availableColumns, '']
+    if ('removeColumn' in request.GET and 'selected_removeColumn' in request.GET):
+        columnLists = _buttonChoice(request, 'removeColumn', 'selected_removeColumn', currentColumns, availableColumns)
+    elif ('addColumn' in request.GET and 'selected_addColumn' in request.GET):
+        columnLists = _buttonChoice(request, 'addColumn', 'selected_addColumn', currentColumns, availableColumns)
+    elif ('upButton' in request.GET and 'selected_removeColumn' in request.GET):
+        columnLists = _buttonChoice(request, 'upButton', 'selected_removeColumn', currentColumns, availableColumns)
+    elif ('downButton' in request.GET and 'selected_removeColumn' in request.GET):
+        columnLists = _buttonChoice(request, 'downButton', 'selected_removeColumn', currentColumns, availableColumns)
+    
+    template_values = {'currentColumns': columnLists[0], 'availableColumns': columnLists[1], \
+                    'selectedEntry': columnLists[2]}
+    
+    return render_to_response('columnpreferences.html', template_values)
 
-    selection = ''
-    if ('removeColumn' in request.GET and 'selected_removeColumn' in
-            request.GET):
-        selection = request.GET['selected_removeColumn']
+
+def _buttonChoice(request, button, field, currentColumns, availableColumns): 
+    '''
+    Helper function that manages the changes in the column preferences array-lists.
+    @see: columnpreferences
+    @rtype: list(list(int), list(int), string)
+    @return: columnLists
+    '''
+    selection = request.GET[field]
+    if (button == 'removeColumn'):
         availableColumns.append(selection)
         currentColumns.remove(selection)
-        request.session['currentColumns'] = currentColumns
-        request.session['availableColumns'] = availableColumns
-
-    if ('addColumn' in request.GET and 'selected_addColumn' in request.GET):
-        selection = request.GET['selected_addColumn']
+    elif (button == 'addColumn'):
         currentColumns.append(selection)
         availableColumns.remove(selection)
-        request.session['currentColumns'] = currentColumns
-        request.session['availableColumns'] = availableColumns
-
-    if ('upButton' in request.GET and 'selected_removeColumn' in request.GET):
-        selection = request.GET['selected_removeColumn']
+    elif (button == 'upButton'):
         selectionPos = currentColumns.index(selection)
         if (selectionPos > 0):
             aux = currentColumns[selectionPos - 1]
             currentColumns[selectionPos - 1] = currentColumns[selectionPos]
             currentColumns[selectionPos] = aux
-        request.session['currentColumns'] = currentColumns
-        request.session['availableColumns'] = availableColumns
-
-    if ('downButton' in request.GET and 'selected_removeColumn' in
-            request.GET):
-        selection = request.GET['selected_removeColumn']
+    elif (button == 'downButton'):
         selectionPos = currentColumns.index(selection)
         if (selectionPos < len(currentColumns) - 1):
             aux = currentColumns[selectionPos + 1]
             currentColumns[selectionPos + 1] = currentColumns[selectionPos]
             currentColumns[selectionPos] = aux
-        request.session['currentColumns'] = currentColumns
-        request.session['availableColumns'] = availableColumns
-
-    template_values = {'currentColumns': currentColumns, 'availableColumns':
-            availableColumns, 'selectedEntry': selection}
-    return render_to_response('columnpreferences.html', template_values)
-
+    request.session['currentColumns'] = currentColumns
+    request.session['availableColumns'] = availableColumns
+    columnLists = []
+    columnLists.append(currentColumns)
+    columnLists.append(availableColumns)
+    columnLists.append(selection)
+    return columnLists
 
 def _get_exit_policy(rawdesc):
     """
