@@ -842,7 +842,7 @@ def columnpreferences(request):
             in request.GET):
         if not(request.GET['selected_removeColumn'] in \
                 notMovableColumns):
-            columnLists = _buttonChoice(request, 'upButton', \
+            columnLists = _buttonChoice(request, 'downButton', \
                     'selected_removeColumn', currentColumns, availableColumns)
 
     template_values = {'currentColumns': columnLists[0],
