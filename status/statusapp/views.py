@@ -43,9 +43,10 @@ def index(request):
     last_va = Statusentry.objects.aggregate(\
             last=Max('validafter'))['last']
 
-    statusentries = Statusentry.objects.filter(validafter=last_va)\
+    statusentries = Statusentry.objects.filter(\
+            validafter=last_va)\
             .extra(select={'geoip':
-            'geoip_lookup(address)'}).order_by('nickname')
+            'geoip_lookup(statusentry.address)'}).order_by('nickname')
 
     num_routers = statusentries.count()
 
@@ -273,7 +274,7 @@ def readhist(request, fingerprint):
 
     ax.set_xlabel("Time (GMT)", fontsize='12')
     ax.set_xticks(range(0, 104, 8))
-    ax.set_xticklabels(times, fontsize='9')
+    ax.set_xticklabels(times, fontsize='8', fontweight='bold')
 
     ax.set_ylabel("Bandwidth (bytes/sec)", fontsize='12')
 
@@ -284,10 +285,12 @@ def readhist(request, fingerprint):
     ax.yaxis.major.formatter.set_scientific(False)
     for tick in ax.yaxis.get_major_ticks():
         tick.label1.set_fontsize('9')
+        tick.label1.set_fontweight('bold')
 
     ax.set_title("Average Bandwidth Read History:\n"
             + start_time.strftime("%Y-%m-%d %H:%M") + " to "
-            + end_time.strftime("%Y-%m-%d %H:%M"), fontsize='12')
+            + end_time.strftime("%Y-%m-%d %H:%M"), fontsize='12',
+            fontweight='bold')
 
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
@@ -380,7 +383,7 @@ def writehist(request, fingerprint):
 
     ax.set_xlabel("Time (GMT)", fontsize='12')
     ax.set_xticks(range(0, 104, 8))
-    ax.set_xticklabels(times, fontsize='9')
+    ax.set_xticklabels(times, fontsize='8', fontweight='bold')
 
     ax.set_ylabel("Bandwidth (bytes/sec)", fontsize='12')
 
@@ -391,10 +394,12 @@ def writehist(request, fingerprint):
     ax.yaxis.major.formatter.set_scientific(False)
     for tick in ax.yaxis.get_major_ticks():
         tick.label1.set_fontsize('9')
+        tick.label1.set_fontweight('bold')
 
     ax.set_title("Average Bandwidth Write History:\n"
             + start_time.strftime("%Y-%m-%d %H:%M") + " to "
-            + end_time.strftime("%Y-%m-%d %H:%M"), fontsize='12')
+            + end_time.strftime("%Y-%m-%d %H:%M"), fontsize='12',
+            fontweight='bold')
 
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
@@ -573,8 +578,8 @@ def bycountrycode(request):
     # and remove excess whitespace.
     matplotlib.rcParams['figure.subplot.left'] = 0.04
     matplotlib.rcParams['figure.subplot.right'] = 0.99
-    matplotlib.rcParams['figure.subplot.top'] = 0.95
-    matplotlib.rcParams['figure.subplot.bottom'] = 0.04
+    matplotlib.rcParams['figure.subplot.top'] = 0.92
+    matplotlib.rcParams['figure.subplot.bottom'] = 0.06
 
     last_va = Statusentry.objects.aggregate(\
             last=Max('validafter'))['last']
@@ -599,7 +604,7 @@ def bycountrycode(request):
 
     x_index = matplotlib.numpy.arange(num_params)
 
-    fig = Figure(facecolor='white', edgecolor='black', figsize=(12, 6),
+    fig = Figure(facecolor='white', edgecolor='black', figsize=(12, 4),
             frameon=False)
     ax = fig.add_subplot(111)
 
@@ -608,17 +613,18 @@ def bycountrycode(request):
 
     # Label the height of each bar.
     for i in range(num_params):
-        ax.text(xs[i] + (bar_width / 2.0), ys[i] + 3, str(ys[i]),
-                fontsize='9', horizontalalignment='center')
+        ax.text(xs[i] + (bar_width / 2.0), ys[i] + (ax.get_ylim()[1] / 100), str(ys[i]),
+                fontsize='8', horizontalalignment='center')
 
     ax.set_xticks(x_index + (bar_width / 2.0))
-    ax.set_xticklabels(keys, fontsize='8')
+    ax.set_xticklabels(keys, fontsize='8', fontweight='bold', rotation='vertical')
 
     for tick in ax.yaxis.get_major_ticks():
         tick.label1.set_fontsize('9')
+        tick.label1.set_fontweight('bold')
 
     ax.set_title("Number of Routers by Country Code",
-            fontsize='12')
+            fontsize='12', fontweight='bold')
 
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
@@ -644,8 +650,8 @@ def exitbycountrycode(request):
     # and remove excess whitespace.
     matplotlib.rcParams['figure.subplot.left'] = 0.04
     matplotlib.rcParams['figure.subplot.right'] = 0.99
-    matplotlib.rcParams['figure.subplot.top'] = 0.95
-    matplotlib.rcParams['figure.subplot.bottom'] = 0.04
+    matplotlib.rcParams['figure.subplot.top'] = 0.92
+    matplotlib.rcParams['figure.subplot.bottom'] = 0.06
 
     last_va = Statusentry.objects.aggregate(\
             last=Max('validafter'))['last']
@@ -671,7 +677,7 @@ def exitbycountrycode(request):
 
     x_index = matplotlib.numpy.arange(num_params)
 
-    fig = Figure(facecolor='white', edgecolor='black', figsize=(12, 6),
+    fig = Figure(facecolor='white', edgecolor='black', figsize=(12, 4),
             frameon=False)
     ax = fig.add_subplot(111)
 
@@ -680,17 +686,18 @@ def exitbycountrycode(request):
 
     # Label the height of each bar.
     for i in range(num_params):
-        ax.text(xs[i] + (bar_width / 2.0), ys[i] + 2, str(ys[i]),
-                fontsize='9', horizontalalignment='center')
+        ax.text(xs[i] + (bar_width / 2.0), ys[i] + (ax.get_ylim()[1] / 100), str(ys[i]),
+                fontsize='8', horizontalalignment='center')
 
     ax.set_xticks(x_index + (bar_width / 2.0))
-    ax.set_xticklabels(keys, fontsize='8')
+    ax.set_xticklabels(keys, fontsize='8', fontweight='bold', rotation='vertical')
 
     for tick in ax.yaxis.get_major_ticks():
         tick.label1.set_fontsize('9')
+        tick.label1.set_fontweight('bold')
 
     ax.set_title("Number of Exit Routers by Country Code",
-            fontsize='12')
+            fontsize='12', fontweight='bold')
 
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
@@ -699,15 +706,244 @@ def exitbycountrycode(request):
 
 
 def bytimerunning(request):
-    return HttpResponse("don't break everything")
+    """
+    Return a graph representing the uptime of routers in the Tor
+    network.
+
+    @rtype: HttpResponse
+    @return: A graph representing the uptime of routers in the
+        Tor network as an HttpResponse object.
+    """
+    import matplotlib
+    from matplotlib.backends.backend_agg import \
+            FigureCanvasAgg as FigureCanvas
+    from matplotlib.figure import Figure
+
+    # Draw the graph such that the labels and title are visible,
+    # and remove excess whitespace.
+    matplotlib.rcParams['figure.subplot.left'] = 0.04
+    matplotlib.rcParams['figure.subplot.right'] = 0.99
+    matplotlib.rcParams['figure.subplot.top'] = 0.92
+    matplotlib.rcParams['figure.subplot.bottom'] = 0.04
+
+    last_va = Statusentry.objects.aggregate(\
+            last=Max('validafter'))['last']
+
+    statusentries = Statusentry.objects.filter(\
+            validafter=last_va)
+
+    uptime_map = {}
+
+    for entry in statusentries:
+        weeks = entry.descriptorid.uptime / (60 * 60 * 24 * 7)
+        if weeks in uptime_map:
+            uptime_map[weeks] += 1
+        else:
+            uptime_map[weeks] = 1
+
+    keys = sorted(uptime_map)
+    num_params = len(keys)
+    xs = range(num_params)
+    ys = [uptime_map[key] for key in keys]
+
+    x_index = matplotlib.numpy.arange(num_params)
+
+    fig = Figure(facecolor='white', edgecolor='black', figsize=(12, 4),
+            frameon=False)
+    ax = fig.add_subplot(111)
+
+    bar_width = 0.5
+    ax.bar(xs, ys, color='#66CD00', width=bar_width)
+
+    # Label the height of each bar.
+    for i in range(num_params):
+        ax.text(xs[i] + (bar_width / 2.0), ys[i] + (ax.get_ylim()[1] / 100), str(ys[i]),
+                fontsize='8', horizontalalignment='center')
+
+    ax.set_xticks(x_index + (bar_width / 2.0))
+    ax.set_xticklabels(keys, fontsize='9', fontweight='bold')
+
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label1.set_fontsize('9')
+        tick.label1.set_fontweight('bold')
+
+    ax.set_title("Number of Routers by Time Running (Weeks)",
+            fontsize='12', fontweight='bold')
+
+    canvas = FigureCanvas(fig)
+    response = HttpResponse(content_type='image/png')
+    canvas.print_png(response, ha="center")
+    return response
 
 
 def byobservedbandwidth(request):
-    return HttpResponse("don't break everything")
+    """
+    Return a graph representing the observed bandwidth of the
+    routers in the Tor network.
+
+    @rtype: HttpResponse
+    @return: A graph representing the observed bandwidth of the
+        routers in the Tor network.
+    """
+    import matplotlib
+    from matplotlib.backends.backend_agg import \
+            FigureCanvasAgg as FigureCanvas
+    from matplotlib.figure import Figure
+
+    # Draw the graph such that the labels and title are visible,
+    # and remove excess whitespace.
+    matplotlib.rcParams['figure.subplot.left'] = 0.08
+    matplotlib.rcParams['figure.subplot.right'] = 0.98
+    matplotlib.rcParams['figure.subplot.top'] = 0.92
+    matplotlib.rcParams['figure.subplot.bottom'] = 0.19
+
+    last_va = Statusentry.objects.aggregate(\
+            last=Max('validafter'))['last']
+
+    statusentries = Statusentry.objects.filter(\
+            validafter=last_va)
+
+    bw_map = {}
+    keys = ['0-10', '11-20', '21-50', '51-100', '101-500', '501-1000',
+            '1001-2000', '2001-3000', '3001-5000', '5001+']
+    for key in keys:
+        bw_map[key] = 0
+
+    for entry in statusentries:
+        kbps = entry.descriptorid.bandwidthobserved / 1024
+        if (0 <= kbps <= 10):
+            bw_map['0-10'] += 1
+        elif (101 <= kbps <= 500):
+            bw_map['101-500'] += 1
+        elif (11 <= kbps <= 20):
+            bw_map['11-20'] += 1
+        elif (21 <= kbps <= 50):
+            bw_map['21-50'] += 1
+        elif (51 <= kbps <= 100):
+            bw_map['51-100'] += 1
+        elif (501 <= kbps <= 1000):
+            bw_map['501-1000'] += 1
+        elif (1001 <= kbps <= 2000):
+            bw_map['1001-2000'] += 1
+        elif (2001 <= kbps <= 3000):
+            bw_map['2001-3000'] += 1
+        elif (3001 <= kbps <= 5000):
+            bw_map['3001-5000'] += 1
+        elif (5001 <= kbps):
+            bw_map['5001+'] += 1
+
+    num_params = len(keys)
+    xs = range(num_params)
+    ys = [bw_map[key] for key in keys]
+
+    x_index = matplotlib.numpy.arange(num_params)
+
+    fig = Figure(facecolor='white', edgecolor='black', figsize=(6, 4),
+            frameon=False)
+    ax = fig.add_subplot(111)
+
+    bar_width = 0.5
+    ax.bar(xs, ys, color='#66CD00', width=bar_width)
+
+    # Label the height of each bar.
+    for i in range(num_params):
+        ax.text(xs[i] + (bar_width / 2.0), ys[i] + (ax.get_ylim()[1] / 100), str(ys[i]),
+                fontsize='8', horizontalalignment='center')
+
+    ax.set_xticks(x_index + (bar_width / 2.0))
+    ax.set_xticklabels(keys, fontsize='8', fontweight='bold', rotation='vertical')
+
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label1.set_fontsize('9')
+        tick.label1.set_fontweight('bold')
+
+    ax.set_title("Number of Routers by Observed Bandwidth (KB/sec)",
+            fontsize='12', fontweight='bold')
+
+    canvas = FigureCanvas(fig)
+    response = HttpResponse(content_type='image/png')
+    canvas.print_png(response, ha="center")
+    return response
 
 
 def byplatform(request):
-    return HttpResponse("don't break everything")
+    """
+    Return a graph representing the platforms of the active relays
+    in the Tor network.
+
+    @rtype: HttpResponse
+    @return: A graph representing the platforms of the active relays
+        in the Tor network as an HttpResponse object.
+    """
+    import matplotlib
+    from matplotlib.backends.backend_agg import \
+            FigureCanvasAgg as FigureCanvas
+    from matplotlib.figure import Figure
+
+    # Draw the graph such that the labels and title are visible,
+    # and remove excess whitespace.
+    matplotlib.rcParams['figure.subplot.left'] = 0.08
+    matplotlib.rcParams['figure.subplot.right'] = 0.98
+    matplotlib.rcParams['figure.subplot.top'] = 0.92
+    matplotlib.rcParams['figure.subplot.bottom'] = 0.05
+
+    last_va = Statusentry.objects.aggregate(\
+            last=Max('validafter'))['last']
+
+    statusentries = Statusentry.objects.filter(\
+            validafter=last_va)
+
+    platform_map = {}
+    keys = ['Linux', 'Windows', 'FreeBSD', 'Darwin', 'OpenBSD',
+            'NetBSD', 'SunOS']
+    for platform in keys:
+        platform_map[platform] = 0
+
+    platform_map['Unknown'] = 0
+
+    for entry in statusentries:
+        platform = entry.descriptorid.platform
+        for key in keys:
+            if key in platform:
+                platform_map[key] += 1
+                break
+        else:
+            platform_map['Unknown'] += 1
+
+    keys.append('Unknown')
+
+    num_params = len(keys)
+    xs = range(num_params)
+    ys = [platform_map[key] for key in keys]
+
+    x_index = matplotlib.numpy.arange(num_params)
+
+    fig = Figure(facecolor='white', edgecolor='black', figsize=(6, 4),
+            frameon=False)
+    ax = fig.add_subplot(111)
+
+    bar_width = 0.5
+    ax.bar(xs, ys, color='#66CD00', width=bar_width)
+
+    # Label the height of each bar.
+    for i in range(num_params):
+        ax.text(xs[i] + (bar_width / 2.0), ys[i] + (ax.get_ylim()[1] / 100), str(ys[i]),
+                fontsize='8', horizontalalignment='center')
+
+    ax.set_xticks(x_index + (bar_width / 2.0))
+    ax.set_xticklabels(keys, fontsize='9', fontweight='bold')
+
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label1.set_fontsize('9')
+        tick.label1.set_fontweight('bold')
+
+    ax.set_title("Number of Routers by Platform",
+            fontsize='12', fontweight='bold')
+
+    canvas = FigureCanvas(fig)
+    response = HttpResponse(content_type='image/png')
+    canvas.print_png(response, ha="center")
+    return response
 
 
 def aggregatesummary(request):
@@ -728,7 +964,7 @@ def aggregatesummary(request):
     # and remove excess whitespace.
     matplotlib.rcParams['figure.subplot.left'] = 0.04
     matplotlib.rcParams['figure.subplot.right'] = 0.99
-    matplotlib.rcParams['figure.subplot.top'] = 0.95
+    matplotlib.rcParams['figure.subplot.top'] = 0.92
     matplotlib.rcParams['figure.subplot.bottom'] = 0.04
 
     last_va = Statusentry.objects.aggregate(\
@@ -765,7 +1001,7 @@ def aggregatesummary(request):
     for count in keys:
         ys.append(counts[count])
 
-    fig = Figure(facecolor='white', edgecolor='black', figsize=(12, 6),
+    fig = Figure(facecolor='white', edgecolor='black', figsize=(12, 4),
             frameon=False)
     ax = fig.add_subplot(111)
 
@@ -774,16 +1010,17 @@ def aggregatesummary(request):
 
     # Label the height of each bar.
     for i in range(num_params):
-        ax.text(xs[i] + (bar_width / 2.0), ys[i] + 10, str(ys[i]),
-                fontsize='9', horizontalalignment='center')
+        ax.text(xs[i] + (bar_width / 2.0), ys[i] + (ax.get_ylim()[1] / 100), str(ys[i]),
+                fontsize='8', horizontalalignment='center')
     ax.set_xticks(x_index + (bar_width / 2.0))
-    ax.set_xticklabels(labels, fontsize='9')
+    ax.set_xticklabels(labels, fontsize='9', fontweight='bold')
 
     for tick in ax.yaxis.get_major_ticks():
         tick.label1.set_fontsize('9')
+        tick.label1.set_fontweight('bold')
 
     ax.set_title("Aggregate Summary -- Number of Routers Matching "
-            + "Specified Criteria", fontsize='12')
+            + "Specified Criteria", fontsize='12', fontweight='bold')
 
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
@@ -842,7 +1079,7 @@ def columnpreferences(request):
             in request.GET):
         if not(request.GET['selected_removeColumn'] in \
                 notMovableColumns):
-            columnLists = _buttonChoice(request, 'upButton', \
+            columnLists = _buttonChoice(request, 'downButton', \
                     'selected_removeColumn', currentColumns, availableColumns)
 
     template_values = {'currentColumns': columnLists[0],
