@@ -14,30 +14,26 @@ table.details {
     border-width: 1px;
     margin-left: auto;
     margin-right: auto;
-    border-spacing: 1;
+    border-spacing: 1px;
     border-collapse: collapse;
    	white-space: nowrap;
 }
 
 td#details_boxTitle {
-    font: 0.625em;
     font-weight: bold;
 	background-color: #7BD4F7;
 	text-align: center;
-	position: center;
-	color: #000000; 
+	color: #000000;
 	border-top: 2px solid black;
 	border-bottom: 2px solid black;
 	white-space:nowrap;
 }
 
 td#detailBox {
-	font: bold 0.625em; /*10pt Arial;*/
     border-style: solid;
     border-width: 1px;
-	/*text-align: center;*/
 	position: center;
-	color: #000000; 
+	color: #000000;
     white-space: nowrap;
 }
 
@@ -45,8 +41,8 @@ td#iconNo {
     border-style: solid;
     border-width: 1px;
     background-image: url(../img/bg_no.png);
-    background-repeat: no-repeat; 
-	background-position: center; 
+    background-repeat: no-repeat;
+	background-position: center;
 	width: 40px;
 }
 
@@ -54,7 +50,7 @@ td#iconYes {
     border-style: solid;
     border-width: 1px;
     background-image: url(../img/bg_yes.png);
-    background-repeat: no-repeat; 
-	background-position: center; 
+    background-repeat: no-repeat;
+	background-position: center;
 	width: 40px;
 }

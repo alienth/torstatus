@@ -3,12 +3,11 @@ body {
 }
 
 tr.relay {
-	font: 0.625em;
     line-height:75%;
 }
 
 tr.relay:hover {
-	background-color: #69EEC8;
+    background-color: #69EEC8;
 }
 
 th {
@@ -16,172 +15,167 @@ th {
 }
 
 th.relayHeader {
-	text-align: left;
-	font-weight: bold; 
-	font-size: 0.6875em;
-	background-color: #7BD4F7;
-	border-top: 2px solid black;
-	border-bottom: 2px solid black;
+    text-align: left;
+    font-weight: bold;
+    font-size: 0.6875em;
+    background-color: #7BD4F7;
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
 }
 
 th#routerName {
-	text-align: left;
-	font-weight: bold; 
-	font-size: 0.6875em;
-	background-color: #7BD4F7;
-	border-top: 2px solid black;
-	border-bottom: 2px solid black;
-	min-width: 100px;
+    text-align: left;
+    font-weight: bold;
+    font-size: 0.6875em;
+    background-color: #7BD4F7;
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+    min-width: 100px;
 }
 
 th#badDir {
     text-align: left;
-	font-weight: bold; 
-	font-size: 0.6875em;
-	background-color: #7BD4F7;
-	border-top: 2px solid black;
-	border-bottom: 2px solid black;
-	min-width: 80px;
+    font-weight: bold;
+    font-size: 0.6875em;
+    background-color: #7BD4F7;
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+    min-width: 80px;
 }
 
 th#lastDescPub {
     text-align: left;
-	font-weight: bold; 
-	font-size: 0.6875em;
-	background-color: #7BD4F7;
-	border-top: 2px solid black;
-	border-bottom: 2px solid black;
-	min-width: 150px;
+    font-weight: bold;
+    font-size: 0.6875em;
+    background-color: #7BD4F7;
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+    min-width: 150px;
 }
 
 th#lastDescPub:hover {
-    background-color: #89FB69;	
-	cursor: pointer;
+    background-color: #89FB69;
+    cursor: pointer;
 }
 th#badDir:hover {
-    background-color: #89FB69;	
-	cursor: pointer;
+    background-color: #89FB69;
+    cursor: pointer;
 }
 
 th#routerName:hover {
-    background-color: #89FB69;	
-	cursor: pointer;
+    background-color: #89FB69;
+    cursor: pointer;
 }
 
 th.relayHeader:hover {
-	background-color: #89FB69;	
-	cursor: pointer;
+    background-color: #89FB69;
+    cursor: pointer;
 }
 
 th#relayHeaderInv {
-	text-align: left;
-	font: bold 0px Arial;
-	background-color: #7BD4F7;
-	border-top: 2px solid black;
-	border-bottom: 2px solid black;
-	cursor: pointer;
+    text-align: left;
+    font: bold 0px Arial;
+    background-color: #7BD4F7;
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+    cursor: pointer;
 }
 
 table.header {
-	width: 100%;
-	border-style: none;
-	margin-left: auto;
-	margin-right: auto;
-	border-spacing: 1;
-	padding: 2px;
+    width: 100%;
+    border-style: none;
+    margin-left: auto;
+    margin-right: auto;
+    border-spacing: 1px;
+    padding: 2px;
 }
 
 td#mainTitle {
-	background-color: #7BD4F7;
-	text-align:center;
-	font-size: 2.0em;
+    background-color: #7BD4F7;
+    text-align:center;
+    font-size: 2.0em;
     font-weight: bold;
-	color: #000000;
-	border-style: solid;
-	border-color: black;
-	border-width: 1px;
-	padding: 10px;
+    color: #000000;
+    border-style: solid;
+    border-color: black;
+    border-width: 1px;
+    padding: 10px;
 }
 
 td#mainLinks {
-	background-color: #7BD4F7;
-	border-style: solid;
-	border-color: black;
-	border-width: 1px;
-	text-align: center;
-	font-size: 0.75em;
-	color: red;
-	padding: 10px;
+    background-color: #7BD4F7;
+    border-style: solid;
+    border-color: black;
+    border-width: 1px;
+    text-align: center;
+    font-size: 0.75em;
+    color: red;
+    padding: 10px;
 }
 
 table.displayStatus {
-	width: 300px;
-	position: center;
-	border-style: none;
-	margin-left: auto;
-	margin-right: auto;
-    border-spacing: 1;
-	padding: 2px;
+    width: 300px;
+    border-style: none;
+    margin-left: auto;
+    margin-right: auto;
+    border-spacing: 1px;
+    padding: 2px;
 }
 
 table.legend {
-	width: 300px;
-	position: center;
-	border-style: solid;
-	border-color: black;
-	border-width: 1px;
-	margin-left: auto;
-	margin-right: auto;
-    border-spacing: 1;
-	padding: 2px;
+    width: 300px;
+    border-style: solid;
+    border-color: black;
+    border-width: 1px;
+    margin-left: auto;
+    margin-right: auto;
+    border-spacing: 1px;
+    padding: 2px;
 }
-	
+
 a:hover {
-	color: black;
-	text-decoration: none;
+color: black;
+text-decoration: none;
 }
 
 a.link {
-	color: black;
-	text-decoration: none;
+color: black;
+text-decoration: none;
 }
 
 a.link:hover {
-	background-color: #89FB69;
+background-color: #89FB69;
 }
 
 a.linkDetails {
     color: black;
-	text-decoration: none;
+text-decoration: none;
 }
 
 .relayOK {
-	font: 0.625em; /*Arial;*/
-	background-color: white;
+    background-color: white;
 }
 
 .relayHibernating {
-	font: 0.625em; /*Arial;*/
-	background-color: #F9BD67;
+    background-color: #F9BD67;
 }
 
 .relayDown {
-	font: 0.625em; /*Arial;*/
-	background-color: yellow;
+    background-color: yellow;
 }
 
 .relayBadExit {
-	background-color: red;
+background-color: red;
 }
 
 table.appServerDetails {
-	width: 350px;
-	border-style: solid;
-	border-color: black; 
-	border-width: 1px;
-	margin-left: auto;
-	margin-right: auto;
-	border-spacing: 1;
+    width: 350px;
+    border-style: solid;
+    border-color: black;
+    border-width: 1px;
+    margin-left: auto;
+    margin-right: auto;
+    border-spacing: 1px;
 }
 
 table.advancedQuery {
@@ -191,12 +185,12 @@ table.advancedQuery {
     border-width: 1px;
     margin-right: auto;
     margin-left: auto;
-    border-spacing: 1;
+    border-spacing: 1px;
 }
 
 tr#row_appServerDetails:hover {
-	background-color: #7BD4F7;
-	cursor: pointer;
+background-color: #7BD4F7;
+cursor: pointer;
 }
 
 table.aggStatisticSummary {
@@ -206,41 +200,35 @@ table.aggStatisticSummary {
     border-width: 1px;
     margin-left: auto;
     margin-right: auto;
-    border-spacing: 1;
+    border-spacing: 1px;
     border-collapse: collapse;
-   	white-space:nowrap;
+    white-space:nowrap;
 }
 
 tr#row_aggStatisticSummary {
-    
 }
 
 td#aggBox {
-	font: bold 0.625em; /*10pt Arial;*/
     border-style: solid;
     border-width: 1px;
-	text-align: center;
-	position: center;
-	color: #000000; 
-	white-space:nowrap;
+    text-align: center;
+    color: #000000;
+    white-space:nowrap;
 }
 
 td.boxTitle {
-	font: bold 0.625em; /*10pt Arial;*/
-	background-color: #7BD4F7;
-	text-align: center;
-	position: center;
-	color: #000000; 
-	border-top: 2px solid black;
-	border-bottom: 2px solid black;
-	white-space:nowrap;
+background-color: #7BD4F7;
+text-align: center;
+color: #000000;
+border-top: 2px solid black;
+border-bottom: 2px solid black;
+white-space:nowrap;
 }
 
 td#col_relayName {
     background-color: #C7FF89;
     width: 20px;
 }
-
 
 td#col_relayName:hover {
     background-color: #69EEC8;
@@ -299,7 +287,7 @@ td {
 
 table.relayTable {
     width: 100%;
-    border-spacing: 0;
+    border-spacing: 0px;
     border: 0;
 }
 
@@ -348,12 +336,10 @@ input#sortRouterListing_Button {
 }
 
 td#sortRouterListing {
-	font: bold 0.625em; /*10pt Arial;*/
-	background-color: #7BD4F7;
-	text-align: center;
-	position: center;
-	color: #000000; 
-	border-top: 1px solid black;
-	border-bottom: 1px solid black;
-	white-space:nowrap;
+    background-color: #7BD4F7;
+    text-align: center;
+    color: #000000;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+    white-space:nowrap;
 }

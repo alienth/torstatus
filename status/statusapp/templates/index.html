@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block mainCSS %}
-<link rel="stylesheet" type="text/css" href="static/css/style.css"></link>
+<link rel="stylesheet" type="text/css" href="/static/css/style.css"></link>
 {% endblock %}
 
 {% block mainJS %}
@@ -291,17 +291,17 @@
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Total average bandwidth of displayed routers [KB/s]:</td>
     <td id="aggBox">{{ counts.bandwidthavg|kilobytes_ps }}</td>
-    <td id="aggBox"></td>
+    <td id="aggBox">{{ counts.bandwidthavg|percent:total_counts.bandwidthavg }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Total burst bandwidth of displayed routers [KB/s]:</td>
     <td id="aggBox">{{ counts.bandwidthburst|kilobytes_ps }}</td>
-    <td id="aggBox"></td>
+    <td id="aggBox">{{ counts.bandwidthburst|percent:total_counts.bandwidthburst }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Total observed bandwidth of displayed routers [KB/s]:</td>
     <td id="aggBox">{{ counts.bandwidthobserved|kilobytes_ps }}</td>
-    <td id="aggBox"></td>
+    <td id="aggBox">{{ counts.bandwidthobserved|percent:total_counts.bandwidthobserved }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Total number of Routers:</td>
@@ -310,8 +310,8 @@
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Routers in current query result set:</td>
-    <td id="aggBox">{{ num_routers }}</td>
-    <td id="aggBox">{{ num_routers|percent:num_routers }}</td>
+    <td id="aggBox">{{ in_query }}</td>
+    <td id="aggBox">{{ in_query|percent:num_routers }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Total number of 'authority' routers:</td>
@@ -324,7 +324,7 @@
     <td id="aggBox">{{ counts.isbaddirectory|percent:num_routers }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
-	<td id="aggbox">Total number of 'bad exit' routers:</td>
+	<td id="aggBox">Total number of 'bad exit' routers:</td>
     <td id="aggBox">{{ counts.isbadexit }}</td>
     <td id="aggBox">{{ counts.isbadexit|percent:num_routers }}</td>
 </tr>

@@ -28,12 +28,18 @@ def index(request):
     Supply a dictionary to the index.html template consisting of a list
     of active relays.
 
+    Currently, an "active relay" is a relay that has a status entry
+    that was published in the last consensus.
+
     @rtype: HttpRequest
     @return: A dictionary consisting of information about each router
         in the network as well as aggregate information about the
         network itself.
     """
-
+    # INITIAL QUERY ---------------------------------------------------
+    # -----------------------------------------------------------------
+    # Get the initial query and necessary aggregate values for the
+    # routers in the last consensus.
     last_va = Statusentry.objects.aggregate(\
             last=Max('validafter'))['last']
 
@@ -41,29 +47,19 @@ def index(request):
             .extra(select={'geoip':
             'geoip_lookup(address)'}).order_by('nickname')
 
-    counts = statusentries.aggregate(
-            isauthority=CountCase('isauthority', when=True),
-            isbaddirectory=CountCase('isbaddirectory', when=True),
-            isbadexit=CountCase('isbadexit', when=True),
-            isexit=CountCase('isexit', when=True),
-            isfast=CountCase('isfast', when=True),
-            isguard=CountCase('isguard', when=True),
-            isnamed=CountCase('isnamed', when=True),
-            isstable=CountCase('isstable', when=True),
-            isrunning=CountCase('isrunning', when=True),
-            isvalid=CountCase('isvalid', when=True),
-            isv2dir=CountCase('isv2dir', when=True),
+    num_routers = statusentries.count()
+
+    bw_total = TotalBandwidth.objects.all()\
+            .order_by('-date')[:1][0].bwobserved
+
+    total_counts = statusentries.aggregate(\
             bandwidthavg=Sum('descriptorid__bandwidthavg'),
             bandwidthburst=Sum('descriptorid__bandwidthburst'),
             bandwidthobserved=Sum('descriptorid__bandwidthobserved'))
 
-    total_bw = TotalBandwidth.objects.all()\
-            .order_by('-date')[:1][0].bwobserved
 
-    num_routers = statusentries.count()
-
-    #############################################################
-
+    # USER QUERY MODIFICATIONS ----------------------------------------
+    # -----------------------------------------------------------------
     currentColumns = []
     if not ('currentColumns' in request.session):
         currentColumns = ["Country Code", "Uptime", "Hostname",
@@ -103,6 +99,10 @@ def index(request):
             statusentries = statusentries.filter(isexit=1)
         elif queryOptions['isexit'] == 'no':
             statusentries = statusentries.filter(isexit=0)
+        if queryOptions['isguard'] == 'yes':
+            statusentries = statusentries.filter(isguard=1)
+        elif queryOptions['isguard'] == 'no':
+            statusentries = statusentries.filter(isguard=0)
         '''
         if queryOptions['ishibernating'] == 'yes':
             statusentries = statusentries.filter(ishibernating=1)
@@ -129,13 +129,42 @@ def index(request):
             statusentries = statusentries.filter(isv2dir=1)
         elif queryOptions['isv2dir'] == 'no':
             statusentries = statusentries.filter(isv2dir=0)
-    #############################################################
 
+
+    # USER QUERY AGGREGATE STATISTICS ---------------------------------
+    # -----------------------------------------------------------------
+    counts = statusentries.aggregate(
+            isauthority=CountCase('isauthority', when=True),
+            isbaddirectory=CountCase('isbaddirectory', when=True),
+            isbadexit=CountCase('isbadexit', when=True),
+            isexit=CountCase('isexit', when=True),
+            isfast=CountCase('isfast', when=True),
+            isguard=CountCase('isguard', when=True),
+            isnamed=CountCase('isnamed', when=True),
+            isstable=CountCase('isstable', when=True),
+            isrunning=CountCase('isrunning', when=True),
+            isvalid=CountCase('isvalid', when=True),
+            isv2dir=CountCase('isv2dir', when=True),
+            bandwidthavg=Sum('descriptorid__bandwidthavg'),
+            bandwidthburst=Sum('descriptorid__bandwidthburst'),
+            bandwidthobserved=Sum('descriptorid__bandwidthobserved'))
+
+    bw_disp = TotalBandwidth.objects.all()\
+            .order_by('-date')[:1][0].bwobserved
+
+    in_query = statusentries.count()
     client_address = request.META['REMOTE_ADDR']
-    template_values = {'relay_list': statusentries, 'client_address':
-            client_address, 'num_routers': num_routers, 'exp_time': 900,
-            'counts': counts, 'total_bw': total_bw, 'currentColumns':
-            currentColumns, 'queryOptions': queryOptions}
+    template_values = {'relay_list': statusentries,
+                       'client_address': client_address,
+                       'num_routers': num_routers,
+                       'in_query': in_query,
+                       'exp_time': 900,
+                       'counts': counts,
+                       'total_counts': total_counts,
+                       'bw_disp': bw_disp,
+                       'bw_total': bw_total,
+                       'currentColumns': currentColumns,
+                       'queryOptions': queryOptions}
     return render_to_response('index.html', template_values)
 
 
@@ -184,7 +213,6 @@ def readhist(request, fingerprint):
     from matplotlib.backends.backend_agg import \
             FigureCanvasAgg as FigureCanvas
     from matplotlib.figure import Figure
-    from matplotlib.dates import DateFormatter
 
     # Draw the graph such that the labels and title are visible,
     # and remove excess whitespace.
@@ -291,7 +319,6 @@ def writehist(request, fingerprint):
     from matplotlib.backends.backend_agg import \
             FigureCanvasAgg as FigureCanvas
     from matplotlib.figure import Figure
-    from matplotlib.dates import DateFormatter
 
     # Draw the graph such that the labels and title are visible,
     # and remove excess whitespace.
@@ -535,11 +562,145 @@ def networkstatisticgraphs(request):
 
 
 def bycountrycode(request):
-    return HttpResponse("don't break everything")
+    """
+    Return a graph representing the number of routers by country code.
+
+    @rtype: HttpResponse
+    @return: A graph representing the number of routers by country
+        code as an HttpResponse object.
+    """
+    import matplotlib
+    from matplotlib.backends.backend_agg import \
+            FigureCanvasAgg as FigureCanvas
+    from matplotlib.figure import Figure
+
+    # Draw the graph such that the labels and title are visible,
+    # and remove excess whitespace.
+    matplotlib.rcParams['figure.subplot.left'] = 0.04
+    matplotlib.rcParams['figure.subplot.right'] = 0.99
+    matplotlib.rcParams['figure.subplot.top'] = 0.95
+    matplotlib.rcParams['figure.subplot.bottom'] = 0.04
+
+    last_va = Statusentry.objects.aggregate(\
+            last=Max('validafter'))['last']
+
+    statusentries = Statusentry.objects.filter(\
+            validafter=last_va)\
+            .extra(select={'geoip': 'geoip_lookup(address)'})
+
+    country_map = {}
+
+    for entry in statusentries:
+        country = entry.geoip[1:3]
+        if country in country_map:
+            country_map[country] += 1
+        else:
+            country_map[country] = 1
+
+    keys = sorted(country_map)
+    num_params = len(keys)
+    xs = range(num_params)
+    ys = [country_map[key] for key in keys]
+
+    x_index = matplotlib.numpy.arange(num_params)
+
+    fig = Figure(facecolor='white', edgecolor='black', figsize=(12, 6),
+            frameon=False)
+    ax = fig.add_subplot(111)
+
+    bar_width = 0.5
+    ax.bar(xs, ys, color='#66CD00', width=bar_width)
+
+    # Label the height of each bar.
+    for i in range(num_params):
+        ax.text(xs[i] + (bar_width / 2.0), ys[i] + 3, str(ys[i]),
+                fontsize='9', horizontalalignment='center')
+
+    ax.set_xticks(x_index + (bar_width / 2.0))
+    ax.set_xticklabels(keys, fontsize='8')
+
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label1.set_fontsize('9')
+
+    ax.set_title("Number of Routers by Country Code",
+            fontsize='12')
+
+    canvas = FigureCanvas(fig)
+    response = HttpResponse(content_type='image/png')
+    canvas.print_png(response, ha="center")
+    return response
 
 
 def exitbycountrycode(request):
-    return HttpResponse("don't break everything")
+    """
+    Return a graph representing the number of exit routers
+    by country code.
+
+    @rtype: HttpResponse
+    @return: A graph representing the number of exit routers by country
+        code as an HttpResponse object.
+    """
+    import matplotlib
+    from matplotlib.backends.backend_agg import \
+            FigureCanvasAgg as FigureCanvas
+    from matplotlib.figure import Figure
+
+    # Draw the graph such that the labels and title are visible,
+    # and remove excess whitespace.
+    matplotlib.rcParams['figure.subplot.left'] = 0.04
+    matplotlib.rcParams['figure.subplot.right'] = 0.99
+    matplotlib.rcParams['figure.subplot.top'] = 0.95
+    matplotlib.rcParams['figure.subplot.bottom'] = 0.04
+
+    last_va = Statusentry.objects.aggregate(\
+            last=Max('validafter'))['last']
+
+    statusentries = Statusentry.objects.filter(\
+            validafter=last_va,
+            isexit=1)\
+            .extra(select={'geoip': 'geoip_lookup(address)'})
+
+    country_map = {}
+
+    for entry in statusentries:
+        country = entry.geoip[1:3]
+        if country in country_map:
+            country_map[country] += 1
+        else:
+            country_map[country] = 1
+
+    keys = sorted(country_map)
+    num_params = len(keys)
+    xs = range(num_params)
+    ys = [country_map[key] for key in keys]
+
+    x_index = matplotlib.numpy.arange(num_params)
+
+    fig = Figure(facecolor='white', edgecolor='black', figsize=(12, 6),
+            frameon=False)
+    ax = fig.add_subplot(111)
+
+    bar_width = 0.5
+    ax.bar(xs, ys, color='#66CD00', width=bar_width)
+
+    # Label the height of each bar.
+    for i in range(num_params):
+        ax.text(xs[i] + (bar_width / 2.0), ys[i] + 2, str(ys[i]),
+                fontsize='9', horizontalalignment='center')
+
+    ax.set_xticks(x_index + (bar_width / 2.0))
+    ax.set_xticklabels(keys, fontsize='8')
+
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label1.set_fontsize('9')
+
+    ax.set_title("Number of Exit Routers by Country Code",
+            fontsize='12')
+
+    canvas = FigureCanvas(fig)
+    response = HttpResponse(content_type='image/png')
+    canvas.print_png(response, ha="center")
+    return response
 
 
 def bytimerunning(request):
@@ -567,7 +728,6 @@ def aggregatesummary(request):
     from matplotlib.backends.backend_agg import \
             FigureCanvasAgg as FigureCanvas
     from matplotlib.figure import Figure
-    from matplotlib.dates import DateFormatter
 
     # Draw the graph such that the labels and title are visible,
     # and remove excess whitespace.
@@ -616,6 +776,8 @@ def aggregatesummary(request):
 
     bar_width = 0.5
     ax.bar(xs, ys, color='#66CD00', width=bar_width)
+
+    # Label the height of each bar.
     for i in range(num_params):
         ax.text(xs[i] + (bar_width / 2.0), ys[i] + 10, str(ys[i]),
                 fontsize='9', horizontalalignment='center')
@@ -632,6 +794,7 @@ def aggregatesummary(request):
     response = HttpResponse(content_type='image/png')
     canvas.print_png(response, ha="center")
     return response
+
 
 def columnpreferences(request):
     '''

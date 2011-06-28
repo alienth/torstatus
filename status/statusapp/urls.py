@@ -23,4 +23,8 @@ urlpatterns = patterns('',
         'statusapp.views.writehist'),
     (r'^network-statistic-graphs/aggregatesummary.png$',
         'statusapp.views.aggregatesummary'),
+    (r'^network-statistic-graphs/bycountrycode.png$',
+        'statusapp.views.bycountrycode'),
+    (r'^network-statistic-graphs/exitbycountrycode.png$',
+        'statusapp.views.exitbycountrycode'),
 )
