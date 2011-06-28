@@ -125,7 +125,7 @@
 		<tr {% ifequal relay.isbadexit 1 %} class="relayBadExit" {% else %} class="relay" {% endifequal %}>
 		    <!-- Add: RELAY IS DOWN and RELAY IS HIBERNATING -->
 
-            <td sorttable_customkey={{ relay.geoip|country }} id="col_relayName"><a href="http://www.openstreetmap.org/?mlon={{ relay.geoip|longitude }}&mlat={{ relay.geoip|latitude }}&zoom=6"<img src="static/img/flags/{{ relay.geoip|country|lower }}.gif" alt={{ relay.geoip|country }} title="{{ relay.geoip|country }}: {{ relay.geoip|latitude }}, {{ relay.geoip|longitude }}"></a></td>
+            <td sorttable_customkey={{ relay.geoip|country }} id="col_relayName"><a href="http://www.openstreetmap.org/?mlon={{ relay.geoip|longitude }}&mlat={{ relay.geoip|latitude }}&zoom=6"<img border=0 src="static/img/flags/{{ relay.geoip|country|lower }}.gif" alt={{ relay.geoip|country }} title="{{ relay.geoip|country }}: {{ relay.geoip|latitude }}, {{ relay.geoip|longitude }}"></a></td>
 			<!-- Note: sorttable_customkey="[[COUNTRY_PREFIX]]" -->
             <td id="col_relayName"> 
                 {% if "Named" in currentColumns %}
