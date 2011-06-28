@@ -16,14 +16,12 @@ def kilobytes_ps(bytes_ps):
     @rtype: C{int}
     @return: The bandwidth value in kbps.
     """
-
     # As statusapp.views.details is written now, this value can
     # be None or an empty string sometimes.
     if (bytes_ps == '' or bytes_ps is None):
         return 0
     else:
         return int(bytes_ps) / 1024
-
 
 @register.filter
 def days(seconds):
@@ -35,7 +33,6 @@ def days(seconds):
     @rtype: C{int}
     @return: The duration in days.
     """
-
     # As statusapp.views.details is written now, this value can
     # be None or an empty string sometimes.
     if (seconds == '' or seconds is None):
@@ -45,9 +42,9 @@ def days(seconds):
 
 
 @register.filter
-def key(d, key_name):
-    return d[key_name]
-
+def getcountry(location):
+    #the location returned contains the country and the coordinates.
+    return location.split(',')[0][1:3]
 
 @register.filter
 def percent(a, b):
@@ -63,7 +60,6 @@ def percent(a, b):
     """
     return '%0.2f%%' % (100.0 * a / b)
 
-
 @register.filter
 def country(geoip):
     """
@@ -77,7 +73,6 @@ def country(geoip):
         C{geoip}.
     """
     return str(geoip).strip('()').split(',')[0].lower()
-
 
 @register.filter
 def latitude(geoip):
@@ -105,3 +100,7 @@ def longitude(geoip):
     @return: The longitude associated with C{geoip}.
     """
     return str(geoip).strip('()').split(',')[2]
+
+@register.filter
+def key(d, key_name):
+    return d[key_name]

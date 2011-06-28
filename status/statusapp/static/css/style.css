@@ -315,7 +315,7 @@ table.bottomTables1 {
 }
 
 table#sortRouterListing {
-    font-size: 19px;
+    font-size: 18px;
     width:auto;
     padding: 10px;
     border-spacing: 3px;
@@ -328,7 +328,9 @@ select#sortRouterListing {
 }
 
 input#sortRouterListing {
+    width: 100%;
     background-color: #95E4AF;
+    width: 100%
 }
 
 input#sortRouterListing_Button {

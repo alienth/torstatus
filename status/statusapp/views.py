@@ -5,17 +5,28 @@ Django is idiosyncratic in that it names controllers 'views'; models
 are still models and views are called templates. This module contains a
 single controller for each page type.
 """
+# General python import statements ------------------------------------
+import subprocess
 import time
 import datetime
 import csv
+
+# Django-specific import statements -----------------------------------
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpRequest, Http404
 from django.db import connection
-from django.views.decorators.cache import cache_page
 from django.db.models import Max, Sum
-from statusapp.models import Statusentry, Descriptor, Bwhist, Geoipdb, \
-        TotalBandwidth
+
+# Matplotlib specific import statements -------------------------------
+import matplotlib
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
+
+# TorStatus specific import statements --------------------------------
+from statusapp.models import Statusentry, Descriptor, Bwhist,\
+        Geoipdb, TotalBandwidth
 from custom.aggregate import CountCase
+
 
 # TODO: get rid of javascript sorting: pass another argument
 # to this view function and sort the table accordingly.
@@ -165,7 +176,6 @@ def index(request):
                        'queryOptions': queryOptions}
     return render_to_response('index.html', template_values)
 
-
 def details(request, fingerprint):
     """
     Supply the L{Statusentry} and L{Geoipdb} objects associated with a
@@ -188,7 +198,41 @@ def details(request, fingerprint):
 
     template_values = {'relay': statusentry}
 
+    last_va = Statusentry.objects.aggregate(last=Max('validafter'))['last']
+    a = Statusentry.objects.filter(
+            validafter=last_va).extra(select={
+            'geoip': 'geoip_lookup(address)'})\
+            .order_by('nickname')
+    entry = a.filter(fingerprint = fingerprint).order_by('validafter')[0]
+    descriptor = entry.descriptorid
+    template_values = {'descriptor': descriptor, 'statusentry': entry}
     return render_to_response('details.html', template_values)
+
+
+def whois(request, address):
+    """
+    Get WHOIS information for a given IP address.
+
+    @see: U{http://docs.python.org/library/subprocess.html}
+
+    @type address: C{string}
+    @param address: The IP address to gather WHOIS information for.
+    @rtype: HttpResponse
+    @return: The WHOIS information of the L{address} as an HttpResponse.
+    """
+    if not _is_ipaddress(address):
+        error_msg = 'Unparsable IP address supplied.'
+        template_values = {'whois': error_msg, 'address': address}
+        return render_to_response('whois.html', template_values)
+
+    proc = subprocess.Popen(["whois %s" % address],
+                              stdout=subprocess.PIPE,
+                              shell=True)
+
+    whois, err = proc.communicate()
+
+    template_values = {'whois': whois, 'address': address}
+    return render_to_response('whois.html', template_values)
 
 
 def readhist(request, fingerprint):
@@ -546,19 +590,240 @@ def exitnodequery(request):
     return render_to_response('nodequery.html', template_values)
 
 
-def csv_current_results(request):
-    # TODO
-    """
-    """
-    response = HttpResponse(mimetype='text/csv')
-    response['Content-Disposition'] = 'attachment; filename=test.csv'
+def current_results_csv(request):
 
-    # Table is undefined now, but it should be what is returned by the
-    # query.
+    currentColumns = []
+    if not ('currentColumns' in request.session):
+        currentColumns = ["Country Code", "Uptime", "ORPort", "DirPort",
+                          "IP", "Exit", "Authority", "Fast", "Guard",
+                          "Stable", "Bandwidth", "V2Dir", "Platform",
+                          "BadExit", "Named"]
+        request.session['currentColumns'] = currentColumns
+    else:
+        currentColumns = request.session['currentColumns']
+
+        currentColumns.remove("Hostname")
+        currentColumns.remove("Valid")
+        currentColumns.remove("Running")
+        currentColumns.remove("Hibernating")
+        currentColumns.remove("Named")
+        currentColumns.append("Nickname")
+
+    last_va = Statusentry.objects.aggregate(
+            last=Max('validafter'))['last']
+    a = Statusentry.objects.filter(
+            validafter=last_va).extra(select={
+            'geoip': 'geoip_lookup(address)'})\
+            .order_by('nickname')
+
+    #MIGHT WORKS BUT DOESN'T SORT BY CERTAIN PARAMATERS SUCH AS COUNTRY
+    #if 'sortListings' in request.GET:
+    #    a = Statusentry.objects.filter(
+    #        validafter=last_va).extra(select={
+    #        'geoip': 'geoip_lookup(address)'})\
+    #        .order_by(request.GET['sortListings'])
+    #else:
+    #    a = Statusentry.objects.filter(
+    #        validafter=last_va).extra(select={
+    #        'geoip': 'geoip_lookup(address)'})\
+    #        .order_by('nickname')
+
+    #############################################################
+    queryOptions = {}
+    if (request.GET):
+        if ('resetQuery' in request.GET):
+            if ('queryOptions' in request.session):
+                del request.session['queryOptions']
+        else:
+            queryOptions = request.GET
+            request.session['queryOptions'] = queryOptions
+    if (not queryOptions and 'queryOptions' in request.session):
+            queryOptions = request.session['queryOptions']
+
+    if queryOptions:
+        if queryOptions['isauthority'] == 'yes':
+            a = a.filter(isauthority=1)
+        elif queryOptions['isauthority'] == 'no':
+            a = a.filter(isauthority=0)
+        if queryOptions['isbaddirectory'] == 'yes':
+            a = a.filter(isbaddirectory=1)
+        elif queryOptions['isbaddirectory'] == 'no':
+            a = a.filter(isbaddirectory=0)
+        if queryOptions['isbadexit'] == 'yes':
+            a = a.filter(isbadexit=1)
+        elif queryOptions['isbadexit'] == 'no':
+            a = a.filter(isbadexit=0)
+        if queryOptions['isexit'] == 'yes':
+            a = a.filter(isexit=1)
+        elif queryOptions['isexit'] == 'no':
+            a = a.filter(isexit=0)
+        '''
+        if queryOptions['ishibernating'] == 'yes':
+            a = a.filter(ishibernating=1)
+        elif queryOptions['ishibernating'] == 'no':
+            a = a.filter(ishibernating=0)
+        '''
+        if queryOptions['isnamed'] == 'yes':
+            a = a.filter(isnamed=1)
+        elif queryOptions['isnamed'] == 'no':
+            a = a.filter(isnamed=0)
+        if queryOptions['isstable'] == 'yes':
+            a = a.filter(isstable=1)
+        elif queryOptions['isstable'] == 'no':
+            a = a.filter(isstable=0)
+        if queryOptions['isrunning'] == 'yes':
+            a = a.filter(isrunning=1)
+        elif queryOptions['isrunning'] == 'no':
+            a = a.filter(isrunning=0)
+        if queryOptions['isvalid'] == 'yes':
+            a = a.filter(isvalid=1)
+        elif queryOptions['isvalid'] == 'no':
+            a = a.filter(isvalid=0)
+        if queryOptions['isv2dir'] == 'yes':
+            a = a.filter(isv2dir=1)
+        elif queryOptions['isv2dir'] == 'no':
+            a = a.filter(isv2dir=0)
+    #############################################################
+
+
+    #Create the HttpResponse object with the appropriate CSV header.
+    response = HttpResponse(mimetype='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=current_results.csv'
+
+    ########################################################
+    #
+    #   We need to check for which columns are being searched for and
+    #   get the data from each one into a dictionary.
+    #
+
+    rows = {}
+    headers = {}
+    for column in currentColumns:
+        rows[column] = []
+
+    for entry in a:
+        rows["Nickname"].append(entry.nickname)
+
+    if "Country Code" in currentColumns:
+        for entry in a:
+            rows["Country Code"].append(entry.geoip.split(',')[0][1:3])
+
+    if "Bandwidth" in currentColumns:
+        for entry in a:
+            rows["Bandwidth"].append(entry.descriptorid.bandwidthobserved)
+
+    if "Uptime" in currentColumns:
+        for entry in a:
+            rows["Uptime"].append(entry.descriptorid.uptime)
+
+    if "IP" in currentColumns:
+        for entry in a:
+            rows["IP"].append(entry.address)
+
+    if "Fingerprint" in currentColumns:
+        for entry in a:
+            rows["Fingerprint"].append(entry.fingerprint)
+
+    if "LastDescriptorPublished" in currentColumns:
+        for entry in a:
+            rows["LastDescriptorPublished"].append(entry.published)
+
+    if "Contact" in currentColumns:
+        for entry in a:
+            rows["Contact"].append(_contact(entry.descriptorid.rawdesc))
+
+    if "BadDir" in currentColumns:
+        for entry in a:
+            rows["BadDir"].append(entry.isbaddirectory)
+
+    if "DirPort" in currentColumns:
+        for entry in a:
+            rows["DirPort"].append(entry.dirport)
+
+    if "Exit" in currentColumns:
+        for entry in a:
+            rows["Exit"].append(entry.isexit)
+
+    if "Authority" in currentColumns:
+        for entry in a:
+            rows["Authority"].append(entry.isauthority)
+
+    if "Fast" in currentColumns:
+        for entry in a:
+            rows["Fast"].append(entry.isfast)
+
+    if "Guard" in currentColumns:
+        for entry in a:
+            rows["Guard"].append(entry.isguard)
+
+    if "V2Dir" in currentColumns:
+        for entry in a:
+            rows["V2Dir"].append(entry.isv2dir)
+
+    if "Platform" in currentColumns:
+        for entry in a:
+            rows["Platform"].append(entry.descriptorid.platform)
+
+    if "Stable" in currentColumns:
+        for entry in a:
+            rows["Stable"].append(entry.isstable)
+
+    if "ORPort" in currentColumns:
+        for entry in a:
+            rows["ORPort"].append(entry.orport)
+
+    if "BadExit" in currentColumns:
+        for entry in a:
+            rows["BadExit"].append(entry.isbadexit)
+
+    fieldnames = currentColumns
     writer = csv.writer(response)
-    writer.writerow(['variables', 'go', 'here'])
-    for row in table:
-        writer.writerow(row)
+    writer = csv.DictWriter(response, fieldnames=fieldnames)
+    for n in fieldnames:
+        headers[n] = n
+    writer.writerow(headers)
+    for i in range(0, len(rows[currentColumns[0]])):
+        dict_row = {}
+        for column in currentColumns:
+            dict_row[column] = rows[column][i]
+        writer.writerow(dict_row)
+    return response
+
+
+def all_ip_csv(request):
+
+    last_va = Statusentry.objects.aggregate(last=Max('validafter'))['last']
+    a = Statusentry.objects.filter(validafter=last_va)
+
+    IPs = []
+    for entry in a:
+        IPs.append(entry.address)
+
+    response = HttpResponse(mimetype= 'text/csv')
+    response['Content-Disposition'] = 'attachment; filename=all_ips_csv'
+
+    writer = csv.writer(response)
+    for ip in IPs:
+        writer.writerow([ip])
+    return response
+
+
+def all_exit_csv(request):
+
+    last_va = Statusentry.objects.aggregate(last=Max('validafter'))['last']
+    all_entries = Statusentry.objects.filter(validafter=last_va)
+    a = all_entries.filter(isexit=True)
+    exit_IPs = []
+
+    for entry in a:
+        exit_IPs.append(entry.address)
+
+    response = HttpResponse(mimetype='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=all_exit_nodes.csv'
+
+    writer = csv.writer(response)
+    for ip in exit_IPs:
+        writer.writerow([ip])
 
     return response
 
@@ -1421,3 +1686,22 @@ def _get_if_exists(request, title):
         return request.GET[title].strip()
     else:
         return ""
+
+
+def _contact(rawdesc):
+    """
+    Get the contact information of a relay from its raw descriptor.
+
+    It is possible that a relay will not publish any contact information.
+    In this case, "No contact information given" is returned.
+
+    @type rawdesc: C{string} or C{buffer}
+    @param rawdesc: The raw descriptor of a relay.
+    @rtype: C{string}
+    @return: The contact information of the relay.
+    """
+
+    for line in str(rawdesc).split("\n"):
+        if (line.startswith("contact")):
+            return line[8:]
+    return "No contact information given"
