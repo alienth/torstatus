@@ -74,7 +74,6 @@ def onion_key(rawdesc):
 
     return "\n".join(raw_list[(i + 1):(i + 6)])
 
-
 @register.filter
 def signing_key(rawdesc):
     """
@@ -111,7 +110,6 @@ def exitinfo(rawdesc):
             policy.append(line)
     return policy
 
-
 @register.filter
 def contact(rawdesc):
     """
@@ -125,7 +123,6 @@ def contact(rawdesc):
     @rtype: C{string}
     @return: The contact information of the relay.
     """
-
     for line in str(rawdesc).split("\n"):
         if (line.startswith("contact")):
             return line[8:]

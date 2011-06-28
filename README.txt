@@ -1,19 +1,7 @@
-TorStatus README
-================
-.. Updated 2011-06-23 11:00:00 GMT-5
-.. This file is written in reStructuredText.
+If you are somebody else, we don't have instructions for how to setup such a
+database quite yet; check back in a few weeks.
 
-Installation
-------------
-For help installing and running TorStatus, consult doc/INSTALL.
-
-Generating the API
-------------------
-To generate the TorStatus API, install epydoc (available at
-http://epydoc.sourceforge.net/installing.html) and run:
-
-    $ epydoc . --config config/epydoc_config.py
-
+=======
 Design Documentation
 --------------------
 Design documentation, like this README, is written in reStructuredText.

@@ -286,7 +286,7 @@ class Statusentry(models.Model):
     descriptor = models.CharField(max_length=40)
     descriptorid = models.ForeignKey(Descriptor, db_column='descriptorid')
     published = models.DateTimeField()
-    address = models.CharField(max_length=15)
+    address = models.IPAddressField()
     orport = models.IntegerField()
     dirport = models.IntegerField()
     isauthority = models.BooleanField()
