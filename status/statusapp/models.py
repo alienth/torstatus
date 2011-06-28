@@ -89,7 +89,7 @@ class Descriptor(models.Model):
     descriptorid = models.IntegerField(primary_key=True)
     descriptor = models.CharField(max_length=40, primary_key=True)
     nickname = models.CharField(max_length=19)
-    address = models.CharField(max_length=15)
+    address = models.IPAddressField()
     orport = models.IntegerField()
     dirport = models.IntegerField()
     fingerprint = models.CharField(max_length=40)
@@ -317,10 +317,6 @@ class Statusentry(models.Model):
 
     def __unicode__(self):
         return str(self.validafter) + ": " + self.fingerprint
-    def __eq__(self, other):
-        return self.fingerprint == other.fingerprint
-    def __hash__(self):
-        return hash(self.fingerprint)
 
     def __eq__(self, other):
         return self.fingerprint == other.fingerprint
@@ -709,7 +705,6 @@ class UserStats(models.Model):
 
 
 class RelayStatusesPerDay(models.Model):
-    # TODO: What is count used for?
     """
     Model for the helper table which is used to update the other tables.
 
@@ -717,7 +712,7 @@ class RelayStatusesPerDay(models.Model):
     @ivar date: The date that corresponds to the L{RelayStatusesPerDay}
         object.
     @type count: IntegerField (C{datetime})
-    @ivar count:
+    @ivar count: The number of relay statuses per day.
     """
     date = models.DateField(primary_key=True)
     count = models.IntegerField()
@@ -857,7 +852,7 @@ class RelaysMonthlySnapshots(models.Model):
     validafter = models.DateTimeField(primary_key=True)
     fingerprint = models.CharField(max_length=40)
     nickname = models.CharField(max_length=19)
-    address = models.CharField(max_length=15)
+    address = models.IPAddressField()
     country = models.CharField(max_length=2)
     latitude = models.DecimalField(max_digits=7, decimal_places=4)
     longitude = models.DecimalField(max_digits=7, decimal_places=4)

@@ -21,36 +21,114 @@ from custom.aggregate import CountCase
 # to this view function and sort the table accordingly.
 #@cache_page(60 * 15) # Cache is turned off for development,
                       # but it works.
+
+
 def index(request):
     """
     Supply a dictionary to the index.html template consisting of a list
     of active relays.
+
+    Currently, an "active relay" is a relay that has a status entry
+    that was published in the last consensus.
 
     @rtype: HttpRequest
     @return: A dictionary consisting of information about each router
         in the network as well as aggregate information about the
         network itself.
     """
-        
+    # INITIAL QUERY ---------------------------------------------------
+    # -----------------------------------------------------------------
+    # Get the initial query and necessary aggregate values for the
+    # routers in the last consensus.
     last_va = Statusentry.objects.aggregate(\
             last=Max('validafter'))['last']
 
-    # This snippet gets relays active in the last 24 hours, but the
-    # current TorStatus implementation only gets relays in the last
-    # published consensus.
-    """
-    day_statusentries = Statusentry.objects.filter(\
-            validafter__gte=(last_va - datetime.timedelta(days=1)))\
-            .order_by('-validafter')
-    recent_entries = list(set(day_statusentries))
-    """
-
-    # This is closer to what the current TorStatus implementation does.
-    # It might not be good design, though.
     statusentries = Statusentry.objects.filter(validafter=last_va)\
             .extra(select={'geoip':
             'geoip_lookup(address)'}).order_by('nickname')
 
+    num_routers = statusentries.count()
+
+    bw_total = TotalBandwidth.objects.all()\
+            .order_by('-date')[:1][0].bwobserved
+
+    total_counts = statusentries.aggregate(\
+            bandwidthavg=Sum('descriptorid__bandwidthavg'),
+            bandwidthburst=Sum('descriptorid__bandwidthburst'),
+            bandwidthobserved=Sum('descriptorid__bandwidthobserved'))
+
+
+    # USER QUERY MODIFICATIONS ----------------------------------------
+    # -----------------------------------------------------------------
+    currentColumns = []
+    if not ('currentColumns' in request.session):
+        currentColumns = _currentColumns_INIT()
+        request.session['currentColumns'] = currentColumns
+    else:
+        currentColumns = request.session['currentColumns']
+
+    queryOptions = {}
+    if (request.GET):
+        if ('resetQuery' in request.GET):
+            if ('queryOptions' in request.session):
+                del request.session['queryOptions']
+        else:
+            queryOptions = request.GET
+            request.session['queryOptions'] = queryOptions
+    if (not queryOptions and 'queryOptions' in request.session):
+            queryOptions = request.session['queryOptions']
+
+    if queryOptions:
+        if queryOptions['isauthority'] == 'yes':
+            statusentries = statusentries.filter(isauthority=1)
+        elif queryOptions['isauthority'] == 'no':
+            statusentries = statusentries.filter(isauthority=0)
+        if queryOptions['isbaddirectory'] == 'yes':
+            statusentries = statusentries.filter(isbaddirectory=1)
+        elif queryOptions['isbaddirectory'] == 'no':
+            statusentries = statusentries.filter(isbaddirectory=0)
+        if queryOptions['isbadexit'] == 'yes':
+            statusentries = statusentries.filter(isbadexit=1)
+        elif queryOptions['isbadexit'] == 'no':
+            statusentries = statusentries.filter(isbadexit=0)
+        if queryOptions['isexit'] == 'yes':
+            statusentries = statusentries.filter(isexit=1)
+        elif queryOptions['isexit'] == 'no':
+            statusentries = statusentries.filter(isexit=0)
+        if queryOptions['isguard'] == 'yes':
+            statusentries = statusentries.filter(isguard=1)
+        elif queryOptions['isguard'] == 'no':
+            statusentries = statusentries.filter(isguard=0)
+        '''
+        if queryOptions['ishibernating'] == 'yes':
+            statusentries = statusentries.filter(ishibernating=1)
+        elif queryOptions['ishibernating'] == 'no':
+            statusentries = statusentries.filter(ishibernating=0)
+        '''
+        if queryOptions['isnamed'] == 'yes':
+            statusentries = statusentries.filter(isnamed=1)
+        elif queryOptions['isnamed'] == 'no':
+            statusentries = statusentries.filter(isnamed=0)
+        if queryOptions['isstable'] == 'yes':
+            statusentries = statusentries.filter(isstable=1)
+        elif queryOptions['isstable'] == 'no':
+            statusentries = statusentries.filter(isstable=0)
+        if queryOptions['isrunning'] == 'yes':
+            statusentries = statusentries.filter(isrunning=1)
+        elif queryOptions['isrunning'] == 'no':
+            statusentries = statusentries.filter(isrunning=0)
+        if queryOptions['isvalid'] == 'yes':
+            statusentries = statusentries.filter(isvalid=1)
+        elif queryOptions['isvalid'] == 'no':
+            statusentries = statusentries.filter(isvalid=0)
+        if queryOptions['isv2dir'] == 'yes':
+            statusentries = statusentries.filter(isv2dir=1)
+        elif queryOptions['isv2dir'] == 'no':
+            statusentries = statusentries.filter(isv2dir=0)
+
+
+    # USER QUERY AGGREGATE STATISTICS ---------------------------------
+    # -----------------------------------------------------------------
     counts = statusentries.aggregate(
             isauthority=CountCase('isauthority', when=True),
             isbaddirectory=CountCase('isbaddirectory', when=True),
@@ -67,85 +145,22 @@ def index(request):
             bandwidthburst=Sum('descriptorid__bandwidthburst'),
             bandwidthobserved=Sum('descriptorid__bandwidthobserved'))
 
-    total_bw = TotalBandwidth.objects.all()\
+    bw_disp = TotalBandwidth.objects.all()\
             .order_by('-date')[:1][0].bwobserved
 
-    num_routers = statusentries.count()
-    
-    #############################################################
-    
-    currentColumns = []
-    if not ('currentColumns' in request.session):
-        currentColumns = _currentColumns_INIT()
-        request.session['currentColumns'] = currentColumns
-    else:
-        currentColumns = request.session['currentColumns']
-    
-    queryOptions = {}
-    if (request.GET):
-        if ('resetQuery' in request.GET):
-            if ('queryOptions' in request.session):
-                del request.session['queryOptions']
-        else:
-            queryOptions = request.GET    
-            request.session['queryOptions'] = queryOptions    
-    if (not queryOptions and 'queryOptions' in request.session):
-            queryOptions = request.session['queryOptions']
-
-    if queryOptions:
-        if queryOptions['isauthority'] == 'yes':
-            statusentries = statusentries.filter(isauthority=1)
-        elif queryOptions['isauthority'] == 'no': 
-            statusentries = statusentries.filter(isauthority=0)
-        if queryOptions['isbaddirectory'] == 'yes':
-            statusentries = statusentries.filter(isbaddirectory=1)
-        elif queryOptions['isbaddirectory'] == 'no':  
-            statusentries = statusentries.filter(isbaddirectory=0)
-        if queryOptions['isbadexit'] == 'yes':
-            statusentries = statusentries.filter(isbadexit=1)
-        elif queryOptions['isbadexit'] == 'no': 
-            statusentries = statusentries.filter(isbadexit=0)
-        if queryOptions['isexit'] == 'yes':
-            statusentries = statusentries.filter(isexit=1)
-        elif queryOptions['isexit'] == 'no': 
-            statusentries = statusentries.filter(isexit=0)
-        if queryOptions['isguard'] == 'yes':
-            statusentries = statusentries.filter(isguard=1)
-        elif queryOptions['isguard'] == 'no':
-            statusentries = statusentries.filter(isguard=1)
-        '''
-        if queryOptions['ishibernating'] == 'yes':
-            statusentries = statusentries.filter(ishibernating=1)
-        elif queryOptions['ishibernating'] == 'no': 
-            statusentries = statusentries.filter(ishibernating=0)
-        '''
-        if queryOptions['isnamed'] == 'yes':
-            statusentries = statusentries.filter(isnamed=1)
-        elif queryOptions['isnamed'] == 'no': 
-            statusentries = statusentries.filter(isnamed=0)
-        if queryOptions['isstable'] == 'yes':
-            statusentries = statusentries.filter(isstable=1)
-        elif queryOptions['isstable'] == 'no': 
-            statusentries = statusentries.filter(isstable=0)
-        if queryOptions['isrunning'] == 'yes':
-            statusentries = statusentries.filter(isrunning=1)
-        elif queryOptions['isrunning'] == 'no': 
-            statusentries = statusentries.filter(isrunning=0)
-        if queryOptions['isvalid'] == 'yes':
-            statusentries = statusentries.filter(isvalid=1)
-        elif queryOptions['isvalid'] == 'no': 
-            statusentries = statusentries.filter(isvalid=0)
-        if queryOptions['isv2dir'] == 'yes':
-            statusentries = statusentries.filter(isv2dir=1)
-        elif queryOptions['isv2dir'] == 'no': 
-            statusentries = statusentries.filter(isv2dir=0)
-    #############################################################
-    
+    in_query = statusentries.count()
     client_address = request.META['REMOTE_ADDR']
-    template_values = {'relay_list': statusentries, 'client_address':
-            client_address, 'num_routers': num_routers, 'exp_time': 900,
-            'counts': counts, 'total_bw': total_bw, 'currentColumns': currentColumns, 
-            'queryOptions': queryOptions}
+    template_values = {'relay_list': statusentries,
+                       'client_address': client_address,
+                       'num_routers': num_routers,
+                       'in_query': in_query,
+                       'exp_time': 900,
+                       'counts': counts,
+                       'total_counts': total_counts,
+                       'bw_disp': bw_disp,
+                       'bw_total': bw_total,
+                       'currentColumns': currentColumns,
+                       'queryOptions': queryOptions}
     return render_to_response('index.html', template_values)
 
 
@@ -169,7 +184,7 @@ def details(request, fingerprint):
             .extra(select={'geoip': 'geoip_lookup(address)'})\
             .order_by('-validafter')[:1][0]
 
-    template_values = {'relay': statusentry} #'geoip': geoip}
+    template_values = {'relay': statusentry}
 
     return render_to_response('details.html', template_values)
 
@@ -194,7 +209,6 @@ def readhist(request, fingerprint):
     from matplotlib.backends.backend_agg import \
             FigureCanvasAgg as FigureCanvas
     from matplotlib.figure import Figure
-    from matplotlib.dates import DateFormatter
 
     # Draw the graph such that the labels and title are visible,
     # and remove excess whitespace.
@@ -243,12 +257,13 @@ def readhist(request, fingerprint):
             frameon=False)
     ax = fig.add_subplot(111)
 
-    # Return bytes per seconds, not total bandwidth for 15 minutes.
+    # Return bytes per second, not total bandwidth for 15 minutes.
     bps = map(lambda x: x / (15 * 60), tr_list)
     times = []
     for i in range(0, 104, 8):
         to_add_date = start_time + datetime.timedelta(minutes=(15 * i))
-        to_add_str = str(to_add_date.hour) + ":" + str(to_add_date.minute)
+        to_add_str = "%0*d:%0*d" % (2, to_add_date.hour,
+                                    2, to_add_date.minute)
         times.append(to_add_str)
 
     dates = range(96)
@@ -300,7 +315,6 @@ def writehist(request, fingerprint):
     from matplotlib.backends.backend_agg import \
             FigureCanvasAgg as FigureCanvas
     from matplotlib.figure import Figure
-    from matplotlib.dates import DateFormatter
 
     # Draw the graph such that the labels and title are visible,
     # and remove excess whitespace.
@@ -349,13 +363,14 @@ def writehist(request, fingerprint):
             frameon=False)
     ax = fig.add_subplot(111)
 
-    # Return bytes per seconds, not total bandwidth for 15 minutes.
+    # Return bytes per second, not total bandwidth for 15 minutes.
     bps = map(lambda x: x / (15 * 60), tr_list)
 
     times = []
     for i in range(0, 104, 8):
         to_add_date = start_time + datetime.timedelta(minutes=(15 * i))
-        to_add_str = str(to_add_date.hour) + ":" + str(to_add_date.minute)
+        to_add_str = "%0*d:%0*d" % (2, to_add_date.hour,
+                                    2, to_add_date.minute)
         times.append(to_add_str)
 
     dates = range(96)
@@ -531,13 +546,249 @@ def csv_current_results(request):
 
     return response
 
-def networkstatisticgraphs(request):
-    #TODO
-    # For now, this function is just a placeholder.
 
-    variables = "TEMP STRING"
-    template_values = {'variables': variables}
-    return render_to_response('statisticgraphs.html', template_values)
+def networkstatisticgraphs(request):
+    """
+    Render an HTML template to response.
+    """
+    # As this page is written now, each graph does it's own querying.
+    # Either this structure should be fixed or the queries should be
+    # cached.
+    return render_to_response('statisticgraphs.html')
+
+def bycountrycode(request):
+    """
+    Return a graph representing the number of routers by country code.
+
+    @rtype: HttpResponse
+    @return: A graph representing the number of routers by country
+        code as an HttpResponse object.
+    """
+    import matplotlib
+    from matplotlib.backends.backend_agg import \
+            FigureCanvasAgg as FigureCanvas
+    from matplotlib.figure import Figure
+
+    # Draw the graph such that the labels and title are visible,
+    # and remove excess whitespace.
+    matplotlib.rcParams['figure.subplot.left'] = 0.04
+    matplotlib.rcParams['figure.subplot.right'] = 0.99
+    matplotlib.rcParams['figure.subplot.top'] = 0.95
+    matplotlib.rcParams['figure.subplot.bottom'] = 0.04
+
+    last_va = Statusentry.objects.aggregate(\
+            last=Max('validafter'))['last']
+
+    statusentries = Statusentry.objects.filter(\
+            validafter=last_va)\
+            .extra(select={'geoip': 'geoip_lookup(address)'})
+
+    country_map = {}
+
+    for entry in statusentries:
+        country = entry.geoip[1:3]
+        if country in country_map:
+            country_map[country] += 1
+        else:
+            country_map[country] = 1
+
+    keys = sorted(country_map)
+    num_params = len(keys)
+    xs = range(num_params)
+    ys = [country_map[key] for key in keys]
+
+    x_index = matplotlib.numpy.arange(num_params)
+
+    fig = Figure(facecolor='white', edgecolor='black', figsize=(12, 6),
+            frameon=False)
+    ax = fig.add_subplot(111)
+
+    bar_width = 0.5
+    ax.bar(xs, ys, color='#66CD00', width=bar_width)
+
+    # Label the height of each bar.
+    for i in range(num_params):
+        ax.text(xs[i] + (bar_width / 2.0), ys[i] + 3, str(ys[i]),
+                fontsize='9', horizontalalignment='center')
+
+    ax.set_xticks(x_index + (bar_width / 2.0))
+    ax.set_xticklabels(keys, fontsize='8')
+
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label1.set_fontsize('9')
+
+    ax.set_title("Number of Routers by Country Code",
+            fontsize='12')
+
+    canvas = FigureCanvas(fig)
+    response = HttpResponse(content_type='image/png')
+    canvas.print_png(response, ha="center")
+    return response
+
+
+def exitbycountrycode(request):
+    """
+    Return a graph representing the number of exit routers
+    by country code.
+
+    @rtype: HttpResponse
+    @return: A graph representing the number of exit routers by country
+        code as an HttpResponse object.
+    """
+    import matplotlib
+    from matplotlib.backends.backend_agg import \
+            FigureCanvasAgg as FigureCanvas
+    from matplotlib.figure import Figure
+
+    # Draw the graph such that the labels and title are visible,
+    # and remove excess whitespace.
+    matplotlib.rcParams['figure.subplot.left'] = 0.04
+    matplotlib.rcParams['figure.subplot.right'] = 0.99
+    matplotlib.rcParams['figure.subplot.top'] = 0.95
+    matplotlib.rcParams['figure.subplot.bottom'] = 0.04
+
+    last_va = Statusentry.objects.aggregate(\
+            last=Max('validafter'))['last']
+
+    statusentries = Statusentry.objects.filter(\
+            validafter=last_va,
+            isexit=1)\
+            .extra(select={'geoip': 'geoip_lookup(address)'})
+
+    country_map = {}
+
+    for entry in statusentries:
+        country = entry.geoip[1:3]
+        if country in country_map:
+            country_map[country] += 1
+        else:
+            country_map[country] = 1
+
+    keys = sorted(country_map)
+    num_params = len(keys)
+    xs = range(num_params)
+    ys = [country_map[key] for key in keys]
+
+    x_index = matplotlib.numpy.arange(num_params)
+
+    fig = Figure(facecolor='white', edgecolor='black', figsize=(12, 6),
+            frameon=False)
+    ax = fig.add_subplot(111)
+
+    bar_width = 0.5
+    ax.bar(xs, ys, color='#66CD00', width=bar_width)
+
+    # Label the height of each bar.
+    for i in range(num_params):
+        ax.text(xs[i] + (bar_width / 2.0), ys[i] + 2, str(ys[i]),
+                fontsize='9', horizontalalignment='center')
+
+    ax.set_xticks(x_index + (bar_width / 2.0))
+    ax.set_xticklabels(keys, fontsize='8')
+
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label1.set_fontsize('9')
+
+    ax.set_title("Number of Exit Routers by Country Code",
+            fontsize='12')
+
+    canvas = FigureCanvas(fig)
+    response = HttpResponse(content_type='image/png')
+    canvas.print_png(response, ha="center")
+    return response
+
+
+def bytimerunning(request):
+    return HttpResponse("don't break everything")
+
+
+def byobservedbandwidth(request):
+    return HttpResponse("don't break everything")
+
+
+def byplatform(request):
+    return HttpResponse("don't break everything")
+
+
+def aggregatesummary(request):
+    """
+    Return a graph representing an aggregate summary of the routers on
+    the network as an HttpResponse object.
+
+    @rtype: HttpResponse
+    @return: A graph representing an aggregate summary of the routers on
+        the Tor network.
+    """
+    import matplotlib
+    from matplotlib.backends.backend_agg import \
+            FigureCanvasAgg as FigureCanvas
+    from matplotlib.figure import Figure
+
+    # Draw the graph such that the labels and title are visible,
+    # and remove excess whitespace.
+    matplotlib.rcParams['figure.subplot.left'] = 0.04
+    matplotlib.rcParams['figure.subplot.right'] = 0.99
+    matplotlib.rcParams['figure.subplot.top'] = 0.95
+    matplotlib.rcParams['figure.subplot.bottom'] = 0.04
+
+    last_va = Statusentry.objects.aggregate(\
+            last=Max('validafter'))['last']
+
+    statusentries = Statusentry.objects.filter(validafter=last_va)
+
+    total = statusentries.count()
+    counts = Statusentry.objects.filter(validafter=last_va).aggregate(\
+            isauthority=CountCase('isauthority', when=True),
+            isbaddirectory=CountCase('isbaddirectory', when=True),
+            isbadexit=CountCase('isbadexit', when=True),
+            isexit=CountCase('isexit', when=True),
+            isfast=CountCase('isfast', when=True),
+            isguard=CountCase('isguard', when=True),
+            isnamed=CountCase('isnamed', when=True),
+            isstable=CountCase('isstable', when=True),
+            isrunning=CountCase('isrunning', when=True),
+            isvalid=CountCase('isvalid', when=True),
+            isv2dir=CountCase('isv2dir', when=True))
+
+    keys = ['isauthority', 'isbaddirectory', 'isbadexit', 'isexit',
+            'isfast', 'isguard', 'isnamed', 'isstable', 'isrunning',
+            'isvalid', 'isv2dir']
+    labels = ['Total', 'Authority', 'BadDirectory', 'BadExit', 'Exit',
+            'Fast', 'Guard', 'Named', 'Stable', 'Running', 'Valid',
+            'V2Dir']
+    num_params = len(labels)
+    xs = range(num_params)
+    x_index = matplotlib.numpy.arange(num_params)
+
+    ys = []
+    ys.append(total)
+    for count in keys:
+        ys.append(counts[count])
+
+    fig = Figure(facecolor='white', edgecolor='black', figsize=(12, 6),
+            frameon=False)
+    ax = fig.add_subplot(111)
+
+    bar_width = 0.5
+    ax.bar(xs, ys, color='#66CD00', width=bar_width)
+
+    # Label the height of each bar.
+    for i in range(num_params):
+        ax.text(xs[i] + (bar_width / 2.0), ys[i] + 10, str(ys[i]),
+                fontsize='9', horizontalalignment='center')
+    ax.set_xticks(x_index + (bar_width / 2.0))
+    ax.set_xticklabels(labels, fontsize='9')
+
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label1.set_fontsize('9')
+
+    ax.set_title("Aggregate Summary -- Number of Routers Matching "
+            + "Specified Criteria", fontsize='12')
+
+    canvas = FigureCanvas(fig)
+    response = HttpResponse(content_type='image/png')
+    canvas.print_png(response, ha="center")
+    return response
 
 
 def columnpreferences(request):
@@ -554,17 +805,6 @@ def columnpreferences(request):
     @return: renders to the page the currently selected columns, the
         available columns and the previous selection.
     '''
-    #
-    #NOTE: The view is currently using sessions and it's storing the session
-    #   into a file in the folder tmp/ from the status/ folder.
-    #
-    #TODO: Give the Session ID a reasonable "life-time" - so it wouldn't stay
-    #   on the system forever (or until it is manually deleted).
-    #TODO: Integrate the array-list into the index page so it will actually
-    #   display only the desired information.
-    #TODO: Clean the code of unnecessary pieces.
-    #
-
     currentColumns = []
     availableColumns = []
     notMovableColumns = _notMovableColumns_INIT()
@@ -581,26 +821,34 @@ def columnpreferences(request):
     else:
         currentColumns = request.session['currentColumns']
         availableColumns = request.session['availableColumns']
-    
+
     columnLists = [currentColumns, availableColumns, '']
-    if ('removeColumn' in request.GET and 'selected_removeColumn' in request.GET):
-        columnLists = _buttonChoice(request, 'removeColumn', 'selected_removeColumn', \
-                                    currentColumns, availableColumns)
-    elif ('addColumn' in request.GET and 'selected_addColumn' in request.GET):
-        columnLists = _buttonChoice(request, 'addColumn', 'selected_addColumn', \
-                                    currentColumns, availableColumns)
-    elif ('upButton' in request.GET and 'selected_removeColumn' in request.GET):
-        if not(request.GET['selected_removeColumn'] in notMovableColumns):
-            columnLists = _buttonChoice(request, 'upButton', 'selected_removeColumn', \
-                                        currentColumns, availableColumns)
-    elif ('downButton' in request.GET and 'selected_removeColumn' in request.GET):
-        if not(request.GET['selected_removeColumn'] in notMovableColumns):
-            columnLists = _buttonChoice(request, 'downButton', 'selected_removeColumn', \
-                                        currentColumns, availableColumns)
-    
-    template_values = {'currentColumns': columnLists[0], 'availableColumns': columnLists[1], \
-                    'selectedEntry': columnLists[2]}
-    
+    if ('removeColumn' in request.GET and 'selected_removeColumn' \
+            in request.GET):
+        columnLists = _buttonChoice(request, 'removeColumn',
+                'selected_removeColumn', currentColumns,
+                availableColumns)
+    elif ('addColumn' in request.GET and 'selected_addColumn' \
+            in request.GET):
+        columnLists = _buttonChoice(request, 'addColumn',
+                'selected_addColumn', currentColumns, availableColumns)
+    elif ('upButton' in request.GET and 'selected_removeColumn' \
+            in request.GET):
+        if not(request.GET['selected_removeColumn'] in \
+                notMovableColumns):
+            columnLists = _buttonChoice(request, 'upButton', \
+                    'selected_removeColumn', currentColumns, availableColumns)
+    elif ('downButton' in request.GET and 'selected_removeColumn' \
+            in request.GET):
+        if not(request.GET['selected_removeColumn'] in \
+                notMovableColumns):
+            columnLists = _buttonChoice(request, 'upButton', \
+                    'selected_removeColumn', currentColumns, availableColumns)
+
+    template_values = {'currentColumns': columnLists[0],
+                       'availableColumns': columnLists[1],
+                       'selectedEntry': columnLists[2]}
+
     return render_to_response('columnpreferences.html', template_values)
 
 def _currentColumns_INIT():
@@ -619,10 +867,12 @@ def _notMovableColumns_INIT():
                         "Running", "Valid", "V2Dir", "Platform", "Hibernating"]
     return notMovableColumns
 
-def _buttonChoice(request, button, field, currentColumns, availableColumns): 
+def _buttonChoice(request, button, field, currentColumns,
+        availableColumns):
     '''
-    Helper function that manages the changes in the column preferences array-lists.
-    @see: columnpreferences
+    Helper function that manages the changes in the L{columnpreferences}
+    arrays/lists.
+
     @rtype: list(list(int), list(int), string)
     @return: columnLists
     '''
@@ -637,13 +887,15 @@ def _buttonChoice(request, button, field, currentColumns, availableColumns):
         selectionPos = currentColumns.index(selection)
         if (selectionPos > 0):
             aux = currentColumns[selectionPos - 1]
-            currentColumns[selectionPos - 1] = currentColumns[selectionPos]
+            currentColumns[selectionPos - 1] = \
+                    currentColumns[selectionPos]
             currentColumns[selectionPos] = aux
     elif (button == 'downButton'):
         selectionPos = currentColumns.index(selection)
         if (selectionPos < len(currentColumns) - 1):
             aux = currentColumns[selectionPos + 1]
-            currentColumns[selectionPos + 1] = currentColumns[selectionPos]
+            currentColumns[selectionPos + 1] = \
+                    currentColumns[selectionPos]
             currentColumns[selectionPos] = aux
     request.session['currentColumns'] = currentColumns
     request.session['availableColumns'] = availableColumns
@@ -652,6 +904,7 @@ def _buttonChoice(request, button, field, currentColumns, availableColumns):
     columnLists.append(availableColumns)
     columnLists.append(selection)
     return columnLists
+
 
 def _get_exit_policy(rawdesc):
     """
@@ -675,7 +928,8 @@ def _is_ip_in_subnet(ip, subnet):
     """
     Return True if the IP is in the subnet, return False otherwise.
 
-    This implementation uses bitwise arithmetic and operators on subnets.
+    This implementation uses bitwise arithmetic and operators on
+    subnets.
 
     >>> _is_ip_in_subnet('0.0.0.0', '0.0.0.0/8')
     True

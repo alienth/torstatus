@@ -10,8 +10,8 @@ bandwidth history graphs.
 @see: http://www.initd.org/psycopg/docs/advanced.html
     #type-casting-from-sql-to-python
 """
-
 import psycopg2
+
 
 def __none_to_zero(string):
     """
@@ -36,7 +36,8 @@ def cast_array(value, cur):
     Return the PostgreSQL array as a tuple consising of the starting
     index, ending index, and the array itself (as a python list).
 
-    >>> cast_array([13:15]={2526642,7003442,6466167}, psycopg2.connection.cursor())
+    >>> cast_array([13:15]={2526642,7003442,6466167},
+            psycopg2.connection.cursor())
     (13, 15, [2526642, 7003442, 6466167])
 
     @type value: C{string}
