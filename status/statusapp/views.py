@@ -127,7 +127,34 @@ def index(request):
             statusentries = statusentries.filter(isv2dir=1)
         elif queryOptions['isv2dir'] == 'no':
             statusentries = statusentries.filter(isv2dir=0)
-
+        
+        if queryOptions['searchValue'] != "":
+            criteriaDict = {'fingerprint': fingerprint, }
+            value = queryOptions['searchValue']
+            criteria = queryOptions['criteria']
+            logic = queryOptions['boolLogic']
+            
+            #if criteria == "
+        
+        sortOptions = ['nickname', 'fingerprint', 'geoip',
+                       'bandwidth', 'uptime', 'published',
+                       'hostname', 'address', 'orport', 'dirport',
+                       'platform', 'contact', 'isauthority', 
+                       'isbaddirectory', 'isbadexit', 'isexit',
+                       'isfast', 'isguard', 'ishibernating', 
+                       'isnamed', 'isstable', 'isrunning', 
+                       'isvalid', 'isv2dir']
+        descriptorList = ['platform', 'uptime', 'contact'] 
+        selectedOption = queryOptions['sortListings']
+        if selectedOption in sortOptions:
+            if selectedOption in descriptorList:
+                selectedOption = 'descriptorid__' + selectedOption
+            if queryOptions['sortOrder'] == 'ascending':
+                statusentries = statusentries.order_by(selectedOption)
+            elif queryOptions['sortOrder'] == 'descending':
+                statusentries = statusentries.order_by('-' + selectedOption)
+                
+        
 
     # USER QUERY AGGREGATE STATISTICS ---------------------------------
     # -----------------------------------------------------------------
