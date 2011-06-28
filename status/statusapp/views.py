@@ -44,19 +44,20 @@ def index(request):
             last=Max('validafter'))['last']
 
     statusentries = Statusentry.objects.filter(\
-            validafter=last_va)\
-            .extra(select={'geoip':
-            'geoip_lookup(statusentry.address)'}).order_by('nickname')
+                    validafter=last_va)\
+                    .extra(select={'geoip':
+                    'geoip_lookup(statusentry.address)'})\
+                    .order_by('nickname')
 
     num_routers = statusentries.count()
 
     bw_total = TotalBandwidth.objects.all()\
-            .order_by('-date')[:1][0].bwobserved
+               .order_by('-date')[:1][0].bwobserved
 
     total_counts = statusentries.aggregate(\
-            bandwidthavg=Sum('descriptorid__bandwidthavg'),
-            bandwidthburst=Sum('descriptorid__bandwidthburst'),
-            bandwidthobserved=Sum('descriptorid__bandwidthobserved'))
+                   bandwidthavg=Sum('descriptorid__bandwidthavg'),
+                   bandwidthburst=Sum('descriptorid__bandwidthburst'),
+                   bandwidthobserved=Sum('descriptorid__bandwidthobserved'))
 
 
     # USER QUERY MODIFICATIONS ----------------------------------------
@@ -131,23 +132,23 @@ def index(request):
     # USER QUERY AGGREGATE STATISTICS ---------------------------------
     # -----------------------------------------------------------------
     counts = statusentries.aggregate(
-            isauthority=CountCase('isauthority', when=True),
-            isbaddirectory=CountCase('isbaddirectory', when=True),
-            isbadexit=CountCase('isbadexit', when=True),
-            isexit=CountCase('isexit', when=True),
-            isfast=CountCase('isfast', when=True),
-            isguard=CountCase('isguard', when=True),
-            isnamed=CountCase('isnamed', when=True),
-            isstable=CountCase('isstable', when=True),
-            isrunning=CountCase('isrunning', when=True),
-            isvalid=CountCase('isvalid', when=True),
-            isv2dir=CountCase('isv2dir', when=True),
-            bandwidthavg=Sum('descriptorid__bandwidthavg'),
-            bandwidthburst=Sum('descriptorid__bandwidthburst'),
-            bandwidthobserved=Sum('descriptorid__bandwidthobserved'))
+             isauthority=CountCase('isauthority', when=True),
+             isbaddirectory=CountCase('isbaddirectory', when=True),
+             isbadexit=CountCase('isbadexit', when=True),
+             isexit=CountCase('isexit', when=True),
+             isfast=CountCase('isfast', when=True),
+             isguard=CountCase('isguard', when=True),
+             isnamed=CountCase('isnamed', when=True),
+             isstable=CountCase('isstable', when=True),
+             isrunning=CountCase('isrunning', when=True),
+             isvalid=CountCase('isvalid', when=True),
+             isv2dir=CountCase('isv2dir', when=True),
+             bandwidthavg=Sum('descriptorid__bandwidthavg'),
+             bandwidthburst=Sum('descriptorid__bandwidthburst'),
+             bandwidthobserved=Sum('descriptorid__bandwidthobserved'))
 
     bw_disp = TotalBandwidth.objects.all()\
-            .order_by('-date')[:1][0].bwobserved
+              .order_by('-date')[:1][0].bwobserved
 
     in_query = statusentries.count()
     client_address = request.META['REMOTE_ADDR']
@@ -182,8 +183,8 @@ def details(request, fingerprint):
     # [:1] is djangonese for 'LIMIT 1', and
     # [0] gets the object rather than the QuerySet.
     statusentry = Statusentry.objects.filter(fingerprint=fingerprint)\
-            .extra(select={'geoip': 'geoip_lookup(address)'})\
-            .order_by('-validafter')[:1][0]
+                  .extra(select={'geoip': 'geoip_lookup(address)'})\
+                  .order_by('-validafter')[:1][0]
 
     template_values = {'relay': statusentry}
 
@@ -218,13 +219,13 @@ def readhist(request, fingerprint):
     matplotlib.rcParams['figure.subplot.top'] = 0.87
 
     last_hist = Bwhist.objects.filter(fingerprint=fingerprint)\
-            .order_by('-date')[:1][0]
+                .order_by('-date')[:1][0]
 
     t_start, t_end, tr_list = last_hist.read
 
     recent_date = last_hist.date
     recent_time = datetime.datetime.combine(recent_date,
-            datetime.time())
+                  datetime.time())
 
     # It's possible that we might be missing some entries at the
     # beginning; add values of 0 in this case.
@@ -235,14 +236,15 @@ def readhist(request, fingerprint):
     to_fill = 96 - len(tr_list)
 
     start_time = recent_time - datetime.timedelta(\
-            minutes=(15 * to_fill))
+                 minutes=(15 * to_fill))
     end_time = start_time + datetime.timedelta(days=1) - \
-            datetime.timedelta(minutes=15)
+               datetime.timedelta(minutes=15)
 
     # If less than 96 entries in the array, get earlier entries.
     # If they don't exist, fill in the array with '0' values.
     if to_fill:
         day_before = last_hist.date - datetime.timedelta(days=1)
+
         try:
             day_before_hist = Bwhist.objects.get(\
                     fingerprint=fingerprint,
@@ -250,12 +252,13 @@ def readhist(request, fingerprint):
             y_start, y_end, y_list = day_before_hist.read
             y_list.extend([0] * (95 - y_end))
             y_list[0:0] = ([0] * y_start)
+
         except ObjectDoesNotExist:
             y_list = ([0] * 96)
         tr_list[0:0] = y_list[(-1 * to_fill):]
 
     fig = Figure(facecolor='white', edgecolor='black', figsize=(6, 4),
-            frameon=False)
+                 frameon=False)
     ax = fig.add_subplot(111)
 
     # Return bytes per second, not total bandwidth for 15 minutes.
@@ -269,12 +272,13 @@ def readhist(request, fingerprint):
 
     dates = range(96)
 
+    # Draw the graph and give the graph a light shade underneath it.
     ax.plot(dates, bps, color='#68228B')
     ax.fill_between(dates, 0, bps, color='#DAC8E2')
 
     ax.set_xlabel("Time (GMT)", fontsize='12')
     ax.set_xticks(range(0, 104, 8))
-    ax.set_xticklabels(times, fontsize='8', fontweight='bold')
+    ax.set_xticklabels(times, fontsize='9', fontweight='bold')
 
     ax.set_ylabel("Bandwidth (bytes/sec)", fontsize='12')
 
@@ -326,13 +330,13 @@ def writehist(request, fingerprint):
     matplotlib.rcParams['figure.subplot.top'] = 0.87
 
     last_hist = Bwhist.objects.filter(fingerprint=fingerprint)\
-            .order_by('-date')[:1][0]
+                .order_by('-date')[:1][0]
 
     t_start, t_end, tr_list = last_hist.written
 
     recent_date = last_hist.date
     recent_time = datetime.datetime.combine(recent_date,
-            datetime.time())
+                  datetime.time())
 
     # It's possible that we might be missing some entries at the
     # beginning; add values of 0 in this case.
@@ -343,9 +347,9 @@ def writehist(request, fingerprint):
     to_fill = 96 - len(tr_list)
 
     start_time = recent_time - datetime.timedelta(\
-            minutes=(15 * to_fill))
+                 minutes=(15 * to_fill))
     end_time = start_time + datetime.timedelta(days=1) - \
-            datetime.timedelta(minutes=15)
+               datetime.timedelta(minutes=15)
 
     # If less than 96 entries in the array, get earlier entries.
     # If they don't exist, fill in the array with '0' values.
@@ -363,7 +367,7 @@ def writehist(request, fingerprint):
         tr_list[0:0] = y_list[(-1 * to_fill):]
 
     fig = Figure(facecolor='white', edgecolor='black', figsize=(6, 4),
-            frameon=False)
+                 frameon=False)
     ax = fig.add_subplot(111)
 
     # Return bytes per second, not total bandwidth for 15 minutes.
@@ -378,6 +382,7 @@ def writehist(request, fingerprint):
 
     dates = range(96)
 
+    # Draw the graph and give it a nice shade underneath it.
     ax.plot(dates, bps, color='#66CD00')
     ax.fill_between(dates, 0, bps, color='#D9F3C0')
 
@@ -469,12 +474,14 @@ def exitnodequery(request):
         # Don't search entries published over 24 hours
         # from the most recent entries.
         last_va = Statusentry.objects.aggregate(\
-                last=Max('validafter'))['last']
+                  last=Max('validafter'))['last']
         oldest_tolerable = last_va - datetime.timedelta(days=1)
 
-        fingerprints = Statusentry.objects.filter(address=source, \
-                validafter__gte=oldest_tolerable).values('fingerprint')\
-                .annotate(Count('fingerprint'))
+        fingerprints = Statusentry.objects.filter(\
+                       address=source,
+                       validafter__gte=oldest_tolerable)\
+                       .values('fingerprint')\
+                       .annotate(Count('fingerprint'))
 
         # Grouped by fingerprints, which are unique. If at least one
         # fingerprint is found, there is a match, so for each
@@ -490,9 +497,9 @@ def exitnodequery(request):
                 # Note that the trailing [:1] is djangonese for
                 # "LIMIT 1", so this query should not be expensive.
                 statusentry_set = Statusentry.objects.filter(\
-                        fingerprint=fp_entry['fingerprint'], \
-                        validafter__gte=(oldest_tolerable))\
-                        .order_by('-validafter')[:1]
+                                  fingerprint=fp_entry['fingerprint'], \
+                                  validafter__gte=(oldest_tolerable))\
+                                  .order_by('-validafter')[:1]
                 statusentry = statusentry_set[0]
 
                 nickname = statusentry.nickname
@@ -502,15 +509,15 @@ def exitnodequery(request):
                 # If the client also wants to test the relay's exit
                 # policy, dest_ip and dest_port cannot be empty strings.
                 if (dest_ip_valid and dest_port_valid):
-                    router_exit_policy = _get_exit_policy(statusentry.\
-                            descriptorid.rawdesc)
+                    router_exit_policy = _get_exit_policy(\
+                                         statusentry.descriptorid.rawdesc)
 
                     # Search the exit policy information for a case in
                     # which the given IP is in a subnet defined in the
                     # exit policy information of a relay.
                     for policy_line in router_exit_policy:
                         condition, network_line = (policy_line.strip())\
-                                .split(' ')
+                                                   .split(' ')
                         subnet, port_line = network_line.split(':')
 
                         # When the IP is in the given subnet, check to
@@ -528,10 +535,14 @@ def exitnodequery(request):
 
                 relays.append((nickname, fingerprint, exit_possible))
 
-    template_values = {'is_router': is_router, 'relays': relays,
-            'dest_ip': dest_ip, 'dest_port': dest_port, 'source':
-            source, 'source_valid': source_valid, 'dest_ip_valid':
-            dest_ip_valid, 'dest_port_valid': dest_port_valid}
+    template_values = {'is_router': is_router,
+                       'relays': relays,
+                       'dest_ip': dest_ip,
+                       'dest_port': dest_port,
+                       'source': source,
+                       'source_valid': source_valid,
+                       'dest_ip_valid': dest_ip_valid,
+                       'dest_port_valid': dest_port_valid}
     return render_to_response('nodequery.html', template_values)
 
 
@@ -582,15 +593,17 @@ def bycountrycode(request):
     matplotlib.rcParams['figure.subplot.bottom'] = 0.06
 
     last_va = Statusentry.objects.aggregate(\
-            last=Max('validafter'))['last']
+              last=Max('validafter'))['last']
 
     statusentries = Statusentry.objects.filter(\
-            validafter=last_va)\
-            .extra(select={'geoip': 'geoip_lookup(address)'})
+                    validafter=last_va)\
+                    .extra(select={'geoip': 'geoip_lookup(address)'})
 
     country_map = {}
 
     for entry in statusentries:
+        # 'geoip' is a string, where the second and third characters
+        # make the country code.
         country = entry.geoip[1:3]
         if country in country_map:
             country_map[country] += 1
@@ -605,7 +618,7 @@ def bycountrycode(request):
     x_index = matplotlib.numpy.arange(num_params)
 
     fig = Figure(facecolor='white', edgecolor='black', figsize=(12, 4),
-            frameon=False)
+                 frameon=False)
     ax = fig.add_subplot(111)
 
     bar_width = 0.5
@@ -613,18 +626,20 @@ def bycountrycode(request):
 
     # Label the height of each bar.
     for i in range(num_params):
-        ax.text(xs[i] + (bar_width / 2.0), ys[i] + (ax.get_ylim()[1] / 100), str(ys[i]),
+        ax.text(xs[i] + (bar_width / 2.0),
+                ys[i] + (ax.get_ylim()[1] / 100), str(ys[i]),
                 fontsize='8', horizontalalignment='center')
 
     ax.set_xticks(x_index + (bar_width / 2.0))
-    ax.set_xticklabels(keys, fontsize='8', fontweight='bold', rotation='vertical')
+    ax.set_xticklabels(keys, fontsize='8', fontweight='bold',
+                       rotation='vertical')
 
     for tick in ax.yaxis.get_major_ticks():
         tick.label1.set_fontsize('9')
         tick.label1.set_fontweight('bold')
 
     ax.set_title("Number of Routers by Country Code",
-            fontsize='12', fontweight='bold')
+                 fontsize='12', fontweight='bold')
 
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
@@ -654,16 +669,18 @@ def exitbycountrycode(request):
     matplotlib.rcParams['figure.subplot.bottom'] = 0.06
 
     last_va = Statusentry.objects.aggregate(\
-            last=Max('validafter'))['last']
+              last=Max('validafter'))['last']
 
     statusentries = Statusentry.objects.filter(\
-            validafter=last_va,
-            isexit=1)\
-            .extra(select={'geoip': 'geoip_lookup(address)'})
+                    validafter=last_va,
+                    isexit=1)\
+                    .extra(select={'geoip': 'geoip_lookup(address)'})
 
     country_map = {}
 
     for entry in statusentries:
+        # 'geoip' is a string, where the second and third characters
+        # make the country code.
         country = entry.geoip[1:3]
         if country in country_map:
             country_map[country] += 1
@@ -678,7 +695,7 @@ def exitbycountrycode(request):
     x_index = matplotlib.numpy.arange(num_params)
 
     fig = Figure(facecolor='white', edgecolor='black', figsize=(12, 4),
-            frameon=False)
+                 frameon=False)
     ax = fig.add_subplot(111)
 
     bar_width = 0.5
@@ -686,18 +703,20 @@ def exitbycountrycode(request):
 
     # Label the height of each bar.
     for i in range(num_params):
-        ax.text(xs[i] + (bar_width / 2.0), ys[i] + (ax.get_ylim()[1] / 100), str(ys[i]),
+        ax.text(xs[i] + (bar_width / 2.0),
+                ys[i] + (ax.get_ylim()[1] / 100), str(ys[i]),
                 fontsize='8', horizontalalignment='center')
 
     ax.set_xticks(x_index + (bar_width / 2.0))
-    ax.set_xticklabels(keys, fontsize='8', fontweight='bold', rotation='vertical')
+    ax.set_xticklabels(keys, fontsize='8', fontweight='bold',
+                       rotation='vertical')
 
     for tick in ax.yaxis.get_major_ticks():
         tick.label1.set_fontsize('9')
         tick.label1.set_fontweight('bold')
 
     ax.set_title("Number of Exit Routers by Country Code",
-            fontsize='12', fontweight='bold')
+                 fontsize='12', fontweight='bold')
 
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
@@ -727,14 +746,16 @@ def bytimerunning(request):
     matplotlib.rcParams['figure.subplot.bottom'] = 0.04
 
     last_va = Statusentry.objects.aggregate(\
-            last=Max('validafter'))['last']
+              last=Max('validafter'))['last']
 
     statusentries = Statusentry.objects.filter(\
-            validafter=last_va)
+                    validafter=last_va)
 
     uptime_map = {}
 
     for entry in statusentries:
+        # The uptime in weeks is seconds / (seconds/min * min/hour
+        # * hour/day * day/week), where / signifies floor division.
         weeks = entry.descriptorid.uptime / (60 * 60 * 24 * 7)
         if weeks in uptime_map:
             uptime_map[weeks] += 1
@@ -749,7 +770,7 @@ def bytimerunning(request):
     x_index = matplotlib.numpy.arange(num_params)
 
     fig = Figure(facecolor='white', edgecolor='black', figsize=(12, 4),
-            frameon=False)
+                 frameon=False)
     ax = fig.add_subplot(111)
 
     bar_width = 0.5
@@ -757,7 +778,8 @@ def bytimerunning(request):
 
     # Label the height of each bar.
     for i in range(num_params):
-        ax.text(xs[i] + (bar_width / 2.0), ys[i] + (ax.get_ylim()[1] / 100), str(ys[i]),
+        ax.text(xs[i] + (bar_width / 2.0),
+                ys[i] + (ax.get_ylim()[1] / 100), str(ys[i]),
                 fontsize='8', horizontalalignment='center')
 
     ax.set_xticks(x_index + (bar_width / 2.0))
@@ -768,7 +790,7 @@ def bytimerunning(request):
         tick.label1.set_fontweight('bold')
 
     ax.set_title("Number of Routers by Time Running (Weeks)",
-            fontsize='12', fontweight='bold')
+                 fontsize='12', fontweight='bold')
 
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
@@ -798,10 +820,10 @@ def byobservedbandwidth(request):
     matplotlib.rcParams['figure.subplot.bottom'] = 0.19
 
     last_va = Statusentry.objects.aggregate(\
-            last=Max('validafter'))['last']
+              last=Max('validafter'))['last']
 
     statusentries = Statusentry.objects.filter(\
-            validafter=last_va)
+                    validafter=last_va)
 
     bw_map = {}
     keys = ['0-10', '11-20', '21-50', '51-100', '101-500', '501-1000',
@@ -839,7 +861,7 @@ def byobservedbandwidth(request):
     x_index = matplotlib.numpy.arange(num_params)
 
     fig = Figure(facecolor='white', edgecolor='black', figsize=(6, 4),
-            frameon=False)
+                 frameon=False)
     ax = fig.add_subplot(111)
 
     bar_width = 0.5
@@ -847,18 +869,20 @@ def byobservedbandwidth(request):
 
     # Label the height of each bar.
     for i in range(num_params):
-        ax.text(xs[i] + (bar_width / 2.0), ys[i] + (ax.get_ylim()[1] / 100), str(ys[i]),
+        ax.text(xs[i] + (bar_width / 2.0),
+                ys[i] + (ax.get_ylim()[1] / 100), str(ys[i]),
                 fontsize='8', horizontalalignment='center')
 
     ax.set_xticks(x_index + (bar_width / 2.0))
-    ax.set_xticklabels(keys, fontsize='8', fontweight='bold', rotation='vertical')
+    ax.set_xticklabels(keys, fontsize='8', fontweight='bold',
+                       rotation='vertical')
 
     for tick in ax.yaxis.get_major_ticks():
         tick.label1.set_fontsize('9')
         tick.label1.set_fontweight('bold')
 
     ax.set_title("Number of Routers by Observed Bandwidth (KB/sec)",
-            fontsize='12', fontweight='bold')
+                 fontsize='12', fontweight='bold')
 
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
@@ -888,10 +912,10 @@ def byplatform(request):
     matplotlib.rcParams['figure.subplot.bottom'] = 0.05
 
     last_va = Statusentry.objects.aggregate(\
-            last=Max('validafter'))['last']
+              last=Max('validafter'))['last']
 
     statusentries = Statusentry.objects.filter(\
-            validafter=last_va)
+                    validafter=last_va)
 
     platform_map = {}
     keys = ['Linux', 'Windows', 'FreeBSD', 'Darwin', 'OpenBSD',
@@ -907,6 +931,8 @@ def byplatform(request):
             if key in platform:
                 platform_map[key] += 1
                 break
+        # 'else' statement only runs if the for loop terminates
+        # normally -- that is, without a break.
         else:
             platform_map['Unknown'] += 1
 
@@ -919,7 +945,7 @@ def byplatform(request):
     x_index = matplotlib.numpy.arange(num_params)
 
     fig = Figure(facecolor='white', edgecolor='black', figsize=(6, 4),
-            frameon=False)
+                 frameon=False)
     ax = fig.add_subplot(111)
 
     bar_width = 0.5
@@ -927,7 +953,8 @@ def byplatform(request):
 
     # Label the height of each bar.
     for i in range(num_params):
-        ax.text(xs[i] + (bar_width / 2.0), ys[i] + (ax.get_ylim()[1] / 100), str(ys[i]),
+        ax.text(xs[i] + (bar_width / 2.0),
+                ys[i] + (ax.get_ylim()[1] / 100), str(ys[i]),
                 fontsize='8', horizontalalignment='center')
 
     ax.set_xticks(x_index + (bar_width / 2.0))
@@ -938,7 +965,7 @@ def byplatform(request):
         tick.label1.set_fontweight('bold')
 
     ax.set_title("Number of Routers by Platform",
-            fontsize='12', fontweight='bold')
+                 fontsize='12', fontweight='bold')
 
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
@@ -968,7 +995,7 @@ def aggregatesummary(request):
     matplotlib.rcParams['figure.subplot.bottom'] = 0.04
 
     last_va = Statusentry.objects.aggregate(\
-            last=Max('validafter'))['last']
+              last=Max('validafter'))['last']
 
     statusentries = Statusentry.objects.filter(validafter=last_va)
 
@@ -1002,7 +1029,7 @@ def aggregatesummary(request):
         ys.append(counts[count])
 
     fig = Figure(facecolor='white', edgecolor='black', figsize=(12, 4),
-            frameon=False)
+                 frameon=False)
     ax = fig.add_subplot(111)
 
     bar_width = 0.5
@@ -1010,7 +1037,8 @@ def aggregatesummary(request):
 
     # Label the height of each bar.
     for i in range(num_params):
-        ax.text(xs[i] + (bar_width / 2.0), ys[i] + (ax.get_ylim()[1] / 100), str(ys[i]),
+        ax.text(xs[i] + (bar_width / 2.0),
+                ys[i] + (ax.get_ylim()[1] / 100), str(ys[i]),
                 fontsize='8', horizontalalignment='center')
     ax.set_xticks(x_index + (bar_width / 2.0))
     ax.set_xticklabels(labels, fontsize='9', fontweight='bold')
@@ -1045,12 +1073,13 @@ def columnpreferences(request):
     currentColumns = []
     availableColumns = []
     notMovableColumns = _notMovableColumns_INIT()
-    
+
     if ('resetPreferences' in request.GET):
         del request.session['currentColumns']
         del request.session['availableColumns']
 
-    if not ('currentColumns' in request.session and 'availableColumns' in request.session):
+    if not ('currentColumns' in request.session and 'availableColumns' \
+            in request.session):
         currentColumns = _currentColumns_INIT()
         availableColumns = _availableColumns_INIT()
         request.session['currentColumns'] = currentColumns
@@ -1061,26 +1090,28 @@ def columnpreferences(request):
 
     columnLists = [currentColumns, availableColumns, '']
     if ('removeColumn' in request.GET and 'selected_removeColumn' \
-            in request.GET):
+        in request.GET):
         columnLists = _buttonChoice(request, 'removeColumn',
-                'selected_removeColumn', currentColumns,
-                availableColumns)
+                      'selected_removeColumn', currentColumns,
+                      availableColumns)
     elif ('addColumn' in request.GET and 'selected_addColumn' \
-            in request.GET):
+          in request.GET):
         columnLists = _buttonChoice(request, 'addColumn',
                 'selected_addColumn', currentColumns, availableColumns)
     elif ('upButton' in request.GET and 'selected_removeColumn' \
-            in request.GET):
+          in request.GET):
         if not(request.GET['selected_removeColumn'] in \
-                notMovableColumns):
+               notMovableColumns):
             columnLists = _buttonChoice(request, 'upButton', \
-                    'selected_removeColumn', currentColumns, availableColumns)
+                          'selected_removeColumn', currentColumns,
+                          availableColumns)
     elif ('downButton' in request.GET and 'selected_removeColumn' \
-            in request.GET):
+          in request.GET):
         if not(request.GET['selected_removeColumn'] in \
-                notMovableColumns):
+               notMovableColumns):
             columnLists = _buttonChoice(request, 'downButton', \
-                    'selected_removeColumn', currentColumns, availableColumns)
+                          'selected_removeColumn', currentColumns,
+                          availableColumns)
 
     template_values = {'currentColumns': columnLists[0],
                        'availableColumns': columnLists[1],
@@ -1088,31 +1119,39 @@ def columnpreferences(request):
 
     return render_to_response('columnpreferences.html', template_values)
 
+
 def _currentColumns_INIT():
-    currentColumns = ["Country Code", "Router Name", "Bandwidth", "Uptime", "IP", "Hostname", \
-                            "Icons", "ORPort", "DirPort", "BadExit", "Named", "Exit", "Authority", \
-                            "Fast", "Guard", "Stable", "Running", "Valid", "V2Dir", "Platform", \
-                            "Hibernating",]
+    currentColumns = ["Country Code", "Router Name", "Bandwidth",
+                      "Uptime", "IP", "Hostname", "Icons", "ORPort",
+                      "DirPort", "BadExit", "Named", "Exit",
+                      "Authority", "Fast", "Guard", "Stable",
+                      "Running", "Valid", "V2Dir", "Platform",
+                      "Hibernating"]
     return currentColumns
-    
+
+
 def _availableColumns_INIT():
-    availableColumns =  ["Fingerprint", "LastDescriptorPublished", "Contact", "BadDir"]
+    availableColumns =  ["Fingerprint", "LastDescriptorPublished",
+                         "Contact", "BadDir"]
     return availableColumns
 
+
 def _notMovableColumns_INIT():
-    notMovableColumns = ["Named", "Exit", "Authority", "Fast", "Guard", "Stable", \
-                        "Running", "Valid", "V2Dir", "Platform", "Hibernating"]
+    notMovableColumns = ["Named", "Exit", "Authority", "Fast", "Guard",
+                         "Stable", "Running", "Valid", "V2Dir",
+                         "Platform", "Hibernating"]
     return notMovableColumns
+
 
 def _buttonChoice(request, button, field, currentColumns,
         availableColumns):
-    '''
+    """
     Helper function that manages the changes in the L{columnpreferences}
     arrays/lists.
 
     @rtype: list(list(int), list(int), string)
     @return: columnLists
-    '''
+    """
     selection = request.GET[field]
     if (button == 'removeColumn'):
         availableColumns.append(selection)
@@ -1125,14 +1164,14 @@ def _buttonChoice(request, button, field, currentColumns,
         if (selectionPos > 0):
             aux = currentColumns[selectionPos - 1]
             currentColumns[selectionPos - 1] = \
-                    currentColumns[selectionPos]
+                           currentColumns[selectionPos]
             currentColumns[selectionPos] = aux
     elif (button == 'downButton'):
         selectionPos = currentColumns.index(selection)
         if (selectionPos < len(currentColumns) - 1):
             aux = currentColumns[selectionPos + 1]
             currentColumns[selectionPos + 1] = \
-                    currentColumns[selectionPos]
+                           currentColumns[selectionPos]
             currentColumns[selectionPos] = aux
     request.session['currentColumns'] = currentColumns
     request.session['availableColumns'] = availableColumns
@@ -1205,7 +1244,7 @@ def _is_ip_in_subnet(ip, subnet):
     # a.b.c.d becomes a*2^24 + b*2^16 + c*2^8 + d
     a, b, c, d = base.split('.')
     subnet_as_int = (int(a) << 24) + (int(b) << 16) + (int(c) << 8) + \
-            int(d)
+                     int(d)
 
     # Example: if 8 bits are specified, then the mask is calculated by
     # taking a 32-bit integer consisting of 1s and doing a bitwise shift
@@ -1277,8 +1316,7 @@ def _is_ipaddress(ip):
     a, b, c, d = ip.split('.')
     try:
         if (int(a) > 255 or int(a) < 0 or int(b) > 255 or int(b) < 0 or
-                int(c) > 255 or int(c) < 0 or int(d) > 255 or
-                int(d) < 0):
+            int(c) > 255 or int(c) < 0 or int(d) > 255 or int(d) < 0):
             return False
     except:
         return False
@@ -1349,7 +1387,7 @@ def _port_match(dest_port, port_line):
         dest_port_int = int(dest_port)
 
         if (dest_port_int >= lower_port and
-                dest_port_int <= upper_port):
+            dest_port_int <= upper_port):
             return True
 
     if (dest_port == port_line):
