@@ -81,43 +81,49 @@
 {% if relay_list %}
 <table class="relayTable sortable">
 	<tr>
-	    {% if "Country Code" in currentColumns %}
+	{% for columnName in currentColumns %}
+	    {% if columnName == "Country Code" %}
         <th class="sorttable_alpha relayHeader">&nbsp</th>
         {% endif %}
+        {% if columnName == "Router Name" %}
 		<th class="sorttable_alpha relayHeader" id="routerName">Router Name</th>
-		{% if "Bandwidth" in currentColumns %}
+		{% endif %}
+		{% if columnName == "Bandwidth" %}
 		<th class="sorttable_numeric relayHeader">Bandwidth</th>
 		{% endif %}
-		{% if "Uptime" in currentColumns %}
+		{% if columnName == "Uptime" %}
         <th class="sorttable_numeric relayHeader">Uptime</th>
         {% endif %}
-        {% if "IP" in currentColumns %}
+        {% if columnName == "IP" %}
         <th class="sorttable_numeric relayHeader">IP</th>
         {% endif %}
-        {% if "Fingerprint" in currentColumns %}
+        {% if columnName == "Fingerprint" %}
         <th class="sorttable_alpha relayHeader">Fingerprint</th>
         {% endif %}
-        {% if "LastDescriptorPublished" in currentColumns %}
+        {% if columnName == "LastDescriptorPublished" %}
         <th class="sorttable_numeric relayHeader" id="lastDescPub">Last Descriptor Published</th>
         {% endif %}
-        {% if "Contact" in currentColumns %}
+        {% if columnName == "Contact" %}
         <th class="sorttable_alpha relayHeader">Contact</th>
         {% endif %}
-        {% if "BadDir" in currentColumns %}
+        {% if columnName == "BadDir" %}
         <th class="sorttable_numeric relayHeader" id="badDir">Bad Directory</th>
         {% endif %}
+        {% if columnName == "Icons" %}
         {% if "DirPort" in currentColumns or "Exit" in currentColumns or "Authority" in currentColumns or "Fast" in currentColumns or "Guard" in currentColumns or "V2Dir" in currentColumns or "Platform" in currentColumns or "Stable" in currentColumns %}
 		<th class="sorttable_nosort" id="relayHeaderInv">Icons</th>
 		{% endif %}
-		{% if "ORPort" in currentColumns %}
+		{% endif %}
+		{% if columnName == "ORPort" %}
         <th class="sorttable_numeric relayHeader">ORPort</th>
         {% endif %}
-        {% if "DirPort" in currentColumns %}
+        {% if columnName == "DirPort" %}
         <th class="sorttable_numeric relayHeader">DirPort</th>
         {% endif %}
-        {% if "BadExit" in currentColumns %}
+        {% if columnName == "BadExit" %}
         <th class="sorttable_numeric relayHeader">Bad Exit</th>
         {% endif %}
+    {% endfor %}
 	</tr>
 	
 	{% for relay in relay_list %}
@@ -126,13 +132,14 @@
 		{% else %}
 		<tr class="relay">
 		{% endif %}
-		
+		    {% for columnName in currentColumns %}
 		    <!-- Add: RELAY IS DOWN and RELAY IS HIBERNATING -->
-		    {% if "Country Code" in currentColumns %}
+		    {% if columnName == "Country Code" %}
             <td sorttable_customkey={{ relay.geoip|country }} id="col_relayName"><a href="http://www.openstreetmap.org/?mlon={{ relay.geoip|longitude }}&mlat={{ relay.geoip|latitude }}&zoom=6"><img src="static/img/flags/{{ relay.geoip|country }}.gif" alt={{ relay.geoip|country }} title="{{ relay.geoip|country }}: {{ relay.geoip|latitude }}, {{ relay.geoip|longitude }}" border=0></a></td>
 			<!-- Note: sorttable_customkey="[[COUNTRY_PREFIX]]" -->
 			{% endif %}
 			
+			{% if columnName == "Router Name" %}
             <td id="col_relayName"> 
                 {% if "Named" in currentColumns %}
                 {% ifequal relay.isnamed 1 %}
@@ -144,33 +151,34 @@
                     <a class="linkDetails" href="/details/{{ relay.fingerprint }}" target="_BLANK">{{ relay.nickname }}</a>
                 {% endif %}                    
             </td>
-
-            {% if "Bandwidth" in currentColumns %}
+            {% endif %}
+            
+            {% if columnName == "Bandwidth" %}
             <td id="col_relayBandwidth">{{ relay.descriptorid.bandwidthobserved|kilobytes_ps }} KB/s</td>
             {% endif %}
             
-            {% if "Uptime" in currentColumns %}
+            {% if columnName == "Uptime" %}
             <td id="col_relayUptime">{{ relay.descriptorid.uptime|days }} d</td>
             {% endif %}
             
-            {% if "IP" in currentColumns %}
+            {% if columnName == "IP" %}
             <td id="col_relayAddress">{{ relay.address }}</td>
             {% endif %}
             
-            {% if "Fingerprint" in currentColumns %}
+            {% if columnName == "Fingerprint" %}
             <td id="col_relayFingerprint">{{ relay.fingerprint }}</td>
             {% endif %}
             
-            {% if "LastDescriptorPublished" in currentColumns %}
+            {% if columnName == "LastDescriptorPublished" %}
             {% load details_filters %}
             <td id="col_relayLastDescPub">{{ relay.published }}</td>
             {% endif %}
             
-            {% if "Contact" in currentColumns %}
+            {% if columnName == "Contact" %}
             <td id="col_relayContact">{{ relay.descriptorid.rawdesc|contact }}</td>
             {% endif %}
             
-            {% if "BadDir" in currentColumns %}
+            {% if columnName == "BadDir" %}
             <td id="col_relayBadDir" {% ifequal relay.isbaddirectory 1 %} sorttable_customkey="1">
                 	<img src="static/img/bg_yes.png" width="12" height="12" alt="Bad Directory" title="Bad Directory">
                 {% else %} sorttable_customkey="0">
@@ -178,7 +186,9 @@
                 {% endifequal %}</td>
             {% endif %}
             
-            {% if "DirPort" in currentColumns or "Exit" in currentColumns or "Authority" in currentColumns or "Fast" in currentColumns or "Guard" in currentColumns or "V2Dir" in currentColumns or "Platform" in currentColumns or "Stable" in currentColumns %}
+            <!-- THE FOR LOOP IS CREATING A NEW TD FOR EACH ICON !!! FIX IT NAO! -->
+            
+            {% if columnName == "Icons" %}
             <td id="col_relayIcons">
                 
                 {% if "Fast" in currentColumns %}
@@ -249,11 +259,11 @@
             </td>
             {% endif %}
             
-            {% if "ORPort" in currentColumns %}
+            {% if columnName == "ORPort" %}
             <td id="col_relayOrport">{{ relay.orport }}</td>
             {% endif %}
             
-            {% if "DirPort" in currentColumns %}
+            {% if columnName == "DirPort" %}
             <td id="col_relayDirport">
             {% ifequal relay.dirport 0 %}
                 None
@@ -263,7 +273,7 @@
             </td>
             {% endif %}
             
-            {% if "BadExit" in currentColumns %}
+            {% if columnName == "BadExit" %}
             <td id="col_relayBadExit" {% ifequal relay.isbadexit 1 %} sorttable_customkey="1">
                 	<img src="static/img/bg_yes.png" width="12" height="12" alt="Bad Exit" title="Bad Exit">
                 {% else %} sorttable_customkey="0">
@@ -271,6 +281,7 @@
                 {% endifequal %}
             </td>
             {% endif %}
+            {% endfor %}
 		</tr>
 	{% endfor %}
 </table>

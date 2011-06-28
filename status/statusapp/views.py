@@ -76,9 +76,7 @@ def index(request):
     
     currentColumns = []
     if not ('currentColumns' in request.session):
-        currentColumns = ["Country Code", "Uptime", "Hostname", "ORPort", "DirPort", "IP", \
-                    "Exit", "Authority", "Fast", "Guard", "Named", "Stable", "Running", "Valid", \
-                    "Bandwidth", "V2Dir", "Platform", "Hibernating", "BadExit",]
+        currentColumns = _currentColumns_INIT()
         request.session['currentColumns'] = currentColumns
     else:
         currentColumns = request.session['currentColumns']
@@ -111,6 +109,10 @@ def index(request):
             statusentries = statusentries.filter(isexit=1)
         elif queryOptions['isexit'] == 'no': 
             statusentries = statusentries.filter(isexit=0)
+        if queryOptions['isguard'] == 'yes':
+            statusentries = statusentries.filter(isguard=1)
+        elif queryOptions['isguard'] == 'no':
+            statusentries = statusentries.filter(isguard=1)
         '''
         if queryOptions['ishibernating'] == 'yes':
             statusentries = statusentries.filter(ishibernating=1)
@@ -565,16 +567,15 @@ def columnpreferences(request):
 
     currentColumns = []
     availableColumns = []
+    notMovableColumns = _notMovableColumns_INIT()
     
     if ('resetPreferences' in request.GET):
         del request.session['currentColumns']
         del request.session['availableColumns']
 
     if not ('currentColumns' in request.session and 'availableColumns' in request.session):
-        currentColumns = ["Country Code", "Uptime", "Hostname", "ORPort", "DirPort", "IP", \
-                    "Exit", "Authority", "Fast", "Guard", "Named", "Stable", "Running", "Valid", \
-                    "Bandwidth", "V2Dir", "Platform", "Hibernating", "BadExit",]
-        availableColumns = ["Fingerprint", "LastDescriptorPublished", "Contact", "BadDir"]
+        currentColumns = _currentColumns_INIT()
+        availableColumns = _availableColumns_INIT()
         request.session['currentColumns'] = currentColumns
         request.session['availableColumns'] = availableColumns
     else:
@@ -583,19 +584,40 @@ def columnpreferences(request):
     
     columnLists = [currentColumns, availableColumns, '']
     if ('removeColumn' in request.GET and 'selected_removeColumn' in request.GET):
-        columnLists = _buttonChoice(request, 'removeColumn', 'selected_removeColumn', currentColumns, availableColumns)
+        columnLists = _buttonChoice(request, 'removeColumn', 'selected_removeColumn', \
+                                    currentColumns, availableColumns)
     elif ('addColumn' in request.GET and 'selected_addColumn' in request.GET):
-        columnLists = _buttonChoice(request, 'addColumn', 'selected_addColumn', currentColumns, availableColumns)
+        columnLists = _buttonChoice(request, 'addColumn', 'selected_addColumn', \
+                                    currentColumns, availableColumns)
     elif ('upButton' in request.GET and 'selected_removeColumn' in request.GET):
-        columnLists = _buttonChoice(request, 'upButton', 'selected_removeColumn', currentColumns, availableColumns)
+        if not(request.GET['selected_removeColumn'] in notMovableColumns):
+            columnLists = _buttonChoice(request, 'upButton', 'selected_removeColumn', \
+                                        currentColumns, availableColumns)
     elif ('downButton' in request.GET and 'selected_removeColumn' in request.GET):
-        columnLists = _buttonChoice(request, 'downButton', 'selected_removeColumn', currentColumns, availableColumns)
+        if not(request.GET['selected_removeColumn'] in notMovableColumns):
+            columnLists = _buttonChoice(request, 'downButton', 'selected_removeColumn', \
+                                        currentColumns, availableColumns)
     
     template_values = {'currentColumns': columnLists[0], 'availableColumns': columnLists[1], \
                     'selectedEntry': columnLists[2]}
     
     return render_to_response('columnpreferences.html', template_values)
 
+def _currentColumns_INIT():
+    currentColumns = ["Country Code", "Router Name", "Bandwidth", "Uptime", "IP", "Hostname", \
+                            "Icons", "ORPort", "DirPort", "BadExit", "Named", "Exit", "Authority", \
+                            "Fast", "Guard", "Stable", "Running", "Valid", "V2Dir", "Platform", \
+                            "Hibernating",]
+    return currentColumns
+    
+def _availableColumns_INIT():
+    availableColumns =  ["Fingerprint", "LastDescriptorPublished", "Contact", "BadDir"]
+    return availableColumns
+
+def _notMovableColumns_INIT():
+    notMovableColumns = ["Named", "Exit", "Authority", "Fast", "Guard", "Stable", \
+                        "Running", "Valid", "V2Dir", "Platform", "Hibernating"]
+    return notMovableColumns
 
 def _buttonChoice(request, button, field, currentColumns, availableColumns): 
     '''

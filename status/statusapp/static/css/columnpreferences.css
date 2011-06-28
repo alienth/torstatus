@@ -60,3 +60,8 @@ input#upButton {
 input#downButton {
     width: 70px;
 }
+
+option#notMovable {
+    font-style:italic; 
+    color:red;
+}
