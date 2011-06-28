@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block mainCSS %}
+<link rel="stylesheet" type="text/css" href="/static/css/style.css"></link>
+{% endblock %}
+
+{% block auxCSS %}
+<link rel="stylesheet" type="text/css" href="/static/css/whois.css"></link>
+{% endblock %}
+
+{% block mainTitle %} TorStatus WHOIS Query {% endblock %}
+
+{% block headerTitle %} TorStatus {% endblock %}
+
+{% block mainPage %}
+
+<table class="whois">
+<tr>
+    <td class="boxTitle">WHOIS Query For {{ address }}</td>
+</tr>
+<tr>
+    <td><pre class="whois">{{ whois }}</pre></td>
+</tr>
+</table>
+
+{% endblock %}
