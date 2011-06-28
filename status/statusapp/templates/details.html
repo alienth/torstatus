@@ -25,7 +25,7 @@
 
 <table class="aggStatisticSummary" id="networkstatisticsummary">
 <tr>
-    <td class="boxTitle" colspan="2">General Information</td>
+    <td id="details_boxTitle" colspan="2">General Information</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Router Name:</td>
@@ -60,6 +60,10 @@
     <td id="aggBox">{{ statusentry.geoip|country|upper }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
+    <td id="aggBox">Latitude, Longitude:</td>
+    <td id="aggBox">{{ statusentry.geoip|latitude }}, {{ statusentry.geoip|longitude }}</td>
+</tr>
+<tr id="row_aggStatisticSummary">
 	<td id="aggBox">Platform / Version:</td>
     <td id="aggBox">{{descriptor.platform}}</td>
 </tr>
@@ -85,7 +89,7 @@
 
 <table class="aggStatisticSummary" id="networkstatisticsummary">
 <tr>
-    <td class="boxTitle" colspan="2"> Graphs </td>
+    <td id="details_boxTitle" colspan="2"> Graphs </td>
 </tr>
 <tr id="row_aggStatisticSummary">
     <td id="aggBox"><img src="{{ statusentry.fingerprint }}/readhist.png" alt="Read Bandwidth History Graph" title="Read Bandwidth History Graph"></td>
