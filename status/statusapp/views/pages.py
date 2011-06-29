@@ -78,89 +78,66 @@ def index(request):
 
     # USER QUERY MODIFICATIONS ----------------------------------------
     # -----------------------------------------------------------------
-    currentColumns = []
+    current_columns = []
     if not ('currentColumns' in request.session):
-        currentColumns = CURRENT_COLUMNS
-        request.session['currentColumns'] = currentColumns
+        current_columns = CURRENT_COLUMNS
+        request.session['currentColumns'] = current_columns
     else:
-        currentColumns = request.session['currentColumns']
+        current_columns = request.session['currentColumns']
 
-    queryOptions = {}
+    query_options = {}
     if (request.GET):
         if ('resetQuery' in request.GET):
             if ('queryOptions' in request.session):
                 del request.session['queryOptions']
         else:
-            queryOptions = request.GET
-            request.session['queryOptions'] = queryOptions
-    if (not queryOptions and 'queryOptions' in request.session):
-            queryOptions = request.session['queryOptions']
+            query_options = request.GET
+            request.session['queryOptions'] = query_options
+    if (not query_options and 'queryOptions' in request.session):
+            query_options = request.session['queryOptions']
 
-    if queryOptions:
-        if queryOptions['isauthority'] == 'yes':
-            statusentries = statusentries.filter(isauthority=1)
-        elif queryOptions['isauthority'] == 'no':
-            statusentries = statusentries.filter(isauthority=0)
-        if queryOptions['isbaddirectory'] == 'yes':
-            statusentries = statusentries.filter(isbaddirectory=1)
-        elif queryOptions['isbaddirectory'] == 'no':
-            statusentries = statusentries.filter(isbaddirectory=0)
-        if queryOptions['isbadexit'] == 'yes':
-            statusentries = statusentries.filter(isbadexit=1)
-        elif queryOptions['isbadexit'] == 'no':
-            statusentries = statusentries.filter(isbadexit=0)
-        if queryOptions['isexit'] == 'yes':
-            statusentries = statusentries.filter(isexit=1)
-        elif queryOptions['isexit'] == 'no':
-            statusentries = statusentries.filter(isexit=0)
-        if queryOptions['isfast'] == 'yes':
-            statusentries = statusentries.filter(isfast=1)
-        elif queryOptions['isfast'] == 'no':
-            statusentries = statusentries.filter(isfast=0)
-        if queryOptions['isguard'] == 'yes':
-            statusentries = statusentries.filter(isguard=1)
-        elif queryOptions['isguard'] == 'no':
-            statusentries = statusentries.filter(isguard=0)
-        '''
-        if queryOptions['ishibernating'] == 'yes':
-            statusentries = statusentries.filter(ishibernating=1)
-        elif queryOptions['ishibernating'] == 'no':
-            statusentries = statusentries.filter(ishibernating=0)
-        '''
-        if queryOptions['isnamed'] == 'yes':
-            statusentries = statusentries.filter(isnamed=1)
-        elif queryOptions['isnamed'] == 'no':
-            statusentries = statusentries.filter(isnamed=0)
-        if queryOptions['isstable'] == 'yes':
-            statusentries = statusentries.filter(isstable=1)
-        elif queryOptions['isstable'] == 'no':
-            statusentries = statusentries.filter(isstable=0)
-        if queryOptions['isrunning'] == 'yes':
-            statusentries = statusentries.filter(isrunning=1)
-        elif queryOptions['isrunning'] == 'no':
-            statusentries = statusentries.filter(isrunning=0)
-        if queryOptions['isvalid'] == 'yes':
-            statusentries = statusentries.filter(isvalid=1)
-        elif queryOptions['isvalid'] == 'no':
-            statusentries = statusentries.filter(isvalid=0)
-        if queryOptions['isv2dir'] == 'yes':
-            statusentries = statusentries.filter(isv2dir=1)
-        elif queryOptions['isv2dir'] == 'no':
-            statusentries = statusentries.filter(isv2dir=0)
-
-       ###################################
-       #
-       # FINISH THIS ----> 
-       #
-       ################################### 
-        if queryOptions['searchValue'] != "":
+    if query_options:
+        # ADD ishibernating AFTER WE KNOW HOW TO CHECK THAT
+        options = ['isauthority', 'isbaddirectory', 'isbadexit', \
+                   'isexit', 'isfast', 'isguard', 'isnamed', \
+                   'isstable', 'isrunning', 'isvalid', 'isv2dir']
+        # options is needed because query_options has some other things that we 
+        #      do not need in this case (the other search query key-values).
+        valid_options = filter(lambda k: query_options[k] != '' and k in options, \
+                                query_options)
+        filterby = {}
+        for opt in valid_options: 
+            filterby[opt] = 1 if query_options[opt] == 'yes' else 0
+        statusentries = statusentries.filter(**filterby)
+    
+        if query_options['searchValue'] != '':
             # IDEA TO AVOID MULTIPLE, REDUNDANT, IF STATEMENTS
             #criteriaDict = {'fingerprint': fingerprint, 'nickname': nickname,
             #                'countrycode': geoip[1:3], }
-            value = queryOptions['searchValue']
-            criteria = queryOptions['criteria']
-            logic = queryOptions['boolLogic']
+            value = query_options['searchValue']
+            criteria = query_options['criteria']
+            logic = query_options['boolLogic']
             
+            options = ['nickname', 'fingerprint', 'geoip',
+                       'bandwidth', 'uptime', 'published',
+                       'hostname', 'address', 'orport', 'dirport',
+                       'platform', 'contact']
+                       
+            descriptorlist_options = ['platform', 'uptime', 'contact'] 
+            
+            if criteria in descriptorlist_options:
+                criteria = 'descriptorid__' + criteria
+                
+            if logic == 'contains':
+                criteria = criteria + '__contains'
+            elif logic == 'less':
+                criteria = criteria + '__lt'
+            elif logic == 'greater':
+                criteria = criteria + '__gt'
+            filterby[criteria] = value
+            
+            statusentries = statusentries.filter(**filterby)
+            """
             if criteria == 'fingerprint':
                 if logic == 'equals':
                     statusentries = statusentries.filter(fingerprint=value)
@@ -179,8 +156,8 @@ def index(request):
                     statusentries = statusentries.filter(nickname__lt=value)
                 elif logic == 'greater':
                     statusentries = statusentries.filter(nickname__gt=value)
-        
-        sortOptions = ['nickname', 'fingerprint', 'geoip',
+            """
+        sort_options = ['nickname', 'fingerprint', 'geoip',
                        'bandwidth', 'uptime', 'published',
                        'hostname', 'address', 'orport', 'dirport',
                        'platform', 'contact', 'isauthority', 
@@ -188,16 +165,15 @@ def index(request):
                        'isfast', 'isguard', 'ishibernating', 
                        'isnamed', 'isstable', 'isrunning', 
                        'isvalid', 'isv2dir']
-        descriptorList = ['platform', 'uptime', 'contact'] 
-        selectedOption = queryOptions['sortListings']
-        if selectedOption in sortOptions:
-            if selectedOption in descriptorList:
-                selectedOption = 'descriptorid__' + selectedOption
-            if queryOptions['sortOrder'] == 'ascending':
-                statusentries = statusentries.order_by(selectedOption)
-            elif queryOptions['sortOrder'] == 'descending':
-                statusentries = statusentries.order_by('-' + selectedOption)
-                
+        descriptorlist_options = ['platform', 'uptime', 'contact'] 
+        selected_option = query_options['sortListings']
+        if selected_option in sort_options:
+            if selected_option in descriptorlist_options:
+                selected_option = 'descriptorid__' + selected_option
+            if query_options['sortOrder'] == 'ascending':
+                statusentries = statusentries.order_by(selected_option)
+            elif query_options['sortOrder'] == 'descending':
+                statusentries = statusentries.order_by('-' + selected_option)       
         
     # USER QUERY AGGREGATE STATISTICS ---------------------------------
     # -----------------------------------------------------------------
@@ -231,8 +207,8 @@ def index(request):
                        'total_counts': total_counts,
                        'bw_disp': bw_disp,
                        'bw_total': bw_total,
-                       'currentColumns': currentColumns,
-                       'queryOptions': queryOptions}
+                       'currentColumns': current_columns,
+                       'queryOptions': query_options}
     return render_to_response('index.html', template_values)
 
 

@@ -186,8 +186,6 @@
                 {% endif %}</td>
             {% endif %}
            
-            <!-- THE FOR LOOP IS CREATING A NEW TD FOR EACH ICON !!! FIX IT NAO! -->
-           
             {% if columnName == "Icons" %}
             <td id="col_relayIcons">
                
@@ -538,32 +536,50 @@
         <tr>
             <td>
             <select id="sortRouterListing" name="criteria">
-            <option value ="fingerprint">Fingerprint</option>
-            <option value ="nickname">Router Name</option>
-            <option value ="countrycode">Country Code</option>
-            <option value ="bandwidth">Bandwidth (kb/s)</option>
-            <option value ="uptime">Uptime (days)</option>
-            <option value ="lastdescriptorpublished">Last Descriptor Published</option>
-            <option value ="ipaddress">IP Address</option>
-            <option value ="hostname">Hostname</option>
-            <option value ="orport">Onion Router Port</option>
-            <option value ="dsport">Directory Sever Port</option>
-            <option value ="platform">Platform</option>
-            <option value ="contact">Contact</option>
+            <option value ="fingerprint" {% if not queryOptions or queryOptions|key:'criteria' == "fingerprint" %}
+                                                            SELECTED {% endif %}>Fingerprint</option>
+            <option value ="nickname" {% if queryOptions and queryOptions|key:'criteria' == "nickname" %}
+                                                            SELECTED {% endif %}>Router Name</option>
+            <option value ="geoip" {% if queryOptions and queryOptions|key:'criteria' == "geoip" %}
+                                                            SELECTED {% endif %}>Country Code</option>
+            <option value ="bandwidth" {% if queryOptions and queryOptions|key:'criteria' == "bandwidth" %}
+                                                            SELECTED {% endif %}>Bandwidth (kb/s)</option>
+            <option value ="uptime" {% if queryOptions and queryOptions|key:'criteria' == "uptime" %}
+                                                            SELECTED {% endif %}>Uptime (days)</option>
+            <option value ="published" {% if queryOptions and queryOptions|key:'criteria' == "published" %}
+                                                            SELECTED {% endif %}>Last Descriptor Published</option>
+            <option value ="address" {% if queryOptions and queryOptions|key:'criteria' == "address" %}
+                                                            SELECTED {% endif %}>IP Address</option>
+            <option value ="hostname" {% if queryOptions and queryOptions|key:'criteria' == "hostname" %}
+                                                            SELECTED {% endif %}>Hostname</option>
+            <option value ="orport" {% if queryOptions and queryOptions|key:'criteria' == "orport" %}
+                                                            SELECTED {% endif %}>Onion Router Port</option>
+            <option value ="dirport" {% if queryOptions and queryOptions|key:'criteria' == "dirport" %}
+                                                            SELECTED {% endif %}>Directory Sever Port</option>
+            <option value ="platform" {% if queryOptions and queryOptions|key:'criteria' == "platform" %}
+                                                            SELECTED {% endif %}>Platform</option>
+            <option value ="contact" {% if queryOptions and queryOptions|key:'criteria' == "contact" %}
+                                                            SELECTED {% endif %}>Contact</option>
             </select>
             </td>
             <td>
             <select id="sortRouterListing" name="boolLogic">
-            <option value ="equals">Equals</option>
-            <option value ="contains">Contains</option>
-            <option value ="less">Is Less Than</option>
-            <option value ="greater">Is Greater Than</option>
+            <option value ="equals" {% if not queryOptions or queryOptions|key:'boolLogic' == "equals" %}
+                                                            SELECTED {% endif %}>Equals</option>
+            <option value ="contains" {% if queryOptions and queryOptions|key:'boolLogic' == "contains" %}
+                                                            SELECTED {% endif %}>Contains</option>
+            <option value ="less" {% if queryOptions and queryOptions|key:'boolLogic' == "less" %}
+                                                            SELECTED {% endif %}>Is Less Than</option>
+            <option value ="greater" {% if queryOptions and queryOptions|key:'boolLogic' == "greater" %}
+                                                            SELECTED {% endif %}>Is Greater Than</option>
             </select>
             </td>
         </tr>
         <tr>
             <td colspan="2">
-            <input id="sortRouterListing" type="text" name="searchValue" />
+            <input id="sortRouterListing" type="text" name="searchValue" {% if queryOptions and queryOptions|key:'searchValue' %}
+                                                                    value="{{queryOptions|key:'searchValue'}}" 
+                                                                    {% endif %}/>
             </td>
         </tr>
         </table>
