@@ -70,7 +70,6 @@ def index(request):
                    bandwidthburst=Sum('descriptorid__bandwidthburst'),
                    bandwidthobserved=Sum('descriptorid__bandwidthobserved'))
 
-
     # USER QUERY MODIFICATIONS ----------------------------------------
     # -----------------------------------------------------------------
     currentColumns = []
@@ -108,6 +107,10 @@ def index(request):
             statusentries = statusentries.filter(isexit=1)
         elif queryOptions['isexit'] == 'no':
             statusentries = statusentries.filter(isexit=0)
+        if queryOptions['isfast'] == 'yes':
+            statusentries = statusentries.filter(isfast=1)
+        elif queryOptions['isfast'] == 'no':
+            statusentries = statusentries.filter(isfast=0)
         if queryOptions['isguard'] == 'yes':
             statusentries = statusentries.filter(isguard=1)
         elif queryOptions['isguard'] == 'no':
@@ -138,7 +141,6 @@ def index(request):
             statusentries = statusentries.filter(isv2dir=1)
         elif queryOptions['isv2dir'] == 'no':
             statusentries = statusentries.filter(isv2dir=0)
-
 
     # USER QUERY AGGREGATE STATISTICS ---------------------------------
     # -----------------------------------------------------------------
@@ -176,6 +178,7 @@ def index(request):
                        'queryOptions': queryOptions}
     return render_to_response('index.html', template_values)
 
+
 def details(request, fingerprint):
     """
     Supply the L{Statusentry} and L{Geoipdb} objects associated with a
@@ -203,7 +206,7 @@ def details(request, fingerprint):
             validafter=last_va).extra(select={
             'geoip': 'geoip_lookup(address)'})\
             .order_by('nickname')
-    entry = a.filter(fingerprint = fingerprint).order_by('validafter')[0]
+    entry = a.filter(fingerprint=fingerprint).order_by('validafter')[0]
     descriptor = entry.descriptorid
     template_values = {'descriptor': descriptor, 'statusentry': entry}
     return render_to_response('details.html', template_values)
@@ -685,11 +688,10 @@ def current_results_csv(request):
             a = a.filter(isv2dir=0)
     #############################################################
 
-
     #Create the HttpResponse object with the appropriate CSV header.
     response = HttpResponse(mimetype='text/csv')
-    response['Content-Disposition'] = 'attachment; filename=current_results.csv'
-
+    response['Content-Disposition'] = \
+            'attachment; filename=current_results.csv'
     ########################################################
     #
     #   We need to check for which columns are being searched for and
@@ -799,7 +801,7 @@ def all_ip_csv(request):
     for entry in a:
         IPs.append(entry.address)
 
-    response = HttpResponse(mimetype= 'text/csv')
+    response = HttpResponse(mimetype='text/csv')
     response['Content-Disposition'] = 'attachment; filename=all_ips_csv'
 
     writer = csv.writer(response)
@@ -836,6 +838,7 @@ def networkstatisticgraphs(request):
     # Either this structure should be fixed or the queries should be
     # cached.
     return render_to_response('statisticgraphs.html')
+
 
 def bycountrycode(request):
     """
@@ -1396,7 +1399,7 @@ def _currentColumns_INIT():
 
 
 def _availableColumns_INIT():
-    availableColumns =  ["Fingerprint", "LastDescriptorPublished",
+    availableColumns = ["Fingerprint", "LastDescriptorPublished",
                          "Contact", "BadDir"]
     return availableColumns
 

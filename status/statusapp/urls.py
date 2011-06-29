@@ -3,7 +3,7 @@ from django.views.static import *
 from django.conf import settings
 
 urlpatterns = patterns('',
-	(r'^$', 'statusapp.views.index'),
+    (r'^$', 'statusapp.views.index'),
     (r'^details/(?P<fingerprint>\w{40})/readhist.png$',
         'statusapp.views.readhist'),
     (r'^details/(?P<fingerprint>\w{40})/writehist.png$',
@@ -31,7 +31,7 @@ urlpatterns = patterns('',
     (r'^network-statistic-graphs/$',
         'statusapp.views.networkstatisticgraphs'),
     (r'^column-preferences/$', 'statusapp.views.columnpreferences'),
-    (r'^Tor-Query-Export.csv$','statusapp.views.current_results_csv'),
-    (r'^Tor-IP-List-All.csv$','statusapp.views.all_ip_csv'),
-    (r'^Tor-IP-List-Exit.csv$','statusapp.views.all_exit_csv'),
+    (r'^Tor-Query-Export.csv$', 'statusapp.views.current_results_csv'),
+    (r'^Tor-IP-List-All.csv$', 'statusapp.views.all_ip_csv'),
+    (r'^Tor-IP-List-Exit.csv$', 'statusapp.views.all_exit_csv'),
 )

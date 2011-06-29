@@ -1,10 +1,6 @@
 """
 Custom filters for the details page.
 """
-
-# TODO: rawdesc methods are part of the application logic, and should
-# exist in statusapp.views rather than here.
-
 from django import template
 
 register = template.Library()
@@ -23,7 +19,6 @@ def words(seconds):
     @rtype: C{string}
     @return: The duration divided into days, hours, minutes, and seconds.
     """
-
     seconds = int(seconds)
 
     days = seconds / 86000
@@ -49,7 +44,6 @@ def format_fing(fingerprint):
     @return: The capitalized fingerprint with spaces every four
     characters.
     """
-
     fingerprint_list = [str(fingerprint)[i:(i + 4)] for i in
             range(0, 40, 4)]
     new_fingerprint = " ".join(fingerprint_list)
@@ -109,6 +103,7 @@ def exitinfo(rawdesc):
         if (line.startswith(("accept", "reject"))):
             policy.append(line)
     return policy
+
 
 @register.filter
 def contact(rawdesc):
@@ -222,7 +217,6 @@ def hostname(address):
     @rtype: C{string}
     @return: The hostname that corresponds to the IP address.
     """
-
     from socket import getfqdn
     return getfqdn(str(address))
 
