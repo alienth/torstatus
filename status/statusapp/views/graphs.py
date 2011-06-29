@@ -353,7 +353,7 @@ def exitbycountrycode(request):
                  frameon=False)
     ax = fig.add_subplot(111)
 
-    bar_width = 0.5
+    bar_width = 0.6
     ax.bar(xs, ys, color='#66CD00', width=bar_width)
 
     # Label the height of each bar.
