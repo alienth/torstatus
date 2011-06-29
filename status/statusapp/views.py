@@ -385,7 +385,7 @@ def readhist(request, fingerprint):
 
     ax.set_xlabel("Time (GMT)", fontsize='12')
     ax.set_xticks(range(0, 104, 8))
-    ax.set_xticklabels(times, fontsize='9', fontweight='bold')
+    ax.set_xticklabels(times, fontsize='8', fontweight='bold')
 
     ax.set_ylabel("Bandwidth (bytes/sec)", fontsize='12')
 
