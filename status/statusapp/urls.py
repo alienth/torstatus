@@ -7,13 +7,13 @@ urlpatterns = patterns('',
     (r'^$', 'statusapp.views.pages.index'),
     (r'^column-preferences/$', 'statusapp.views.pages.columnpreferences'),
     (r'^exit-node-query/$', 'statusapp.views.pages.exitnodequery'),
-  
+
     # Media Files
     (r'^flags/(?P<country_code>\w\w).gif$',
         'statusapp.views.displayFlag'),
     (r'^static/(?P<path>.*)$', 'django.views.static.serve',
             {'document_root': settings.MEDIA_ROOT}),
-     
+
     # Details Page
     (r'^details/(?P<fingerprint>\w{40})$', 'statusapp.views.pages.details'),
     # Details Page Graphs
@@ -21,11 +21,11 @@ urlpatterns = patterns('',
         'statusapp.views.graphs.readhist'),
     (r'^details/(?P<fingerprint>\w{40})/writehist.png$',
         'statusapp.views.graphs.writehist'),
-        
+
     # Whois Page
     (r'^details/(?P<address>.{7,15})/whois$',
         'statusapp.views.pages.whois'),
-    
+
     # Network Statistic Graphs Page
     (r'^network-statistic-graphs/$',
         'statusapp.views.pages.networkstatisticgraphs'),
@@ -42,7 +42,7 @@ urlpatterns = patterns('',
         'statusapp.views.graphs.byobservedbandwidth'),
     (r'^network-statistic-graphs/byplatform.png$',
         'statusapp.views.graphs.byplatform'),
-    
+
     # CSV Files
     (r'^Tor-Query-Export.csv$', 'statusapp.views.csvs.current_results_csv'),
     (r'^Tor-IP-List-All.csv$', 'statusapp.views.csvs.all_ip_csv'),
