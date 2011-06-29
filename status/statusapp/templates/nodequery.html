@@ -33,7 +33,7 @@
             {% endif %}
         {% endif %}
     {% else %}
-    <tr><td id="searchQError">The Querry IP address you supplied, {{source}}, is not a valid IP
+    <tr><td id="searchQError">The Query IP address you supplied, {{source}}, is not a valid IP
     {% endif %}
     {% endifequal %}
 <tr>
@@ -55,8 +55,14 @@
                 {% endif %}
                 <br>
             {% endfor %}
+        </td></tr>
+        {% else %}
+            {% if source_valid %}
+                <tr><td id="searchQError">
+                The IP address you entered, {{source}}, does not match any active Tor servers.
+                </td>
+            {% endif %}
         {% endif %}
-    </td>
 </tr>
 <tr>
     <td>

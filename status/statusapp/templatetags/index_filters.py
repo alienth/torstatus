@@ -23,6 +23,7 @@ def kilobytes_ps(bytes_ps):
     else:
         return int(bytes_ps) / 1024
 
+
 @register.filter
 def days(seconds):
     """
@@ -42,16 +43,29 @@ def days(seconds):
 
 
 @register.filter
-def getcountry(location):
-    #the location returned contains the country and the coordinates.
-    return location.split(',')[0][1:3]
+def country(location):
+    """
+    Get the country associated with a tuple as a string consisting of
+    a country, a latitude, and a longitude.
+
+    >>> getcountry('(US,-43.0156,68.2351)')
+    'US'
+
+    @type location: C{string}
+    @param location: A tuple consisting of a country, latitude, and
+        longitude as a string.
+    @rtype: C{string}
+    @return: The country code in the tuple as a string.
+    """
+    return location[1:3].lower()
+
 
 @register.filter
 def percent(a, b):
     """
     Return C{a / b} as a percent.
 
-    @type a: C{int}
+    @type a: C{int} or C{NoneType}
     @param a: The numerator of the percent.
     @type b: C{int}
     @param b: The denominator of the percent.
@@ -63,19 +77,6 @@ def percent(a, b):
     else:
         return '%0.2f%%' % (100.0 * a / b)
 
-@register.filter
-def country(geoip):
-    """
-    Get the two-letter lowercase country code from a GeoIP string.
-
-    @type geoip: C{string} or C{buffer}
-    @param geoip: A string formatted as a tuple with entries country
-        code, latitude, and longitude.
-    @rtype: C{string}
-    @return: The lowercase two-letter country code associated with
-        C{geoip}.
-    """
-    return str(geoip).strip('()').split(',')[0].lower()
 
 @register.filter
 def latitude(geoip):
@@ -103,6 +104,7 @@ def longitude(geoip):
     @return: The longitude associated with C{geoip}.
     """
     return str(geoip).strip('()').split(',')[2]
+
 
 @register.filter
 def key(d, key_name):
