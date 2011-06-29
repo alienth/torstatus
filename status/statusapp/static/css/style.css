@@ -239,7 +239,7 @@ td#col_relayBandwidth {
 }
 
 td#col_relayUptime {
-    width: 50px;
+    width: 55px;
 }
 
 td#col_relayIcons {
@@ -257,7 +257,7 @@ td#col_relayDirport {
 }
 
 td#col_relayBadExit {
-    width: 50px;
+    width: 55px;
     text-align: center;
 }
 

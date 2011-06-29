@@ -83,19 +83,19 @@
 	<tr>
 	{% for columnName in currentColumns %}
 	    {% if columnName == "Country Code" %}
-        <th class="sorttable_alpha relayHeader">&nbsp</th>
+        <th class="sorttable_alpha relayHeader">&nbsp; &uarr;</th>
         {% endif %}
         {% if columnName == "Router Name" %}
-		<th class="sorttable_alpha relayHeader" id="routerName">Router Name</th>
+		<th class="sorttable_alpha relayHeader" id="routerName">Router Name &uarr;</th>
 		{% endif %}
 		{% if columnName == "Bandwidth" %}
-		<th class="sorttable_numeric relayHeader">Bandwidth</th>
+		<th class="sorttable_numeric relayHeader">Bandwidth &uarr;</th>
 		{% endif %}
 		{% if columnName == "Uptime" %}
-        <th class="sorttable_numeric relayHeader">Uptime</th>
+        <th class="sorttable_numeric relayHeader">Uptime &uarr; </th>
         {% endif %}
         {% if columnName == "IP" %}
-        <th class="sorttable_numeric relayHeader">IP</th>
+        <th class="sorttable_numeric relayHeader">IP &uarr;</th>
         {% endif %}
         {% if columnName == "Fingerprint" %}
         <th class="sorttable_alpha relayHeader">Fingerprint</th>
@@ -115,13 +115,13 @@
 		{% endif %}
 		{% endif %}
 		{% if columnName == "ORPort" %}
-        <th class="sorttable_numeric relayHeader">ORPort</th>
+        <th class="sorttable_numeric relayHeader">ORPort &loz;</th>
         {% endif %}
         {% if columnName == "DirPort" %}
-        <th class="sorttable_numeric relayHeader">DirPort</th>
+        <th class="sorttable_numeric relayHeader">DirPort &loz;</th>
         {% endif %}
         {% if columnName == "BadExit" %}
-        <th class="sorttable_numeric relayHeader">Bad Exit</th>
+        <th class="sorttable_numeric relayHeader">Bad Exit &loz;</th>
         {% endif %}
     {% endfor %}
 	</tr>
@@ -554,7 +554,7 @@
             </td>
             <td>
             <select id="sortRouterListing" name="boolLogic">
-            <option value ="no">Equals</option>
+            <option value ="equals">Equals</option>
             <option value ="contains">Contains</option>
             <option value ="less">Is Less Than</option>
             <option value ="greater">Is Greater Than</option>

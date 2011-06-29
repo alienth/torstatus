@@ -27,6 +27,18 @@ from statusapp.models import Statusentry, Descriptor, Bwhist,\
         Geoipdb, TotalBandwidth
 from custom.aggregate import CountCase
 
+# INIT Variables ------------------------------------------------------
+_currentColumns_INIT = ["Country Code", "Router Name", "Bandwidth",
+                      "Uptime", "IP", "Hostname", "Icons", "ORPort",
+                      "DirPort", "BadExit", "Named", "Exit",
+                      "Authority", "Fast", "Guard", "Stable",
+                      "Running", "Valid", "V2Dir", "Platform",
+                      "Hibernating"]
+_availableColumns_INIT = ["Fingerprint", "LastDescriptorPublished",
+                         "Contact", "BadDir"]
+_notMovableColumns_INIT = ["Named", "Exit", "Authority", "Fast", "Guard",
+                         "Stable", "Running", "Valid", "V2Dir",
+                         "Platform", "Hibernating"]
 
 # TODO: get rid of javascript sorting: pass another argument
 # to this view function and sort the table accordingly.
@@ -138,14 +150,38 @@ def index(request):
             statusentries = statusentries.filter(isv2dir=1)
         elif queryOptions['isv2dir'] == 'no':
             statusentries = statusentries.filter(isv2dir=0)
-        
+
+       ###################################
+       #
+       # FINISH THIS ----> 
+       #
+       ################################### 
         if queryOptions['searchValue'] != "":
-            criteriaDict = {'fingerprint': fingerprint, }
+            # IDEA TO AVOID MULTIPLE, REDUNDANT, IF STATEMENTS
+            #criteriaDict = {'fingerprint': fingerprint, 'nickname': nickname,
+            #                'countrycode': geoip[1:3], }
             value = queryOptions['searchValue']
             criteria = queryOptions['criteria']
             logic = queryOptions['boolLogic']
             
-            #if criteria == "
+            if criteria == 'fingerprint':
+                if logic == 'equals':
+                    statusentries = statusentries.filter(fingerprint=value)
+                elif logic == 'contains':
+                    statusentries = statusentries.filter(fingerprint__contains=value)
+                elif logic == 'less':
+                    statusentries = statusentries.filter(fingerprint__lt=value)
+                elif logic == 'greater':
+                    statusentries = statusentries.filter(fingerprint__gt=value)
+            elif criteria == 'nickname':
+                if logic == 'equals':
+                    statusentries = statusentries.filter(nickname=value)
+                elif logic == 'contains':
+                    statusentries = statusentries.filter(nickname__contains=value)
+                elif logic == 'less':
+                    statusentries = statusentries.filter(nickname__lt=value)
+                elif logic == 'greater':
+                    statusentries = statusentries.filter(nickname__gt=value)
         
         sortOptions = ['nickname', 'fingerprint', 'geoip',
                        'bandwidth', 'uptime', 'published',
@@ -1410,30 +1446,6 @@ def columnpreferences(request):
                        'selectedEntry': columnLists[2]}
 
     return render_to_response('columnpreferences.html', template_values)
-
-
-def _currentColumns_INIT():
-    currentColumns = ["Country Code", "Router Name", "Bandwidth",
-                      "Uptime", "IP", "Hostname", "Icons", "ORPort",
-                      "DirPort", "BadExit", "Named", "Exit",
-                      "Authority", "Fast", "Guard", "Stable",
-                      "Running", "Valid", "V2Dir", "Platform",
-                      "Hibernating"]
-    return currentColumns
-
-
-def _availableColumns_INIT():
-    availableColumns =  ["Fingerprint", "LastDescriptorPublished",
-                         "Contact", "BadDir"]
-    return availableColumns
-
-
-def _notMovableColumns_INIT():
-    notMovableColumns = ["Named", "Exit", "Authority", "Fast", "Guard",
-                         "Stable", "Running", "Valid", "V2Dir",
-                         "Platform", "Hibernating"]
-    return notMovableColumns
-
 
 def _buttonChoice(request, button, field, currentColumns,
         availableColumns):

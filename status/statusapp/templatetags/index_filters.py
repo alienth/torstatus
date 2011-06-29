@@ -58,7 +58,10 @@ def percent(a, b):
     @rtype: C{string}
     @return: C{a / b} as a percent as a string.
     """
-    return '%0.2f%%' % (100.0 * a / b)
+    if a is None:
+        return '0.00%'
+    else:
+        return '%0.2f%%' % (100.0 * a / b)
 
 @register.filter
 def country(geoip):
