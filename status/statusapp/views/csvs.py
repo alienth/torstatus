@@ -7,7 +7,7 @@ import csv
 
 # TorStatus specific import statements --------------------------------
 from statusapp.models import Statusentry, Descriptor
-
+from helpers import *
 
 # INIT Variables ------------------------------------------------------
 CURRENT_COLUMNS = ["Country Code", "Router Name", "Bandwidth",
@@ -149,7 +149,7 @@ def current_results_csv(request):
 
     if "Contact" in currentColumns:
         for entry in statusentries:
-            rows["Contact"].append(_contact(entry.descriptorid.rawdesc))
+            rows["Contact"].append(contact(entry.descriptorid.rawdesc))
 
     if "BadDir" in currentColumns:
         for entry in statusentries:

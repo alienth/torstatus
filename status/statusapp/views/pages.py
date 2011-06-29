@@ -47,7 +47,7 @@ def index(request):
 
     Currently, an "active relay" is a relay that has a status entry
     that was published in the last consensus.
-
+    
     @rtype: HttpRequest
     @return: A dictionary consisting of information about each router
         in the network as well as aggregate information about the
@@ -95,86 +95,9 @@ def index(request):
             request.session['queryOptions'] = query_options
     if (not query_options and 'queryOptions' in request.session):
             query_options = request.session['queryOptions']
-
-    if query_options:
-        # ADD ishibernating AFTER WE KNOW HOW TO CHECK THAT
-        options = ['isauthority', 'isbaddirectory', 'isbadexit', \
-                   'isexit', 'isfast', 'isguard', 'isnamed', \
-                   'isstable', 'isrunning', 'isvalid', 'isv2dir']
-        # options is needed because query_options has some other things that we 
-        #      do not need in this case (the other search query key-values).
-        valid_options = filter(lambda k: query_options[k] != '' and k in options, \
-                                query_options)
-        filterby = {}
-        for opt in valid_options: 
-            filterby[opt] = 1 if query_options[opt] == 'yes' else 0
-        statusentries = statusentries.filter(**filterby)
     
-        if query_options['searchValue'] != '':
-            # IDEA TO AVOID MULTIPLE, REDUNDANT, IF STATEMENTS
-            #criteriaDict = {'fingerprint': fingerprint, 'nickname': nickname,
-            #                'countrycode': geoip[1:3], }
-            value = query_options['searchValue']
-            criteria = query_options['criteria']
-            logic = query_options['boolLogic']
-            
-            options = ['nickname', 'fingerprint', 'geoip',
-                       'bandwidth', 'uptime', 'published',
-                       'hostname', 'address', 'orport', 'dirport',
-                       'platform', 'contact']
-                       
-            descriptorlist_options = ['platform', 'uptime', 'contact'] 
-            
-            if criteria in descriptorlist_options:
-                criteria = 'descriptorid__' + criteria
-                
-            if logic == 'contains':
-                criteria = criteria + '__contains'
-            elif logic == 'less':
-                criteria = criteria + '__lt'
-            elif logic == 'greater':
-                criteria = criteria + '__gt'
-            filterby[criteria] = value
-            
-            statusentries = statusentries.filter(**filterby)
-            """
-            if criteria == 'fingerprint':
-                if logic == 'equals':
-                    statusentries = statusentries.filter(fingerprint=value)
-                elif logic == 'contains':
-                    statusentries = statusentries.filter(fingerprint__contains=value)
-                elif logic == 'less':
-                    statusentries = statusentries.filter(fingerprint__lt=value)
-                elif logic == 'greater':
-                    statusentries = statusentries.filter(fingerprint__gt=value)
-            elif criteria == 'nickname':
-                if logic == 'equals':
-                    statusentries = statusentries.filter(nickname=value)
-                elif logic == 'contains':
-                    statusentries = statusentries.filter(nickname__contains=value)
-                elif logic == 'less':
-                    statusentries = statusentries.filter(nickname__lt=value)
-                elif logic == 'greater':
-                    statusentries = statusentries.filter(nickname__gt=value)
-            """
-        sort_options = ['nickname', 'fingerprint', 'geoip',
-                       'bandwidth', 'uptime', 'published',
-                       'hostname', 'address', 'orport', 'dirport',
-                       'platform', 'contact', 'isauthority', 
-                       'isbaddirectory', 'isbadexit', 'isexit',
-                       'isfast', 'isguard', 'ishibernating', 
-                       'isnamed', 'isstable', 'isrunning', 
-                       'isvalid', 'isv2dir']
-        descriptorlist_options = ['platform', 'uptime', 'contact'] 
-        selected_option = query_options['sortListings']
-        if selected_option in sort_options:
-            if selected_option in descriptorlist_options:
-                selected_option = 'descriptorid__' + selected_option
-            if query_options['sortOrder'] == 'ascending':
-                statusentries = statusentries.order_by(selected_option)
-            elif query_options['sortOrder'] == 'descending':
-                statusentries = statusentries.order_by('-' + selected_option)       
-        
+    statusentries = filter_statusentries(statusentries, query_options)
+    
     # USER QUERY AGGREGATE STATISTICS ---------------------------------
     # -----------------------------------------------------------------
     counts = statusentries.aggregate(
@@ -421,9 +344,9 @@ def columnpreferences(request):
     @return: renders to the page the currently selected columns, the
         available columns and the previous selection.
     '''
-    currentColumns = []
-    availableColumns = []
-    notMovableColumns = NOT_MOVABLE_COLUMNS
+    current_columns = []
+    available_columns = []
+    not_movable_columns = NOT_MOVABLE_COLUMNS
 
     if ('resetPreferences' in request.GET):
         del request.session['currentColumns']
@@ -431,41 +354,41 @@ def columnpreferences(request):
 
     if not ('currentColumns' in request.session and 'availableColumns' \
             in request.session):
-        currentColumns = CURRENT_COLUMNS
-        availableColumns = AVAILABLE_COLUMNS
-        request.session['currentColumns'] = currentColumns
-        request.session['availableColumns'] = availableColumns
+        current_columns = CURRENT_COLUMNS
+        available_columns = AVAILABLE_COLUMNS
+        request.session['currentColumns'] = current_columns
+        request.session['availableColumns'] = available_columns
     else:
-        currentColumns = request.session['currentColumns']
-        availableColumns = request.session['availableColumns']
+        current_columns = request.session['currentColumns']
+        available_columns = request.session['availableColumns']
 
-    columnLists = [currentColumns, availableColumns, '']
+    column_lists = [current_columns, available_columns, '']
     if ('removeColumn' in request.GET and 'selected_removeColumn' \
         in request.GET):
-        columnLists = buttonChoice(request, 'removeColumn',
-                      'selected_removeColumn', currentColumns,
-                      availableColumns)
+        column_lists = button_choice(request, 'removeColumn',
+                      'selected_removeColumn', current_columns,
+                      available_columns)
     elif ('addColumn' in request.GET and 'selected_addColumn' \
           in request.GET):
-        columnLists = buttonChoice(request, 'addColumn',
-                'selected_addColumn', currentColumns, availableColumns)
+        column_lists = button_choice(request, 'addColumn',
+                'selected_addColumn', current_columns, available_columns)
     elif ('upButton' in request.GET and 'selected_removeColumn' \
           in request.GET):
         if not(request.GET['selected_removeColumn'] in \
-               notMovableColumns):
-            columnLists = buttonChoice(request, 'upButton', \
-                          'selected_removeColumn', currentColumns,
-                          availableColumns)
+               not_movable_columns):
+            column_lists = button_choice(request, 'upButton', \
+                          'selected_removeColumn', current_columns,
+                          available_columns)
     elif ('downButton' in request.GET and 'selected_removeColumn' \
           in request.GET):
         if not(request.GET['selected_removeColumn'] in \
-               notMovableColumns):
-            columnLists = buttonChoice(request, 'downButton', \
-                          'selected_removeColumn', currentColumns,
-                          availableColumns)
+               not_movable_columns):
+            column_lists = button_choice(request, 'downButton', \
+                          'selected_removeColumn', current_columns,
+                          available_columns)
 
-    template_values = {'currentColumns': columnLists[0],
-                       'availableColumns': columnLists[1],
-                       'selectedEntry': columnLists[2]}
+    template_values = {'currentColumns': column_lists[0],
+                       'availableColumns': column_lists[1],
+                       'selectedEntry': column_lists[2]}
 
     return render_to_response('columnpreferences.html', template_values)
