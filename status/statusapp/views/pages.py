@@ -18,7 +18,7 @@ from django.db.models import Max, Sum, Count
 from statusapp.models import Statusentry, Descriptor, Bwhist,\
         TotalBandwidth
 from custom.aggregate import CountCase
-from helpers import * 
+from helpers import *
 
 
 # INIT Variables ------------------------------------------------------
@@ -289,7 +289,6 @@ def whois(request, address):
 
 
 def exitnodequery(request):
-    # TODO: See code reviews from 21 June
     """
     Determine if an IP address is an active Tor server, and optionally
     see if the server's exit policy would permit it to exit to a given
