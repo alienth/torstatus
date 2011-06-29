@@ -24,8 +24,8 @@ def filter_statusentries(statusentries, query_options):
     filterby = {}
     for opt in valid_options: 
         filterby[opt] = 1 if query_options[opt] == 'yes' else 0
-    
-    if query_options['searchValue'] != '':
+ 
+    if 'searchValue' in query_options and query_options['searchValue'] != '':
         value = query_options['searchValue']
         criteria = query_options['criteria']
         logic = query_options['boolLogic']
@@ -56,8 +56,11 @@ def filter_statusentries(statusentries, query_options):
                'isfast', 'isguard', 'ishibernating', 
                'isnamed', 'isstable', 'isrunning', 
                'isvalid', 'isv2dir']
-    descriptorlist_options = ['platform', 'uptime', 'contact'] 
-    selected_option = query_options['sortListings']
+    descriptorlist_options = ['platform', 'uptime', 'contact']
+    if 'sortListings' in query_options: 
+        selected_option = query_options['sortListings']
+    else:
+        selected_option = ''
     if selected_option in options:
         if selected_option in descriptorlist_options:
             selected_option = 'descriptorid__' + option
