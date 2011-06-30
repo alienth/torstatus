@@ -1,43 +1,112 @@
 # Django-specific import statements -----------------------------------
-from django.http import HttpRequest
+from django.http import HttpRequest 
 
-def buttonChoice(request, button, field, currentColumns,
-        availableColumns):
+
+def filter_statusentries(statusentries, query_options):
+    """
+    Helper function that gets a QuerySet of status entries and a
+    dictionary of search query options and filteres the QuerySet
+    based on this dictionary.
+    
+    @see: index
+    @rtype: QuerySet
+    @return: statusentries
+    """
+    
+    # ADD ishibernating AFTER WE KNOW HOW TO CHECK THAT
+    options = ['isauthority', 'isbaddirectory', 'isbadexit', \
+               'isexit', 'isfast', 'isguard', 'isnamed', \
+               'isstable', 'isrunning', 'isvalid', 'isv2dir']
+    # options is needed because query_options has some other things that we 
+    #      do not need in this case (the other search query key-values).
+    valid_options = filter(lambda k: query_options[k] != '' and k in options, \
+                            query_options)
+    filterby = {}
+    for opt in valid_options: 
+        filterby[opt] = 1 if query_options[opt] == 'yes' else 0
+ 
+    if 'searchValue' in query_options and query_options['searchValue'] != '':
+        value = query_options['searchValue']
+        criteria = query_options['criteria']
+        logic = query_options['boolLogic']
+            
+        options = ['nickname', 'fingerprint', 'geoip',
+                   'bandwidth', 'published',
+                   'hostname', 'address', 'orport', 'dirport']            
+        descriptorlist_options = ['platform', 'uptime'] 
+          
+        if criteria in descriptorlist_options:
+            criteria = 'descriptorid__' + criteria
+                
+        if logic == 'contains':
+            criteria = criteria + '__contains'
+        elif logic == 'less':
+            criteria = criteria + '__lt'
+        elif logic == 'greater':
+            criteria = criteria + '__gt'
+        filterby[criteria] = value
+            
+    statusentries = statusentries.filter(**filterby)
+    
+    options = ['nickname', 'fingerprint', 'geoip',
+               'bandwidth', 'uptime', 'published',
+               'hostname', 'address', 'orport', 'dirport',
+               'platform', 'contact', 'isauthority', 
+               'isbaddirectory', 'isbadexit', 'isexit',
+               'isfast', 'isguard', 'ishibernating', 
+               'isnamed', 'isstable', 'isrunning', 
+               'isvalid', 'isv2dir']
+    descriptorlist_options = ['platform', 'uptime', 'contact']
+    if 'sortListings' in query_options: 
+        selected_option = query_options['sortListings']
+    else:
+        selected_option = ''
+    if selected_option in options:
+        if selected_option in descriptorlist_options:
+            selected_option = 'descriptorid__' + option
+        if query_options['sortOrder'] == 'ascending':
+            statusentries = statusentries.order_by(selected_option)
+        elif query_options['sortOrder'] == 'descending':
+            statusentries = statusentries.order_by('-' + selected_option)
+    return statusentries
+
+def button_choice(request, button, field, current_columns,
+        available_columns):
     """
     Helper function that manages the changes in the L{columnpreferences}
     arrays/lists.
 
     @rtype: list(list(int), list(int), string)
-    @return: columnLists
+    @return: column_lists
     """
     selection = request.GET[field]
     if (button == 'removeColumn'):
-        availableColumns.append(selection)
-        currentColumns.remove(selection)
+        available_columns.append(selection)
+        current_columns.remove(selection)
     elif (button == 'addColumn'):
-        currentColumns.append(selection)
-        availableColumns.remove(selection)
+        current_columns.append(selection)
+        available_columns.remove(selection)
     elif (button == 'upButton'):
-        selectionPos = currentColumns.index(selection)
-        if (selectionPos > 0):
-            aux = currentColumns[selectionPos - 1]
-            currentColumns[selectionPos - 1] = \
-                           currentColumns[selectionPos]
-            currentColumns[selectionPos] = aux
+        selection_pos = current_columns.index(selection)
+        if (selection_pos > 0):
+            aux = current_columns[selection_pos - 1]
+            current_columns[selection_pos - 1] = \
+                           current_columns[selection_pos]
+            current_columns[selection_pos] = aux
     elif (button == 'downButton'):
-        selectionPos = currentColumns.index(selection)
-        if (selectionPos < len(currentColumns) - 1):
-            aux = currentColumns[selectionPos + 1]
-            currentColumns[selectionPos + 1] = \
-                           currentColumns[selectionPos]
-            currentColumns[selectionPos] = aux
-    request.session['currentColumns'] = currentColumns
-    request.session['availableColumns'] = availableColumns
-    columnLists = []
-    columnLists.append(currentColumns)
-    columnLists.append(availableColumns)
-    columnLists.append(selection)
-    return columnLists
+        selection_pos = current_columns.index(selection)
+        if (selection_pos < len(current_columns) - 1):
+            aux = current_columns[selection_pos + 1]
+            current_columns[selection_pos + 1] = \
+                           current_columns[selection_pos]
+            current_columns[selection_pos] = aux
+    request.session['currentColumns'] = current_columns
+    request.session['availableColumns'] = available_columns
+    column_lists = []
+    column_lists.append(current_columns)
+    column_lists.append(available_columns)
+    column_lists.append(selection)
+    return column_lists
 
 
 def get_exit_policy(rawdesc):

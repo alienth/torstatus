@@ -1,3 +1,6 @@
+"""
+Views for statusapp that involve creating dynamic graphs.
+"""
 # General python import statements ------------------------------------
 import datetime
 
@@ -16,6 +19,8 @@ from statusapp.models import Statusentry, Bwhist
 from custom.aggregate import CountCase
 
 
+# TODO: Get rid of "magic numbers in graphs", so that the graphs are
+# more easily customizable by future maintainers.
 def readhist(request, fingerprint):
     """
     Create a graph of read bandwidth history for the last twenty-four
@@ -31,17 +36,29 @@ def readhist(request, fingerprint):
     @return: A PNG image that is the graph of the read bandwidth
         history information for the given router.
     """
-    from django.core.exceptions import ObjectDoesNotExist
-    import matplotlib
-    from matplotlib.backends.backend_agg import \
-            FigureCanvasAgg as FigureCanvas
-    from matplotlib.figure import Figure
+    # Width and height of the graph in pixels
+    WIDTH = 480
+    HEIGHT = 320
+    # Space in pixels given around plot
+    TOP_MARGIN = 42
+    BOTTOM_MARGIN = 32
+    LEFT_MARGIN = 98
+    RIGHT_MARGIN = 5
+    # Font sizes, in pixels
+    X_FONT_SIZE = '8'
+    Y_FONT_SIZE = '8'
+    # Font weight used for labels and titles.
+    FONT_WEIGHT = 'bold'
 
-    # Draw the graph such that the labels and title are visible,
-    # and remove excess whitespace.
-    matplotlib.rcParams['figure.subplot.left'] = 0.2
-    matplotlib.rcParams['figure.subplot.right'] = 0.99
-    matplotlib.rcParams['figure.subplot.top'] = 0.87
+    # Set margins according to specification.
+    matplotlib.rcParams['figure.subplot.left'] = \
+            float(LEFT_MARGIN) / WIDTH
+    matplotlib.rcParams['figure.subplot.right'] = \
+            float(WIDTH - RIGHT_MARGIN) / WIDTH
+    matplotlib.rcParams['figure.subplot.top'] = \
+            float(HEIGHT - TOP_MARGIN) / HEIGHT
+    matplotlib.rcParams['figure.subplot.bottom'] = \
+            float(BOTTOM_MARGIN) / HEIGHT
 
     last_hist = Bwhist.objects.filter(fingerprint=fingerprint)\
                 .order_by('-date')[:1][0]
@@ -82,8 +99,10 @@ def readhist(request, fingerprint):
             y_list = ([0] * 96)
         tr_list[0:0] = y_list[(-1 * to_fill):]
 
-    fig = Figure(facecolor='white', edgecolor='black', figsize=(6, 4),
-                 frameon=False)
+    width_inches = float(WIDTH) / 80
+    height_inches = float(HEIGHT) / 80
+    fig = Figure(facecolor='white', edgecolor='black',
+                 figsize=(width_inches, height_inches), frameon=False)
     ax = fig.add_subplot(111)
 
     # Return bytes per second, not total bandwidth for 15 minutes.
@@ -103,7 +122,8 @@ def readhist(request, fingerprint):
 
     ax.set_xlabel("Time (GMT)", fontsize='12')
     ax.set_xticks(range(0, 104, 8))
-    ax.set_xticklabels(times, fontsize='8', fontweight='bold')
+    ax.set_xticklabels(times, fontsize=X_FONT_SIZE,
+                       fontweight=FONT_WEIGHT)
 
     ax.set_ylabel("Bandwidth (bytes/sec)", fontsize='12')
 
@@ -113,13 +133,13 @@ def readhist(request, fingerprint):
     # Don't use scientific notation.
     ax.yaxis.major.formatter.set_scientific(False)
     for tick in ax.yaxis.get_major_ticks():
-        tick.label1.set_fontsize('9')
-        tick.label1.set_fontweight('bold')
+        tick.label1.set_fontsize(Y_FONT_SIZE)
+        tick.label1.set_fontweight(FONT_WEIGHT)
 
     ax.set_title("Average Bandwidth Read History:\n"
             + start_time.strftime("%Y-%m-%d %H:%M") + " to "
             + end_time.strftime("%Y-%m-%d %H:%M"), fontsize='12',
-            fontweight='bold')
+            fontweight=FONT_WEIGHT)
 
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
@@ -142,12 +162,31 @@ def writehist(request, fingerprint):
     @return: A PNG image that is the graph of the written bandwidth
         history information for the given router.
     """
+    # Width and height of the graph in pixels
+    WIDTH = 480
+    HEIGHT = 320
+    # Space in pixels given around plot
+    # NOTE: be careful with these margins; some values can cause
+    # irregular behavior
+    TOP_MARGIN = 42
+    BOTTOM_MARGIN = 32
+    LEFT_MARGIN = 98
+    RIGHT_MARGIN = 5
+    # Font sizes, in pixels
+    X_FONT_SIZE = '8'
+    Y_FONT_SIZE = '8'
+    # Font weight used for labels and titles.
+    FONT_WEIGHT = 'bold'
 
-    # Draw the graph such that the labels and title are visible,
-    # and remove excess whitespace.
-    matplotlib.rcParams['figure.subplot.left'] = 0.2
-    matplotlib.rcParams['figure.subplot.right'] = 0.99
-    matplotlib.rcParams['figure.subplot.top'] = 0.87
+    # Set margins according to specification.
+    matplotlib.rcParams['figure.subplot.left'] = \
+            float(LEFT_MARGIN) / WIDTH
+    matplotlib.rcParams['figure.subplot.right'] = \
+            float(WIDTH - RIGHT_MARGIN) / WIDTH
+    matplotlib.rcParams['figure.subplot.top'] = \
+            float(HEIGHT - TOP_MARGIN) / HEIGHT
+    matplotlib.rcParams['figure.subplot.bottom'] = \
+            float(BOTTOM_MARGIN) / HEIGHT
 
     last_hist = Bwhist.objects.filter(fingerprint=fingerprint)\
                 .order_by('-date')[:1][0]
@@ -186,8 +225,10 @@ def writehist(request, fingerprint):
             y_list = ([0] * 96)
         tr_list[0:0] = y_list[(-1 * to_fill):]
 
-    fig = Figure(facecolor='white', edgecolor='black', figsize=(6, 4),
-                 frameon=False)
+    width_inches = float(WIDTH) / 80
+    height_inches = float(HEIGHT) / 80
+    fig = Figure(facecolor='white', edgecolor='black',
+                 figsize=(width_inches, height_inches), frameon=False)
     ax = fig.add_subplot(111)
 
     # Return bytes per second, not total bandwidth for 15 minutes.
@@ -208,7 +249,8 @@ def writehist(request, fingerprint):
 
     ax.set_xlabel("Time (GMT)", fontsize='12')
     ax.set_xticks(range(0, 104, 8))
-    ax.set_xticklabels(times, fontsize='8', fontweight='bold')
+    ax.set_xticklabels(times, fontsize=X_FONT_SIZE,
+                       fontweight=FONT_WEIGHT)
 
     ax.set_ylabel("Bandwidth (bytes/sec)", fontsize='12')
 
@@ -218,19 +260,20 @@ def writehist(request, fingerprint):
     # Don't use scientific notation.
     ax.yaxis.major.formatter.set_scientific(False)
     for tick in ax.yaxis.get_major_ticks():
-        tick.label1.set_fontsize('9')
-        tick.label1.set_fontweight('bold')
+        tick.label1.set_fontsize(Y_FONT_SIZE)
+        tick.label1.set_fontweight(FONT_WEIGHT)
 
     ax.set_title("Average Bandwidth Write History:\n"
             + start_time.strftime("%Y-%m-%d %H:%M") + " to "
             + end_time.strftime("%Y-%m-%d %H:%M"), fontsize='12',
-            fontweight='bold')
+            fontweight=FONT_WEIGHT)
 
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
     canvas.print_png(response, ha="center")
     return response
-    
+
+
 def bycountrycode(request):
     """
     Return a graph representing the number of routers by country code.
@@ -239,17 +282,31 @@ def bycountrycode(request):
     @return: A graph representing the number of routers by country
         code as an HttpResponse object.
     """
-    import matplotlib
-    from matplotlib.backends.backend_agg import \
-            FigureCanvasAgg as FigureCanvas
-    from matplotlib.figure import Figure
+    # Width and height of the graph in pixels
+    WIDTH = 960
+    HEIGHT = 320
+    # Space in pixels given around plot
+    TOP_MARGIN = 25
+    BOTTOM_MARGIN = 19
+    LEFT_MARGIN = 38
+    RIGHT_MARGIN = 5
+    # Font sizes, in pixels
+    X_FONT_SIZE = '8'
+    Y_FONT_SIZE = '9'
+    LABEL_FONT_SIZE = '8'
+    # Font weight used for labels and titles.
+    FONT_WEIGHT = 'bold'
+    BAR_WIDTH = 0.5
 
-    # Draw the graph such that the labels and title are visible,
-    # and remove excess whitespace.
-    matplotlib.rcParams['figure.subplot.left'] = 0.04
-    matplotlib.rcParams['figure.subplot.right'] = 0.99
-    matplotlib.rcParams['figure.subplot.top'] = 0.92
-    matplotlib.rcParams['figure.subplot.bottom'] = 0.06
+    # Set margins according to specification.
+    matplotlib.rcParams['figure.subplot.left'] = \
+            float(LEFT_MARGIN) / WIDTH
+    matplotlib.rcParams['figure.subplot.right'] = \
+            float(WIDTH - RIGHT_MARGIN) / WIDTH
+    matplotlib.rcParams['figure.subplot.top'] = \
+            float(HEIGHT - TOP_MARGIN) / HEIGHT
+    matplotlib.rcParams['figure.subplot.bottom'] = \
+            float(BOTTOM_MARGIN) / HEIGHT
 
     last_va = Statusentry.objects.aggregate(\
               last=Max('validafter'))['last']
@@ -276,29 +333,30 @@ def bycountrycode(request):
 
     x_index = matplotlib.numpy.arange(num_params)
 
-    fig = Figure(facecolor='white', edgecolor='black', figsize=(12, 4),
-                 frameon=False)
+    width_inches = float(WIDTH) / 80
+    height_inches = float(HEIGHT) / 80
+    fig = Figure(facecolor='white', edgecolor='black',
+                 figsize=(width_inches, height_inches), frameon=False)
     ax = fig.add_subplot(111)
 
-    bar_width = 0.5
-    ax.bar(xs, ys, color='#66CD00', width=bar_width)
+    ax.bar(xs, ys, color='#66CD00', width=BAR_WIDTH)
 
     # Label the height of each bar.
     for i in range(num_params):
-        ax.text(xs[i] + (bar_width / 2.0),
+        ax.text(xs[i] + (BAR_WIDTH / 2.0),
                 ys[i] + (ax.get_ylim()[1] / 100), str(ys[i]),
-                fontsize='8', horizontalalignment='center')
+                fontsize=LABEL_FONT_SIZE, horizontalalignment='center')
 
-    ax.set_xticks(x_index + (bar_width / 2.0))
-    ax.set_xticklabels(keys, fontsize='8', fontweight='bold',
-                       rotation='vertical')
+    ax.set_xticks(x_index + (BAR_WIDTH / 2.0))
+    ax.set_xticklabels(keys, fontsize=X_FONT_SIZE,
+                       fontweight=FONT_WEIGHT, rotation='vertical')
 
     for tick in ax.yaxis.get_major_ticks():
-        tick.label1.set_fontsize('9')
-        tick.label1.set_fontweight('bold')
+        tick.label1.set_fontsize(Y_FONT_SIZE)
+        tick.label1.set_fontweight(FONT_WEIGHT)
 
     ax.set_title("Number of Routers by Country Code",
-                 fontsize='12', fontweight='bold')
+                 fontsize='12', fontweight=FONT_WEIGHT)
 
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
@@ -315,13 +373,31 @@ def exitbycountrycode(request):
     @return: A graph representing the number of exit routers by country
         code as an HttpResponse object.
     """
+    # Width and height of the graph in pixels
+    WIDTH = 960
+    HEIGHT = 320
+    # Space in pixels given around plot
+    TOP_MARGIN = 25
+    BOTTOM_MARGIN = 19
+    LEFT_MARGIN = 38
+    RIGHT_MARGIN = 5
+    # Font sizes, in pixels
+    X_FONT_SIZE = '8'
+    Y_FONT_SIZE = '9'
+    LABEL_FONT_SIZE = '8'
+    # Font weight used for labels and titles.
+    FONT_WEIGHT = 'bold'
+    BAR_WIDTH = 0.5
 
-    # Draw the graph such that the labels and title are visible,
-    # and remove excess whitespace.
-    matplotlib.rcParams['figure.subplot.left'] = 0.04
-    matplotlib.rcParams['figure.subplot.right'] = 0.99
-    matplotlib.rcParams['figure.subplot.top'] = 0.92
-    matplotlib.rcParams['figure.subplot.bottom'] = 0.06
+    # Set margins according to specification.
+    matplotlib.rcParams['figure.subplot.left'] = \
+            float(LEFT_MARGIN) / WIDTH
+    matplotlib.rcParams['figure.subplot.right'] = \
+            float(WIDTH - RIGHT_MARGIN) / WIDTH
+    matplotlib.rcParams['figure.subplot.top'] = \
+            float(HEIGHT - TOP_MARGIN) / HEIGHT
+    matplotlib.rcParams['figure.subplot.bottom'] = \
+            float(BOTTOM_MARGIN) / HEIGHT
 
     last_va = Statusentry.objects.aggregate(\
               last=Max('validafter'))['last']
@@ -349,29 +425,30 @@ def exitbycountrycode(request):
 
     x_index = matplotlib.numpy.arange(num_params)
 
-    fig = Figure(facecolor='white', edgecolor='black', figsize=(12, 4),
-                 frameon=False)
+    width_inches = float(WIDTH) / 80
+    height_inches = float(HEIGHT) / 80
+    fig = Figure(facecolor='white', edgecolor='black',
+                 figsize=(width_inches, height_inches), frameon=False)
     ax = fig.add_subplot(111)
 
-    bar_width = 0.6
-    ax.bar(xs, ys, color='#66CD00', width=bar_width)
+    ax.bar(xs, ys, color='#66CD00', width=BAR_WIDTH)
 
     # Label the height of each bar.
     for i in range(num_params):
-        ax.text(xs[i] + (bar_width / 2.0),
+        ax.text(xs[i] + (BAR_WIDTH / 2.0),
                 ys[i] + (ax.get_ylim()[1] / 100), str(ys[i]),
-                fontsize='8', horizontalalignment='center')
+                fontsize=LABEL_FONT_SIZE, horizontalalignment='center')
 
-    ax.set_xticks(x_index + (bar_width / 2.0))
-    ax.set_xticklabels(keys, fontsize='8', fontweight='bold',
-                       rotation='vertical')
+    ax.set_xticks(x_index + (BAR_WIDTH / 2.0))
+    ax.set_xticklabels(keys, fontsize=X_FONT_SIZE,
+                       fontweight=FONT_WEIGHT, rotation='vertical')
 
     for tick in ax.yaxis.get_major_ticks():
-        tick.label1.set_fontsize('9')
-        tick.label1.set_fontweight('bold')
+        tick.label1.set_fontsize(Y_FONT_SIZE)
+        tick.label1.set_fontweight(FONT_WEIGHT)
 
     ax.set_title("Number of Exit Routers by Country Code",
-                 fontsize='12', fontweight='bold')
+                 fontsize='12', fontweight=FONT_WEIGHT)
 
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
@@ -388,13 +465,31 @@ def bytimerunning(request):
     @return: A graph representing the uptime of routers in the
         Tor network as an HttpResponse object.
     """
+    # Width and height of the graph in pixels
+    WIDTH = 960
+    HEIGHT = 320
+    # Space in pixels given around plot
+    TOP_MARGIN = 25
+    BOTTOM_MARGIN = 19
+    LEFT_MARGIN = 38
+    RIGHT_MARGIN = 5
+    # Font sizes, in pixels
+    X_FONT_SIZE = '9'
+    Y_FONT_SIZE = '9'
+    LABEL_FONT_SIZE = '8'
+    # Font weight used for labels and titles.
+    FONT_WEIGHT = 'bold'
+    BAR_WIDTH = 0.5
 
-    # Draw the graph such that the labels and title are visible,
-    # and remove excess whitespace.
-    matplotlib.rcParams['figure.subplot.left'] = 0.04
-    matplotlib.rcParams['figure.subplot.right'] = 0.99
-    matplotlib.rcParams['figure.subplot.top'] = 0.92
-    matplotlib.rcParams['figure.subplot.bottom'] = 0.04
+    # Set margins according to specification.
+    matplotlib.rcParams['figure.subplot.left'] = \
+            float(LEFT_MARGIN) / WIDTH
+    matplotlib.rcParams['figure.subplot.right'] = \
+            float(WIDTH - RIGHT_MARGIN) / WIDTH
+    matplotlib.rcParams['figure.subplot.top'] = \
+            float(HEIGHT - TOP_MARGIN) / HEIGHT
+    matplotlib.rcParams['figure.subplot.bottom'] = \
+            float(BOTTOM_MARGIN) / HEIGHT
 
     last_va = Statusentry.objects.aggregate(\
               last=Max('validafter'))['last']
@@ -420,28 +515,30 @@ def bytimerunning(request):
 
     x_index = matplotlib.numpy.arange(num_params)
 
-    fig = Figure(facecolor='white', edgecolor='black', figsize=(12, 4),
-                 frameon=False)
+    width_inches = float(WIDTH) / 80
+    height_inches = float(HEIGHT) / 80
+    fig = Figure(facecolor='white', edgecolor='black',
+                 figsize=(width_inches, height_inches), frameon=False)
     ax = fig.add_subplot(111)
 
-    bar_width = 0.5
-    ax.bar(xs, ys, color='#66CD00', width=bar_width)
+    ax.bar(xs, ys, color='#66CD00', width=BAR_WIDTH)
 
     # Label the height of each bar.
     for i in range(num_params):
-        ax.text(xs[i] + (bar_width / 2.0),
+        ax.text(xs[i] + (BAR_WIDTH / 2.0),
                 ys[i] + (ax.get_ylim()[1] / 100), str(ys[i]),
-                fontsize='8', horizontalalignment='center')
+                fontsize=LABEL_FONT_SIZE, horizontalalignment='center')
 
-    ax.set_xticks(x_index + (bar_width / 2.0))
-    ax.set_xticklabels(keys, fontsize='9', fontweight='bold')
+    ax.set_xticks(x_index + (BAR_WIDTH / 2.0))
+    ax.set_xticklabels(keys, fontsize=X_FONT_SIZE,
+                       fontweight=FONT_WEIGHT)
 
     for tick in ax.yaxis.get_major_ticks():
-        tick.label1.set_fontsize('9')
-        tick.label1.set_fontweight('bold')
+        tick.label1.set_fontsize(Y_FONT_SIZE)
+        tick.label1.set_fontweight(FONT_WEIGHT)
 
     ax.set_title("Number of Routers by Time Running (Weeks)",
-                 fontsize='12', fontweight='bold')
+                 fontsize='12', fontweight=FONT_WEIGHT)
 
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
@@ -458,13 +555,48 @@ def byobservedbandwidth(request):
     @return: A graph representing the observed bandwidth of the
         routers in the Tor network.
     """
+    # Width and height of the graph in pixels
+    WIDTH = 480
+    HEIGHT = 320
+    # Space in pixels given around plot
+    TOP_MARGIN = 25
+    BOTTOM_MARGIN = 64
+    LEFT_MARGIN = 38
+    RIGHT_MARGIN = 5
+    # Font sizes, in pixels
+    X_FONT_SIZE = '8'
+    Y_FONT_SIZE = '9'
+    LABEL_FONT_SIZE = '8'
+    # Font weight used for labels and titles.
+    FONT_WEIGHT = 'bold'
+    BAR_WIDTH = 0.5
 
-    # Draw the graph such that the labels and title are visible,
-    # and remove excess whitespace.
-    matplotlib.rcParams['figure.subplot.left'] = 0.08
-    matplotlib.rcParams['figure.subplot.right'] = 0.98
-    matplotlib.rcParams['figure.subplot.top'] = 0.92
-    matplotlib.rcParams['figure.subplot.bottom'] = 0.19
+    # Define the ranges for the graph, a list of 2-tuples of ints.
+    RANGES = [(0, 10), (11, 20), (21, 50), (51, 100), (101, 500),
+              (501, 1000), (1001, 2000), (2001, 3000), (3001, 5000)]
+
+    # This next part is here to give me ideas.
+    #import math
+    #RANGES = []
+    #i = 0
+    #granularity = 10
+    #while (i < 10000):
+    #    lower = i
+    #    upper = lower + lower / granularity + 10
+    #    round_to = -1*(int(math.log(upper, 10)) - 1)
+    #    upper = int(round(upper, round_to))
+    #    RANGES.append((lower, upper))
+    #    i = upper + 1
+
+    # Set margins according to specification.
+    matplotlib.rcParams['figure.subplot.left'] = \
+            float(LEFT_MARGIN) / WIDTH
+    matplotlib.rcParams['figure.subplot.right'] = \
+            float(WIDTH - RIGHT_MARGIN) / WIDTH
+    matplotlib.rcParams['figure.subplot.top'] = \
+            float(HEIGHT - TOP_MARGIN) / HEIGHT
+    matplotlib.rcParams['figure.subplot.bottom'] = \
+            float(BOTTOM_MARGIN) / HEIGHT
 
     last_va = Statusentry.objects.aggregate(\
               last=Max('validafter'))['last']
@@ -473,63 +605,73 @@ def byobservedbandwidth(request):
                     validafter=last_va)
 
     bw_map = {}
-    keys = ['0-10', '11-20', '21-50', '51-100', '101-500', '501-1000',
-            '1001-2000', '2001-3000', '3001-5000', '5001+']
-    for key in keys:
-        bw_map[key] = 0
+    excess = RANGES[-1][1] + 1
+
+    for rng in RANGES:
+        bw_map[rng] = 0
+    bw_map[excess] = 0
 
     for entry in statusentries:
         kbps = entry.descriptorid.bandwidthobserved / 1024
-        if (0 <= kbps <= 10):
-            bw_map['0-10'] += 1
-        elif (101 <= kbps <= 500):
-            bw_map['101-500'] += 1
-        elif (11 <= kbps <= 20):
-            bw_map['11-20'] += 1
-        elif (21 <= kbps <= 50):
-            bw_map['21-50'] += 1
-        elif (51 <= kbps <= 100):
-            bw_map['51-100'] += 1
-        elif (501 <= kbps <= 1000):
-            bw_map['501-1000'] += 1
-        elif (1001 <= kbps <= 2000):
-            bw_map['1001-2000'] += 1
-        elif (2001 <= kbps <= 3000):
-            bw_map['2001-3000'] += 1
-        elif (3001 <= kbps <= 5000):
-            bw_map['3001-5000'] += 1
-        elif (5001 <= kbps):
-            bw_map['5001+'] += 1
 
-    num_params = len(keys)
+        # Linear search
+        # for lower, upper in ranges:
+        #     if lower <= kbps <= upper:
+        #         bw_map[lower, upper] += 1
+        #         break
+        # else:
+        #     bw_map[excess] += 1
+
+        # Binary search
+        # Is there a way to clean up this bit? It could be its own
+        # function...
+        rngs = RANGES
+        while (rngs and (not rngs[len(rngs) / 2][0] <= kbps <= \
+                             rngs[len(rngs) / 2][1])):
+            if rngs[len(rngs) / 2][0] > kbps:
+                rngs = rngs[:(len(rngs) / 2)]
+            else:
+                rngs = rngs[(len(rngs) / 2 + 1):]
+        if rngs:
+            bw_map[rngs[len(rngs) / 2][0], rngs[len(rngs) / 2][1]] += 1
+        else:
+            bw_map[excess] += 1
+
+
+    num_params = len(bw_map)
     xs = range(num_params)
-    ys = [bw_map[key] for key in keys]
+    ys = [bw_map[lower, upper] for lower, upper in RANGES]
+    ys.append(bw_map[excess])
+
+    labels = ['%s-%s' % (lower, upper) for lower, upper in RANGES]
+    labels.append('%s+' % excess)
 
     x_index = matplotlib.numpy.arange(num_params)
 
-    fig = Figure(facecolor='white', edgecolor='black', figsize=(6, 4),
-                 frameon=False)
+    width_inches = float(WIDTH) / 80
+    height_inches = float(HEIGHT) / 80
+    fig = Figure(facecolor='white', edgecolor='black',
+                 figsize=(width_inches, height_inches), frameon=False)
     ax = fig.add_subplot(111)
 
-    bar_width = 0.5
-    ax.bar(xs, ys, color='#66CD00', width=bar_width)
+    ax.bar(xs, ys, color='#66CD00', width=BAR_WIDTH)
 
     # Label the height of each bar.
     for i in range(num_params):
-        ax.text(xs[i] + (bar_width / 2.0),
+        ax.text(xs[i] + (BAR_WIDTH / 2.0),
                 ys[i] + (ax.get_ylim()[1] / 100), str(ys[i]),
-                fontsize='8', horizontalalignment='center')
+                fontsize=LABEL_FONT_SIZE, horizontalalignment='center')
 
-    ax.set_xticks(x_index + (bar_width / 2.0))
-    ax.set_xticklabels(keys, fontsize='8', fontweight='bold',
-                       rotation='vertical')
+    ax.set_xticks(x_index + (BAR_WIDTH / 2.0))
+    ax.set_xticklabels(labels, fontsize=X_FONT_SIZE,
+                       fontweight=FONT_WEIGHT, rotation='vertical')
 
     for tick in ax.yaxis.get_major_ticks():
-        tick.label1.set_fontsize('9')
-        tick.label1.set_fontweight('bold')
+        tick.label1.set_fontsize(Y_FONT_SIZE)
+        tick.label1.set_fontweight(FONT_WEIGHT)
 
     ax.set_title("Number of Routers by Observed Bandwidth (KB/sec)",
-                 fontsize='12', fontweight='bold')
+                 fontsize='12', fontweight=FONT_WEIGHT)
 
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
@@ -546,13 +688,31 @@ def byplatform(request):
     @return: A graph representing the platforms of the active relays
         in the Tor network as an HttpResponse object.
     """
+    # Width and height of the graph in pixels
+    WIDTH = 480
+    HEIGHT = 320
+    # Space in pixels given around plot
+    TOP_MARGIN = 25
+    BOTTOM_MARGIN = 19
+    LEFT_MARGIN = 38
+    RIGHT_MARGIN = 5
+    # Font sizes, in pixels
+    X_FONT_SIZE = '9'
+    Y_FONT_SIZE = '9'
+    LABEL_FONT_SIZE = '8'
+    # Font weight used for labels and titles.
+    FONT_WEIGHT = 'bold'
+    BAR_WIDTH = 0.5
 
-    # Draw the graph such that the labels and title are visible,
-    # and remove excess whitespace.
-    matplotlib.rcParams['figure.subplot.left'] = 0.08
-    matplotlib.rcParams['figure.subplot.right'] = 0.98
-    matplotlib.rcParams['figure.subplot.top'] = 0.92
-    matplotlib.rcParams['figure.subplot.bottom'] = 0.05
+    # Set margins according to specification.
+    matplotlib.rcParams['figure.subplot.left'] = \
+            float(LEFT_MARGIN) / WIDTH
+    matplotlib.rcParams['figure.subplot.right'] = \
+            float(WIDTH - RIGHT_MARGIN) / WIDTH
+    matplotlib.rcParams['figure.subplot.top'] = \
+            float(HEIGHT - TOP_MARGIN) / HEIGHT
+    matplotlib.rcParams['figure.subplot.bottom'] = \
+            float(BOTTOM_MARGIN) / HEIGHT
 
     last_va = Statusentry.objects.aggregate(\
               last=Max('validafter'))['last']
@@ -587,34 +747,37 @@ def byplatform(request):
 
     x_index = matplotlib.numpy.arange(num_params)
 
-    fig = Figure(facecolor='white', edgecolor='black', figsize=(6, 4),
-                 frameon=False)
+    width_inches = float(WIDTH) / 80
+    height_inches = float(HEIGHT) / 80
+    fig = Figure(facecolor='white', edgecolor='black',
+                 figsize=(width_inches, height_inches), frameon=False)
     ax = fig.add_subplot(111)
 
-    bar_width = 0.5
-    ax.bar(xs, ys, color='#66CD00', width=bar_width)
+    ax.bar(xs, ys, color='#66CD00', width=BAR_WIDTH)
 
     # Label the height of each bar.
     for i in range(num_params):
-        ax.text(xs[i] + (bar_width / 2.0),
+        ax.text(xs[i] + (BAR_WIDTH / 2.0),
                 ys[i] + (ax.get_ylim()[1] / 100), str(ys[i]),
-                fontsize='8', horizontalalignment='center')
+                fontsize=LABEL_FONT_SIZE, horizontalalignment='center')
 
-    ax.set_xticks(x_index + (bar_width / 2.0))
-    ax.set_xticklabels(keys, fontsize='9', fontweight='bold')
+    ax.set_xticks(x_index + (BAR_WIDTH / 2.0))
+    ax.set_xticklabels(keys, fontsize=X_FONT_SIZE,
+                       fontweight=FONT_WEIGHT)
 
     for tick in ax.yaxis.get_major_ticks():
-        tick.label1.set_fontsize('9')
-        tick.label1.set_fontweight('bold')
+        tick.label1.set_fontsize(Y_FONT_SIZE)
+        tick.label1.set_fontweight(FONT_WEIGHT)
 
     ax.set_title("Number of Routers by Platform",
-                 fontsize='12', fontweight='bold')
+                 fontsize='12', fontweight=FONT_WEIGHT)
 
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
     canvas.print_png(response, ha="center")
     return response
-    
+
+
 def aggregatesummary(request):
     """
     Return a graph representing an aggregate summary of the routers on
@@ -624,13 +787,31 @@ def aggregatesummary(request):
     @return: A graph representing an aggregate summary of the routers on
         the Tor network.
     """
+    # Width and height of the graph in pixels
+    WIDTH = 960
+    HEIGHT = 320
+    # Space in pixels given around plot
+    TOP_MARGIN = 25
+    BOTTOM_MARGIN = 19
+    LEFT_MARGIN = 38
+    RIGHT_MARGIN = 5
+    # Font sizes, in pixels
+    X_FONT_SIZE = '9'
+    Y_FONT_SIZE = '9'
+    LABEL_FONT_SIZE = '8'
+    # Font weight used for labels and titles.
+    FONT_WEIGHT = 'bold'
+    BAR_WIDTH = 0.5
 
-    # Draw the graph such that the labels and title are visible,
-    # and remove excess whitespace.
-    matplotlib.rcParams['figure.subplot.left'] = 0.04
-    matplotlib.rcParams['figure.subplot.right'] = 0.99
-    matplotlib.rcParams['figure.subplot.top'] = 0.92
-    matplotlib.rcParams['figure.subplot.bottom'] = 0.04
+    # Set margins according to specification.
+    matplotlib.rcParams['figure.subplot.left'] = \
+            float(LEFT_MARGIN) / WIDTH
+    matplotlib.rcParams['figure.subplot.right'] = \
+            float(WIDTH - RIGHT_MARGIN) / WIDTH
+    matplotlib.rcParams['figure.subplot.top'] = \
+            float(HEIGHT - TOP_MARGIN) / HEIGHT
+    matplotlib.rcParams['figure.subplot.bottom'] = \
+            float(BOTTOM_MARGIN) / HEIGHT
 
     last_va = Statusentry.objects.aggregate(\
               last=Max('validafter'))['last']
@@ -666,27 +847,31 @@ def aggregatesummary(request):
     for count in keys:
         ys.append(counts[count])
 
-    fig = Figure(facecolor='white', edgecolor='black', figsize=(12, 4),
-                 frameon=False)
+    width_inches = float(WIDTH) / 80
+    height_inches = float(HEIGHT) / 80
+    fig = Figure(facecolor='white', edgecolor='black',
+                 figsize=(width_inches, height_inches), frameon=False)
     ax = fig.add_subplot(111)
 
-    bar_width = 0.5
-    ax.bar(xs, ys, color='#66CD00', width=bar_width)
+    ax.bar(xs, ys, color='#66CD00', width=BAR_WIDTH)
 
     # Label the height of each bar.
     for i in range(num_params):
-        ax.text(xs[i] + (bar_width / 2.0),
+        ax.text(xs[i] + (BAR_WIDTH / 2.0),
                 ys[i] + (ax.get_ylim()[1] / 100), str(ys[i]),
-                fontsize='8', horizontalalignment='center')
-    ax.set_xticks(x_index + (bar_width / 2.0))
-    ax.set_xticklabels(labels, fontsize='9', fontweight='bold')
+                fontsize=LABEL_FONT_SIZE, horizontalalignment='center')
+
+    ax.set_xticks(x_index + (BAR_WIDTH / 2.0))
+    ax.set_xticklabels(labels, fontsize=X_FONT_SIZE,
+                       fontweight=FONT_WEIGHT)
 
     for tick in ax.yaxis.get_major_ticks():
-        tick.label1.set_fontsize('9')
-        tick.label1.set_fontweight('bold')
+        tick.label1.set_fontsize(Y_FONT_SIZE)
+        tick.label1.set_fontweight(FONT_WEIGHT)
 
     ax.set_title("Aggregate Summary -- Number of Routers Matching "
-            + "Specified Criteria", fontsize='12', fontweight='bold')
+               + "Specified Criteria", fontsize='12',
+                 fontweight=FONT_WEIGHT)
 
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
