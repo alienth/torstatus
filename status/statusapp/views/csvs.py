@@ -9,45 +9,22 @@ import csv
 from statusapp.models import Statusentry, Descriptor
 from helpers import *
 
-# INIT Variables ------------------------------------------------------
-CURRENT_COLUMNS = ["Country Code", "Router Name", "Bandwidth",
-                   "Uptime", "IP", "Hostname", "Icons", "ORPort",
-                   "DirPort", "BadExit", "Named", "Exit",
-                   "Authority", "Fast", "Guard", "Stable",
-                   "Running", "Valid", "V2Dir", "Platform",
-                   "Hibernating"]
-
-
 def current_results_csv(request):
 
-    currentColumns = []
-    if not ('currentColumns' in request.session):
-        currentColumns = CURRENT_COLUMNS
-        currentColumns.append("Nickname")
-        currentColumns.remove("Hostname")
-        currentColumns.remove("Valid")
-        currentColumns.remove("Running")
-        currentColumns.remove("Hibernating")
-        currentColumns.remove("Named")
-        currentColumns.remove("Router Name")
-        currentColumns.remove("Icons")
-        request.session['currentColumns'] = currentColumns
-    else:
-        currentColumns = request.session['currentColumns']
+    current_columns = request.session['currentColumns']
 
-        currentColumns.remove("Hostname")
-        currentColumns.remove("Icons")
-        currentColumns.remove("Valid")
-        currentColumns.remove("Running")
-        currentColumns.remove("Hibernating")
-        currentColumns.remove("Named")
-        currentColumns.remove("Router Name")
-        currentColumns.append("Nickname")
+    current_columns.remove("Hostname")
+    current_columns.remove("Icons")
+    current_columns.remove("Valid")
+    current_columns.remove("Running")
+    current_columns.remove("Hibernating")
+    current_columns.remove("Named")
 
     last_va = Statusentry.objects.aggregate(
             last=Max('validafter'))['last']
 
-    statusentries = Statusentry.objects.filter(validafter=last_va).extra(select={'geoip': 'geoip_lookup(address)'}).order_by('nickname')
+    statusentries = Statusentry.objects.filter(validafter=last_va).\
+            extra(select={'geoip': 'geoip_lookup(address)'}).order_by('nickname')
 
     queryOptions = {}
     if (request.GET):
@@ -103,107 +80,50 @@ def current_results_csv(request):
             statusentries = statusentries.filter(isv2dir=1)
         elif queryOptions['isv2dir'] == 'no': 
             statusentries = statusentries.filter(isv2dir=0)
-    #############################################################
+
 
     #Create the HttpResponse object with the appropriate CSV header.
     response = HttpResponse(mimetype='text/csv')
     response['Content-Disposition'] = 'attachment; filename=current_results.csv'
 
-    ########################################################
-    #
     #   We need to check for which columns are being searched for and
     #   get the data from each one into a dictionary.
-    #
     
     rows = {}
     headers = {}
-    for column in currentColumns:
-        rows[column] = []
+    
+    for column in current_columns: rows[column] = []
 
     for entry in statusentries:
-        rows["Nickname"].append(entry.nickname)
+        fields_access = [("Router Name", entry.nickname),\
+                ("Country Code", entry.geoip.split(',')[0][1:3]),\
+                ("Bandwidth", entry.descriptorid.bandwidthobserved),\
+                ("Uptime", entry.descriptorid.uptime),\
+                ("IP", entry.address),\
+                ("Fingerprint", entry.fingerprint),\
+                ("LastDescriptorPublished", entry.published),\
+                ("Contact", entry.descriptorid.rawdesc),\
+                ("BadDir", entry.isbaddirectory),\
+                ("DirPort", entry.dirport), ("Exit", entry.isexit),\
+                ("Authority", entry.isauthority),\
+                ("Fast", entry.isfast), ("Guard", entry.isguard),\
+                ("V2Dir", entry.isv2dir),\
+                ("Platform", entry.descriptorid.platform),\
+                ("Stable", entry.isstable), ("ORPort", entry.orport),\
+                ("BadExit", entry.isbadexit)]
+        for k, v in fields_access:
+            if k in current_columns: rows[k].append(v)
 
-    if "Country Code" in currentColumns:
-        for entry in statusentries:
-            rows["Country Code"].append(entry.geoip.split(',')[0][1:3])
-
-    if "Bandwidth" in currentColumns:
-        for entry in statusentries:
-            rows["Bandwidth"].append(entry.descriptorid.bandwidthobserved)
-
-    if "Uptime" in currentColumns:
-        for entry in statusentries:
-            rows["Uptime"].append(entry.descriptorid.uptime)
-
-    if "IP" in currentColumns:
-        for entry in statusentries:
-            rows["IP"].append(entry.address)
-
-    if "Fingerprint" in currentColumns:
-        for entry in statusentries:
-            rows["Fingerprint"].append(entry.fingerprint)
-
-    if "LastDescriptorPublished" in currentColumns:
-        for entry in statusentries:
-            rows["LastDescriptorPublished"].append(entry.published)
-
-    if "Contact" in currentColumns:
-        for entry in statusentries:
-            rows["Contact"].append(contact(entry.descriptorid.rawdesc))
-
-    if "BadDir" in currentColumns:
-        for entry in statusentries:
-            rows["BadDir"].append(entry.isbaddirectory)
-
-    if "DirPort" in currentColumns:
-        for entry in statusentries:
-            rows["DirPort"].append(entry.dirport)
-
-    if "Exit" in currentColumns:
-        for entry in statusentries:
-            rows["Exit"].append(entry.isexit)
-
-    if "Authority" in currentColumns:
-        for entry in statusentries:
-            rows["Authority"].append(entry.isauthority)
-
-    if "Fast" in currentColumns:
-        for entry in statusentries:
-            rows["Fast"].append(entry.isfast)
-
-    if "Guard" in currentColumns:
-        for entry in statusentries:
-            rows["Guard"].append(entry.isguard)
-
-    if "V2Dir" in currentColumns:
-        for entry in statusentries:
-            rows["V2Dir"].append(entry.isv2dir)
-
-    if "Platform" in currentColumns:
-        for entry in statusentries:
-            rows["Platform"].append(entry.descriptorid.platform)
-
-    if "Stable" in currentColumns:
-        for entry in statusentries:
-            rows["Stable"].append(entry.isstable)
-
-    if "ORPort" in currentColumns:
-        for entry in statusentries:
-            rows["ORPort"].append(entry.orport)
-
-    if "BadExit" in currentColumns:
-        for entry in statusentries:
-            rows["BadExit"].append(entry.isbadexit)
-
-    fieldnames = currentColumns
     writer = csv.writer(response)
-    writer = csv.DictWriter(response, fieldnames=fieldnames)
-    for n in fieldnames:
-        headers[n] = n
+    writer = csv.DictWriter(response, fieldnames=current_columns)
+
+    for column in current_columns: headers[column] = column
+
     writer.writerow(headers)
-    for i in range(0, len(rows[currentColumns[0]])):
+
+    for i in range(0, len(rows[current_columns[0]])):
         dict_row = {}
-        for column in currentColumns:
+        for column in current_columns:
             dict_row[column] = rows[column][i]
         writer.writerow(dict_row)
     return response
@@ -224,14 +144,14 @@ def all_ip_csv(request):
     writer = csv.writer(response)
     for ip in IPs:
         writer.writerow([ip])
+
     return response
 
 
 def all_exit_csv(request):
     
     last_va = Statusentry.objects.aggregate(last=Max('validafter'))['last']
-    all_entries = Statusentry.objects.filter(validafter=last_va)
-    statusentries = all_entries.filter(isexit=True)
+    statusentries = Statusentry.objects.filter(validafter=last_va, isexit=True)
     exit_IPs = []
 
     for entry in statusentries:
