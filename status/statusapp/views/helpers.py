@@ -19,36 +19,33 @@ def filter_statusentries(statusentries, query_options):
                'isstable', 'isrunning', 'isvalid', 'isv2dir']
     # options is needed because query_options has some other things that we 
     #      do not need in this case (the other search query key-values).
-    valid_options = filter(lambda k: query_options[k] != '' and k in options, \
-                            query_options)
+    valid_options = filter(lambda k: query_options[k] != '' \
+                            and k in options, query_options)
     filterby = {}
     for opt in valid_options: 
-   
         filterby[opt] = 1 if query_options[opt] == 'yes' else 0
  
-    if 'searchValue' in query_options and query_options['searchValue'] != '':
+    if 'searchValue' in query_options and \
+                query_options['searchValue'] != '':
         value = query_options['searchValue']
         criteria = query_options['criteria']
         logic = query_options['boolLogic']
-        key = criteria
             
         options = ['nickname', 'fingerprint', 'geoip',
-                   'bandwidth', 'published',
-                   'hostname', 'address', 'orport', 'dirport']            
-        descriptorlist_options = ['platform', 'uptime'] 
-        '''
-        # Special dictionary entries for uptime
-        if criteria == 'uptime':
-            lower_value = value * 86400
-            upper_value = lower_value + 86400 - 1
-            
-            uptime gte lower_value lte upper_value
-        '''    
-        if criteria in descriptorlist_options:
-            key = 'descriptorid__' + criteria
-            # Special dictionary entries for uptime
-            if criteria == 'uptime':
-                value = int(value) * 86400 
+                   'published','hostname', 'address', 
+                   'orport', 'dirport']            
+        descriptorlist_options = ['platform', 'uptime', 'bandwidthobserved'] 
+
+        # Special case for the value if searching for 
+        #       Uptime or Bandwidth and the criteria is 
+        #       not Contains
+        if (criteria == 'uptime' or criteria == 'bandwidthobserved') and \
+                logic != 'contains': 
+            value = int(value) * (86400 if criteria == 'uptime' else 1024)
+           
+
+        key = ('descriptorid__' + criteria) if criteria in \
+                descriptorlist_options else criteria
       
         if logic == 'contains':
             key = key + '__contains'
@@ -57,9 +54,10 @@ def filter_statusentries(statusentries, query_options):
         elif logic == 'greater':
             key = key + '__gt'
         
-        if criteria == 'uptime' and logic == 'equals':
+        if (criteria == 'uptime' or criteria == 'bandwidthobserved') and \
+                logic == 'equals':
             lower_value = value
-            upper_value = lower_value + 86400
+            upper_value = lower_value + (86400 if criteria == 'uptime' else 1024)
             filterby[key + '__gt'] = lower_value
             filterby[key + '__lt'] = upper_value
         else:
@@ -67,22 +65,22 @@ def filter_statusentries(statusentries, query_options):
         
     statusentries = statusentries.filter(**filterby)
     
-    options = ['nickname', 'fingerprint', 'geoip',
-               'bandwidth', 'published',
-               'hostname', 'address', 'orport', 'dirport',
-               'platform', 'isauthority', 
+    options = ['nickname', 'fingerprint', 'geoip', 'bandwidthobserved',
+               'uptime', 'published','hostname', 'address', 'orport', 
+               'dirport', 'platform', 'isauthority', 
                'isbaddirectory', 'isbadexit', 'isexit',
                'isfast', 'isguard', 'ishibernating', 
                'isnamed', 'isstable', 'isrunning', 
                'isvalid', 'isv2dir']
-    descriptorlist_options = ['platform', 'uptime', 'contact']
+
+    descriptorlist_options = ['platform', 'uptime', 'contact', 'bandwidthobserved']
     if 'sortListings' in query_options: 
         selected_option = query_options['sortListings']
     else:
         selected_option = ''
     if selected_option in options:
         if selected_option in descriptorlist_options:
-            selected_option = 'descriptorid__' + option
+            selected_option = 'descriptorid__' + selected_option
         if query_options['sortOrder'] == 'ascending':
             statusentries = statusentries.order_by(selected_option)
         elif query_options['sortOrder'] == 'descending':
