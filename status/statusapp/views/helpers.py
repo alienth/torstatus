@@ -23,35 +23,54 @@ def filter_statusentries(statusentries, query_options):
                             query_options)
     filterby = {}
     for opt in valid_options: 
+   
         filterby[opt] = 1 if query_options[opt] == 'yes' else 0
  
     if 'searchValue' in query_options and query_options['searchValue'] != '':
         value = query_options['searchValue']
         criteria = query_options['criteria']
         logic = query_options['boolLogic']
+        key = criteria
             
         options = ['nickname', 'fingerprint', 'geoip',
                    'bandwidth', 'published',
                    'hostname', 'address', 'orport', 'dirport']            
         descriptorlist_options = ['platform', 'uptime'] 
-          
-        if criteria in descriptorlist_options:
-            criteria = 'descriptorid__' + criteria
-                
-        if logic == 'contains':
-            criteria = criteria + '__contains'
-        elif logic == 'less':
-            criteria = criteria + '__lt'
-        elif logic == 'greater':
-            criteria = criteria + '__gt'
-        filterby[criteria] = value
+        '''
+        # Special dictionary entries for uptime
+        if criteria == 'uptime':
+            lower_value = value * 86400
+            upper_value = lower_value + 86400 - 1
             
+            uptime gte lower_value lte upper_value
+        '''    
+        if criteria in descriptorlist_options:
+            key = 'descriptorid__' + criteria
+            # Special dictionary entries for uptime
+            if criteria == 'uptime':
+                value = int(value) * 86400 
+      
+        if logic == 'contains':
+            key = key + '__contains'
+        elif logic == 'less':
+            key = key + '__lt'
+        elif logic == 'greater':
+            key = key + '__gt'
+        
+        if criteria == 'uptime' and logic == 'equals':
+            lower_value = value
+            upper_value = lower_value + 86400
+            filterby[key + '__gt'] = lower_value
+            filterby[key + '__lt'] = upper_value
+        else:
+            filterby[key] = value
+        
     statusentries = statusentries.filter(**filterby)
     
     options = ['nickname', 'fingerprint', 'geoip',
-               'bandwidth', 'uptime', 'published',
+               'bandwidth', 'published',
                'hostname', 'address', 'orport', 'dirport',
-               'platform', 'contact', 'isauthority', 
+               'platform', 'isauthority', 
                'isbaddirectory', 'isbadexit', 'isexit',
                'isfast', 'isguard', 'ishibernating', 
                'isnamed', 'isstable', 'isrunning', 

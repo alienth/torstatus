@@ -283,7 +283,14 @@
 		</tr>
 	{% endfor %}
 </table>
+{% else %}
+<table id="noTableError">
+    <tr>
+        <td id="boxError"> Sorry, your query options did not return any result. </td>
+    </tr>
+</table>
 {% endif %}
+
 
 <br />
 <br />
