@@ -8,6 +8,7 @@ import datetime
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from django.db.models import Max
+from django.views.decorators.cache import cache_page
 
 # Matplotlib specific import statements -------------------------------
 import matplotlib
@@ -19,8 +20,7 @@ from statusapp.models import Statusentry, Bwhist
 from custom.aggregate import CountCase
 
 
-# TODO: Get rid of "magic numbers in graphs", so that the graphs are
-# more easily customizable by future maintainers.
+@cache_page(60 * 5)
 def readhist(request, fingerprint):
     """
     Create a graph of read bandwidth history for the last twenty-four
@@ -146,7 +146,7 @@ def readhist(request, fingerprint):
     canvas.print_png(response, ha="center")
     return response
 
-
+@cache_page(60 * 5)
 def writehist(request, fingerprint):
     """
     Create a graph of written bandwidth history for the last twenty-four
@@ -274,6 +274,7 @@ def writehist(request, fingerprint):
     return response
 
 
+@cache_page(60 * 5)
 def bycountrycode(request):
     """
     Return a graph representing the number of routers by country code.
@@ -364,6 +365,7 @@ def bycountrycode(request):
     return response
 
 
+@cache_page(60 * 5)
 def exitbycountrycode(request):
     """
     Return a graph representing the number of exit routers
@@ -456,6 +458,7 @@ def exitbycountrycode(request):
     return response
 
 
+@cache_page(60 * 5)
 def bytimerunning(request):
     """
     Return a graph representing the uptime of routers in the Tor
@@ -546,6 +549,7 @@ def bytimerunning(request):
     return response
 
 
+@cache_page(60 * 5)
 def byobservedbandwidth(request):
     """
     Return a graph representing the observed bandwidth of the
@@ -679,6 +683,7 @@ def byobservedbandwidth(request):
     return response
 
 
+@cache_page(60 * 5)
 def byplatform(request):
     """
     Return a graph representing the platforms of the active relays
@@ -778,6 +783,7 @@ def byplatform(request):
     return response
 
 
+@cache_page(60 * 5)
 def aggregatesummary(request):
     """
     Return a graph representing an aggregate summary of the routers on

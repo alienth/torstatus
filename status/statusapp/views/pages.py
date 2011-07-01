@@ -13,6 +13,7 @@ import datetime
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpRequest
 from django.db.models import Max, Sum, Count
+from django.views.decorators.cache import cache_page
 
 # TorStatus specific import statements --------------------------------
 from statusapp.models import Statusentry, Descriptor, Bwhist,\
@@ -34,12 +35,7 @@ NOT_MOVABLE_COLUMNS = ["Named", "Exit", "Authority", "Fast", "Guard",
                        "Stable", "Running", "Valid", "V2Dir",
                        "Platform", "Hibernating"]
 
-# TODO: get rid of javascript sorting: pass another argument
-# to this view function and sort the table accordingly.
-#@cache_page(60 * 15) # Cache is turned off for development,
-                      # but it works.
-
-
+@cache_page(60 * 5)
 def index(request):
     """
     Supply a dictionary to the index.html template consisting of a list
@@ -47,7 +43,7 @@ def index(request):
 
     Currently, an "active relay" is a relay that has a status entry
     that was published in the last consensus.
-    
+
     @rtype: HttpRequest
     @return: A dictionary consisting of information about each router
         in the network as well as aggregate information about the
