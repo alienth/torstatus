@@ -1,9 +1,7 @@
 """
-The views module for TorStatus.
+The pages module for TorStatus.
 
-Django is idiosyncratic in that it names controllers 'views'; models
-are still models and views are called templates. This module contains a
-single controller for each page type.
+This module contains a single controller for each page type.
 """
 # General python import statements ------------------------------------
 import subprocess
@@ -44,7 +42,7 @@ def index(request):
     Currently, an "active relay" is a relay that has a status entry
     that was published in the last consensus.
 
-    @rtype: HttpRequest
+    @rtype: HttpResponse
     @return: A dictionary consisting of information about each router
         in the network as well as aggregate information about the
         network itself.
@@ -91,9 +89,9 @@ def index(request):
             request.session['queryOptions'] = query_options
     if (not query_options and 'queryOptions' in request.session):
             query_options = request.session['queryOptions']
-    
+
     statusentries = filter_statusentries(statusentries, query_options)
-    
+
     # USER QUERY AGGREGATE STATISTICS ---------------------------------
     # -----------------------------------------------------------------
     counts = statusentries.aggregate(
@@ -147,7 +145,7 @@ def details(request, fingerprint):
     # and less than are incorrectly implemented for IPAddressFields.
     # [:1] is djangonese for 'LIMIT 1', and
     # [0] gets the object rather than the QuerySet.
-    
+
     statusentry = Statusentry.objects.filter(fingerprint=fingerprint)\
                   .extra(select={'geoip': 'geoip_lookup(address)'})\
                   .order_by('-validafter')[:1][0]

@@ -83,19 +83,19 @@
 	<tr>
 	{% for columnName in currentColumns %}
 	    {% if columnName == "Country Code" %}
-        <th class="sorttable_alpha relayHeader">&nbsp; &uarr;</th>
+        <th class="sorttable_alpha relayHeader">&nbsp;</th>
         {% endif %}
         {% if columnName == "Router Name" %}
-		<th class="sorttable_alpha relayHeader" id="routerName">Router Name &uarr;</th>
+		<th class="sorttable_alpha relayHeader" id="routerName">Router Name</th>
 		{% endif %}
 		{% if columnName == "Bandwidth" %}
-		<th class="sorttable_numeric relayHeader">Bandwidth &uarr;</th>
+		<th class="sorttable_numeric relayHeader">Bandwidth</th>
 		{% endif %}
 		{% if columnName == "Uptime" %}
-        <th class="sorttable_numeric relayHeader">Uptime &uarr; </th>
+        <th class="sorttable_numeric relayHeader">Uptime</th>
         {% endif %}
         {% if columnName == "IP" %}
-        <th class="sorttable_numeric relayHeader">IP &uarr;</th>
+        <th class="sorttable_numeric relayHeader">IP</th>
         {% endif %}
         {% if columnName == "Fingerprint" %}
         <th class="sorttable_alpha relayHeader">Fingerprint</th>
@@ -115,13 +115,13 @@
 		{% endif %}
 		{% endif %}
 		{% if columnName == "ORPort" %}
-        <th class="sorttable_numeric relayHeader">ORPort &loz;</th>
+        <th class="sorttable_numeric relayHeader">ORPort</th>
         {% endif %}
         {% if columnName == "DirPort" %}
-        <th class="sorttable_numeric relayHeader">DirPort &loz;</th>
+        <th class="sorttable_numeric relayHeader">DirPort</th>
         {% endif %}
         {% if columnName == "BadExit" %}
-        <th class="sorttable_numeric relayHeader">Bad Exit &loz;</th>
+        <th class="sorttable_numeric relayHeader">Bad Exit</th>
         {% endif %}
     {% endfor %}
 	</tr>
@@ -283,7 +283,14 @@
 		</tr>
 	{% endfor %}
 </table>
+{% else %}
+<table id="noTableError">
+    <tr>
+        <td id="boxError"> Sorry, your query options did not return any results. </td>
+    </tr>
+</table>
 {% endif %}
+
 
 <br />
 <br />
@@ -334,7 +341,7 @@
                                                             SELECTED {% endif %}>Fingerprint</option>
                 <option value="geoip" {% if queryOptions and queryOptions|key:'sortListings' == "geoip" %} 
                                                             SELECTED {% endif %}>Country Code</option>
-                <option value="bandwidth" {% if queryOptions and queryOptions|key:'sortListings' == "bandwidth" %} 
+                <option value="bandwidthobserved" {% if queryOptions and queryOptions|key:'sortListings' == "bandwidthobserved" %} 
                                                             SELECTED {% endif %}>Bandwidth</option>
                 <option value="uptime" {% if queryOptions and queryOptions|key:'sortListings' == "uptime" %} 
                                                             SELECTED {% endif %}>Uptime</option>
@@ -542,7 +549,7 @@
                                                             SELECTED {% endif %}>Router Name</option>
             <option value ="geoip" {% if queryOptions and queryOptions|key:'criteria' == "geoip" %}
                                                             SELECTED {% endif %}>Country Code</option>
-            <option value ="bandwidth" {% if queryOptions and queryOptions|key:'criteria' == "bandwidth" %}
+            <option value ="bandwidthobserved" {% if queryOptions and queryOptions|key:'criteria' == "bandwidthobserved" %}
                                                             SELECTED {% endif %}>Bandwidth (kb/s)</option>
             <option value ="uptime" {% if queryOptions and queryOptions|key:'criteria' == "uptime" %}
                                                             SELECTED {% endif %}>Uptime (days)</option>
