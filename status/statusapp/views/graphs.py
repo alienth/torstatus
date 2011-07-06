@@ -1,6 +1,9 @@
 """
 Views for statusapp that involve creating dynamic graphs.
 """
+# Python-specific import statements -----------------------------------
+from copy import copy
+
 # Django-specific import statements -----------------------------------
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Max
@@ -12,6 +15,13 @@ from custom.aggregate import CountCase
 from helpers import draw_bar_graph, draw_line_graph
 
 
+DEFAULT_PARAMS = {'WIDTH': 960, 'HEIGHT': 320, 'TOP_MARGIN': 25,
+                  'BOTTOM_MARGIN': 19, 'LEFT_MARGIN': 38,
+                  'RIGHT_MARGIN': 5, 'X_FONT_SIZE': '8',
+                  'Y_FONT_SIZE': '9', 'LABEL_FONT_SIZE': '8',
+                  'LABEL_FLOAT': 3, 'LABEL_ROT': 'horizontal',
+                  'FONT_WEIGHT': 'bold', 'BAR_WIDTH': 0.5,
+                  'COLOR': '#66CD00', 'TITLE': ''}
 def readhist(request, fingerprint):
     """
     Create a graph of read bandwidth history for the last twenty-four
@@ -57,36 +67,16 @@ def bycountrycode(request):
     @return: A graph representing the number of routers by country
         code as an HttpResponse object.
     """
-    params = {}
-    # Width and height of the graph in pixels
-    params['WIDTH'] = 960
-    params['HEIGHT'] = 320
-    # Space in pixels given around plot
-    params['TOP_MARGIN'] = 25
-    params['BOTTOM_MARGIN'] = 19
-    params['LEFT_MARGIN'] = 38
-    params['RIGHT_MARGIN'] = 5
-    # Font sizes, in pixels
-    params['X_FONT_SIZE'] = '8'
-    params['Y_FONT_SIZE'] = '9'
-    params['LABEL_FONT_SIZE'] = '8'
-    # How many pixels above each bar the labels should be
-    params['LABEL_FLOAT'] = 3
-    # How the labels should be presented
+    params = copy(DEFAULT_PARAMS)
     params['LABEL_ROT'] = 'vertical'
-    # Font weight used for labels and titles.
-    params['FONT_WEIGHT'] = 'bold'
-    params['BAR_WIDTH'] = 0.5
-    params['COLOR'] = '#66CD00'
-    # Title of graph
     params['TITLE'] = 'Number of Routers by Country Code'
 
-    last_va = Statusentry.objects.aggregate(\
+    last_va = Statusentry.objects.aggregate(
               last=Max('validafter'))['last']
 
-    statusentries = Statusentry.objects.filter(\
-                    validafter=last_va)\
-                    .extra(select={'geoip': 'geoip_lookup(address)'})
+    statusentries = Statusentry.objects.filter(
+                    validafter=last_va).extra(
+                            select={'geoip': 'geoip_lookup(address)'})
 
     country_map = {}
 
@@ -117,37 +107,16 @@ def exitbycountrycode(request):
     @return: A graph representing the number of exit routers by country
         code as an HttpResponse object.
     """
-    params = {}
-    # Width and height of the graph in pixels
-    params['WIDTH'] = 960
-    params['HEIGHT'] = 320
-    # Space in pixels given around plot
-    params['TOP_MARGIN'] = 25
-    params['BOTTOM_MARGIN'] = 19
-    params['LEFT_MARGIN'] = 38
-    params['RIGHT_MARGIN'] = 5
-    # Font sizes, in pixels
-    params['X_FONT_SIZE'] = '8'
-    params['Y_FONT_SIZE'] = '9'
-    params['LABEL_FONT_SIZE'] = '8'
-    # How many pixels above each bar the labels should be
-    params['LABEL_FLOAT'] = 3
-    # How the labels should be presented
+    params = copy(DEFAULT_PARAMS)
     params['LABEL_ROT'] = 'vertical'
-    # Font weight used for labels and titles.
-    params['FONT_WEIGHT'] = 'bold'
-    params['BAR_WIDTH'] = 0.5
-    params['COLOR'] = '#66CD00'
-    # Title of graph
     params['TITLE'] = 'Number of Exit Routers by Country Code'
 
     last_va = Statusentry.objects.aggregate(
               last=Max('validafter'))['last']
 
     statusentries = Statusentry.objects.filter(
-                    validafter=last_va,
-                    isexit=1)\
-                    .extra(select={'geoip': 'geoip_lookup(address)'})
+                    validafter=last_va, isexit=1).extra(
+                            select={'geoip': 'geoip_lookup(address)'})
 
     country_map = {}
 
@@ -167,7 +136,6 @@ def exitbycountrycode(request):
 
     return draw_bar_graph(xs, ys, keys, params)
 
-
 @cache_page(60 * 5)
 def bytimerunning(request):
     """
@@ -178,34 +146,14 @@ def bytimerunning(request):
     @return: A graph representing the uptime of routers in the
         Tor network as an HttpResponse object.
     """
-    params = {}
-    # Width and height of the graph in pixels
-    params['WIDTH'] = 960
-    params['HEIGHT'] = 320
-    # Space in pixels given around plot
-    params['TOP_MARGIN'] = 25
-    params['BOTTOM_MARGIN'] = 19
-    params['LEFT_MARGIN'] = 38
-    params['RIGHT_MARGIN'] = 5
-    # Font sizes, in pixels
+    params = copy(DEFAULT_PARAMS)
     params['X_FONT_SIZE'] = '9'
-    params['Y_FONT_SIZE'] = '9'
-    params['LABEL_FONT_SIZE'] = '8'
-    # How many pixels above each bar the labels should be
-    params['LABEL_FLOAT'] = 3
-    # How the labels should be presented
-    params['LABEL_ROT'] = 'horizontal'
-    # Font weight used for labels and titles.
-    params['FONT_WEIGHT'] = 'bold'
-    params['BAR_WIDTH'] = 0.5
-    params['COLOR'] = '#66CD00'
-    # Title of graph
     params['TITLE'] = 'Number of Routers by Time Running (weeks)'
 
-    last_va = Statusentry.objects.aggregate(\
+    last_va = Statusentry.objects.aggregate(
               last=Max('validafter'))['last']
 
-    statusentries = Statusentry.objects.filter(\
+    statusentries = Statusentry.objects.filter(
                     validafter=last_va)
 
     uptime_map = {}
@@ -239,7 +187,7 @@ def byobservedbandwidth(request):
     @return: A graph representing the observed bandwidth of the
         routers in the Tor network.
     """
-    params = {}
+    params = copy(DEFAULT_PARAMS)
     # Width and height of the graph in pixels
     params['WIDTH'] = 480
     params['HEIGHT'] = 320
@@ -248,29 +196,17 @@ def byobservedbandwidth(request):
     params['BOTTOM_MARGIN'] = 64
     params['LEFT_MARGIN'] = 38
     params['RIGHT_MARGIN'] = 5
-    # Font sizes, in pixels
-    params['X_FONT_SIZE'] = '8'
-    params['Y_FONT_SIZE'] = '9'
-    params['LABEL_FONT_SIZE'] = '8'
-    # How many pixels above each bar the labels should be
-    params['LABEL_FLOAT'] = 3
-    # How the labels should be presented
     params['LABEL_ROT'] = 'vertical'
-    # Font weight used for labels and titles.
-    params['FONT_WEIGHT'] = 'bold'
-    params['BAR_WIDTH'] = 0.5
-    params['COLOR'] = '#66CD00'
-    # Title of graph
     params['TITLE'] = 'Number of Routers by Observed Bandwidth (KB/sec)'
 
     # Define the ranges for the graph, a list of 2-tuples of ints.
     RANGES = [(0, 10), (11, 20), (21, 50), (51, 100), (101, 500),
               (501, 1000), (1001, 2000), (2001, 3000), (3001, 5000)]
 
-    last_va = Statusentry.objects.aggregate(\
+    last_va = Statusentry.objects.aggregate(
               last=Max('validafter'))['last']
 
-    statusentries = Statusentry.objects.filter(\
+    statusentries = Statusentry.objects.filter(
                     validafter=last_va)
 
     bw_map = {}
@@ -320,44 +256,16 @@ def byplatform(request):
     @return: A graph representing the platforms of the active relays
         in the Tor network as an HttpResponse object.
     """
-    params = {}
-    # Width and height of the graph in pixels
+    params = copy(DEFAULT_PARAMS)
     params['WIDTH'] = 480
     params['HEIGHT'] = 320
-    # Space in pixels given around plot
-    params['TOP_MARGIN'] = 25
-    params['BOTTOM_MARGIN'] = 64
-    params['LEFT_MARGIN'] = 38
-    params['RIGHT_MARGIN'] = 5
-    # Font sizes, in pixels
-    params['X_FONT_SIZE'] = '8'
-    params['Y_FONT_SIZE'] = '9'
-    params['LABEL_FONT_SIZE'] = '8'
-    # How many pixels above each bar the labels should be
-    params['LABEL_FLOAT'] = 3
-    # How the labels should be presented
-    params['LABEL_ROT'] = 'horizontal'
-    # Font weight used for labels and titles.
-    params['FONT_WEIGHT'] = 'bold'
-    params['BAR_WIDTH'] = 0.5
-    params['COLOR'] = '#66CD00'
-    # Title of graph
+    params['X_FONT_SIZE'] = '9'
     params['TITLE'] = 'Number of Routers by Platform'
 
-    # Set margins according to specification.
-    matplotlib.rcParams['figure.subplot.left'] = \
-            float(LEFT_MARGIN) / WIDTH
-    matplotlib.rcParams['figure.subplot.right'] = \
-            float(WIDTH - RIGHT_MARGIN) / WIDTH
-    matplotlib.rcParams['figure.subplot.top'] = \
-            float(HEIGHT - TOP_MARGIN) / HEIGHT
-    matplotlib.rcParams['figure.subplot.bottom'] = \
-            float(BOTTOM_MARGIN) / HEIGHT
-
-    last_va = Statusentry.objects.aggregate(\
+    last_va = Statusentry.objects.aggregate(
               last=Max('validafter'))['last']
 
-    statusentries = Statusentry.objects.filter(\
+    statusentries = Statusentry.objects.filter(
                     validafter=last_va)
 
     platform_map = {}
@@ -401,38 +309,18 @@ def aggregatesummary(request):
     @return: A graph representing an aggregate summary of the routers on
         the Tor network.
     """
-    params = {}
-    # Width and height of the graph in pixels
-    params['WIDTH'] = 960
-    params['HEIGHT'] = 320
-    # Space in pixels given around plot
-    params['TOP_MARGIN'] = 25
-    params['BOTTOM_MARGIN'] = 19
-    params['LEFT_MARGIN'] = 38
-    params['RIGHT_MARGIN'] = 5
-    # Font sizes, in pixels
+    params = copy(DEFAULT_PARAMS)
     params['X_FONT_SIZE'] = '9'
-    params['Y_FONT_SIZE'] = '9'
-    params['LABEL_FONT_SIZE'] = '8'
-    # How many pixels above each bar the labels should be
-    params['LABEL_FLOAT'] = 3
-    # How the labels should be presented
-    params['LABEL_ROT'] = 'horizontal'
-    # Font weight used for labels and titles.
-    params['FONT_WEIGHT'] = 'bold'
-    params['BAR_WIDTH'] = 0.5
-    params['COLOR'] = '#66CD00'
-    # Title of graph
     params['TITLE'] = 'Aggregate Summary -- Number of Routers Matching' \
                     + ' Specified Criteria'
 
-    last_va = Statusentry.objects.aggregate(\
+    last_va = Statusentry.objects.aggregate(
               last=Max('validafter'))['last']
 
     statusentries = Statusentry.objects.filter(validafter=last_va)
 
     total = statusentries.count()
-    counts = Statusentry.objects.filter(validafter=last_va).aggregate(\
+    counts = Statusentry.objects.filter(validafter=last_va).aggregate(
             isauthority=CountCase('isauthority', when=True),
             isbaddirectory=CountCase('isbaddirectory', when=True),
             isbadexit=CountCase('isbadexit', when=True),

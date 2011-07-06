@@ -1,0 +1,80 @@
+Installing TorStatus
+====================
+0: Installing the Dependencies
+------------------------------
+First, install the necessary software to run TorStatus.
+
+    | $ sudo aptitude install python2.6 postgresql-8.4 python-matplotlib python-django python-psycopg2 git ant
+    | $ python --version
+    | Python 2.6.6
+    | $ psql --version
+    | psql (PostgreSQL) 8.4.8
+    | $ ant -version
+    | Apache Ant version 1.8.0 compiled on March 11 2010
+    | $ python
+    | >>> import matplotlib
+    | >>> import django
+    | >>> import psycopg2
+    | >>> matplotlib.__version__
+    | '0.99.3'
+    | >>> django.VERSION
+    | (1, 2, 3, 'final', 0)
+    | >>> psycopg2.__version__
+    | '2.2.1 (dt dec mx ext pq3)'
+
+1: Installing the Database
+--------------------------
+This implementation of TorStatus currently uses features that are not
+part of the master branch of metrics-web. Do the following to get the
+correct branch of metrics-web:
+
+    | $ mkdir /srv/metrics-web
+    | $ cd /srv/metrics-web
+    | $ git init
+    | $ git remote add karsten git://git.torproject.org/karsten/metrics-web
+    | $ git fetch karsten
+    | $ git checkout -b foreignkey karsten/foreignkey
+
+Now follow the instructions in the README to build the database.
+Note that if you have not previously configured postgreSQL, you may
+prefer to use a "password" verification system rather than a "trust"
+verification system for the user "metrics" to access the database.
+This is possible by adding a line to pg_hba.conf, found in
+/etc/postgresql/8.4/main/ in Debian Squeeze, along the lines of
+the following:
+
+    | local     all     metrics     password
+
+TorStatus requires, at the least, bandwidth history information,
+relay statuses, descriptors, and the MaxMind Geoip database. Executing
+the instructions found in sections 1.1, 1.2, 1.3, 1.5 and 1.6 should
+enter all necessary data into the database to run TorStatus.
+
+2: Installing TorStatus
+-----------------------
+If you have not done so already, get the most recent stable version of
+TorStatus:
+
+    | $ git clone https://github.com/dcalderon/TorStatus
+
+Now change directory to TorStatus/status and edit config.template such
+that TorStatus can connect to the database just built. Save these changes
+to a file called "settings.py". Note that if you are not using password
+verification for the "metrics" user in postgres, you may leave the
+'password' field blank.
+
+While still in TorStatus/status, run the following to synchronize
+TorStatus with the database:
+
+    | $ python manage.py syncdb
+
+And run the following to initiate TorStatus, where [port] is the port
+that you would like TorStatus to run on:
+
+    | $ python manage.py runserver [port]
+
+At this point, TorStatus should be running; navigate to localhost:[port]
+in your web browser to view it.
+
+If there are any changes that you would like to see in TorStatus, please
+let us know by sending e-mail to torstatus@gmail.com.

@@ -56,8 +56,20 @@ tuples with two entries: the first uses regular expressions to match
 page requests, and the second specifies what method in views.py will be
 called to serve the page request.
 
-views.py
+views
 ........
 Contains the application logic used to serve each page request. Each
 "view" returns an HttpResponse object that refers to an HTML template
 that presents the information to the client.
+
+pages.py
+~~~~~~~~
+Contains the "views" for "pages" of the TorStatus web application.
+
+graphs.py
+~~~~~~~~~
+Contains the "views" for the graphs of the TorStatus web application.
+
+helpers.py
+~~~~~~~~~~
+Contains helper functions for pages.py and graphs.py.

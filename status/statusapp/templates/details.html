@@ -15,7 +15,7 @@
 <table cellspacing="2" cellpadding="2" class="displayStatus">
 <tr>
 	<td id="mainLinks">
-        Details for Relay: {{descriptor.nickname}}
+        Details for Relay: {{ descriptor.nickname }}
 	</td>
 </tr>
 </table>
@@ -29,59 +29,59 @@
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Router Name:</td>
-    <td id="aggBox">{{descriptor.nickname}}</td>
+    <td id="aggBox">{{ descriptor.nickname }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Fingerprint:</td>
-    <td id="aggBox">{{descriptor.fingerprint|format_fing}}</td>
+    <td id="aggBox">{{ descriptor.fingerprint|format_fing }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Contact:</td>
-    <td id="aggBox">{{descriptor.rawdesc|contact}}</td>
+    <td id="aggBox">{{ descriptor.contact }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">IP Address:</td>
-    <td id="aggBox">{{descriptor.address}}</td>
+    <td id="aggBox">{{ descriptor.address }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Hostname:</td>
-    <td id="aggBox">{{descriptor.address|hostname}}</td>
+    <td id="aggBox">{{ descriptor.hostname }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Onion Router Port:</td>
-    <td id="aggBox">{{descriptor.orport}}</td>
+    <td id="aggBox">{{ descriptor.orport }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Directory Server Port:</td>
-    <td id="aggBox">{{descriptor.dirport}}</td>
+    <td id="aggBox">{{ descriptor.dirport }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Country Code:</td>
-    <td id="aggBox">{{ statusentry.geoip|country|upper }}</td>
+    <td id="aggBox">{{ statusentry.country }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
     <td id="aggBox">Latitude, Longitude:</td>
-    <td id="aggBox">{{ statusentry.geoip|latitude }}, {{ statusentry.geoip|longitude }}</td>
+    <td id="aggBox">{{ statusentry.latitude }}, {{ statusentry.longitude }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Platform / Version:</td>
-    <td id="aggBox">{{descriptor.platform}}</td>
+    <td id="aggBox">{{ descriptor.platform }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Last Descriptor Published (GMT):</td>
-    <td id="aggBox">{{descriptor.published}}</td>
+    <td id="aggBox">{{ descriptor.published }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Current Uptime:</td>
-    <td id="aggBox">{{descriptor.uptime|words}}</td>
+    <td id="aggBox">{{ descriptor.uptime|words }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Bandwidth (Burst/Avg/Observed - In Bps):</td>
-    <td id="aggBox">{{descriptor.bandwidthburst}} / {{descriptor.bandwidthavg}} / {{descriptor.bandwidthobserved}}</td>
+    <td id="aggBox">{{ descriptor.bandwidthburst }} / {{ descriptor.bandwidthavg }} / {{ descriptor.bandwidthobserved }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Family:</td>
-    <td id="aggBox">{{descriptor.rawdesc|family|safe}}</td> <!-- |safe|linebreaks}}</td> -->
+    <td id="aggBox">{{ descriptor.family|format_family|safe|linebreaks }}</td> <!-- |safe|linebreaks}}</td> -->
 </tr>
 </table>
 
@@ -107,10 +107,10 @@
                 <td id="details_boxTitle"> Router Keys </td>
             </tr>
             <tr>
-                <td>Onion Key:<pre>{{descriptor.rawdesc|onion_key}}</pre></td>
+                <td>Onion Key:<pre>{{ descriptor.onion_key }}</pre></td>
             </tr>
             <tr>
-                <td>Signing Key:<pre>{{descriptor.rawdesc|signing_key}}</pre></td>
+                <td>Signing Key:<pre>{{ descriptor.signing_key }}</pre></td>
             </tr>
         </table>
     </td>
@@ -176,9 +176,9 @@
                 <td id="details_boxTitle" colspan=100%> Exit Policy Information </td>
             </tr>
             <tr>
-                <td id="detailBox">{% for line in descriptor.rawdesc|exitinfo %} 
+                <td id="detailBox">{% for line in descriptor.exit_info %} 
                         {% if forloop.counter0|divisible_by:16 %}</td><td id="detailBox">{% endif %}   
-                        {{ line}} <br />
+                        {{ line }} <br />
                     {% endfor %}
                 </td>
             </tr>

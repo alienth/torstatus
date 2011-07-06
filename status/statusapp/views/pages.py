@@ -6,6 +6,7 @@ This module contains a single controller for each page type.
 # General python import statements ------------------------------------
 import subprocess
 import datetime
+from socket import getfqdn
 
 # Django-specific import statements -----------------------------------
 from django.shortcuts import render_to_response
@@ -69,6 +70,10 @@ def index(request):
                    bandwidthavg=Sum('descriptorid__bandwidthavg'),
                    bandwidthburst=Sum('descriptorid__bandwidthburst'),
                    bandwidthobserved=Sum('descriptorid__bandwidthobserved'))
+    # Convert from B/s to KB/s
+    total_counts['bandwidthavg'] /= 1024
+    total_counts['bandwidthburst'] /= 1024
+    total_counts['bandwidthobserved'] /= 1024
 
     # USER QUERY MODIFICATIONS ----------------------------------------
     # -----------------------------------------------------------------
@@ -109,6 +114,29 @@ def index(request):
              bandwidthavg=Sum('descriptorid__bandwidthavg'),
              bandwidthburst=Sum('descriptorid__bandwidthburst'),
              bandwidthobserved=Sum('descriptorid__bandwidthobserved'))
+    # Convert from B/s to KB/s
+    counts['bandwidthavg'] /= 1024
+    counts['bandwidthburst'] /= 1024
+    counts['bandwidthobserved'] /= 1024
+
+    for entry in statusentries:
+        # Calculate real uptime
+        published = entry.descriptorid.published
+        now = datetime.datetime.now()
+        diff = now - published
+        diff_sec = (diff.microseconds + (
+                  diff.seconds + diff.days * 24 * 3600) * 10**6) / 10**6
+        entry.descriptorid.uptime = (
+                  entry.descriptorid.uptime + diff_sec) / 86400
+
+        # Calculate real bandwidth
+        entry.descriptorid.bandwidthobserved = \
+                  entry.descriptorid.bandwidthobserved / 1024
+
+        # Create appropriate country, latitude, and longitude attributes
+        entry.country, lat, lng = entry.geoip.strip('()').split(',')
+        entry.latitude = float(lat)
+        entry.longitude = float(lng)
 
     in_query = statusentries.count()
 
@@ -152,7 +180,47 @@ def details(request, fingerprint):
                   .order_by('-validafter')[:1][0]
 
     descriptor = statusentry.descriptorid
-    template_values = {'descriptor': descriptor, 'statusentry': statusentry}
+
+    # Get the country, latitude, and longitude from the geoip attribute
+    statusentry.country, lat, lng = statusentry.geoip.strip('()').split(',')
+    statusentry.latitude = float(lat)
+    statusentry.longitude = float(lng)
+
+    # Get the correct uptime, assuming that the router is still running
+    published = descriptor.published
+    now = datetime.datetime.now()
+    diff = now - published
+    diff_sec = (diff.microseconds + (
+                diff.seconds + diff.days * 24 * 3600) * 10**6) / 10**6
+    descriptor.uptime = descriptor.uptime + diff_sec
+
+    # Get information from the raw descriptor.
+    raw_list = str(descriptor.rawdesc).split("\n")
+    descriptor.onion_key = ''
+    descriptor.signing_key = ''
+    descriptor.exit_info = []
+    descriptor.contact = ''
+    descriptor.family = []
+    i = 0
+    while (i < len(raw_list)):
+        if raw_list[i].startswith('onion-key'):
+            descriptor.onion_key = '\n'.join(
+                    raw_list[(i + 1):(i + 6)])
+        elif raw_list[i].startswith('signing-key'):
+            descriptor.signing_key = '\n'.join(
+                    raw_list[(i + 1):(i + 6)])
+        elif raw_list[i].startswith(('accept', 'reject')):
+            descriptor.exit_info.append(raw_list[i])
+        elif raw_list[i].startswith('contact'):
+            descriptor.contact = raw_list[i][8:]
+        elif raw_list[i].startswith('family'):
+            descriptor.family = raw_list[i][7:].split()
+        i += 1
+
+    descriptor.hostname = getfqdn(str(statusentry.address))
+
+    template_values = {'descriptor': descriptor, 'statusentry':
+            statusentry}
     return render_to_response('details.html', template_values)
 
 

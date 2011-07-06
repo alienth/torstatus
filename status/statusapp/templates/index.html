@@ -134,7 +134,7 @@
 		{% endif %}
 		    {% for columnName in currentColumns %}
 		    {% if columnName == "Country Code" %}
-            <td sorttable_customkey={{ relay.geoip|country }} id="col_relayName"><a href="http://www.openstreetmap.org/?mlon={{ relay.geoip|longitude }}&mlat={{ relay.geoip|latitude }}&zoom=6"><img src="static/img/flags/{{ relay.geoip|country }}.gif" alt={{ relay.geoip|country }} title="{{ relay.geoip|country }}: {{ relay.geoip|latitude }}, {{ relay.geoip|longitude }}" border=0></a></td>
+            <td sorttable_customkey={{ relay.country }} id="col_relayName"><a href="http://www.openstreetmap.org/?mlon={{ relay.longitude }}&mlat={{ relay.latitude }}&zoom=6"><img src="static/img/flags/{{ relay.country|lower }}.gif" alt={{ relay.country }} title="{{ relay.country }}: {{ relay.latitude }}, {{ relay.longitude }}" border=1px, style="border-color: black"></a></td>
 			{% endif %}
 			{% if columnName == "Router Name" %}
             <td id="col_relayName">
@@ -150,10 +150,10 @@
             </td>
             {% endif %}
             {% if columnName == "Bandwidth" %}
-            <td id="col_relayBandwidth">{{ relay.descriptorid.bandwidthobserved|kilobytes_ps }} KB/s</td>
+            <td id="col_relayBandwidth">{{ relay.descriptorid.bandwidthobserved }} KB/s</td>
             {% endif %}
             {% if columnName == "Uptime" %}
-            <td id="col_relayUptime">{{ relay.descriptorid.uptime|days }} d</td>
+            <td id="col_relayUptime">{{ relay.descriptorid.uptime }} d</td>
             {% endif %}
             {% if columnName == "IP" %}
             <td id="col_relayAddress">[<a href="details/{{ relay.address }}/whois">{{ relay.address }}</a>]</td>
@@ -595,17 +595,17 @@
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Total average bandwidth of displayed routers [KB/s]:</td>
-    <td id="aggBox">{{ counts.bandwidthavg|kilobytes_ps }}</td>
+    <td id="aggBox">{{ counts.bandwidthavg }}</td>
     <td id="aggBox">{{ counts.bandwidthavg|percent:total_counts.bandwidthavg }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Total burst bandwidth of displayed routers [KB/s]:</td>
-    <td id="aggBox">{{ counts.bandwidthburst|kilobytes_ps }}</td>
+    <td id="aggBox">{{ counts.bandwidthburst }}</td>
     <td id="aggBox">{{ counts.bandwidthburst|percent:total_counts.bandwidthburst }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Total observed bandwidth of displayed routers [KB/s]:</td>
-    <td id="aggBox">{{ counts.bandwidthobserved|kilobytes_ps }}</td>
+    <td id="aggBox">{{ counts.bandwidthobserved }}</td>
     <td id="aggBox">{{ counts.bandwidthobserved|percent:total_counts.bandwidthobserved }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
