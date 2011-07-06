@@ -33,7 +33,7 @@ NOT_MOVABLE_COLUMNS = ["Named", "Exit", "Authority", "Fast", "Guard",
                        "Stable", "Running", "Valid", "V2Dir",
                        "Platform", "Hibernating"]
 
-@cache_page(60 * 5)
+
 def index(request):
     """
     Supply a dictionary to the index.html template consisting of a list
@@ -110,10 +110,11 @@ def index(request):
              bandwidthburst=Sum('descriptorid__bandwidthburst'),
              bandwidthobserved=Sum('descriptorid__bandwidthobserved'))
 
+    in_query = statusentries.count()
+
     bw_disp = TotalBandwidth.objects.all()\
               .order_by('-date')[:1][0].bwobserved
 
-    in_query = statusentries.count()
     client_address = request.META['REMOTE_ADDR']
     template_values = {'relay_list': statusentries,
                        'client_address': client_address,
