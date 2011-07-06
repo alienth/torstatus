@@ -4,7 +4,7 @@ from django.conf import settings
 
 urlpatterns = patterns('',
     # Main pages
-    (r'^$', 'statusapp.views.pages.index'),
+    (r'^(?P<sort_filter>\w*)$', 'statusapp.views.pages.index'),
     (r'^column-preferences/$', 'statusapp.views.pages.columnpreferences'),
     (r'^exit-node-query/$', 'statusapp.views.pages.exitnodequery'),
 

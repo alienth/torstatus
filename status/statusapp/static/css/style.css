@@ -33,6 +33,16 @@ th#routerName {
     min-width: 100px;
 }
 
+th#uptime {
+    text-align: left;
+    font-weight: bold;
+    font-size: 0.6875em;
+    background-color: #7BD4F7;
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+    min-width: 30px;
+}
+
 th#badDir {
     text-align: left;
     font-weight: bold;
@@ -40,7 +50,7 @@ th#badDir {
     background-color: #7BD4F7;
     border-top: 2px solid black;
     border-bottom: 2px solid black;
-    min-width: 80px;
+    min-width: 100px;
 }
 
 th#lastDescPub {
@@ -50,13 +60,59 @@ th#lastDescPub {
     background-color: #7BD4F7;
     border-top: 2px solid black;
     border-bottom: 2px solid black;
-    min-width: 150px;
+    min-width: 160px;
+}
+
+th#bandwidth {
+    text-align: left;
+    font-weight: bold;
+    font-size: 0.6875em;
+    background-color: #7BD4F7;
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+    min-width: 50px;
+}
+
+th#dirport {
+    text-align: left;
+    font-weight: bold;
+    font-size: 0.6875em;
+    background-color: #7BD4F7;
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+    min-width: 60px;
+}
+
+th#orport {
+    text-align: left;
+    font-weight: bold;
+    font-size: 0.6875em;
+    background-color: #7BD4F7;
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+    min-width: 60px;
+}
+
+th#dirport:hover {
+    background-color: #89FB69;
+    cursor: pointer;
+}
+
+th#orport:hover {
+    background-color: #89FB69;
+    cursor: pointer;
+}
+
+th#bandwidth:hover {
+    background-color: #89FB69;
+    cursor: pointer;
 }
 
 th#lastDescPub:hover {
     background-color: #89FB69;
     cursor: pointer;
 }
+
 th#badDir:hover {
     background-color: #89FB69;
     cursor: pointer;
@@ -79,6 +135,7 @@ th#relayHeaderInv {
     border-top: 2px solid black;
     border-bottom: 2px solid black;
     cursor: pointer;
+    min-width: 60px;
 }
 
 table.header {
@@ -145,32 +202,37 @@ table#noTableError {
 }
 
 td#boxError {
-background-color: #FB4521;
-text-align: center;
-color: #000000;
-font-size: 12px;
-border-top: 2px solid black;
-border-bottom: 2px solid black;
-white-space:nowrap;
+    background-color: #FB4521;
+    text-align: center;
+    color: #000000;
+    font-size: 12px;
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+    white-space:nowrap;
 }
 
 a:hover {
-color: black;
-text-decoration: none;
+    color: black;
+    text-decoration: none;
 }
 
 a.link {
-color: black;
-text-decoration: none;
+    color: black;
+    text-decoration: none;
 }
 
 a.link:hover {
-background-color: #89FB69;
+    background-color: #89FB69;
+}
+
+a.sortLink {
+    color: black;
+    text-decoration: none;
 }
 
 a.linkDetails {
     color: black;
-text-decoration: none;
+    text-decoration: none;
 }
 
 .relayOK {
@@ -186,7 +248,7 @@ text-decoration: none;
 }
 
 .relayBadExit {
-background-color: red;
+    background-color: red;
 }
 
 table.appServerDetails {
@@ -210,8 +272,8 @@ table.advancedQuery {
 }
 
 tr#row_appServerDetails:hover {
-background-color: #7BD4F7;
-cursor: pointer;
+    background-color: #7BD4F7;
+    cursor: pointer;
 }
 
 table.aggStatisticSummary {
@@ -238,12 +300,12 @@ td#aggBox {
 }
 
 td.boxTitle {
-background-color: #7BD4F7;
-text-align: center;
-color: #000000;
-border-top: 2px solid black;
-border-bottom: 2px solid black;
-white-space:nowrap;
+    background-color: #7BD4F7;
+    text-align: center;
+    color: #000000;
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+    white-space:nowrap;
 }
 
 td#col_relayName {
@@ -260,7 +322,7 @@ td#col_relayBandwidth {
 }
 
 td#col_relayUptime {
-    width: 55px;
+    width: 60px;
 }
 
 td#col_relayIcons {
@@ -269,7 +331,7 @@ td#col_relayIcons {
 }
 
 td#col_relayOrport {
-    width: 50px;
+    width: 60px;
 }
 
 
@@ -298,7 +360,7 @@ td#col_relayContact {
 }
 
 td#col_relayLastDescPub {
-    width: 50px;
+    width: 100px;
     text-align: center;
 }
 
