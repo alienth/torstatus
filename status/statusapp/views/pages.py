@@ -11,6 +11,7 @@ import datetime
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpRequest
 from django.db.models import Max, Sum, Count
+from django.views.decorators.cache import cache_page
 
 # TorStatus specific import statements --------------------------------
 from statusapp.models import Statusentry, Descriptor, Bwhist,\
@@ -37,7 +38,7 @@ NOT_MOVABLE_COLUMNS = ["Named", "Exit", "Authority", "Fast", "Guard",
 #@cache_page(60 * 15) # Cache is turned off for development,
                       # but it works.
 
-
+@cache_page(60 * 15, key_prefix="index")
 def index(request):
     """
     Supply a dictionary to the index.html template consisting of a list
@@ -61,8 +62,7 @@ def index(request):
     statusentries = Statusentry.objects.filter(\
                     validafter=last_va)\
                     .extra(select={'geoip':
-                    'geoip_lookup(statusentry.address)'})\
-                    .order_by('nickname')
+                    'geoip_lookup(statusentry.address)'})
 
     num_routers = statusentries.count()
 
@@ -316,7 +316,7 @@ def exitnodequery(request):
                        'dest_port_valid': dest_port_valid}
     return render_to_response('nodequery.html', template_values)
 
-
+@cache_page(60 * 30)
 def networkstatisticgraphs(request):
     """
     Render an HTML template to response.

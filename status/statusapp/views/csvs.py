@@ -105,63 +105,47 @@ def current_results_csv(request):
     return response
 
 
-def all_ip_csv(request):
+def exits_or_ips(request, all_flag):
     """
-    Returns a csv formatted file with all ip addresses in the Tor network.
+    Returns a csv formatted file that contains either all Tor ip
+        addresses or all Tor exit node ip addresses.
+
+    @oaram all_flag: a variable that represents the clients
+        desire to get all the ips or only the exit node ips from
+        the Tor network.
 
     @rtype: HttpResponse
-    @return: csv formatted list of ip addresses.
+    @return: csv formatted list of either all ip address or all
+        exit node ip addresses.
     """
-
-    #Perform queries
-    last_va = Statusentry.objects.aggregate(last=Max('validafter'))['last']
-    statusentries = Statusentry.objects.filter(validafter=last_va)
     
+    #Performs the necessary query depending on what is requested
+    if all_flag:
+        last_va = Statusentry.objects.aggregate(
+                last=Max('validafter'))['last']
+        statusentries = Statusentry.objects.filter(validafter=last_va)
+    else:
+        last_va = Statusentry.objects.aggregate(
+                last=Max('validafter'))['last']
+        statusentries = Statusentry.objects.filter(
+                validafter=last_va, isexit=True)
+
     #Initialize list to hold ips and populates it.
     IPs = []
     for entry in statusentries:
         IPs.append(entry.address)
 
-    #Creates csv response type.
-    response = HttpResponse(mimetype= 'text/csv')
-    response['Content-Disposition'] = 'attachment; filename=all_ips_csv'
+    #Creates the proper csv response type.
+    if all_flag:
+        response = HttpResponse(mimetype= 'text/csv')
+        response['Content-Disposition'] = 'attachment; filename=all_ips.csv'
+    else:
+        response = HttpResponse(mimetype= 'text/csv')
+        response['Content-Disposition'] = 'attachment; filename=all_exit_ips.csv'
 
     #Writes IP list to csv response file.
     writer = csv.writer(response)
     for ip in IPs:
-        writer.writerow([ip])
-
-    return response
-
-
-def all_exit_csv(request):
-    """
-    Returns a csv formatted file with the exit node ip addresses
-    in the Tor network.
-
-    @rtype: HttpResponse
-    @return: csv formatted list of the exit node ip addresses.
-    """
-
-    #Perform queries
-    last_va = Statusentry.objects.\
-            aggregate(last=Max('validafter'))['last']
-    statusentries = Statusentry.objects.\
-            filter(validafter=last_va, isexit=True)
-
-    #Initilize list to hold exit node ips and populate it.
-    exit_IPs = []
-    for entry in statusentries:
-        exit_IPs.append(entry.address)
-
-    #Creates csv response type.
-    response = HttpResponse(mimetype='text/csv')
-    response['Content-Disposition'] = 'attachment;\
-            filename=all_exit_nodes.csv'
-
-    #Writes IP list to csv response file.
-    writer = csv.writer(response)
-    for ip in exit_IPs:
         writer.writerow([ip])
 
     return response

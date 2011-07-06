@@ -1,6 +1,7 @@
 from django.conf.urls.defaults import *
 from django.views.static import *
 from django.conf import settings
+from django.views.decorators.cache import cache_page
 
 urlpatterns = patterns('',
     # Main pages
@@ -9,8 +10,7 @@ urlpatterns = patterns('',
     (r'^exit-node-query/$', 'statusapp.views.pages.exitnodequery'),
 
     # Media Files
-    (r'^flags/(?P<country_code>\w\w).gif$',
-        'statusapp.views.displayFlag'),
+    (r'^flags/(?P<country_code>\w\w).gif$','statusapp.views.displayFlag'),
     (r'^static/(?P<path>.*)$', 'django.views.static.serve',
             {'document_root': settings.MEDIA_ROOT}),
 
@@ -45,6 +45,6 @@ urlpatterns = patterns('',
 
     # CSV Files
     (r'^Tor-Query-Export.csv$', 'statusapp.views.csvs.current_results_csv'),
-    (r'^Tor-IP-List-All.csv$', 'statusapp.views.csvs.all_ip_csv'),
-    (r'^Tor-IP-List-Exit.csv$', 'statusapp.views.csvs.all_exit_csv'),
+    (r'^Tor-IP-List-All.csv$', 'statusapp.views.csvs.exits_or_ips', {'all_flag': True}),
+    (r'^Tor-IP-List-Exit.csv$', 'statusapp.views.csvs.exits_or_ips', {'all_flag': False}),
 )
