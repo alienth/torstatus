@@ -177,8 +177,8 @@
             </tr>
             <tr>
                 <td id="detailBox">{% for line in descriptor.rawdesc|exitinfo %} 
-                        {% if forloop.counter0|divisible_by:16 %}</td><td id="detailBox">{% endif %}   
-                        {{ line}} <br />
+                        {% if forloop.counter0|divisibleby:"16" %}</td><td id="detailBox">{% endif %}   
+                        {{ line }} <br />
                     {% endfor %}
                 </td>
             </tr>

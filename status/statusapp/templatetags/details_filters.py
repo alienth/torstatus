@@ -222,24 +222,6 @@ def hostname(address):
 
 
 @register.filter
-def divisible_by(counter, rows):
-    """
-    Return True if rows divides counter, False otherwise.
-
-    This method is used to divide entries (rows) in the exit policy
-    information table into a given number of columns.
-
-    @type counter: C{int}
-    @param counter: The maximum number of entries (rows) per column.
-    @type rows: C{int}
-    @param rows: The number of rows in the table.
-    @rtype: C{boolean}
-    @return: True if rows divides counter, False otherwise.
-    """
-    return counter % rows == 0
-
-
-@register.filter
 def country(geoip):
     """
     Get the two-letter lowercase country code from a GeoIP string.

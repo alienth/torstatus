@@ -108,4 +108,32 @@ def longitude(geoip):
 
 @register.filter
 def key(d, key_name):
+    """
+    """
     return d[key_name]
+
+@register.filter
+def sorting_link(sort_order, column_name):
+    """
+    Returns the proper URL after checking how the sorting is currently set up.
+    
+    @rtype: C{string}
+    @return The proper link for sorting the tables.
+    """
+    
+    if sort_order == "ascending":
+        return "/" + column_name + "_descending"
+    return "/" + column_name + "_ascending"
+
+@register.filter
+def sorting_arrows(sort_order):
+    """
+    Returns the string version of an HTML arrow depending on how the sorting 
+    is set up.
+    """
+    if sort_order == "ascending":
+        return u'&uarr;'
+    elif sort_order == "descending":
+        return u'&darr;'
+    else:
+        return u'&loz;'
