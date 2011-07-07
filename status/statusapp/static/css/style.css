@@ -371,7 +371,7 @@ td {
 table.relayTable {
     width: 100%;
     border-spacing: 0px;
-    border: 0;
+    border: 1px solid black;
 }
 
 div.footer {

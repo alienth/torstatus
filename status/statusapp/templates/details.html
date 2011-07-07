@@ -37,7 +37,7 @@
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Contact:</td>
-    <td id="aggBox">{{ descriptor.contact }}</td>
+    <td id="aggBox">{{ descriptor.contact|wordwrap:72|linebreaksbr }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">IP Address:</td>
@@ -65,7 +65,7 @@
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Platform / Version:</td>
-    <td id="aggBox">{{ descriptor.platform }}</td>
+    <td id="aggBox">{{ descriptor.platform|wordwrap:72|linebreaksbr }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Last Descriptor Published (GMT):</td>
