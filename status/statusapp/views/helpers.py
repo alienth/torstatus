@@ -1,8 +1,11 @@
+"""
+Helper functions for views.csvs, views.graphs, and views.pages.
+"""
 # General import statements -------------------------------------------
 import datetime
 
 # Django-specific import statements -----------------------------------
-from django.http import HttpRequest 
+from django.http import HttpRequest
 from django.http import HttpResponse
 
 # Matplotlib-specific import statements -------------------------------
@@ -19,53 +22,53 @@ def filter_statusentries(statusentries, query_options):
     Helper function that gets a QuerySet of status entries and a
     dictionary of search query options and filteres the QuerySet
     based on this dictionary.
-    
+
     @see: index
     @rtype: QuerySet
     @return: statusentries
     """
-    
+
     # ADD ishibernating AFTER WE KNOW HOW TO CHECK THAT
     options = ['isauthority', 'isbaddirectory', 'isbadexit', \
                'isexit', 'isfast', 'isguard', 'isnamed', \
                'isstable', 'isrunning', 'isvalid', 'isv2dir']
-    # options is needed because query_options has some other things that we 
+    # options is needed because query_options has some other things that we
     #      do not need in this case (the other search query key-values).
     valid_options = filter(lambda k: query_options[k] != '' \
                             and k in options, query_options)
     filterby = {}
     for opt in valid_options: 
         filterby[opt] = 1 if query_options[opt] == 'yes' else 0
- 
+
     if 'searchValue' in query_options and \
                 query_options['searchValue'] != '':
         value = query_options['searchValue']
         criteria = query_options['criteria']
         logic = query_options['boolLogic']
-            
-        options = ['nickname', 'fingerprint', 'geoip',
-                   'published','hostname', 'address', 
-                   'orport', 'dirport']            
-        descriptorlist_options = ['platform', 'uptime', 'bandwidthobserved'] 
 
-        # Special case for the value if searching for 
-        #       Uptime or Bandwidth and the criteria is 
+        options = ['nickname', 'fingerprint', 'geoip',
+                   'published','hostname', 'address',
+                   'orport', 'dirport']
+        descriptorlist_options = ['platform', 'uptime', 'bandwidthobserved']
+
+        # Special case for the value if searching for
+        #       Uptime or Bandwidth and the criteria is
         #       not Contains
         if (criteria == 'uptime' or criteria == 'bandwidthobserved') and \
-                logic != 'contains': 
+                logic != 'contains':
             value = int(value) * (86400 if criteria == 'uptime' else 1024)
-           
+
 
         key = ('descriptorid__' + criteria) if criteria in \
                 descriptorlist_options else criteria
-      
+
         if logic == 'contains':
             key = key + '__contains'
         elif logic == 'less':
             key = key + '__lt'
         elif logic == 'greater':
             key = key + '__gt'
-        
+
         if (criteria == 'uptime' or criteria == 'bandwidthobserved') and \
                 logic == 'equals':
             lower_value = value
@@ -74,15 +77,15 @@ def filter_statusentries(statusentries, query_options):
             filterby[key + '__lt'] = upper_value
         else:
             filterby[key] = value
-        
+
     statusentries = statusentries.filter(**filterby)
-    
+
     options = ['nickname', 'fingerprint', 'geoip', 'bandwidthobserved',
-               'uptime', 'published','hostname', 'address', 'orport', 
-               'dirport', 'platform', 'isauthority', 
+               'uptime', 'published','hostname', 'address', 'orport',
+               'dirport', 'platform', 'isauthority',
                'isbaddirectory', 'isbadexit', 'isexit',
-               'isfast', 'isguard', 'ishibernating', 
-               'isnamed', 'isstable', 'isrunning', 
+               'isfast', 'isguard', 'ishibernating',
+               'isnamed', 'isstable', 'isrunning',
                'isvalid', 'isv2dir']
 
     descriptorlist_options = ['platform', 'uptime', 'contact', 'bandwidthobserved']
@@ -464,7 +467,8 @@ def draw_bar_graph(xs, ys, labels, params):
     ax.bar(xs, ys, color=COLOR, width=BAR_WIDTH)
 
     # Label the height of each bar.
-    label_float_ydist = ax.get_ylim()[1] / (HEIGHT - TOP_MARGIN - BOTTOM_MARGIN) * LABEL_FLOAT
+    label_float_ydist = ax.get_ylim()[1] * LABEL_FLOAT / (
+                        HEIGHT - TOP_MARGIN - BOTTOM_MARGIN)
     num_params = len(xs)
     for i in range(num_params):
         ax.text(xs[i] + (BAR_WIDTH / 2.0),
@@ -549,10 +553,10 @@ def draw_line_graph(fingerprint, bwtype, color, shade):
     # them, get some data points from the day before, if we can.
     to_fill = 96 - len(tr_list)
 
-    start_time = recent_time - datetime.timedelta(\
+    start_time = recent_time - datetime.timedelta(
                  minutes=(15 * to_fill))
-    end_time = start_time + datetime.timedelta(days=1) - \
-               datetime.timedelta(minutes=15)
+    end_time = start_time + datetime.timedelta(
+               days=1) - datetime.timedelta(minutes=15)
 
     # If less than 96 entries in the array, get earlier entries.
     # If they don't exist, fill in the array with '0' values.

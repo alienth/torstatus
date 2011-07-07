@@ -5,8 +5,8 @@ name: TorStatus
 output: html
 target: api/
 introspect: no
-private: yes
-exclude: django, manage, settings, tests
+private: no
+exclude: django, manage, settings, tests,
 sourcecode: no
 # The verbosity should be set at -2 upon release, as this gets rid of
 # error messages of the flavor:

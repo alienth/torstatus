@@ -76,8 +76,7 @@
 {% block mainPage %}
 
 {% load index_filters %}
-{% load gapless %}
-{% gapless %}
+{% spaceless %}
 
 {% if relay_list %}
 <table class="relayTable sortable">
@@ -166,7 +165,7 @@
             <td id="col_relayLastDescPub">{{ relay.published }}</td>
             {% endif %}
             {% if columnName == "Contact" %}
-            <td id="col_relayContact">{{ relay.descriptorid.rawdesc|contact }}</td>
+            <td id="col_relayContact">{{ relay.contact }}</td>
             {% endif %}
             {% if columnName == "BadDir" %}
             <td id="col_relayBadDir" {% if relay.isbaddirectory == 1 %} sorttable_customkey="1">
@@ -679,5 +678,5 @@
 </table>
 
 <br />
-{% endgapless %}
+{% endspaceless %}
 {% endblock %}

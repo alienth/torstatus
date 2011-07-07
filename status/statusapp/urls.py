@@ -1,3 +1,7 @@
+"""
+The URLCONF for the statusapp.
+"""
+
 from django.conf.urls.defaults import *
 from django.views.static import *
 from django.conf import settings

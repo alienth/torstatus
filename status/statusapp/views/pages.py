@@ -52,21 +52,21 @@ def index(request):
     # -----------------------------------------------------------------
     # Get the initial query and necessary aggregate values for the
     # routers in the last consensus.
-    last_va = Statusentry.objects.aggregate(\
-            last=Max('validafter'))['last']
+    last_va = Statusentry.objects.aggregate(
+              last=Max('validafter'))['last']
 
-    statusentries = Statusentry.objects.filter(\
-                    validafter=last_va)\
-                    .extra(select={'geoip':
-                    'geoip_lookup(statusentry.address)'})\
-                    .order_by('nickname')
+    statusentries = Statusentry.objects.filter(
+                    validafter=last_va).extra(
+                    select={'geoip':
+                    'geoip_lookup(statusentry.address)'}).order_by(
+                    'nickname')
 
     num_routers = statusentries.count()
 
-    bw_total = TotalBandwidth.objects.all()\
-               .order_by('-date')[:1][0].bwobserved
+    bw_total = TotalBandwidth.objects.all().order_by(
+               '-date')[:1][0].bwobserved
 
-    total_counts = statusentries.aggregate(\
+    total_counts = statusentries.aggregate(
                    bandwidthavg=Sum('descriptorid__bandwidthavg'),
                    bandwidthburst=Sum('descriptorid__bandwidthburst'),
                    bandwidthobserved=Sum('descriptorid__bandwidthobserved'))
@@ -130,13 +130,19 @@ def index(request):
                   entry.descriptorid.uptime + diff_sec) / 86400
 
         # Calculate real bandwidth
-        entry.descriptorid.bandwidthobserved = \
-                  entry.descriptorid.bandwidthobserved / 1024
+        entry.descriptorid.bandwidthobserved /= 1024
 
         # Create appropriate country, latitude, and longitude attributes
         entry.country, lat, lng = entry.geoip.strip('()').split(',')
         entry.latitude = float(lat)
         entry.longitude = float(lng)
+
+        # Get the contact information -- NOTE: regex?
+        raw_list = str(entry.descriptorid.rawdesc).split('\n')
+        for line in raw_list:
+            if line.startswith('contact'):
+                entry.contact = line[8:]
+                break
 
     in_query = statusentries.count()
 
@@ -175,14 +181,16 @@ def details(request, fingerprint):
     # [:1] is djangonese for 'LIMIT 1', and
     # [0] gets the object rather than the QuerySet.
 
-    statusentry = Statusentry.objects.filter(fingerprint=fingerprint)\
-                  .extra(select={'geoip': 'geoip_lookup(address)'})\
-                  .order_by('-validafter')[:1][0]
+    statusentry = Statusentry.objects.filter(
+                  fingerprint=fingerprint).extra(
+                  select={'geoip': 'geoip_lookup(address)'}).order_by(
+                  '-validafter')[:1][0]
 
     descriptor = statusentry.descriptorid
 
     # Get the country, latitude, and longitude from the geoip attribute
-    statusentry.country, lat, lng = statusentry.geoip.strip('()').split(',')
+    statusentry.country, lat, lng = statusentry.geoip.strip(
+                                    '()').split(',')
     statusentry.latitude = float(lat)
     statusentry.longitude = float(lng)
 
@@ -220,7 +228,7 @@ def details(request, fingerprint):
     descriptor.hostname = getfqdn(str(statusentry.address))
 
     template_values = {'descriptor': descriptor, 'statusentry':
-            statusentry}
+                       statusentry}
     return render_to_response('details.html', template_values)
 
 
@@ -309,15 +317,14 @@ def exitnodequery(request):
 
         # Don't search entries published over 24 hours
         # from the most recent entries.
-        last_va = Statusentry.objects.aggregate(\
+        last_va = Statusentry.objects.aggregate(
                   last=Max('validafter'))['last']
         oldest_tolerable = last_va - datetime.timedelta(days=1)
 
-        fingerprints = Statusentry.objects.filter(\
+        fingerprints = Statusentry.objects.filter(
                        address=source,
-                       validafter__gte=oldest_tolerable)\
-                       .values('fingerprint')\
-                       .annotate(Count('fingerprint'))
+                       validafter__gte=oldest_tolerable).values(
+                       'fingerprint').annotate(Count('fingerprint'))
 
         # Grouped by fingerprints, which are unique. If at least one
         # fingerprint is found, there is a match, so for each
@@ -332,10 +339,11 @@ def exitnodequery(request):
             for fp_entry in fingerprints:
                 # Note that the trailing [:1] is djangonese for
                 # "LIMIT 1", so this query should not be expensive.
-                statusentry_set = Statusentry.objects.filter(\
-                                  fingerprint=fp_entry['fingerprint'], \
-                                  validafter__gte=(oldest_tolerable))\
-                                  .order_by('-validafter')[:1]
+                statusentry_set = Statusentry.objects.filter(
+                                  fingerprint=fp_entry['fingerprint'],
+                                  validafter__gte=(
+                                  oldest_tolerable)).order_by(
+                                  '-validafter')[:1]
                 statusentry = statusentry_set[0]
 
                 nickname = statusentry.nickname
@@ -345,7 +353,7 @@ def exitnodequery(request):
                 # If the client also wants to test the relay's exit
                 # policy, dest_ip and dest_port cannot be empty strings.
                 if (dest_ip_valid and dest_port_valid):
-                    router_exit_policy = get_exit_policy(\
+                    router_exit_policy = get_exit_policy(
                                          statusentry.descriptorid.rawdesc)
 
                     # Search the exit policy information for a case in
