@@ -4,7 +4,7 @@
 <link rel="stylesheet" type="text/css" href="/static/css/details.css"></link>
 {% endblock %}
 
-{% block mainTitle %} TorStatus Router Details -- {{descriptor.nickname}} {% endblock %}
+{% block mainTitle %} TorStatus Router Details -- {{ descriptor.nickname }} {% endblock %}
 
 {% block headerTitle %} TorStatus {% endblock %}
 
@@ -119,12 +119,12 @@
             <tr>
                 <td id="details_boxTitle" colspan="2"> Router Flags </td>
             </tr>
-            
-            <tr> 
+
+            <tr>
                 <td id="detailBox"> Authority: </td>
                 <td {% if statusentry.isauthority %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
-            <tr> 
+            <tr>
                 <td id="detailBox"> Bad Directory: </td>
                 <td {% if statusentry.isbaddirectory %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
@@ -177,7 +177,7 @@
             </tr>
             <tr>
                 <td id="detailBox">{% for line in descriptor.exit_info %} 
-                        {% if forloop.counter0|divisible_by:16 %}</td><td id="detailBox">{% endif %}   
+                        {% if forloop.counter0|divisibleby:"16" %}</td><td id="detailBox">{% endif %}
                         {{ line }} <br />
                     {% endfor %}
                 </td>

@@ -35,7 +35,8 @@ NOT_MOVABLE_COLUMNS = ["Named", "Exit", "Authority", "Fast", "Guard",
                        "Platform", "Hibernating"]
 
 
-def index(request):
+#@cache_page(60 * 15, key_prefix="index")
+def index(request, sort_filter):
     """
     Supply a dictionary to the index.html template consisting of a list
     of active relays.
@@ -79,10 +80,8 @@ def index(request):
     # -----------------------------------------------------------------
     current_columns = []
     if not ('currentColumns' in request.session):
-        current_columns = CURRENT_COLUMNS
-        request.session['currentColumns'] = current_columns
-    else:
-        current_columns = request.session['currentColumns']
+        request.session['currentColumns'] = CURRENT_COLUMNS
+    current_columns = request.session['currentColumns']
 
     query_options = {}
     if (request.GET):
@@ -95,7 +94,37 @@ def index(request):
     if (not query_options and 'queryOptions' in request.session):
             query_options = request.session['queryOptions']
 
-    statusentries = filter_statusentries(statusentries, query_options)
+    if query_options:
+        statusentries = filter_statusentries(
+                statusentries, query_options)
+
+    # TABLE SORTING ---------------------------------------------------
+    # -----------------------------------------------------------------
+    sort_order = ''
+    column_name = ''
+    if sort_filter:
+        column_name, sort_order = sort_filter.split('_')
+        options = ['nickname', 'fingerprint', 'geoip', 'bandwidthobserved',
+               'uptime', 'published','hostname', 'address', 'orport',
+               'dirport', 'platform', 'isauthority',
+               'isbaddirectory', 'isbadexit', 'isexit',
+               'isfast', 'isguard', 'ishibernating',
+               'isnamed', 'isstable', 'isrunning',
+               'isvalid', 'isv2dir']
+
+        descriptorlist_options = ['platform', 'uptime', 'contact',
+                                  'bandwidthobserved']
+        altered_column_name = column_name
+        if altered_column_name in options:
+            if altered_column_name in descriptorlist_options:
+                altered_column_name = 'descriptorid__' + \
+                        altered_column_name
+            if sort_order == 'ascending':
+                statusentries = statusentries.order_by(
+                        altered_column_name)
+            elif sort_order == 'descending':
+                statusentries = statusentries.order_by(
+                        '-' + altered_column_name)
 
     # USER QUERY AGGREGATE STATISTICS ---------------------------------
     # -----------------------------------------------------------------
@@ -150,6 +179,7 @@ def index(request):
               .order_by('-date')[:1][0].bwobserved
 
     client_address = request.META['REMOTE_ADDR']
+
     template_values = {'relay_list': statusentries,
                        'client_address': client_address,
                        'num_routers': num_routers,
@@ -160,7 +190,9 @@ def index(request):
                        'bw_disp': bw_disp,
                        'bw_total': bw_total,
                        'currentColumns': current_columns,
-                       'queryOptions': query_options}
+                       'queryOptions': query_options,
+                       'orderColumnName': column_name,
+                       'sortOrder': sort_order,}
     return render_to_response('index.html', template_values)
 
 
@@ -389,7 +421,7 @@ def exitnodequery(request):
                        'dest_port_valid': dest_port_valid}
     return render_to_response('nodequery.html', template_values)
 
-
+@cache_page(60 * 30)
 def networkstatisticgraphs(request):
     """
     Render an HTML template to response.
