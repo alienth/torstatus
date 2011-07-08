@@ -110,7 +110,8 @@ def longitude(geoip):
 def key(d, key_name):
     """
     """
-    return d[key_name]
+    if key_name in d:
+        return d[key_name]
 
 @register.filter
 def sorting_link(sort_order, column_name):

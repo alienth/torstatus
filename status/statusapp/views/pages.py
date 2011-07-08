@@ -25,12 +25,12 @@ CURRENT_COLUMNS = ["Country Code", "Router Name", "Bandwidth",
                    "DirPort", "BadExit", "Named", "Exit",
                    "Authority", "Fast", "Guard", "Stable",
                    "Running", "Valid", "V2Dir", "Platform",
-                   "Hibernating"]
+                  ]
 AVAILABLE_COLUMNS = ["Fingerprint", "LastDescriptorPublished",
-                     "Contact", "BadDir"]
+                     "Contact", "BadDir",]
 NOT_MOVABLE_COLUMNS = ["Named", "Exit", "Authority", "Fast", "Guard",
                        "Stable", "Running", "Valid", "V2Dir",
-                       "Platform", "Hibernating"]
+                       "Platform",]
 
 # TODO: get rid of javascript sorting: pass another argument
 # to this view function and sort the table accordingly.
@@ -98,19 +98,15 @@ def index(request, sort_filter):
     # TABLE SORTING ---------------------------------------------------
     # -----------------------------------------------------------------
     sort_order = ''
-    column_name = ''
+    order_column_name = ''
     if sort_filter:
-        column_name, sort_order = sort_filter.split('_')
+        order_column_name, sort_order = sort_filter.split('_')
         options = ['nickname', 'fingerprint', 'geoip', 'bandwidthobserved',
                'uptime', 'published','hostname', 'address', 'orport', 
-               'dirport', 'platform', 'isauthority', 
-               'isbaddirectory', 'isbadexit', 'isexit',
-               'isfast', 'isguard', 'ishibernating', 
-               'isnamed', 'isstable', 'isrunning', 
-               'isvalid', 'isv2dir']
+               'dirport', 'isbaddirectory', 'isbadexit',]
 
-        descriptorlist_options = ['platform', 'uptime', 'contact', 'bandwidthobserved']
-        altered_column_name = column_name
+        descriptorlist_options = ['uptime', 'contact', 'bandwidthobserved']
+        altered_column_name = order_column_name
         if altered_column_name in options:
             if altered_column_name in descriptorlist_options:
                 altered_column_name = 'descriptorid__' + altered_column_name
@@ -143,6 +139,77 @@ def index(request, sort_filter):
     in_query = statusentries.count()
     client_address = request.META['REMOTE_ADDR']
     
+    ### BETA #################################################
+    ### CREATE DICTIONARY OF HTML COLUMNS ####################
+    ##########################################################
+
+    COLUMN_VALUE_NAME = {'Country Code': 'geoip', 
+                     'Router Name': 'nickname', 
+                     'Bandwidth': 'bandwidthobserved', 
+                     'Uptime': 'uptime',
+                     'IP': 'address', 
+                     'Hostname': 'hostname', 
+                     'Icons': 'icons',
+                     'ORPort': 'orport', 
+                     'DirPort': 'dirport',
+                     'BadExit': 'isbadexit',
+                     'Named': 'isnamed',
+                     'Exit': 'isexit',
+                     'Authority': 'isauthority',
+                     'Fast': 'isfast',
+                     'Guard': 'isguard',
+                     'Stable': 'isstable',
+                     'Running': 'isrunning',
+                     'Valid': 'isvalid',
+                     'V2Dir': 'isv2dir',
+                     'Platform': 'platform',
+                     'Fingerprint': 'fingerprint',
+                     'LastDescriptorPublished': 'published',
+                     'Contact': 'contact',
+                     'BadDir': 'isbaddirectory',
+                    }
+    
+    NOT_COLUMNS = ['Running', 'Hostname', 'Named', 'Valid',]
+    
+    ICONS = ['Exit', 'Authority', 'Fast', 'Guard', 'V2Dir', 'Platform',
+                'Stable',]
+
+    html_table_headers = {}
+    html_current_columns = []
+    for column in current_columns:
+        database_name = COLUMN_VALUE_NAME[column]
+        display_name = "&nbsp;&nbsp;" if column == "Country Code" else column
+        sort_arrow = ''
+        if order_column_name == database_name:
+            if sort_order == 'ascending':
+                sort_arrow = "&uarr;"
+            elif sort_order == 'descending':
+                sort_arrow = "&darr;"
+        html_class = "relayHeader hoverable" if database_name != "icons" \
+                                                else "relayHeader"    
+                                           
+        if column not in ICONS and column not in NOT_COLUMNS:
+            if column == "Icons":
+                if filter(lambda c: c in current_columns, ICONS):
+                    html_table_headers[column] = "<th class='" + html_class + "' id='" \
+                                        + database_name + "'>" + display_name + "</th>"
+                    html_current_columns.append(column)
+            else:
+                html_table_headers[column] = "<th class='" + html_class + "' id='" \
+                                    + database_name + "'><a class='sortLink' \
+                                    href='" + sorting_link(sort_order, database_name) \
+                                    + "'>" + display_name + " " + sort_arrow + "</a></th>"
+                html_current_columns.append(column)
+                
+    
+    ### CREATE TABLE ROWS #####
+    
+    html_table_rows = []
+
+                                        
+    
+    ##########################################################
+    
     template_values = {'relay_list': statusentries,
                        'client_address': client_address,
                        'num_routers': num_routers,
@@ -154,8 +221,11 @@ def index(request, sort_filter):
                        'bw_total': bw_total,
                        'currentColumns': current_columns,
                        'queryOptions': query_options,
-                       'orderColumnName': column_name,
-                       'sortOrder': sort_order,}
+                       'orderColumnName': order_column_name,
+                       'sortOrder': sort_order,
+                       'htmlTableHeaders': html_table_headers,
+                       'htmlCurrentColumns': html_current_columns,
+                      }
     return render_to_response('index.html', template_values)
 
 
@@ -375,38 +445,35 @@ def columnpreferences(request):
         del request.session['currentColumns']
         del request.session['availableColumns']
 
-    if not ('currentColumns' in request.session and 'availableColumns' \
+    if not ('currentColumns' in request.session and 'availableColumns'
             in request.session):
-        current_columns = CURRENT_COLUMNS
-        available_columns = AVAILABLE_COLUMNS
-        request.session['currentColumns'] = current_columns
-        request.session['availableColumns'] = available_columns
-    else:
-        current_columns = request.session['currentColumns']
-        available_columns = request.session['availableColumns']
+        request.session['currentColumns'] = CURRENT_COLUMNS
+        request.session['availableColumns'] = AVAILABLE_COLUMNS
+    current_columns = request.session['currentColumns']
+    available_columns = request.session['availableColumns']
 
     column_lists = [current_columns, available_columns, '']
-    if ('removeColumn' in request.GET and 'selected_removeColumn' \
+    if ('removeColumn' in request.GET and 'selected_removeColumn'
         in request.GET):
         column_lists = button_choice(request, 'removeColumn',
                       'selected_removeColumn', current_columns,
                       available_columns)
-    elif ('addColumn' in request.GET and 'selected_addColumn' \
+    elif ('addColumn' in request.GET and 'selected_addColumn'
           in request.GET):
         column_lists = button_choice(request, 'addColumn',
                 'selected_addColumn', current_columns, available_columns)
-    elif ('upButton' in request.GET and 'selected_removeColumn' \
+    elif ('upButton' in request.GET and 'selected_removeColumn'
           in request.GET):
-        if not(request.GET['selected_removeColumn'] in \
+        if not(request.GET['selected_removeColumn'] in
                not_movable_columns):
-            column_lists = button_choice(request, 'upButton', \
+            column_lists = button_choice(request, 'upButton',
                           'selected_removeColumn', current_columns,
                           available_columns)
-    elif ('downButton' in request.GET and 'selected_removeColumn' \
+    elif ('downButton' in request.GET and 'selected_removeColumn'
           in request.GET):
-        if not(request.GET['selected_removeColumn'] in \
+        if not(request.GET['selected_removeColumn'] in
                not_movable_columns):
-            column_lists = button_choice(request, 'downButton', \
+            column_lists = button_choice(request, 'downButton',
                           'selected_removeColumn', current_columns,
                           available_columns)
 

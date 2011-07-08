@@ -23,73 +23,37 @@ th.relayHeader {
     border-bottom: 2px solid black;
 }
 
-th#routerName {
-    text-align: left;
-    font-weight: bold;
-    font-size: 0.6875em;
-    background-color: #7BD4F7;
-    border-top: 2px solid black;
-    border-bottom: 2px solid black;
+th#icons {
+    font: bold 0px Arial;
+    cursor: pointer;
+    min-width: 60px;
+}
+
+th#nickname {
     min-width: 100px;
 }
 
 th#uptime {
-    text-align: left;
-    font-weight: bold;
-    font-size: 0.6875em;
-    background-color: #7BD4F7;
-    border-top: 2px solid black;
-    border-bottom: 2px solid black;
     min-width: 30px;
 }
 
-th#badDir {
-    text-align: left;
-    font-weight: bold;
-    font-size: 0.6875em;
-    background-color: #7BD4F7;
-    border-top: 2px solid black;
-    border-bottom: 2px solid black;
+th#isbaddirectory {
     min-width: 100px;
 }
 
-th#lastDescPub {
-    text-align: left;
-    font-weight: bold;
-    font-size: 0.6875em;
-    background-color: #7BD4F7;
-    border-top: 2px solid black;
-    border-bottom: 2px solid black;
+th#published {
     min-width: 160px;
 }
 
-th#bandwidth {
-    text-align: left;
-    font-weight: bold;
-    font-size: 0.6875em;
-    background-color: #7BD4F7;
-    border-top: 2px solid black;
-    border-bottom: 2px solid black;
+th#bandwidthobserved {
     min-width: 50px;
 }
 
 th#dirport {
-    text-align: left;
-    font-weight: bold;
-    font-size: 0.6875em;
-    background-color: #7BD4F7;
-    border-top: 2px solid black;
-    border-bottom: 2px solid black;
     min-width: 60px;
 }
 
 th#orport {
-    text-align: left;
-    font-weight: bold;
-    font-size: 0.6875em;
-    background-color: #7BD4F7;
-    border-top: 2px solid black;
-    border-bottom: 2px solid black;
     min-width: 60px;
 }
 
@@ -103,39 +67,29 @@ th#orport:hover {
     cursor: pointer;
 }
 
-th#bandwidth:hover {
+th#bandwidthobserved:hover {
     background-color: #89FB69;
     cursor: pointer;
 }
 
-th#lastDescPub:hover {
+th#published:hover {
     background-color: #89FB69;
     cursor: pointer;
 }
 
-th#badDir:hover {
+th#isbaddirectory:hover {
     background-color: #89FB69;
     cursor: pointer;
 }
 
-th#routerName:hover {
+th#nickname:hover {
     background-color: #89FB69;
     cursor: pointer;
 }
 
-th.relayHeader:hover {
+th.hoverable:hover {
     background-color: #89FB69;
     cursor: pointer;
-}
-
-th#relayHeaderInv {
-    text-align: left;
-    font: bold 0px Arial;
-    background-color: #7BD4F7;
-    border-top: 2px solid black;
-    border-bottom: 2px solid black;
-    cursor: pointer;
-    min-width: 60px;
 }
 
 table.header {

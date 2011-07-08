@@ -62,15 +62,13 @@ def filter_statusentries(statusentries, query_options):
             filterby[key + '__lt'] = upper_value
         else:
             filterby[key] = value
-        
     statusentries = statusentries.filter(**filterby)
     
     options = ['nickname', 'fingerprint', 'geoip', 'bandwidthobserved',
-               'uptime', 'published','hostname', 'address', 'orport', 
+               'uptime', 'published', 'hostname', 'address', 'orport', 
                'dirport', 'platform', 'isauthority', 
                'isbaddirectory', 'isbadexit', 'isexit',
-               'isfast', 'isguard', 'ishibernating', 
-               'isnamed', 'isstable', 'isrunning', 
+               'isfast', 'isguard', 'isnamed', 'isstable', 'isrunning', 
                'isvalid', 'isv2dir']
 
     descriptorlist_options = ['platform', 'uptime', 'contact', 'bandwidthobserved']
@@ -384,3 +382,19 @@ def contact(rawdesc):
         if (line.startswith("contact")):
             return line[8:]
     return "No contact information given"
+    
+
+#### THIS WAS A FILTER ##################
+#########################################
+
+def sorting_link(sort_order, column_name):
+    """
+    Returns the proper URL after checking how the sorting is currently set up.
+    
+    @rtype: C{string}
+    @return The proper link for sorting the tables.
+    """
+    
+    if sort_order == "ascending":
+        return "/" + column_name + "_descending"
+    return "/" + column_name + "_ascending"

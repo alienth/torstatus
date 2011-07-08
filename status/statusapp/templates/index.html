@@ -19,6 +19,9 @@
 </tr>
 </table>
 <br />
+{% autoescape off %}
+{{TEST}}
+{% endautoescape %}
 
 <table cellspacing="1" cellpadding="2" class="legend">
 <tr>
@@ -79,52 +82,14 @@
 
 {% if relay_list %}
 <table class="relayTable">
-	<tr>
-	{% for columnName in currentColumns %}
-	    {% if columnName == "Country Code" %}
-        <th class="relayHeader"><a class="sortLink" href={{ sortOrder|sorting_link:"geoip" }}>&nbsp;&nbsp; {% if orderColumnName == "geoip" %}{% if sortOrder == "ascending" %} &uarr; {% else %} {% if sortOrder == "descending" %} &darr; {% endif %}{% endif %}{% endif %}</a></th>
-        {% endif %}
-        {% if columnName == "Router Name" %}
-		<th class="relayHeader" id="routerName"><a class="sortLink" href={{ sortOrder|sorting_link:"nickname" }}>Router Name {% if orderColumnName == "nickname" %}{% if sortOrder == "ascending" %} &uarr; {% else %} {% if sortOrder == "descending" %} &darr; {% endif %}{% endif %}{% endif %}</a></th>
-		{% endif %}
-		{% if columnName == "Bandwidth" %}
-		<th class="relayHeader" id="bandwidth"><a class="sortLink" href={{ sortOrder|sorting_link:"bandwidthobserved" }}>Bandwidth {% if orderColumnName == "bandwidthobserved" %}{% if sortOrder == "ascending" %} &uarr; {% else %} {% if sortOrder == "descending" %} &darr; {% endif %}{% endif %}{% endif %}</a></th>
-		{% endif %}
-		{% if columnName == "Uptime" %}
-        <th class="relayHeader"><a class="sortLink" href={{ sortOrder|sorting_link:"uptime" }}>Uptime {% if orderColumnName == "uptime" %}{% if sortOrder == "ascending" %} &uarr; {% else %} {% if sortOrder == "descending" %} &darr; {% endif %}{% endif %}{% endif %}</a></th>
-        {% endif %}
-        {% if columnName == "IP" %}
-        <th class="relayHeader"><a class="sortLink" href={{ sortOrder|sorting_link:"address" }}>IP {% if orderColumnName == "address" %}{% if sortOrder == "ascending" %} &uarr; {% else %} {% if sortOrder == "descending" %} &darr; {% endif %}{% endif %}{% endif %}</a></th>
-        {% endif %}
-        {% if columnName == "Fingerprint" %}
-        <th class="relayHeader"><a class="sortLink" href={{ sortOrder|sorting_link:"fingerprint" }}>Fingerprint {% if orderColumnName == "fingerprint" %}{% if sortOrder == "ascending" %} &uarr; {% else %} {% if sortOrder == "descending" %} &darr; {% endif %}{% endif %}{% endif %}</a></th>
-        {% endif %}
-        {% if columnName == "LastDescriptorPublished" %}
-        <th class="relayHeader" id="lastDescPub"><a class="sortLink" href={{ sortOrder|sorting_link:"published" }}>Last Descriptor Published {% if orderColumnName == "published" %}{% if sortOrder == "ascending" %} &uarr; {% else %} {% if sortOrder == "descending" %} &darr; {% endif %}{% endif %}{% endif %}</a></th>
-        {% endif %}
-        {% if columnName == "Contact" %}
-        <th class="relayHeader"><a class="sortLink" href={{ sortOrder|sorting_link:"contact" }}>Contact {% if orderColumnName == "contact" %}{% if sortOrder == "ascending" %} &uarr; {% else %} {% if sortOrder == "descending" %} &darr; {% endif %}{% endif %}{% endif %}</a></th>
-        {% endif %}
-        {% if columnName == "BadDir" %}
-        <th class="relayHeader" id="badDir"><a class="sortLink" href={{ sortOrder|sorting_link:"isbaddirectory" }}>Bad Directory {% if orderColumnName == "isbaddirectory" %}{% if sortOrder == "ascending" %} &uarr; {% else %} {% if sortOrder == "descending" %} &darr; {% endif %}{% endif %}{% endif %}</a></th>
-        {% endif %}
-        {% if columnName == "Icons" %}
-        {% if "DirPort" in currentColumns or "Exit" in currentColumns or "Authority" in currentColumns or "Fast" in currentColumns or "Guard" in currentColumns or "V2Dir" in currentColumns or "Platform" in currentColumns or "Stable" in currentColumns %}
-		<th id="relayHeaderInv">Icons</th>
-		{% endif %}
-		{% endif %}
-		{% if columnName == "ORPort" %}
-        <th class="relayHeader" id="orport"><a class="sortLink" href={{ sortOrder|sorting_link:"orport" }}>ORPort {% if orderColumnName == "orport" %}{% if sortOrder == "ascending" %} &uarr; {% else %} {% if sortOrder == "descending" %} &darr; {% endif %}{% endif %}{% endif %}</a></th>
-        {% endif %}
-        {% if columnName == "DirPort" %}
-        <th class="relayHeader" id="dirport"><a class="sortLink" href={{ sortOrder|sorting_link:"dirport" }}>DirPort {% if orderColumnName == "dirport" %}{% if sortOrder == "ascending" %} &uarr; {% else %} {% if sortOrder == "descending" %} &darr; {% endif %}{% endif %}{% endif %}</a></th>
-        {% endif %}
-        {% if columnName == "BadExit" %}
-        <th class="relayHeader"><a class="sortLink" href={{ sortOrder|sorting_link:"isbadexit" }}>Bad Exit {% if orderColumnName == "isbadexit" %}{% if sortOrder == "ascending" %} &uarr; {% else %} {% if sortOrder == "descending" %} &darr; {% endif %}{% endif %}{% endif %}</a></th>
-        {% endif %}
-    {% endfor %}
-	</tr>
-	
+    <tr>
+        {% autoescape off %}
+        {% for column in htmlCurrentColumns %}
+            {{ htmlTableHeaders|key:column }}
+        {% endfor %}
+        {% endautoescape %}
+    </tr>
+        
 	{% for relay in relay_list %}
 	    {% if "BadExit" in currentColumns %}
 		<tr {% if relay.isbadexit == 1 %} class="relayBadExit" {% else %} class="relay" {% endif %}>
