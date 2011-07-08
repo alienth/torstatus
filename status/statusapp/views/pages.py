@@ -155,8 +155,10 @@ def index(request, sort_filter):
         diff = now - published
         diff_sec = (diff.microseconds + (
                   diff.seconds + diff.days * 24 * 3600) * 10**6) / 10**6
-        entry.descriptorid.uptime = (
-                  entry.descriptorid.uptime + diff_sec) / 86400
+        # Turned off - probably not a good idea to implement uptime
+        # this way.
+        # entry.descriptorid.uptime = (
+        #          entry.descriptorid.uptime + diff_sec) / 86400
 
         # Calculate real bandwidth
         entry.descriptorid.bandwidthobserved /= 1024
