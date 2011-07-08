@@ -1,5 +1,10 @@
 Installing TorStatus
 ====================
+This document contains instructions on how to install TorStatus on a
+minimal Debian Squeeze/6 installation. The procedure to build the
+database and use TorStatus should be very similar for other Linux/Unix
+distributions, but this has not yet been tested.
+
 0: Installing the Dependencies
 ------------------------------
 First, install the necessary software to run TorStatus.
@@ -52,10 +57,10 @@ enter all necessary data into the database to run TorStatus.
 
 2: Installing TorStatus
 -----------------------
-If you have not done so already, get the most recent stable version of
-TorStatus:
+If you have not done so already, get the most preview of TorStatus:
 
     | $ git clone https://github.com/dcalderon/TorStatus
+    | $ git checkout preview
 
 Now change directory to TorStatus/status and edit config.template such
 that TorStatus can connect to the database just built. Save these changes
