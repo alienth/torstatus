@@ -119,7 +119,8 @@ def filter_statusentries(statusentries, query_options):
                'isfast', 'isguard', 'isnamed', 'isstable', 'isrunning', 
                'isvalid', 'isv2dir']
 
-    descriptorlist_options = ['platform', 'uptime', 'contact', 'bandwidthobserved']
+    descriptorlist_options = ['platform', 'uptime', 'contact', 
+                            'bandwidthobserved']
     if 'sortListings' in query_options: 
         selected_option = query_options['sortListings']
     else:
@@ -581,14 +582,18 @@ def generate_table_headers(current_columns, order_column_name, sort_order):
         if column not in ICONS and column not in NOT_COLUMNS:
             if column == "Icons":
                 if filter(lambda c: c in current_columns, ICONS):
-                    html_table_headers[column] = "<th class='" + html_class + "' id='" \
-                                        + database_name + "'>" + display_name + "</th>"
+                    html_table_headers[column] = "<th class='" + html_class +\
+                                        "' id='" \
+                                        + database_name + "'>" + display_name +\
+                                        "</th>"
                     html_current_columns.append(column)
             else:
-                html_table_headers[column] = "<th class='" + html_class + "' id='" \
-                                    + database_name + "'><a class='sortLink' \
-                                    href='" + sorting_link(sort_order, database_name) \
-                                    + "'>" + display_name + " " + sort_arrow + "</a></th>"
+                html_table_headers[column] = "<th class='" + html_class + \
+                                    "' id='" + database_name + "'>\
+                                    <a class='sortLink' href='" + \
+                                    sorting_link(sort_order, database_name) \
+                                    + "'>" + display_name + " " + sort_arrow +\
+                                    "</a></th>"
                 html_current_columns.append(column)
     return html_table_headers, html_current_columns 
     
@@ -609,11 +614,14 @@ def generate_table_rows(statusentries, current_columns, html_current_columns):
         #TODO: CLEAN THE CODE - QUERY ONLY ON THE NECESSARY COLUMNS 
         #               AND THROW IN DICTIONARY AFTERWARDS!!!
         
-        # Declarations in order to avoid multiple queries. 
+        # Declarations made in order to avoid multiple queries. 
         r_isbadexit = relay.isbadexit      
-        field_isbadexit = "<img src='static/img/bg_" + ("yes" if r_isbadexit else "no") + \
-                        ".png' width='12' height='12' alt='" + ("Bad Exit' title='Bad Exit'" \
-                        if r_isbadexit else "Not a Bad Exit' title='Not a Bad Exit'") + ">"  
+        field_isbadexit = "<img src='static/img/bg_" + \
+                        ("yes" if r_isbadexit else "no") + \
+                        ".png' width='12' height='12' alt='" + \
+                        ("Bad Exit' title='Bad Exit'" \
+                        if r_isbadexit else \
+                        "Not a Bad Exit' title='Not a Bad Exit'") + ">"  
         field_geoip = relay.geoip
         field_isnamed = relay.isnamed
         field_fingerprint = relay.fingerprint
@@ -627,25 +635,35 @@ def generate_table_rows(statusentries, current_columns, html_current_columns):
         field_published = str(relay.published)
         field_contact = contact(relay.descriptorid.rawdesc)
         r_isbaddir = relay.isbaddirectory
-        field_isbaddirectory = "<img src='static/img/bg_" + ("yes" if r_isbaddir else "no") + \
-                        ".png' width='12' height='12' alt='" + ("Bad Directory' title='Bad Directory'" \
-                        if r_isbaddir else "Not a Bad Directory' title='Not a Bad Directory'") + ">"                   
-        field_isfast = "<img src='static/img/status/Fast.png' alt='Fast Server' title='Fast Server'>" \
+        field_isbaddirectory = "<img src='static/img/bg_" + \
+                        ("yes" if r_isbaddir else "no") + \
+                        ".png' width='12' height='12' alt='" + \
+                        ("Bad Directory' title='Bad Directory'" \
+                        if r_isbaddir else "Not a Bad Directory' \
+                        title='Not a Bad Directory'") + ">"                   
+        field_isfast = "<img src='static/img/status/Fast.png' \
+                        alt='Fast Server' title='Fast Server'>" \
                         if relay.isfast else ""
-        field_isv2dir = "<img src='static/img/status/Dir.png' alt='Directory Server' title='Directory Server'>" \
+        field_isv2dir = "<img src='static/img/status/Dir.png' \
+                        alt='Directory Server' title='Directory Server'>" \
                         if relay.isv2dir else ""
-        field_isexit = "<img src='static/img/status/Exit.png' alt='Exit Server' title='Exit Server'>" \
+        field_isexit = "<img src='static/img/status/Exit.png' \
+                        alt='Exit Server' title='Exit Server'>" \
                         if relay.isexit else ""
-        field_isguard = "<img src='static/img/status/Guard.png' alt='Guard Server' title='Guard Server'>" \
+        field_isguard = "<img src='static/img/status/Guard.png' \
+                        alt='Guard Server' title='Guard Server'>" \
                         if relay.isguard else ""
-        field_isstable = "<img src='static/img/status/Stable.png' alt='Stable Server' title='Stable Server'>" \
+        field_isstable = "<img src='static/img/status/Stable.png' \
+                        alt='Stable Server' title='Stable Server'>" \
                         if relay.isstable else ""
-        field_isauthority = "<img src='static/img/status/Authority.png' alt='Authority Server' title='Authority Server'>" \
+        field_isauthority = "<img src='static/img/status/Authority.png' \
+                        alt='Authority Server' title='Authority Server'>" \
                         if relay.isauthority else ""
         r_platform = relay.descriptorid.platform
         r_os_platform = get_platform(r_platform)
-        field_platform = "<img src='static/img/os-icons/" + r_os_platform + ".png' alt='" + r_os_platform + \
-                         "' title='" + r_platform + "'>" if r_os_platform else ""
+        field_platform = "<img src='static/img/os-icons/" + r_os_platform + \
+                        ".png' alt='" + r_os_platform + "' title='" + \
+                        r_platform + "'>" if r_os_platform else ""
         field_orport = str(relay.orport)
         r_dirport = str(relay.dirport)
         field_dirport = r_dirport if r_dirport else "None"
@@ -689,24 +707,24 @@ def generate_table_rows(statusentries, current_columns, html_current_columns):
                 c_country = country(RELAY_FIELDS[value_name])
                 c_latitude = latitude(RELAY_FIELDS[value_name])
                 c_longitude = longitude(RELAY_FIELDS[value_name])               
-                html_row_code = html_row_code + "<td id='col_relayName'><a href=\
-                                'http://www.openstreetmap.org/?mlon=" + c_longitude + \
-                                "&mlat=" + c_latitude + "&zoom=6'> \
-                                <img src='static/img/flags/" + c_country + \
-                                ".gif' alt='" + c_country + "' title='" + \
-                                c_country + ":" + c_latitude + ", " + \
-                                c_longitude + "' border=0></a></td>"
+                html_row_code = html_row_code + "<td id='col_relayName'> \
+                                <a href='http://www.openstreetmap.org/?mlon="\
+                                 + c_longitude + "&mlat=" + c_latitude + \
+                                 "&zoom=6'><img src='static/img/flags/" + \
+                                 c_country + ".gif' alt='" + c_country + \
+                                 "' title='" + c_country + ":" + c_latitude +\
+                                 ", " + c_longitude + "' border=0></a></td>"
             # Special Case: Router Name and Named
             elif column == 'Router Name':
                 if 'Named' in current_columns:
                     html_router_name = "<a class='link' href='/details/" + \
                                         RELAY_FIELDS['fingerprint'] + "' \
-                                        target='_BLANK'>" + RELAY_FIELDS[value_name] + \
-                                        "</a>"
+                                        target='_BLANK'>" + \
+                                        RELAY_FIELDS[value_name] + "</a>"
                     if RELAY_FIELDS['isnamed']:
                         html_router_name = "<b>" + html_router_name + "</b>"
-                    html_row_code = html_row_code + "<td id='col_relayName'>" + \
-                                    html_router_name + "</td>"
+                    html_row_code = html_row_code + "<td id='col_relayName'>"\
+                                    + html_router_name + "</td>"
             # Special Case: Icons
             elif column == 'Icons':
                 html_icons = "<td id='col_relayIcons'>"
@@ -717,8 +735,8 @@ def generate_table_rows(statusentries, current_columns, html_current_columns):
                 html_icons = html_icons + "</td>"
                 html_row_code = html_row_code + html_icons
             else:              
-                html_row_code = html_row_code + "<td id='col_relay" + column + "'>" + \
-                                RELAY_FIELDS[value_name] + "</td>"
+                html_row_code = html_row_code + "<td id='col_relay" + column \
+                                + "'>" + RELAY_FIELDS[value_name] + "</td>"
 
         html_row_code = html_row_code + "</tr>"          
         html_table_rows.append(html_row_code)  

@@ -153,7 +153,7 @@ def index(request, sort_filter):
     # GENERATE TABLE HEADERS -------- ---------------------------------
     # -----------------------------------------------------------------
                 
-    html_table_headers, html_current_columns = generate_table_headers(current_columns, \
+    html_table_headers, html_current_columns = generate_table_headers(current_columns,
                                 order_column_name, sort_order)
 
     # GENERATE TABLE ROWS ---------------------------------------------
@@ -483,3 +483,8 @@ def columnpreferences(request):
                        'selectedEntry': column_lists[2]}
 
     return render_to_response('columnpreferences.html', template_values)
+    
+
+def mainindex(request):
+    hello = 'Hello New Page'
+    return render_to_response('mainindex.html', hello)
