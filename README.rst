@@ -5,21 +5,22 @@ TorStatus README
 
 Installation
 ------------
-For help installing and running TorStatus, consult doc/INSTALL.
+For help installing and running TorStatus, consult doc/INSTALL.rst.
 
 Generating the API
 ------------------
 To generate the TorStatus API, install epydoc (available at
 http://epydoc.sourceforge.net/installing.html) and run:
 
-    $ epydoc . --config config/epydoc_config.py
+    | $ cd status/
+    | $ epydoc . --config config/epydoc_config.py
 
-Design Documentation
---------------------
-Design documentation, like this README, is written in reStructuredText.
-To generate HTML-formatted design documentation using reStructuredText,
-install docutils (available at http://docutils.sourceforge.net/)
-and run the following:
+ReStructured Text
+-----------------
+TorStatus documentation, like this README, is written in
+reStructuredText. To generate HTML-formatted design documentation using
+reStructuredText, install docutils (available at
+http://docutils.sourceforge.net/) and run the following:
 
     | $ cd doc/
     | $ rst2html design.txt design.html

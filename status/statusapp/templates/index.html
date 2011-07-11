@@ -14,14 +14,11 @@
 	<td id="mainLinks">
 		<a class="link" href="https://check.torproject.org/"> Check if you are using Tor (via TorCheck)</a>
 		<br />
-		Your IP Address is: {{client_address}}
+        Your IP Address is: {{ client_address }}
 	</td>
 </tr>
 </table>
 <br />
-{% autoescape off %}
-{{TEST}}
-{% endautoescape %}
 
 <table cellspacing="1" cellpadding="2" class="legend">
 <tr>
@@ -50,27 +47,27 @@
 </tr>
 <tr id="row_appServerDetails">
 	<td>Cache Last Updated (Local Server Time):</td>
-    <td>{{cache_updated}}</td>
+    <td>{{ cache_updated }}</td>
 </tr>
 <tr id="row_appServerDetails">
 	<td>Last Update Cycle Processing Time (Seconds):</td>
-    <td>{{proc_time}}</td>
+    <td>{{ proc_time }}</td>
 </tr>
 <tr id="row_appServerDetails">
 	<td>Current Cache Expire Time (Seconds):</td>
-    <td>{{exp_time}}</td>
+    <td>{{ exp_time }}</td>
 </tr>
 <tr id="row_appServerDetails">
 	<td>Number of Routers In Cache:</td>
-    <td>{{num_routers}}</td>
+    <td>{{ num_routers }}</td>
 </tr>
 <tr id="row_appServerDetails">
 	<td>Number of Descriptors In Cache:</td>
-	<td>[[NUM_DESCS]]</td>
+    <td>{{ num_descs }}</td>
 </tr>
 <tr id="row_appServerDetails">
 	<td>Approximate Page Generation Time (Seconds):</td>
-    <td>{{gen_time}}</td>
+    <td>{{ gen_time }}</td>
 </tr>
 </table>
 
@@ -79,6 +76,7 @@
 {% block mainPage %}
 
 {% load index_filters %}
+{% spaceless %}
 
 {% if relay_list %}
 <table class="relayTable">
@@ -427,17 +425,17 @@
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Total average bandwidth of displayed routers [KB/s]:</td>
-    <td id="aggBox">{{ counts.bandwidthavg|kilobytes_ps }}</td>
+    <td id="aggBox">{{ counts.bandwidthavg }}</td>
     <td id="aggBox">{{ counts.bandwidthavg|percent:total_counts.bandwidthavg }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Total burst bandwidth of displayed routers [KB/s]:</td>
-    <td id="aggBox">{{ counts.bandwidthburst|kilobytes_ps }}</td>
+    <td id="aggBox">{{ counts.bandwidthburst }}</td>
     <td id="aggBox">{{ counts.bandwidthburst|percent:total_counts.bandwidthburst }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
 	<td id="aggBox">Total observed bandwidth of displayed routers [KB/s]:</td>
-    <td id="aggBox">{{ counts.bandwidthobserved|kilobytes_ps }}</td>
+    <td id="aggBox">{{ counts.bandwidthobserved }}</td>
     <td id="aggBox">{{ counts.bandwidthobserved|percent:total_counts.bandwidthobserved }}</td>
 </tr>
 <tr id="row_aggStatisticSummary">
@@ -511,5 +509,5 @@
 </table>
 
 <br />
-
+{% endspaceless %}
 {% endblock %}

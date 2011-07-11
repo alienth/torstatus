@@ -6,11 +6,13 @@ This module contains a single controller for each page type.
 # General python import statements ------------------------------------
 import subprocess
 import datetime
+from socket import getfqdn
 
 # Django-specific import statements -----------------------------------
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpRequest
 from django.db.models import Max, Sum, Count
+from django.views.decorators.cache import cache_page
 
 # TorStatus specific import statements --------------------------------
 from statusapp.models import Statusentry, Descriptor, Bwhist,\
@@ -32,12 +34,8 @@ NOT_MOVABLE_COLUMNS = ["Named", "Exit", "Authority", "Fast", "Guard",
                        "Stable", "Running", "Valid", "V2Dir",
                        "Platform",]
 
-# TODO: get rid of javascript sorting: pass another argument
-# to this view function and sort the table accordingly.
-#@cache_page(60 * 15) # Cache is turned off for development,
-                      # but it works.
 
-
+#@cache_page(60 * 15) #, key_prefix="index")
 def index(request, sort_filter):
     """
     Supply a dictionary to the index.html template consisting of a list
@@ -45,7 +43,7 @@ def index(request, sort_filter):
 
     Currently, an "active relay" is a relay that has a status entry
     that was published in the last consensus.
-    
+
     @rtype: HttpResponse
     @return: A dictionary consisting of information about each router
         in the network as well as aggregate information about the
@@ -55,26 +53,29 @@ def index(request, sort_filter):
     # -----------------------------------------------------------------
     # Get the initial query and necessary aggregate values for the
     # routers in the last consensus.
-    last_va = Statusentry.objects.aggregate(\
-            last=Max('validafter'))['last']
+    last_va = Statusentry.objects.aggregate(
+              last=Max('validafter'))['last']
 
-    statusentries = Statusentry.objects.filter(\
-                    validafter=last_va)\
-                    .extra(select={'geoip':
-                    'geoip_lookup(statusentry.address)'})\
-                    .order_by('nickname')
+    statusentries = Statusentry.objects.filter(
+                    validafter=last_va).extra(
+                    select={'geoip':
+                    'geoip_lookup(statusentry.address)'}).order_by(
+                    'nickname')
 
     num_routers = statusentries.count()
 
-    bw_total = TotalBandwidth.objects.all()\
-               .order_by('-date')[:1][0].bwobserved
+    bw_total = TotalBandwidth.objects.all().order_by(
+               '-date')[:1][0].bwobserved
 
-    total_counts = statusentries.aggregate(\
+    total_counts = statusentries.aggregate(
                    bandwidthavg=Sum('descriptorid__bandwidthavg'),
                    bandwidthburst=Sum('descriptorid__bandwidthburst'),
-                   bandwidthobserved=Sum('descriptorid__bandwidthobserved'))    
-    
-    
+                   bandwidthobserved=Sum('descriptorid__bandwidthobserved'))
+    # Convert from B/s to KB/s
+    total_counts['bandwidthavg'] /= 1024
+    total_counts['bandwidthburst'] /= 1024
+    total_counts['bandwidthobserved'] /= 1024
+
     # USER QUERY MODIFICATIONS ----------------------------------------
     # -----------------------------------------------------------------
     current_columns = []
@@ -92,9 +93,11 @@ def index(request, sort_filter):
             request.session['queryOptions'] = query_options
     if (not query_options and 'queryOptions' in request.session):
             query_options = request.session['queryOptions']
+
     if query_options:
-        statusentries = filter_statusentries(statusentries, query_options)
-    
+        statusentries = filter_statusentries(
+                statusentries, query_options)
+
     # TABLE SORTING ---------------------------------------------------
     # -----------------------------------------------------------------
     sort_order = ''
@@ -109,12 +112,15 @@ def index(request, sort_filter):
         altered_column_name = order_column_name
         if altered_column_name in options:
             if altered_column_name in descriptorlist_options:
-                altered_column_name = 'descriptorid__' + altered_column_name
+                altered_column_name = 'descriptorid__' + \
+                        altered_column_name
             if sort_order == 'ascending':
-                statusentries = statusentries.order_by(altered_column_name)
+                statusentries = statusentries.order_by(
+                        altered_column_name)
             elif sort_order == 'descending':
-                statusentries = statusentries.order_by('-' + altered_column_name)
-    
+                statusentries = statusentries.order_by(
+                        '-' + altered_column_name)
+
     # USER QUERY AGGREGATE STATISTICS ---------------------------------
     # -----------------------------------------------------------------
     counts = statusentries.aggregate(
@@ -132,27 +138,30 @@ def index(request, sort_filter):
              bandwidthavg=Sum('descriptorid__bandwidthavg'),
              bandwidthburst=Sum('descriptorid__bandwidthburst'),
              bandwidthobserved=Sum('descriptorid__bandwidthobserved'))
+    # Convert from B/s to KB/s
+    counts['bandwidthavg'] /= 1024
+    counts['bandwidthburst'] /= 1024
+    counts['bandwidthobserved'] /= 1024
+
+    in_query = statusentries.count()
 
     bw_disp = TotalBandwidth.objects.all()\
               .order_by('-date')[:1][0].bwobserved
 
-    in_query = statusentries.count()
     client_address = request.META['REMOTE_ADDR']
     
-    ### BETA #################################################
-    ### CREATE DICTIONARY OF HTML COLUMNS ####################
-    ##########################################################
+    # GENERATE TABLE HEADERS -------- ---------------------------------
+    # -----------------------------------------------------------------
                 
     html_table_headers, html_current_columns = generate_table_headers(current_columns, \
                                 order_column_name, sort_order)
-                
-    
-    ### CREATE TABLE ROWS #####
+
+    # GENERATE TABLE ROWS ---------------------------------------------
+    # -----------------------------------------------------------------
 
     html_table_rows = generate_table_rows(statusentries, current_columns, html_current_columns)                                      
     
-    ##########################################################
-    
+
     template_values = {'relay_list': statusentries,
                        'client_address': client_address,
                        'num_routers': num_routers,
@@ -186,13 +195,64 @@ def details(request, fingerprint):
     # and less than are incorrectly implemented for IPAddressFields.
     # [:1] is djangonese for 'LIMIT 1', and
     # [0] gets the object rather than the QuerySet.
-    
-    statusentry = Statusentry.objects.filter(fingerprint=fingerprint)\
-                  .extra(select={'geoip': 'geoip_lookup(address)'})\
-                  .order_by('-validafter')[:1][0]
+    statusentry = Statusentry.objects.filter(
+                  fingerprint=fingerprint).extra(
+                  select={'geoip': 'geoip_lookup(address)'}).order_by(
+                  '-validafter')[:1][0]
 
     descriptor = statusentry.descriptorid
-    template_values = {'descriptor': descriptor, 'statusentry': statusentry}
+
+    # Some clients may want to look up old relays. Create an attribute
+    # to flag active and unactive relays.
+    last_va = Statusentry.objects.aggregate(
+              last=Max('validafter'))['last']
+
+    if last_va != statusentry.validafter:
+        statusentry.active = False
+    else:
+        statusentry.active = True
+
+    # Get the country, latitude, and longitude from the geoip attribute
+    statusentry.country, lat, lng = statusentry.geoip.strip(
+                                    '()').split(',')
+    statusentry.latitude = float(lat)
+    statusentry.longitude = float(lng)
+
+    # Get the correct uptime, assuming that the router is still running
+    published = descriptor.published
+    now = datetime.datetime.now()
+    diff = now - published
+    diff_sec = (diff.microseconds + (
+                diff.seconds + diff.days * 24 * 3600) * 10**6) / 10**6
+    descriptor.adjuptime = descriptor.uptime + diff_sec
+
+    # Get information from the raw descriptor.
+    raw_list = str(descriptor.rawdesc).split("\n")
+    descriptor.onion_key = ''
+    descriptor.signing_key = ''
+    descriptor.exit_info = []
+    descriptor.contact = ''
+    descriptor.family = []
+    i = 0
+    while (i < len(raw_list)):
+        if raw_list[i].startswith('onion-key'):
+            descriptor.onion_key = '\n'.join(
+                    raw_list[(i + 1):(i + 6)])
+        elif raw_list[i].startswith('signing-key'):
+            descriptor.signing_key = '\n'.join(
+                    raw_list[(i + 1):(i + 6)])
+        elif raw_list[i].startswith(('accept', 'reject')):
+            descriptor.exit_info.append(raw_list[i])
+        elif raw_list[i].startswith('contact'):
+            descriptor.contact = raw_list[i][8:]
+        elif raw_list[i].startswith('family'):
+            descriptor.family = raw_list[i][7:].split()
+        i += 1
+
+    descriptor.hostname = getfqdn(str(statusentry.address))
+
+    template_values = {'descriptor': descriptor, 'statusentry':
+                       statusentry}
     return render_to_response('details.html', template_values)
 
 
@@ -281,15 +341,14 @@ def exitnodequery(request):
 
         # Don't search entries published over 24 hours
         # from the most recent entries.
-        last_va = Statusentry.objects.aggregate(\
+        last_va = Statusentry.objects.aggregate(
                   last=Max('validafter'))['last']
         oldest_tolerable = last_va - datetime.timedelta(days=1)
 
-        fingerprints = Statusentry.objects.filter(\
+        fingerprints = Statusentry.objects.filter(
                        address=source,
-                       validafter__gte=oldest_tolerable)\
-                       .values('fingerprint')\
-                       .annotate(Count('fingerprint'))
+                       validafter__gte=oldest_tolerable).values(
+                       'fingerprint').annotate(Count('fingerprint'))
 
         # Grouped by fingerprints, which are unique. If at least one
         # fingerprint is found, there is a match, so for each
@@ -304,10 +363,11 @@ def exitnodequery(request):
             for fp_entry in fingerprints:
                 # Note that the trailing [:1] is djangonese for
                 # "LIMIT 1", so this query should not be expensive.
-                statusentry_set = Statusentry.objects.filter(\
-                                  fingerprint=fp_entry['fingerprint'], \
-                                  validafter__gte=(oldest_tolerable))\
-                                  .order_by('-validafter')[:1]
+                statusentry_set = Statusentry.objects.filter(
+                                  fingerprint=fp_entry['fingerprint'],
+                                  validafter__gte=(
+                                  oldest_tolerable)).order_by(
+                                  '-validafter')[:1]
                 statusentry = statusentry_set[0]
 
                 nickname = statusentry.nickname
@@ -317,7 +377,7 @@ def exitnodequery(request):
                 # If the client also wants to test the relay's exit
                 # policy, dest_ip and dest_port cannot be empty strings.
                 if (dest_ip_valid and dest_port_valid):
-                    router_exit_policy = get_exit_policy(\
+                    router_exit_policy = get_exit_policy(
                                          statusentry.descriptorid.rawdesc)
 
                     # Search the exit policy information for a case in
@@ -353,7 +413,7 @@ def exitnodequery(request):
                        'dest_port_valid': dest_port_valid}
     return render_to_response('nodequery.html', template_values)
 
-
+@cache_page(60 * 30)
 def networkstatisticgraphs(request):
     """
     Render an HTML template to response.
