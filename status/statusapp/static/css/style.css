@@ -284,12 +284,12 @@ td#col_relayIcons {
     text-align: right;
 }
 
-td#col_relayOrport {
+td#col_relayORPort {
     width: 60px;
 }
 
 
-td#col_relayDirport {
+td#col_relayDirPort {
     width: 50px;
 }
 
@@ -313,7 +313,7 @@ td#col_relayContact {
     text-align: center;
 }
 
-td#col_relayLastDescPub {
+td#col_relayLastDescPublished {
     width: 100px;
     text-align: center;
 }

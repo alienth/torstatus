@@ -5,7 +5,7 @@ from django import template
 
 register = template.Library()
 
-
+# Moved to HELPERS
 @register.filter
 def kilobytes_ps(bytes_ps):
     """
@@ -23,7 +23,7 @@ def kilobytes_ps(bytes_ps):
     else:
         return int(bytes_ps) / 1024
 
-
+# Moved to HELPERS
 @register.filter
 def days(seconds):
     """
@@ -41,7 +41,7 @@ def days(seconds):
     else:
         return int(seconds) / 86400
 
-
+# Moved to HELPERS
 @register.filter
 def country(location):
     """
@@ -77,7 +77,7 @@ def percent(a, b):
     else:
         return '%0.2f%%' % (100.0 * a / b)
 
-
+# Moved to HELPERS
 @register.filter
 def latitude(geoip):
     """
@@ -91,7 +91,7 @@ def latitude(geoip):
     """
     return str(geoip).split(',')[1]
 
-
+# Moved to HELPERS
 @register.filter
 def longitude(geoip):
     """
@@ -113,28 +113,3 @@ def key(d, key_name):
     if key_name in d:
         return d[key_name]
 
-@register.filter
-def sorting_link(sort_order, column_name):
-    """
-    Returns the proper URL after checking how the sorting is currently set up.
-    
-    @rtype: C{string}
-    @return The proper link for sorting the tables.
-    """
-    
-    if sort_order == "ascending":
-        return "/" + column_name + "_descending"
-    return "/" + column_name + "_ascending"
-
-@register.filter
-def sorting_arrows(sort_order):
-    """
-    Returns the string version of an HTML arrow depending on how the sorting 
-    is set up.
-    """
-    if sort_order == "ascending":
-        return u'&uarr;'
-    elif sort_order == "descending":
-        return u'&darr;'
-    else:
-        return u'&loz;'

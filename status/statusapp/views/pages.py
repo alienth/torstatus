@@ -142,71 +142,14 @@ def index(request, sort_filter):
     ### BETA #################################################
     ### CREATE DICTIONARY OF HTML COLUMNS ####################
     ##########################################################
-
-    COLUMN_VALUE_NAME = {'Country Code': 'geoip', 
-                     'Router Name': 'nickname', 
-                     'Bandwidth': 'bandwidthobserved', 
-                     'Uptime': 'uptime',
-                     'IP': 'address', 
-                     'Hostname': 'hostname', 
-                     'Icons': 'icons',
-                     'ORPort': 'orport', 
-                     'DirPort': 'dirport',
-                     'BadExit': 'isbadexit',
-                     'Named': 'isnamed',
-                     'Exit': 'isexit',
-                     'Authority': 'isauthority',
-                     'Fast': 'isfast',
-                     'Guard': 'isguard',
-                     'Stable': 'isstable',
-                     'Running': 'isrunning',
-                     'Valid': 'isvalid',
-                     'V2Dir': 'isv2dir',
-                     'Platform': 'platform',
-                     'Fingerprint': 'fingerprint',
-                     'LastDescriptorPublished': 'published',
-                     'Contact': 'contact',
-                     'BadDir': 'isbaddirectory',
-                    }
-    
-    NOT_COLUMNS = ['Running', 'Hostname', 'Named', 'Valid',]
-    
-    ICONS = ['Exit', 'Authority', 'Fast', 'Guard', 'V2Dir', 'Platform',
-                'Stable',]
-
-    html_table_headers = {}
-    html_current_columns = []
-    for column in current_columns:
-        database_name = COLUMN_VALUE_NAME[column]
-        display_name = "&nbsp;&nbsp;" if column == "Country Code" else column
-        sort_arrow = ''
-        if order_column_name == database_name:
-            if sort_order == 'ascending':
-                sort_arrow = "&uarr;"
-            elif sort_order == 'descending':
-                sort_arrow = "&darr;"
-        html_class = "relayHeader hoverable" if database_name != "icons" \
-                                                else "relayHeader"    
-                                           
-        if column not in ICONS and column not in NOT_COLUMNS:
-            if column == "Icons":
-                if filter(lambda c: c in current_columns, ICONS):
-                    html_table_headers[column] = "<th class='" + html_class + "' id='" \
-                                        + database_name + "'>" + display_name + "</th>"
-                    html_current_columns.append(column)
-            else:
-                html_table_headers[column] = "<th class='" + html_class + "' id='" \
-                                    + database_name + "'><a class='sortLink' \
-                                    href='" + sorting_link(sort_order, database_name) \
-                                    + "'>" + display_name + " " + sort_arrow + "</a></th>"
-                html_current_columns.append(column)
+                
+    html_table_headers, html_current_columns = generate_table_headers(current_columns, \
+                                order_column_name, sort_order)
                 
     
     ### CREATE TABLE ROWS #####
-    
-    html_table_rows = []
 
-                                        
+    html_table_rows = generate_table_rows(statusentries, current_columns, html_current_columns)                                      
     
     ##########################################################
     
@@ -219,12 +162,10 @@ def index(request, sort_filter):
                        'total_counts': total_counts,
                        'bw_disp': bw_disp,
                        'bw_total': bw_total,
-                       'currentColumns': current_columns,
                        'queryOptions': query_options,
-                       'orderColumnName': order_column_name,
-                       'sortOrder': sort_order,
                        'htmlTableHeaders': html_table_headers,
                        'htmlCurrentColumns': html_current_columns,
+                       'htmlRowCode': html_table_rows,
                       }
     return render_to_response('index.html', template_values)
 
