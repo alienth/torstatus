@@ -699,7 +699,7 @@ def generate_table_rows(statusentries, current_columns, html_current_columns):
             # Special Case: Router Name and Named
             elif column == 'Router Name':
                 if 'Named' in current_columns:
-                    html_router_name = "<a href='/details/" + \
+                    html_router_name = "<a class='link' href='/details/" + \
                                         RELAY_FIELDS['fingerprint'] + "' \
                                         target='_BLANK'>" + RELAY_FIELDS[value_name] + \
                                         "</a>"
@@ -717,7 +717,7 @@ def generate_table_rows(statusentries, current_columns, html_current_columns):
                 html_icons = html_icons + "</td>"
                 html_row_code = html_row_code + html_icons
             else:              
-                html_row_code = html_row_code + "<td id='col_relay'" + column + "'>" + \
+                html_row_code = html_row_code + "<td id='col_relay" + column + "'>" + \
                                 RELAY_FIELDS[value_name] + "</td>"
 
         html_row_code = html_row_code + "</tr>"          
