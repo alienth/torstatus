@@ -34,7 +34,7 @@ NOT_MOVABLE_COLUMNS = ["Named", "Exit", "Authority", "Fast", "Guard",
                        "Stable", "Running", "Valid", "V2Dir",
                        "Platform",]
 
-#@cache_page(60 * 15, key_prefix="index")
+@cache_page(60 * 15, key_prefix="index")
 def index(request, sort_filter):
     """
     Supply a dictionary to the index.html template consisting of a list
@@ -58,8 +58,7 @@ def index(request, sort_filter):
     statusentries = Statusentry.objects.filter(
                     validafter=last_va).extra(
                     select={'geoip':
-                    'geoip_lookup(statusentry.address)'}).order_by(
-                    'nickname')
+                    'geoip_lookup(statusentry.address)'})
 
     num_routers = statusentries.count()
 

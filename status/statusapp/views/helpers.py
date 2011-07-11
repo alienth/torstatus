@@ -717,7 +717,7 @@ def generate_table_rows(statusentries, current_columns, html_current_columns):
                 html_icons = html_icons + "</td>"
                 html_row_code = html_row_code + html_icons
             else:              
-                html_row_code = html_row_code + "<td id='col_relay'" + column + "'>" + \
+                html_row_code = html_row_code + "<td id='col_relay" + column + "'>" + \
                                 RELAY_FIELDS[value_name] + "</td>"
 
         html_row_code = html_row_code + "</tr>"          
