@@ -37,6 +37,24 @@ td#detailBox {
     white-space: nowrap;
 }
 
+td#detailsLabel {
+    font-size: 0.625em;
+    border-style: solid;
+    border-width: 1px;
+    text-align: right;
+    color: #000000;
+    white-space:nowrap;
+}
+
+td#detailsInfo {
+    font-size: 0.625em;
+    border-style: solid;
+    border-width: 1px;
+    text-align: left;
+    color: #000000;
+    white-space:nowrap;
+}
+
 td#iconNo {
     border-style: solid;
     border-width: 1px;
@@ -54,3 +72,4 @@ td#iconYes {
 	background-position: center;
 	width: 40px;
 }
+

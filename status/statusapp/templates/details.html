@@ -11,7 +11,7 @@
 {% block mainPage %}
 
 {% load details_filters %}
-
+{% spaceless %}
 <table cellspacing="2" cellpadding="2" class="displayStatus">
 <tr>
 	<td id="mainLinks">
@@ -23,65 +23,82 @@
 <br />
 <br />
 
-<table class="aggStatisticSummary" id="networkstatisticsummary">
+<table class="aggStatisticSummary">
 <tr>
     <td id="details_boxTitle" colspan="2">General Information</td>
 </tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Router Name:</td>
-    <td id="aggBox">{{ descriptor.nickname }}</td>
+<tr>
+	<td id="detailsLabel">Router Name:</td>
+    <td id="detailsInfo">{{ descriptor.nickname }}</td>
 </tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Fingerprint:</td>
-    <td id="aggBox">{{ descriptor.fingerprint|format_fing }}</td>
+<tr>
+	<td id="detailsLabel">Fingerprint:</td>
+    <td id="detailsInfo">{{ descriptor.fingerprint|format_fing }}</td>
 </tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Contact:</td>
-    <td id="aggBox">{{ descriptor.contact|wordwrap:72|linebreaksbr }}</td>
+<tr>
+    <td id="detailsLabel">Active Relay:</td>
+    {% if statusentry.active %}
+    <td id="detailsInfo" style="background-color:rgb(0, 255, 0)">Yes</td>
 </tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">IP Address:</td>
-    <td id="aggBox">{{ descriptor.address }}</td>
+<tr>
+	<td id="detailsLabel">Adjusted Uptime:</td>
+    <td id="detailsInfo">{{ descriptor.adjuptime|words }}</td>
 </tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Hostname:</td>
-    <td id="aggBox">{{ descriptor.hostname }}</td>
+    {% else %}
+    <td id="detailsInfo" style="background-color:rgb(255, 0, 0)">No</td>
 </tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Onion Router Port:</td>
-    <td id="aggBox">{{ descriptor.orport }}</td>
+    <td id="detailsLabel">Last Consensus Present (GMT):</td>
+    <td id="detailsInfo">{{ statusentry.validafter|date:"Y-m-d H:i:s" }}</td>
 </tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Directory Server Port:</td>
-    <td id="aggBox">{{ descriptor.dirport }}</td>
+    {% endif %}
 </tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Country Code:</td>
-    <td id="aggBox">{{ statusentry.country }}</td>
+<tr>
+	<td id="detailsLabel">Contact:</td>
+    <td id="detailsInfo">{{ descriptor.contact|wordwrap:72|linebreaksbr }}</td>
 </tr>
-<tr id="row_aggStatisticSummary">
-    <td id="aggBox">Latitude, Longitude:</td>
-    <td id="aggBox">{{ statusentry.latitude }}, {{ statusentry.longitude }}</td>
+<tr>
+	<td id="detailsLabel">IP Address:</td>
+    <td id="detailsInfo">{{ descriptor.address }}</td>
 </tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Platform / Version:</td>
-    <td id="aggBox">{{ descriptor.platform|wordwrap:72|linebreaksbr }}</td>
+<tr>
+	<td id="detailsLabel">Hostname:</td>
+    <td id="detailsInfo">{{ descriptor.hostname }}</td>
 </tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Last Descriptor Published (GMT):</td>
-    <td id="aggBox">{{ descriptor.published }}</td>
+<tr>
+	<td id="detailsLabel">Onion Router Port:</td>
+    <td id="detailsInfo">{{ descriptor.orport }}</td>
 </tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Current Uptime:</td>
-    <td id="aggBox">{{ descriptor.uptime|words }}</td>
+<tr>
+	<td id="detailsLabel">Directory Server Port:</td>
+    <td id="detailsInfo">{{ descriptor.dirport }}</td>
 </tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Bandwidth (Burst/Avg/Observed - In Bps):</td>
-    <td id="aggBox">{{ descriptor.bandwidthburst }} / {{ descriptor.bandwidthavg }} / {{ descriptor.bandwidthobserved }}</td>
+<tr>
+	<td id="detailsLabel">Country Code:</td>
+    <td id="detailsInfo">{{ statusentry.country }}</td>
 </tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Family:</td>
-    <td id="aggBox">{{ descriptor.family|format_family|safe|linebreaksbr }}</td>
+<tr>
+    <td id="detailsLabel">Latitude, Longitude:</td>
+    <td id="detailsInfo">{{ statusentry.latitude }}, {{ statusentry.longitude }}</td>
+</tr>
+<tr>
+	<td id="detailsLabel">Platform / Version:</td>
+    <td id="detailsInfo">{{ descriptor.platform|wordwrap:72|linebreaksbr }}</td>
+</tr>
+<tr>
+	<td id="detailsLabel">Last Descriptor Published (GMT):</td>
+    <td id="detailsInfo">{{ descriptor.published|date:"Y-m-d H:i:s" }}</td>
+</tr>
+<tr>
+	<td id="detailsLabel">Published Uptime:</td>
+    <td id="detailsInfo">{{ descriptor.uptime|words }}</td>
+</tr>
+<tr>
+	<td id="detailsLabel">Bandwidth (Burst/Avg/Observed - In Bps):</td>
+    <td id="detailsInfo">{{ descriptor.bandwidthburst }} / {{ descriptor.bandwidthavg }} / {{ descriptor.bandwidthobserved }}</td>
+</tr>
+<tr>
+	<td id="detailsLabel">Family:</td>
+    <td id="detailsInfo">{{ descriptor.family|format_family|safe|linebreaksbr }}</td>
 </tr>
 </table>
 
@@ -91,9 +108,9 @@
 <tr>
     <td id="details_boxTitle" colspan="2"> Graphs </td>
 </tr>
-<tr id="row_aggStatisticSummary">
-    <td id="aggBox"><img src="{{ statusentry.fingerprint }}/readhist.png" alt="Read Bandwidth History Graph" title="Read Bandwidth History Graph"></td>
-    <td id="aggBox"><img src="{{ statusentry.fingerprint }}/writehist.png" alt="Write Bandwidth History Graph" title="Write Bandwidth History Graph"></td>
+<tr>
+    <td id="detailsInfo"><img src="{{ statusentry.fingerprint }}/readhist.png" alt="Read Bandwidth History Graph" title="Read Bandwidth History Graph"></td>
+    <td id="detailsInfo"><img src="{{ statusentry.fingerprint }}/writehist.png" alt="Write Bandwidth History Graph" title="Write Bandwidth History Graph"></td>
 </tr>
 </table>
 
@@ -186,5 +203,5 @@
     </td>
 </tr>
 </table>
-
+{% endspaceless %}
 {% endblock %}

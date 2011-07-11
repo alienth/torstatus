@@ -155,10 +155,8 @@ def index(request, sort_filter):
         diff = now - published
         diff_sec = (diff.microseconds + (
                   diff.seconds + diff.days * 24 * 3600) * 10**6) / 10**6
-        # Turned off - probably not a good idea to implement uptime
-        # this way.
-        # entry.descriptorid.uptime = (
-        #          entry.descriptorid.uptime + diff_sec) / 86400
+        entry.descriptorid.uptime = (
+                 entry.descriptorid.uptime + diff_sec) / 86400
 
         # Calculate real bandwidth
         entry.descriptorid.bandwidthobserved /= 1024
@@ -214,13 +212,22 @@ def details(request, fingerprint):
     # and less than are incorrectly implemented for IPAddressFields.
     # [:1] is djangonese for 'LIMIT 1', and
     # [0] gets the object rather than the QuerySet.
-
     statusentry = Statusentry.objects.filter(
                   fingerprint=fingerprint).extra(
                   select={'geoip': 'geoip_lookup(address)'}).order_by(
                   '-validafter')[:1][0]
 
     descriptor = statusentry.descriptorid
+
+    # Some clients may want to look up old relays. Create an attribute
+    # to flag active and unactive relays.
+    last_va = Statusentry.objects.aggregate(
+              last=Max('validafter'))['last']
+
+    if last_va != statusentry.validafter:
+        statusentry.active = False
+    else:
+        statusentry.active = True
 
     # Get the country, latitude, and longitude from the geoip attribute
     statusentry.country, lat, lng = statusentry.geoip.strip(
@@ -234,7 +241,7 @@ def details(request, fingerprint):
     diff = now - published
     diff_sec = (diff.microseconds + (
                 diff.seconds + diff.days * 24 * 3600) * 10**6) / 10**6
-    descriptor.uptime = descriptor.uptime + diff_sec
+    descriptor.adjuptime = descriptor.uptime + diff_sec
 
     # Get information from the raw descriptor.
     raw_list = str(descriptor.rawdesc).split("\n")
