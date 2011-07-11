@@ -55,6 +55,12 @@ def filter_statusentries(statusentries, query_options):
     dictionary of search query options and filteres the QuerySet
     based on this dictionary.
 
+    @type statusentries: C{QuerySet}
+    @param statusentries: A QuerySet of the statusentries.
+    @type query_options: C{dict}
+    @param query_options: A list of the columns that will be displayed on 
+                        this session.
+    
     @see: index
     @rtype: QuerySet
     @return: statusentries
@@ -140,6 +146,19 @@ def button_choice(request, button, field, current_columns,
     Helper function that manages the changes in the L{columnpreferences}
     arrays/lists.
 
+    @type button: C{string}
+    @param button: A string that indicates which button was clicked.
+    @type field: C{string}
+    @param field: A string that indicates from which prefereces column was 
+                the corresponding value selected (ADD column, REMOVE
+                column).
+    @type current_columns: C{list}
+    @param current_columns: A list of the columns that will be displayed on 
+                        this session.
+    @type available_columns: C{list}
+    @param available_columns: A list of the columns that can be added to the 
+                        current ones.
+    
     @rtype: list(list(int), list(int), string)
     @return: column_lists
     """
@@ -418,6 +437,12 @@ def sorting_link(sort_order, column_name):
     """
     Returns the proper URL after checking how the sorting is currently set up.
     
+    @type sort_order: C{string}
+    @param sort_order: A string - the type of order (ascending/descending).
+    @type column_name: C{string}
+    @param column_name: A string - the name of the column that is 
+                    currently ordering by.
+    
     @rtype: C{string}
     @return The proper link for sorting the tables.
     """
@@ -528,8 +553,11 @@ def get_platform(platform):
     Method that searches in the platform string for the corresponding 
     platform name.
     
+    @type platform: C{string}
+    @param platform: A string, raw version of the platform of a relay.
+    
     @rtype: C{string}
-    @return: The platform name of the relay.
+    @return: The cleaned version of the platform name.
     """
     # Dictionary of {NameInPlatform: NameOfTheIcon}
     supported_platforms = {'Linux': 'Linux',
@@ -554,6 +582,15 @@ def get_platform(platform):
 def generate_table_headers(current_columns, order_column_name, sort_order):
     """ 
     Generates a dictionary of {header_name: html_string_code}. 
+    
+    @type current_columns: C{list}
+    @param current_columns: A list of the columns that will be displayed on 
+                    this session.
+    @type order_column_name: C{string}
+    @param order_column_name: A string - the name of the column that is 
+                    currently ordering by.
+    @type sort_order: C{string}
+    @param sort_order: A string - the type of order (ascending/descending).
     
     @rtype: C{dict}, C{list}
     @return: Dictionary that contains the header name and the HTML code.
@@ -602,6 +639,15 @@ def generate_table_rows(statusentries, current_columns, html_current_columns):
     """
     Generates a list of HTML strings. Each string represents a row in the 
     main template table.
+    
+    @type statusentries: C{QuerySet}
+    @param statusentries: A QuerySet of the statusentries.
+    @type current_columns: C{list}
+    @param current_columns: A list of the columns that will be displayed on 
+                    this session.
+    @type html_current_columns: C{list}
+    @param html_current_columns: A list of the HTML string version of the 
+                    current columns.
     
     @rtype: C{list}
     @return: List of HTML strings.
@@ -742,6 +788,47 @@ def generate_table_rows(statusentries, current_columns, html_current_columns):
         html_table_rows.append(html_row_code)  
         
     return html_table_rows
+    
+    
+def generate_query_list_options(query_options):
+    """
+    Generates the HTML version of each option in the Query List Options field.
+    
+    @type query_options: C{dict}
+    @param query_options: A dictionary of the current query options.
+    
+    @rtype: C{list}
+    @return: List of strings - each string represents the HTML version of 
+        an option.
+    """
+    
+    LIST_OPTIONS = {'Router Name': 'nickname',
+                    'Fingerprint': 'fingerprint',
+                    'Country Code': 'geoip',
+                    'Bandwidth': 'bandwidthobserved',
+                    'Uptime': 'uptime',
+                    'Last Descriptor Published': 'published',
+                    #'Hostname': 'hostname',
+                    'IP Address': 'address',
+                    'ORPort': 'orport',
+                    'DirPort': 'dirport',
+                    'Platform': 'platform',
+                    'Contact': 'contact',
+                    'Authority': 'isauthority',
+                    'Bad Directory': 'isbaddirectory',
+                    'Bad Exit': 'isbadexit',
+                    'Exit': 'isexit',
+                    'Fast': 'isfast',
+                    'Guard': 'isguard',
+                    #'Hibernating': 'ishibernating',
+                    'Named': 'isnamed',
+                    'Stable': 'isstable',
+                    'Valid': 'isvalid',
+                    'Directory': 'isv2dir',
+                   }
+                    
+                    
+    
 
 
 def draw_bar_graph(xs, ys, labels, params):

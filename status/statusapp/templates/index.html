@@ -145,6 +145,11 @@
             <td>
                 <form action="/" method="get">
                 <select id="sortRouterListing" name="sortListings">
+                {% autoescape off %}
+                    {% for option in queryListOptions %}
+                       {{option}}
+                    {% endfor %}
+                {% endautoescape %}
                 <option value="nickname" {% if not queryOptions or queryOptions|key:'sortListings' == "nickname" %} 
                                                             SELECTED {% endif %}>Router Name</option>
                 <option value="fingerprint" {% if queryOptions and queryOptions|key:'sortListings' == "fingerprint" %} 
