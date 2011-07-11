@@ -16,6 +16,38 @@ from matplotlib.figure import Figure
 # TorStatus-specific import statements --------------------------------
 from statusapp.models import Bwhist
 
+# INIT Variables ------------------------------------------------------
+COLUMN_VALUE_NAME = {'Country Code': 'geoip', 
+                     'Router Name': 'nickname', 
+                     'Bandwidth': 'bandwidthobserved', 
+                     'Uptime': 'uptime',
+                     'IP': 'address', 
+                     'Hostname': 'hostname', 
+                     'Icons': 'icons',
+                     'ORPort': 'orport', 
+                     'DirPort': 'dirport',
+                     'BadExit': 'isbadexit',
+                     'Named': 'isnamed',
+                     'Exit': 'isexit',
+                     'Authority': 'isauthority',
+                     'Fast': 'isfast',
+                     'Guard': 'isguard',
+                     'Stable': 'isstable',
+                     'Running': 'isrunning',
+                     'Valid': 'isvalid',
+                     'V2Dir': 'isv2dir',
+                     'Platform': 'platform',
+                     'Fingerprint': 'fingerprint',
+                     'LastDescriptorPublished': 'published',
+                     'Contact': 'contact',
+                     'BadDir': 'isbaddirectory',
+                    }
+    
+NOT_COLUMNS = ['Running', 'Hostname', 'Named', 'Valid',]
+    
+ICONS = ['Fast', 'Exit', 'V2Dir', 'Guard', 'Stable', 'Authority', 
+         'Platform',]
+
 
 def filter_statusentries(statusentries, query_options):
     """
@@ -516,38 +548,6 @@ def get_platform(platform):
         if name in platform:
             return supported_platforms[name]
     return None
-
-
-COLUMN_VALUE_NAME = {'Country Code': 'geoip', 
-                     'Router Name': 'nickname', 
-                     'Bandwidth': 'bandwidthobserved', 
-                     'Uptime': 'uptime',
-                     'IP': 'address', 
-                     'Hostname': 'hostname', 
-                     'Icons': 'icons',
-                     'ORPort': 'orport', 
-                     'DirPort': 'dirport',
-                     'BadExit': 'isbadexit',
-                     'Named': 'isnamed',
-                     'Exit': 'isexit',
-                     'Authority': 'isauthority',
-                     'Fast': 'isfast',
-                     'Guard': 'isguard',
-                     'Stable': 'isstable',
-                     'Running': 'isrunning',
-                     'Valid': 'isvalid',
-                     'V2Dir': 'isv2dir',
-                     'Platform': 'platform',
-                     'Fingerprint': 'fingerprint',
-                     'LastDescriptorPublished': 'published',
-                     'Contact': 'contact',
-                     'BadDir': 'isbaddirectory',
-                    }
-    
-NOT_COLUMNS = ['Running', 'Hostname', 'Named', 'Valid',]
-    
-ICONS = ['Exit', 'Authority', 'Fast', 'Guard', 'V2Dir', 'Platform',
-         'Stable',]
 
 
 def generate_table_headers(current_columns, order_column_name, sort_order):
