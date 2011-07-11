@@ -23,7 +23,13 @@ th.relayHeader {
     border-bottom: 2px solid black;
 }
 
-th#routerName {
+th#icons {
+    font: bold 0px Arial;
+    cursor: pointer;
+    min-width: 60px;
+}
+
+th#nickname {
     min-width: 100px;
 }
 
@@ -31,15 +37,15 @@ th#uptime {
     min-width: 30px;
 }
 
-th#badDir {
+th#isbaddirectory {
     min-width: 100px;
 }
 
-th#lastDescPub {
+th#published {
     min-width: 160px;
 }
 
-th#bandwidth {
+th#bandwidthobserved {
     min-width: 50px;
 }
 
@@ -61,35 +67,29 @@ th#orport:hover {
     cursor: pointer;
 }
 
-th#bandwidth:hover {
+th#bandwidthobserved:hover {
     background-color: #89FB69;
     cursor: pointer;
 }
 
-th#lastDescPub:hover {
+th#published:hover {
     background-color: #89FB69;
     cursor: pointer;
 }
 
-th#badDir:hover {
+th#isbaddirectory:hover {
     background-color: #89FB69;
     cursor: pointer;
 }
 
-th#routerName:hover {
+th#nickname:hover {
     background-color: #89FB69;
     cursor: pointer;
 }
 
-th.relayHeader:hover {
+th.hoverable:hover {
     background-color: #89FB69;
     cursor: pointer;
-}
-
-th#relayHeaderInv {
-    font: bold 0px Arial;
-    cursor: pointer;
-    min-width: 60px;
 }
 
 table.header {
@@ -242,9 +242,6 @@ table.aggStatisticSummary {
     white-space:nowrap;
 }
 
-tr#row_aggStatisticSummary {
-}
-
 td#aggBox {
     border-style: solid;
     border-width: 1px;
@@ -284,12 +281,12 @@ td#col_relayIcons {
     text-align: right;
 }
 
-td#col_relayOrport {
+td#col_relayORPort {
     width: 60px;
 }
 
 
-td#col_relayDirport {
+td#col_relayDirPort {
     width: 50px;
 }
 
@@ -313,7 +310,7 @@ td#col_relayContact {
     text-align: center;
 }
 
-td#col_relayLastDescPub {
+td#col_relayLastDescPublished {
     width: 100px;
     text-align: center;
 }
@@ -325,7 +322,7 @@ td {
 table.relayTable {
     width: 100%;
     border-spacing: 0px;
-    border: 0;
+    border: 1px solid black;
 }
 
 div.footer {
@@ -338,7 +335,7 @@ div.footer {
 
 p#trademark {
     text-align: center;
-    font-size: 12px;
+    font-size: 0.750em;
     margin: 0 0 1px 0;
 }
 

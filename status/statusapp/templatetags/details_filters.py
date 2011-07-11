@@ -1,7 +1,15 @@
 """
 Custom filters for the details page.
 """
+# Python-specific import statements -----------------------------------
+import datetime
+
+# Django-specific import statements -----------------------------------
 from django import template
+from django.db.models import Max, Count
+
+# TorStatus-specific import statements --------------------------------
+from statusapp.models import Statusentry
 
 register = template.Library()
 
@@ -52,80 +60,7 @@ def format_fing(fingerprint):
 
 
 @register.filter
-def onion_key(rawdesc):
-    """
-    Get the onion key of a relay from its raw descriptor.
-
-    @type rawdesc: C{string} or C{buffer}
-    @param rawdesc: The raw descriptor of a relay.
-    @rtype: C{string}
-    @return: The onion key of the relay.
-    """
-    raw_list = str(rawdesc).split("\n")
-    i = 0
-    while not raw_list[i].startswith("onion-key"):
-        i += 1
-
-    return "\n".join(raw_list[(i + 1):(i + 6)])
-
-@register.filter
-def signing_key(rawdesc):
-    """
-    Get the signing key of a relay from its raw descriptor.
-
-    @type rawdesc: C{string} or C{buffer}
-    @param rawdesc: The raw descriptor of a relay.
-    @rtype: C{string}
-    @return: The signing key of the relay.
-    """
-    raw_list = str(rawdesc).split("\n")
-    i = 0
-    while not raw_list[i].startswith("signing-key"):
-        i += 1
-
-    return "\n".join(raw_list[(i + 1):(i + 6)])
-
-
-@register.filter
-def exitinfo(rawdesc):
-    """
-    Get the detailed exit policy information of a relay from its raw
-    descriptor.
-
-    @type rawdesc: C{string} or C{buffer}
-    @param rawdesc: The raw descriptor of a relay.
-    @rtype: C{string}
-    @return: The exit policy information of the relay.
-    """
-    policy = []
-    rawdesc_array = str(rawdesc).split("\n")
-    for line in rawdesc_array:
-        if (line.startswith(("accept", "reject"))):
-            policy.append(line)
-    return policy
-
-
-@register.filter
-def contact(rawdesc):
-    """
-    Get the contact information of a relay from its raw descriptor.
-
-    It is possible that a relay will not publish any contact information.
-    In this case, "No contact information given" is returned.
-
-    @type rawdesc: C{string} or C{buffer}
-    @param rawdesc: The raw descriptor of a relay.
-    @rtype: C{string}
-    @return: The contact information of the relay.
-    """
-    for line in str(rawdesc).split("\n"):
-        if (line.startswith("contact")):
-            return line[8:]
-    return "No contact information given"
-
-
-@register.filter
-def family(rawdesc):
+def format_family(family_list):
     #TODO: This method almost certainly belongs in statusapp.views.
     """
     Get the family of a relay from its raw descriptor.
@@ -138,18 +73,7 @@ def family(rawdesc):
     @rtype: C{string}
     @return: The family of a relay.
     """
-    # Family information is given in terms of nicknames or fingerprints.
-    # First, get all family information.
-    fingerprints_and_nicknames = []
-    for line in str(rawdesc).split("\n"):
-        if (line.startswith("family")):
-            fingerprints_and_nicknames = line[7:].split()
-
-    if fingerprints_and_nicknames:
-        from statusapp.models import Statusentry
-        from django.db.models import Max, Count
-        import datetime
-
+    if family_list:
         links = []
 
         one_day = datetime.timedelta(days=1)
@@ -157,7 +81,7 @@ def family(rawdesc):
                 last_consensus=Max('validafter'))['last_consensus']
         oldest_usable = last_consensus - one_day
 
-        for entry in fingerprints_and_nicknames:
+        for entry in family_list:
             if (entry[0] == "$" and len(entry[1:]) == 40):
                 # Assume the entry is a fingerprint.
 
@@ -204,61 +128,4 @@ def family(rawdesc):
 
         return "\n".join(links)
 
-    return "No family given"
-
-
-@register.filter
-def hostname(address):
-    """
-    Get the hostname that corresponds to a given IP address.
-
-    @type address: C{string} or C{buffer}
-    @param address: An IP address.
-    @rtype: C{string}
-    @return: The hostname that corresponds to the IP address.
-    """
-    from socket import getfqdn
-    return getfqdn(str(address))
-
-
-@register.filter
-def country(geoip):
-    """
-    Get the two-letter lowercase country code from a GeoIP string.
-
-    @type geoip: C{string} or C{buffer}
-    @param geoip: A string formatted as a tuple with entries country
-        code, latitude, and longitude.
-    @rtype: C{string}
-    @return: The lowercase two-letter country code associated with
-        C{geoip}.
-    """
-    return str(geoip).strip('()').split(',')[0].lower()
-
-
-@register.filter
-def latitude(geoip):
-    """
-    Get the latitude from a GeoIP string.
-
-    @type geoip: C{string} or C{buffer}
-    @param geoip: A string formatted as a tuple with entries country
-        code, latitude, and longitude.
-    @rtype: C{string}
-    @return: The latitude associated with C{geoip}.
-    """
-    return str(geoip).split(',')[1]
-
-
-@register.filter
-def longitude(geoip):
-    """
-    Get the longitude from a GeoIP string.
-
-    @type geoip: C{string} or C{buffer}
-    @param geoip: A string formatted as a tuple with entries country
-        code, latitude, and longitude.
-    @rtype: C{string}
-    @return: The longitude associated with C{geoip}.
-    """
-    return str(geoip).strip('()').split(',')[2]
+    return None

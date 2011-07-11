@@ -1,16 +1,16 @@
 """
-A custom typecast for psycopg2.
-
-Psycopg2, by default,
-casts a BIGINT[] in PostgreSQL to a python list, removing the indices
-given, e.g. [86:86]={2563637}. These are necessary, however, to gather
-96 data points consisting of (date, bandwidth) pairs for use in
-bandwidth history graphs.
-
-@see: http://www.initd.org/psycopg/docs/advanced.html
-    #type-casting-from-sql-to-python
+The application that runs TorStatus.
 """
+
+# What follows is a custom typecast for psycopg2.
+# Psycopg2, by default, casts a BIGINT[] in PostgreSQL to a python list,
+# removing the indices given, e.g. [86:86]={2563637}. These are
+# necessary, however, to gather 96 data points consisting of
+# (date, bandwidth) pairs for use in bandwidth history graphs.
+# see: http://www.initd.org/psycopg/docs/advanced.html
+# #type-casting-from-sql-to-python
 import psycopg2
+from django.db import connection
 
 
 def __none_to_zero(string):
@@ -36,8 +36,7 @@ def cast_array(value, cur):
     Return the PostgreSQL array as a tuple consising of the starting
     index, ending index, and the array itself (as a python list).
 
-    >>> cast_array([13:15]={2526642,7003442,6466167},
-            psycopg2.connection.cursor())
+    >>> cast_array([13:15]={2526642,7003442,6466167}, psycopg2.connection.cursor())
     (13, 15, [2526642, 7003442, 6466167])
 
     @type value: C{string}
@@ -67,8 +66,21 @@ def cast_array(value, cur):
     return (start, end, array)
 
 
-# 1016 is the psycopg2 object ID (OID) for BIGINT[] fields. See
-# http://www.initd.org/psycopg/docs/advanced.html#
-# type-casting-from-sql-to-python to see how this was determined.
-ARRAY = psycopg2.extensions.new_type((1016,), "BIGINT[]", cast_array)
-psycopg2.extensions.register_type(ARRAY)
+def get_oid(type):
+    """
+    Get the psycopg2 object ID of a data type.
+
+    @type type: C{string}
+    @param type: The data type to find the object ID of.
+    @rtype: C{int}
+    @return: The object ID of the data type.
+    """
+    cursor = connection.cursor()
+    cursor.execute("SELECT NULL::%s" % type)
+    array_oid = cursor.description[0][1]
+    return array_oid
+
+
+__BIGINT_ARRAY = psycopg2.extensions.new_type(
+        (get_oid("BIGINT[]"),), "BIGINT[]", cast_array)
+psycopg2.extensions.register_type(__BIGINT_ARRAY)
