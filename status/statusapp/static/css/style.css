@@ -24,72 +24,30 @@ th.relayHeader {
 }
 
 th#routerName {
-    text-align: left;
-    font-weight: bold;
-    font-size: 0.6875em;
-    background-color: #7BD4F7;
-    border-top: 2px solid black;
-    border-bottom: 2px solid black;
     min-width: 100px;
 }
 
 th#uptime {
-    text-align: left;
-    font-weight: bold;
-    font-size: 0.6875em;
-    background-color: #7BD4F7;
-    border-top: 2px solid black;
-    border-bottom: 2px solid black;
     min-width: 30px;
 }
 
 th#badDir {
-    text-align: left;
-    font-weight: bold;
-    font-size: 0.6875em;
-    background-color: #7BD4F7;
-    border-top: 2px solid black;
-    border-bottom: 2px solid black;
     min-width: 100px;
 }
 
 th#lastDescPub {
-    text-align: left;
-    font-weight: bold;
-    font-size: 0.6875em;
-    background-color: #7BD4F7;
-    border-top: 2px solid black;
-    border-bottom: 2px solid black;
     min-width: 160px;
 }
 
 th#bandwidth {
-    text-align: left;
-    font-weight: bold;
-    font-size: 0.6875em;
-    background-color: #7BD4F7;
-    border-top: 2px solid black;
-    border-bottom: 2px solid black;
     min-width: 50px;
 }
 
 th#dirport {
-    text-align: left;
-    font-weight: bold;
-    font-size: 0.6875em;
-    background-color: #7BD4F7;
-    border-top: 2px solid black;
-    border-bottom: 2px solid black;
     min-width: 60px;
 }
 
 th#orport {
-    text-align: left;
-    font-weight: bold;
-    font-size: 0.6875em;
-    background-color: #7BD4F7;
-    border-top: 2px solid black;
-    border-bottom: 2px solid black;
     min-width: 60px;
 }
 
@@ -129,11 +87,7 @@ th.relayHeader:hover {
 }
 
 th#relayHeaderInv {
-    text-align: left;
     font: bold 0px Arial;
-    background-color: #7BD4F7;
-    border-top: 2px solid black;
-    border-bottom: 2px solid black;
     cursor: pointer;
     min-width: 60px;
 }
