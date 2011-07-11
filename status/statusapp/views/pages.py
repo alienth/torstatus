@@ -104,11 +104,13 @@ def index(request, sort_filter):
     order_column_name = ''
     if sort_filter:
         order_column_name, sort_order = sort_filter.split('_')
-        options = ['nickname', 'fingerprint', 'geoip', 'bandwidthobserved',
-               'uptime', 'published','hostname', 'address', 'orport', 
-               'dirport', 'isbaddirectory', 'isbadexit',]
+        options = ['nickname', 'fingerprint', 'geoip',
+                   'bandwidthobserved', 'uptime', 'published',
+                   'hostname', 'address', 'orport', 'dirport',
+                   'isbaddirectory', 'isbadexit',]
 
-        descriptorlist_options = ['uptime', 'contact', 'bandwidthobserved']
+        descriptorlist_options = ['uptime', 'contact',
+                                  'bandwidthobserved']
         altered_column_name = order_column_name
         if altered_column_name in options:
             if altered_column_name in descriptorlist_options:
@@ -149,18 +151,16 @@ def index(request, sort_filter):
               .order_by('-date')[:1][0].bwobserved
 
     client_address = request.META['REMOTE_ADDR']
-    
-    # GENERATE TABLE HEADERS -------- ---------------------------------
+
+    # GENERATE TABLE HEADERS ------------------------------------------
     # -----------------------------------------------------------------
-                
-    html_table_headers, html_current_columns = generate_table_headers(current_columns, \
-                                order_column_name, sort_order)
+    html_table_headers, html_current_columns = generate_table_headers(
+            current_columns, order_column_name, sort_order)
 
     # GENERATE TABLE ROWS ---------------------------------------------
     # -----------------------------------------------------------------
-
-    html_table_rows = generate_table_rows(statusentries, current_columns, html_current_columns)                                      
-    
+    html_table_rows = generate_table_rows(
+                   statusentries, current_columns, html_current_columns)
 
     template_values = {'relay_list': statusentries,
                        'client_address': client_address,

@@ -37,7 +37,7 @@ def filter_statusentries(statusentries, query_options):
     valid_options = filter(lambda k: query_options[k] != '' \
                             and k in options, query_options)
     filterby = {}
-    for opt in valid_options: 
+    for opt in valid_options:
         filterby[opt] = 1 if query_options[opt] == 'yes' else 0
 
     if 'searchValue' in query_options and \
@@ -81,14 +81,14 @@ def filter_statusentries(statusentries, query_options):
     statusentries = statusentries.filter(**filterby)
 
     options = ['nickname', 'fingerprint', 'geoip', 'bandwidthobserved',
-               'uptime', 'published', 'hostname', 'address', 'orport', 
-               'dirport', 'platform', 'isauthority', 
+               'uptime', 'published', 'hostname', 'address', 'orport',
+               'dirport', 'platform', 'isauthority',
                'isbaddirectory', 'isbadexit', 'isexit',
-               'isfast', 'isguard', 'isnamed', 'isstable', 'isrunning', 
+               'isfast', 'isguard', 'isnamed', 'isstable', 'isrunning',
                'isvalid', 'isv2dir']
 
     descriptorlist_options = ['platform', 'uptime', 'contact', 'bandwidthobserved']
-    if 'sortListings' in query_options: 
+    if 'sortListings' in query_options:
         selected_option = query_options['sortListings']
     else:
         selected_option = ''
@@ -384,16 +384,16 @@ def get_if_exists(request, title):
 def sorting_link(sort_order, column_name):
     """
     Returns the proper URL after checking how the sorting is currently set up.
-    
+
     @rtype: C{string}
     @return The proper link for sorting the tables.
     """
-    
+
     if sort_order == "ascending":
         return "/" + column_name + "_descending"
     return "/" + column_name + "_ascending"
-    
- 
+
+
 def kilobytes_ps(bytes_ps):
     """
     Convert a bandwidth value in bytes to a bandwidth value in kilobytes
@@ -409,7 +409,7 @@ def kilobytes_ps(bytes_ps):
         return 0
     else:
         return int(bytes_ps) / 1024
-        
+
 
 def days(seconds):
     """
@@ -426,7 +426,7 @@ def days(seconds):
         return 0
     else:
         return int(seconds) / 86400
-        
+
 
 def contact(rawdesc):
     """
@@ -445,7 +445,7 @@ def contact(rawdesc):
             contact_raw = line[8:]
             return contact_raw.decode('raw_unicode_escape')
     return "No contact information given"
-    
+
 
 def country(location):
     """
@@ -492,9 +492,9 @@ def longitude(geoip):
 
 def get_platform(platform):
     """
-    Method that searches in the platform string for the corresponding 
+    Method that searches in the platform string for the corresponding
     platform name.
-    
+
     @rtype: C{string}
     @return: The platform name of the relay.
     """
@@ -508,7 +508,7 @@ def get_platform(platform):
                            'NetBSD': 'NetBSD',
                            'OpenBSD': 'OpenBSD',
                            'SunOS': 'SunOS',
-                           'IRIX': 'IRIX', 
+                           'IRIX': 'IRIX',
                            'Cygwin': 'Cygwin',
                            'Dragon': 'Dragon',
                           }
@@ -518,14 +518,14 @@ def get_platform(platform):
     return None
 
 
-COLUMN_VALUE_NAME = {'Country Code': 'geoip', 
-                     'Router Name': 'nickname', 
-                     'Bandwidth': 'bandwidthobserved', 
+COLUMN_VALUE_NAME = {'Country Code': 'geoip',
+                     'Router Name': 'nickname',
+                     'Bandwidth': 'bandwidthobserved',
                      'Uptime': 'uptime',
-                     'IP': 'address', 
-                     'Hostname': 'hostname', 
+                     'IP': 'address',
+                     'Hostname': 'hostname',
                      'Icons': 'icons',
-                     'ORPort': 'orport', 
+                     'ORPort': 'orport',
                      'DirPort': 'dirport',
                      'BadExit': 'isbadexit',
                      'Named': 'isnamed',
@@ -543,27 +543,27 @@ COLUMN_VALUE_NAME = {'Country Code': 'geoip',
                      'Contact': 'contact',
                      'BadDir': 'isbaddirectory',
                     }
-    
+
 NOT_COLUMNS = ['Running', 'Hostname', 'Named', 'Valid',]
-    
+
 ICONS = ['Exit', 'Authority', 'Fast', 'Guard', 'V2Dir', 'Platform',
          'Stable',]
 
 
 def generate_table_headers(current_columns, order_column_name, sort_order):
-    """ 
-    Generates a dictionary of {header_name: html_string_code}. 
-    
+    """
+    Generates a dictionary of {header_name: html_string_code}.
+
     @rtype: C{dict}, C{list}
     @return: Dictionary that contains the header name and the HTML code.
         List of the current columns that will be displayed.
     """
-    
+
     # NOTE: The html_current_columns list is needed to preserve the order
     #   of the displayed columns. It is used in the template to iterate
     #   through the current columns in the right order that they should be
     #   displayed.
-    
+
     html_table_headers = {}
     html_current_columns = []
     for column in current_columns:
@@ -576,8 +576,8 @@ def generate_table_headers(current_columns, order_column_name, sort_order):
             elif sort_order == 'descending':
                 sort_arrow = "&darr;"
         html_class = "relayHeader hoverable" if database_name != "icons" \
-                                                else "relayHeader"    
-                                           
+                                                else "relayHeader"
+
         if column not in ICONS and column not in NOT_COLUMNS:
             if column == "Icons":
                 if filter(lambda c: c in current_columns, ICONS):
@@ -590,30 +590,30 @@ def generate_table_headers(current_columns, order_column_name, sort_order):
                                     href='" + sorting_link(sort_order, database_name) \
                                     + "'>" + display_name + " " + sort_arrow + "</a></th>"
                 html_current_columns.append(column)
-    return html_table_headers, html_current_columns 
-    
-    
+    return html_table_headers, html_current_columns
+
+
 def generate_table_rows(statusentries, current_columns, html_current_columns):
     """
-    Generates a list of HTML strings. Each string represents a row in the 
+    Generates a list of HTML strings. Each string represents a row in the
     main template table.
-    
+
     @rtype: C{list}
     @return: List of HTML strings.
     """
-    
+
     html_table_rows = []
-    
+
     for relay in statusentries:
-    
-        #TODO: CLEAN THE CODE - QUERY ONLY ON THE NECESSARY COLUMNS 
+
+        #TODO: CLEAN THE CODE - QUERY ONLY ON THE NECESSARY COLUMNS
         #               AND THROW IN DICTIONARY AFTERWARDS!!!
-        
-        # Declarations in order to avoid multiple queries. 
-        r_isbadexit = relay.isbadexit      
+
+        # Declarations in order to avoid multiple queries.
+        r_isbadexit = relay.isbadexit
         field_isbadexit = "<img src='static/img/bg_" + ("yes" if r_isbadexit else "no") + \
                         ".png' width='12' height='12' alt='" + ("Bad Exit' title='Bad Exit'" \
-                        if r_isbadexit else "Not a Bad Exit' title='Not a Bad Exit'") + ">"  
+                        if r_isbadexit else "Not a Bad Exit' title='Not a Bad Exit'") + ">"
         field_geoip = relay.geoip
         field_isnamed = relay.isnamed
         field_fingerprint = relay.fingerprint
@@ -622,14 +622,14 @@ def generate_table_rows(statusentries, current_columns, html_current_columns):
                                   " KB/s"
         field_uptime = str(days(relay.descriptorid.uptime)) + " d"
         r_address = relay.address
-        field_address = "[<a href='details/" + r_address + "/whois'>" + \
-                        r_address + "</a>]"
+        field_address = "[<a href='details/" + r_address + \
+                        "/whois'>" + r_address + "</a>]"
         field_published = str(relay.published)
         field_contact = contact(relay.descriptorid.rawdesc)
         r_isbaddir = relay.isbaddirectory
         field_isbaddirectory = "<img src='static/img/bg_" + ("yes" if r_isbaddir else "no") + \
                         ".png' width='12' height='12' alt='" + ("Bad Directory' title='Bad Directory'" \
-                        if r_isbaddir else "Not a Bad Directory' title='Not a Bad Directory'") + ">"                   
+                        if r_isbaddir else "Not a Bad Directory' title='Not a Bad Directory'") + ">"
         field_isfast = "<img src='static/img/status/Fast.png' alt='Fast Server' title='Fast Server'>" \
                         if relay.isfast else ""
         field_isv2dir = "<img src='static/img/status/Dir.png' alt='Directory Server' title='Directory Server'>" \
@@ -649,8 +649,8 @@ def generate_table_rows(statusentries, current_columns, html_current_columns):
         field_orport = str(relay.orport)
         r_dirport = str(relay.dirport)
         field_dirport = r_dirport if r_dirport else "None"
-        
-        
+
+
         RELAY_FIELDS = {'isbadexit': field_isbadexit,
                         'geoip': field_geoip,
                         'isnamed': field_isnamed,
@@ -664,31 +664,31 @@ def generate_table_rows(statusentries, current_columns, html_current_columns):
                         'isbaddirectory': field_isbaddirectory,
                         'isfast': field_isfast,
                         'isv2dir': field_isv2dir,
-                        'isexit': field_isexit, 
+                        'isexit': field_isexit,
                         'isguard': field_isguard,
                         'isstable': field_isstable,
                         'isauthority': field_isauthority,
                         'platform': field_platform,
                         'orport': field_orport,
                         'dirport': field_dirport,
-                       }                  
-                        
+                       }
+
         html_row_code = ''
-        
+
         if 'isbadexit' in RELAY_FIELDS:
             html_row_code = "<tr " + ("class='relayBadExit'" if r_isbadexit \
                             else "class='relay'") + ">"
         else:
             html_row_code = "<tr class='relay'>"
-            
+
         for column in html_current_columns:
             value_name = COLUMN_VALUE_NAME[column]
-            
+
             # Special Case: Country Code
             if column == 'Country Code':
                 c_country = country(RELAY_FIELDS[value_name])
                 c_latitude = latitude(RELAY_FIELDS[value_name])
-                c_longitude = longitude(RELAY_FIELDS[value_name])               
+                c_longitude = longitude(RELAY_FIELDS[value_name])
                 html_row_code = html_row_code + "<td id='col_relayName'><a href=\
                                 'http://www.openstreetmap.org/?mlon=" + c_longitude + \
                                 "&mlat=" + c_latitude + "&zoom=6'> \
@@ -699,7 +699,7 @@ def generate_table_rows(statusentries, current_columns, html_current_columns):
             # Special Case: Router Name and Named
             elif column == 'Router Name':
                 if 'Named' in current_columns:
-                    html_router_name = "<a href='/details/" + \
+                    html_router_name = "<a class='link' href='/details/" + \
                                         RELAY_FIELDS['fingerprint'] + "' \
                                         target='_BLANK'>" + RELAY_FIELDS[value_name] + \
                                         "</a>"
@@ -716,13 +716,13 @@ def generate_table_rows(statusentries, current_columns, html_current_columns):
                         html_icons = html_icons + RELAY_FIELDS[value_icon]
                 html_icons = html_icons + "</td>"
                 html_row_code = html_row_code + html_icons
-            else:              
+            else:
                 html_row_code = html_row_code + "<td id='col_relay'" + column + "'>" + \
                                 RELAY_FIELDS[value_name] + "</td>"
 
-        html_row_code = html_row_code + "</tr>"          
-        html_table_rows.append(html_row_code)  
-        
+        html_row_code = html_row_code + "</tr>"
+        html_table_rows.append(html_row_code)
+
     return html_table_rows
 
 
@@ -889,7 +889,7 @@ def draw_line_graph(fingerprint, bwtype, color, shade):
         day_before = last_hist.date - datetime.timedelta(days=1)
 
         try:
-            day_before_hist = Bwhist.objects.get(\
+            day_before_hist = Bwhist.objects.get(
                     fingerprint=fingerprint,
                     date=str(day_before))
             if bwtype == 'Read':
