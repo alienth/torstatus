@@ -769,7 +769,12 @@ def generate_table_rows(statusentries, current_columns, html_current_columns):
                                         RELAY_FIELDS[value_name] + "</a>"
                     if RELAY_FIELDS['isnamed']:
                         html_router_name = "<b>" + html_router_name + "</b>"
-                    html_row_code = html_row_code + "<td id='col_relayName'>"\
+                else:
+                    html_router_name = "<a class='link' href='/details/" + \
+                                        RELAY_FIELDS['fingerprint'] + "' \
+                                        target='_BLANK'>" + \
+                                        RELAY_FIELDS[value_name] + "</a>"
+                html_row_code = html_row_code + "<td id='col_relayName'>"\
                                     + html_router_name + "</td>"
             # Special Case: Icons
             elif column == 'Icons':
