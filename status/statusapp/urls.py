@@ -8,10 +8,16 @@ from django.conf import settings
 from django.views.decorators.cache import cache_page
 
 urlpatterns = patterns('',
-    # Main pages
-    (r'^(?P<sort_filter>\w*)$', 'statusapp.views.pages.index'),
-    (r'^column-preferences/$', 'statusapp.views.pages.columnpreferences'),
-    (r'^exit-node-query/$', 'statusapp.views.pages.exitnodequery'),
+    # Splash page
+    (r'^$', 'statusapp.views.pages.splash'),
+
+    # Index and related pages
+    (r'^index$', 'statusapp.views.pages.index'),
+
+    # Unpaged Index and related pages
+    (r'^unpaged/(?P<sort_filter>\w*)$', 'statusapp.views.pages.unpaged'),
+    (r'^unpaged/column-preferences/$', 'statusapp.views.pages.columnpreferences'),
+    (r'^unpaged/exit-node-query/$', 'statusapp.views.pages.exitnodequery'),
 
     # Media Files
     (r'^flags/(?P<country_code>\w\w).gif$','statusapp.views.displayFlag'),

@@ -21,6 +21,13 @@ from custom.aggregate import CountCase
 from helpers import *
 
 
+def splash(request):
+    """
+    The splash page for the TorStatus website.
+    """
+    return render_to_response("base.html")
+
+
 # INIT Variables ------------------------------------------------------
 CURRENT_COLUMNS = ["Country Code", "Router Name", "Bandwidth",
                    "Uptime", "IP", "Hostname", "Icons", "ORPort",
@@ -34,21 +41,20 @@ NOT_MOVABLE_COLUMNS = ["Named", "Exit", "Authority", "Fast", "Guard",
                        "Stable", "Running", "Valid", "V2Dir",
                        "Platform",]
 
-
 #@cache_page(60 * 15) #, key_prefix="index")
-def index(request, sort_filter):
+def unpaged(request, sort_filter):
     """
     Supply a dictionary to the index.html template consisting of a list
     of active relays.
 
     Currently, an "active relay" is a relay that has a status entry
     that was published in the last consensus.
-    
+
     @type sort_filter: C{string}
-    @param: A string that contains both the column that should be ordered by
-        and the actual ordering (ascending/descending); the values are 
-        separated by '_'.
-    
+    @param: A string that contains both the column that should be
+        ordered by and the actual ordering (ascending/descending);
+        the values are separated by '_'.
+
     @rtype: HttpResponse
     @return: A dictionary consisting of information about each router
         in the network as well as aggregate information about the
@@ -109,11 +115,13 @@ def index(request, sort_filter):
     order_column_name = ''
     if sort_filter:
         order_column_name, sort_order = sort_filter.split('_')
-        options = ['nickname', 'fingerprint', 'geoip', 'bandwidthobserved',
-               'uptime', 'published','hostname', 'address', 'orport', 
-               'dirport', 'isbaddirectory', 'isbadexit',]
+        options = ['nickname', 'fingerprint', 'geoip',
+                   'bandwidthobserved', 'uptime', 'published',
+                   'hostname', 'address', 'orport', 'dirport',
+                   'isbaddirectory', 'isbadexit',]
 
-        descriptorlist_options = ['uptime', 'contact', 'bandwidthobserved']
+        descriptorlist_options = ['uptime', 'contact',
+                                  'bandwidthobserved']
         altered_column_name = order_column_name
         if altered_column_name in options:
             if altered_column_name in descriptorlist_options:
@@ -157,16 +165,16 @@ def index(request, sort_filter):
               .order_by('-date')[:1][0].bwobserved
 
     client_address = request.META['REMOTE_ADDR']
-    
+
     # GENERATE HTML: TABLE HEADERS ------------------------------------
-    # -----------------------------------------------------------------        
-    html_table_headers, html_current_columns = generate_table_headers(current_columns,
-                                order_column_name, sort_order)
+    # -----------------------------------------------------------------
+    html_table_headers, html_current_columns = generate_table_headers(
+            current_columns, order_column_name, sort_order)
 
     # GENERATE HTML: TABLE ROWS ---------------------------------------
     # -----------------------------------------------------------------
-    html_table_rows = generate_table_rows(statusentries, current_columns, 
-                                html_current_columns) 
+    html_table_rows = generate_table_rows(
+                    statusentries, current_columns, html_current_columns) 
    
     # GENERATE HTML: ADVANCE QUERY ------------------------------------
     # -----------------------------------------------------------------
@@ -438,7 +446,7 @@ def networkstatisticgraphs(request):
 
 
 def columnpreferences(request):
-    '''
+    """
     Let the user choose what columns should be displayed on the index
     page. This view makes use of the sessions in order to store two
     array-listobjects (currentColumns and availableColumns) in a
@@ -450,7 +458,7 @@ def columnpreferences(request):
     @param: request
     @return: renders to the page the currently selected columns, the
         available columns and the previous selection.
-    '''
+    """
     current_columns = []
     available_columns = []
     not_movable_columns = NOT_MOVABLE_COLUMNS
@@ -496,7 +504,6 @@ def columnpreferences(request):
                        'selectedEntry': column_lists[2]}
 
     return render_to_response('columnpreferences.html', template_values)
-    
 
 def mainindex(request):
     hello = 'Hello New Page'
