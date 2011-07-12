@@ -144,9 +144,12 @@ def index(request, sort_filter):
              bandwidthburst=Sum('descriptorid__bandwidthburst'),
              bandwidthobserved=Sum('descriptorid__bandwidthobserved'))
     # Convert from B/s to KB/s
-    counts['bandwidthavg'] /= 1024
-    counts['bandwidthburst'] /= 1024
-    counts['bandwidthobserved'] /= 1024
+    if counts['bandwidthavg']:
+        counts['bandwidthavg'] /= 1024
+    if counts['bandwidthburst']:
+        counts['bandwidthburst'] /= 1024
+    if counts['bandwidthobserved']:
+        counts['bandwidthobserved'] /= 1024
 
     in_query = statusentries.count()
 
@@ -167,8 +170,7 @@ def index(request, sort_filter):
    
     # GENERATE HTML: ADVANCE QUERY LISTING OPTIONS --------------------
     # -----------------------------------------------------------------
-    #TODO: 
-    #html_query_list_options = generate_query_list_options()
+    html_query_list_options = generate_query_list_options(query_options)
 
     template_values = {'relay_list': statusentries,
                        'client_address': client_address,
@@ -183,6 +185,7 @@ def index(request, sort_filter):
                        'htmlTableHeaders': html_table_headers,
                        'htmlCurrentColumns': html_current_columns,
                        'htmlRowCode': html_table_rows,
+                       'htmlQueryListOptions': html_query_list_options,
                       }
     return render_to_response('index.html', template_values)
 

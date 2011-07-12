@@ -831,7 +831,16 @@ def generate_query_list_options(query_options):
                     'Valid': 'isvalid',
                     'Directory': 'isv2dir',
                    }
-                    
+    html_query_list_options = []    
+    for option in LIST_OPTIONS:
+        list_option = "<option value='" + LIST_OPTIONS[option] + "'"
+        if (query_options and query_options['sortListings'] == 
+                LIST_OPTIONS[option]):
+            list_option = list_option + " SELECTED>" + option + "</option>"
+        else: 
+            list_option = list_option + ">" + option + "</option>"
+        html_query_list_options.append(list_option)
+    return html_query_list_options
                     
     
 
