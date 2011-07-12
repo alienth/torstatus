@@ -44,6 +44,11 @@ def index(request, sort_filter):
     Currently, an "active relay" is a relay that has a status entry
     that was published in the last consensus.
 
+    @type sort_filter: C{string}
+    @param: A string that contains both the column that should be
+        ordered by and the actual ordering (ascending/descending);
+        the values are separated by '_'.
+
     @rtype: HttpResponse
     @return: A dictionary consisting of information about each router
         in the network as well as aggregate information about the
@@ -152,15 +157,20 @@ def index(request, sort_filter):
 
     client_address = request.META['REMOTE_ADDR']
 
-    # GENERATE TABLE HEADERS ------------------------------------------
+    # GENERATE HTML: TABLE HEADERS ------------------------------------
     # -----------------------------------------------------------------
     html_table_headers, html_current_columns = generate_table_headers(
             current_columns, order_column_name, sort_order)
 
-    # GENERATE TABLE ROWS ---------------------------------------------
+    # GENERATE HTML: TABLE ROWS ---------------------------------------
     # -----------------------------------------------------------------
     html_table_rows = generate_table_rows(
-                   statusentries, current_columns, html_current_columns)
+            statusentries, current_columns, html_current_columns)
+
+    # GENERATE HTML: ADVANCE QUERY LISTING OPTIONS --------------------
+    # -----------------------------------------------------------------
+    # TODO:
+    #html_query_list_options = generate_query_list_options()
 
     template_values = {'relay_list': statusentries,
                        'client_address': client_address,
@@ -425,7 +435,7 @@ def networkstatisticgraphs(request):
 
 
 def columnpreferences(request):
-    '''
+    """
     Let the user choose what columns should be displayed on the index
     page. This view makes use of the sessions in order to store two
     array-listobjects (currentColumns and availableColumns) in a
@@ -437,7 +447,7 @@ def columnpreferences(request):
     @param: request
     @return: renders to the page the currently selected columns, the
         available columns and the previous selection.
-    '''
+    """
     current_columns = []
     available_columns = []
     not_movable_columns = NOT_MOVABLE_COLUMNS
@@ -483,3 +493,7 @@ def columnpreferences(request):
                        'selectedEntry': column_lists[2]}
 
     return render_to_response('columnpreferences.html', template_values)
+
+def mainindex(request):
+    hello = 'Hello New Page'
+    return render_to_response('mainindex.html', hello)
