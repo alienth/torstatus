@@ -21,6 +21,13 @@ from custom.aggregate import CountCase
 from helpers import *
 
 
+def splash(request):
+    """
+    The splash page for the TorStatus website.
+    """
+    return render_to_response("base.html")
+
+
 # INIT Variables ------------------------------------------------------
 CURRENT_COLUMNS = ["Country Code", "Router Name", "Bandwidth",
                    "Uptime", "IP", "Hostname", "Icons", "ORPort",
@@ -34,9 +41,8 @@ NOT_MOVABLE_COLUMNS = ["Named", "Exit", "Authority", "Fast", "Guard",
                        "Stable", "Running", "Valid", "V2Dir",
                        "Platform",]
 
-
 #@cache_page(60 * 15) #, key_prefix="index")
-def index(request, sort_filter):
+def unpaged(request, sort_filter):
     """
     Supply a dictionary to the index.html template consisting of a list
     of active relays.
@@ -146,9 +152,12 @@ def index(request, sort_filter):
              bandwidthburst=Sum('descriptorid__bandwidthburst'),
              bandwidthobserved=Sum('descriptorid__bandwidthobserved'))
     # Convert from B/s to KB/s
-    counts['bandwidthavg'] /= 1024
-    counts['bandwidthburst'] /= 1024
-    counts['bandwidthobserved'] /= 1024
+    if counts['bandwidthavg']:
+        counts['bandwidthavg'] /= 1024
+    if counts['bandwidthburst']:
+        counts['bandwidthburst'] /= 1024
+    if counts['bandwidthobserved']:
+        counts['bandwidthobserved'] /= 1024
 
     in_query = statusentries.count()
 

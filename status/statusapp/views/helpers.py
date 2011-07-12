@@ -658,7 +658,7 @@ def generate_table_rows(statusentries, current_columns,
         #               AND THROW IN DICTIONARY AFTERWARDS!!!
         # Declarations made in order to avoid multiple queries.
         r_isbadexit = relay.isbadexit
-        field_isbadexit = "<img src='static/img/bg_" + \
+        field_isbadexit = "<img src='/static/img/bg_" + \
                         ("yes" if r_isbadexit else "no") + \
                         ".png' width='12' height='12' alt='" + \
                         ("Bad Exit' title='Bad Exit'" \
@@ -677,33 +677,33 @@ def generate_table_rows(statusentries, current_columns,
         field_published = str(relay.published)
         field_contact = contact(relay.descriptorid.rawdesc)
         r_isbaddir = relay.isbaddirectory
-        field_isbaddirectory = "<img src='static/img/bg_" + \
+        field_isbaddirectory = "<img src='/static/img/bg_" + \
                         ("yes" if r_isbaddir else "no") + \
                         ".png' width='12' height='12' alt='" + \
                         ("Bad Directory' title='Bad Directory'" \
                         if r_isbaddir else "Not a Bad Directory' \
                         title='Not a Bad Directory'") + ">"
-        field_isfast = "<img src='static/img/status/Fast.png' \
+        field_isfast = "<img src='/static/img/status/Fast.png' \
                         alt='Fast Server' title='Fast Server'>" \
                         if relay.isfast else ""
-        field_isv2dir = "<img src='static/img/status/Dir.png' \
+        field_isv2dir = "<img src='/static/img/status/Dir.png' \
                         alt='Directory Server' title='Directory Server'>" \
                         if relay.isv2dir else ""
-        field_isexit = "<img src='static/img/status/Exit.png' \
+        field_isexit = "<img src='/static/img/status/Exit.png' \
                         alt='Exit Server' title='Exit Server'>" \
                         if relay.isexit else ""
-        field_isguard = "<img src='static/img/status/Guard.png' \
+        field_isguard = "<img src='/static/img/status/Guard.png' \
                         alt='Guard Server' title='Guard Server'>" \
                         if relay.isguard else ""
-        field_isstable = "<img src='static/img/status/Stable.png' \
+        field_isstable = "<img src='/static/img/status/Stable.png' \
                         alt='Stable Server' title='Stable Server'>" \
                         if relay.isstable else ""
-        field_isauthority = "<img src='static/img/status/Authority.png' \
+        field_isauthority = "<img src='/static/img/status/Authority.png' \
                         alt='Authority Server' title='Authority Server'>" \
                         if relay.isauthority else ""
         r_platform = relay.descriptorid.platform
         r_os_platform = get_platform(r_platform)
-        field_platform = "<img src='static/img/os-icons/" + r_os_platform + \
+        field_platform = "<img src='/static/img/os-icons/" + r_os_platform + \
                         ".png' alt='" + r_os_platform + "' title='" + \
                         r_platform + "'>" if r_os_platform else ""
         field_orport = str(relay.orport)
@@ -752,7 +752,7 @@ def generate_table_rows(statusentries, current_columns,
                 html_row_code = html_row_code + "<td id='col_relayName'> \
                                 <a href='http://www.openstreetmap.org/?mlon="\
                                  + c_longitude + "&mlat=" + c_latitude + \
-                                 "&zoom=6'><img src='static/img/flags/" + \
+                                 "&zoom=6'><img src='/static/img/flags/" + \
                                  c_country + ".gif' alt='" + c_country + \
                                  "' title='" + c_country + ":" + c_latitude +\
                                  ", " + c_longitude + "' border=0></a></td>"
