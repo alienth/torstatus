@@ -25,7 +25,9 @@ def splash(request):
     """
     The splash page for the TorStatus website.
     """
-    return render_to_response("base.html")
+    client_address = request.META['REMOTE_ADDR']
+    template_values = {'client_address': client_address}
+    return render_to_response("splash.html", template_values)
 
 
 # INIT Variables ------------------------------------------------------
