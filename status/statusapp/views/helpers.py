@@ -801,7 +801,7 @@ def generate_query_list_options(query_options):
     @return: List of strings - each string represents the HTML version of 
         an option.
     """
-    
+    #TODO: Finish this. It will clean up the Advanced Query Options search.  
     LIST_OPTIONS = {'Router Name': 'nickname',
                     'Fingerprint': 'fingerprint',
                     'Country Code': 'geoip',

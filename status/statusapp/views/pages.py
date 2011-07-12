@@ -167,7 +167,8 @@ def index(request, sort_filter):
    
     # GENERATE HTML: ADVANCE QUERY LISTING OPTIONS --------------------
     # -----------------------------------------------------------------
-    html_query_list_options = generate_query_list_options()
+    #TODO: 
+    #html_query_list_options = generate_query_list_options()
 
     template_values = {'relay_list': statusentries,
                        'client_address': client_address,
