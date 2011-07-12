@@ -594,7 +594,8 @@ def generate_table_headers(current_columns, order_column_name, sort_order):
     
     @rtype: C{dict}, C{list}
     @return: Dictionary that contains the header name and the HTML code.
-        List of the current columns that will be displayed.
+    @rtype: C{list}
+    @return: List of the current columns that will be displayed.
     """
     
     # NOTE: The html_current_columns list is needed to preserve the order
@@ -843,7 +844,48 @@ def generate_query_list_options(query_options):
     return html_query_list_options
                     
     
-
+def generate_query_input_options(query_options):
+    """
+    Generates the HTML version of each input option in the Required Flags
+    feature.
+    
+    @type query_options: C{dict}
+    @param query_options: A dictionary of the current query options.
+    
+    @rtype: C{list}
+    @return: List of strings - each string represents the HTML version of 
+        an input option.
+    """
+    INPUT_OPTIONS = {'Authority': 'isauthority',
+                    'Bad Directory': 'isbaddirectory',
+                    'Bad Exit': 'isbadexit',
+                    'Exit': 'isexit',
+                    'Fast': 'isfast',
+                    'Guard': 'isguard',
+                    #'Hibernating': 'ishibernating',
+                    'Named': 'isnamed',
+                    'Stable': 'isstable',
+                    'Valid': 'isvalid',
+                    'V2Dir': 'isv2dir',
+                   }
+    sorted_input_options = sorted(INPUT_OPTIONS.keys())
+    html_query_input_options = []
+    for option in sorted_input_options:
+        input_option = "<td> " + option + ": </td>"
+        input_string = ''
+        for value in ['', 'yes', 'no']:
+            input_string = input_string + "<input type='radio' \
+                name='" + INPUT_OPTIONS[option] + "' value='" + value + "'"
+            if not query_options and value == '':
+                input_string = input_string + " CHECKED"
+            if (query_options and query_options[INPUT_OPTIONS[option]] == \
+                value):
+                input_string = input_string + " CHECKED"
+            input_string = input_string + " />" + ("Off" if value == '' else \
+                value.capitalize())
+        input_option = input_option + "<td>" + input_string + "</td>"
+        html_query_input_options.append(input_option)
+    return html_query_input_options
 
 def draw_bar_graph(xs, ys, labels, params):
     """

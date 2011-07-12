@@ -168,9 +168,10 @@ def index(request, sort_filter):
     html_table_rows = generate_table_rows(statusentries, current_columns, 
                                 html_current_columns) 
    
-    # GENERATE HTML: ADVANCE QUERY LISTING OPTIONS --------------------
+    # GENERATE HTML: ADVANCE QUERY ------------------------------------
     # -----------------------------------------------------------------
     html_query_list_options = generate_query_list_options(query_options)
+    html_query_input_options = generate_query_input_options(query_options)
 
     template_values = {'relay_list': statusentries,
                        'client_address': client_address,
@@ -186,6 +187,7 @@ def index(request, sort_filter):
                        'htmlCurrentColumns': html_current_columns,
                        'htmlRowCode': html_table_rows,
                        'htmlQueryListOptions': html_query_list_options,
+                       'htmlQueryInputOptions': html_query_input_options,
                       }
     return render_to_response('index.html', template_values)
 
