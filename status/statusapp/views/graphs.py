@@ -3,14 +3,21 @@ Views for statusapp that involve creating dynamic graphs.
 """
 # Python-specific import statements -----------------------------------
 from copy import copy
+import datetime
 
 # Django-specific import statements -----------------------------------
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Max
 from django.views.decorators.cache import cache_page
+from django.http import HttpResponse
+
+# Matplotlib-specific import statements -------------------------------
+import matplotlib
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
 
 # TorStatus specific import statements --------------------------------
-from statusapp.models import Statusentry, Bwhist
+from statusapp.models import Statusentry, Bwhist, TotalBandwidth
 from custom.aggregate import CountCase
 from helpers import draw_bar_graph, draw_line_graph
 
@@ -321,17 +328,17 @@ def aggregatesummary(request):
 
     total = statusentries.count()
     counts = Statusentry.objects.filter(validafter=last_va).aggregate(
-            isauthority=CountCase('isauthority', when=True),
-            isbaddirectory=CountCase('isbaddirectory', when=True),
-            isbadexit=CountCase('isbadexit', when=True),
-            isexit=CountCase('isexit', when=True),
-            isfast=CountCase('isfast', when=True),
-            isguard=CountCase('isguard', when=True),
-            isnamed=CountCase('isnamed', when=True),
-            isstable=CountCase('isstable', when=True),
-            isrunning=CountCase('isrunning', when=True),
-            isvalid=CountCase('isvalid', when=True),
-            isv2dir=CountCase('isv2dir', when=True))
+             isauthority=CountCase('isauthority', when=True),
+             isbaddirectory=CountCase('isbaddirectory', when=True),
+             isbadexit=CountCase('isbadexit', when=True),
+             isexit=CountCase('isexit', when=True),
+             isfast=CountCase('isfast', when=True),
+             isguard=CountCase('isguard', when=True),
+             isnamed=CountCase('isnamed', when=True),
+             isstable=CountCase('isstable', when=True),
+             isrunning=CountCase('isrunning', when=True),
+             isvalid=CountCase('isvalid', when=True),
+             isv2dir=CountCase('isv2dir', when=True))
 
     keys = ['isauthority', 'isbaddirectory', 'isbadexit', 'isexit',
             'isfast', 'isguard', 'isnamed', 'isstable', 'isrunning',
@@ -348,3 +355,109 @@ def aggregatesummary(request):
         ys.append(counts[count])
 
     return draw_bar_graph(xs, ys, labels, params)
+
+
+@cache_page(60 * 5)
+def networktotalbw(request):
+    """
+    Return a graph representing the total bandwidth of the Tor network.
+
+    @rtype: HttpResponse
+    @return: A graph representing the total bandwidth of the
+        Tor Network.
+    """
+    TITLE = 'Tor Network Bandwidth History'
+    HEIGHT = 320
+    WIDTH = 480
+    TOP_MARGIN = 25
+    BOTTOM_MARGIN = 80
+    LEFT_MARGIN = 48
+    RIGHT_MARGIN = 5
+    X_FONT_SIZE = 8
+    Y_FONT_SIZE = 8
+    LABEL_FONT_SIZE = 8
+    LABEL_ROT = 'vertical'
+    FONT_WEIGHT = 'bold'
+
+    tbw_entries = list(TotalBandwidth.objects.all().order_by('-date')[:93])
+
+    data_points = len(tbw_entries)
+    xs = range(data_points)
+
+    ys_bwobserved = []
+    ys_bwburst = []
+    ys_bwadvertised = []
+    ys_bwavg = []
+
+    for i in range(data_points - 1, -1, -1):
+        tbw_today = tbw_entries[i]
+        ys_bwobserved.append(tbw_today.bwobserved / float(1024**2))
+        ys_bwburst.append(tbw_today.bwburst / float(1024**2))
+        ys_bwadvertised.append(tbw_today.bwadvertised / float(1024**2))
+        ys_bwavg.append(tbw_today.bwavg / float(1024**2))
+
+    times = []
+    start_date = tbw_entries[-1].date
+    for i in range(0, data_points, 7):
+        to_add_date = start_date + datetime.timedelta(days=(1 * i))
+        to_add_str = "%s-%0*d-%0*d" % (to_add_date.year, 2, to_add_date.month,
+                                   2, to_add_date.day)
+        times.append(to_add_str)
+
+    # Set margins according to specification.
+    matplotlib.rcParams['figure.subplot.left'] = \
+            float(LEFT_MARGIN) / WIDTH
+    matplotlib.rcParams['figure.subplot.right'] = \
+            float(WIDTH - RIGHT_MARGIN) / WIDTH
+    matplotlib.rcParams['figure.subplot.top'] = \
+            float(HEIGHT - TOP_MARGIN) / HEIGHT
+    matplotlib.rcParams['figure.subplot.bottom'] = \
+            float(BOTTOM_MARGIN) / HEIGHT
+
+    width_inches = float(WIDTH) / 80
+    height_inches = float(HEIGHT) / 80
+
+    fig = Figure(facecolor='white', edgecolor='black',
+                 figsize=(width_inches, height_inches), frameon=False)
+    ax = fig.add_subplot(111)
+    ax.grid(color='#888888')
+
+    # ax.plot(xs, ys_bwobserved, color='#66CD00',
+    #         xs, ys_bwburst, color='#68228B',
+    #         xs, ys_bwadvertised, color='#22688B',
+    #         xs, ys_bwavg, color='#CD6600')
+    ax.plot(xs, ys_bwobserved,
+            color='#66CD00', label='Observed Bandwidth')
+    ax.plot(xs, ys_bwadvertised,
+            color='#68228B', label='Advertised Bandwidth')
+
+    ax.fill_between(xs, 0, ys_bwobserved, color='#DAC8E2')
+    ax.fill_between(xs, ys_bwobserved, ys_bwadvertised, color='#D9F3C0')
+
+    fontparam = matplotlib.font_manager.FontProperties(
+                size=8, weight='bold')
+    ax.legend(prop=fontparam, loc='upper left')
+
+    #fig.legend(ax, ('Observed Bandwidth'))#, 'Burst Bandwidth',
+    #            #'Advertised Bandwidth', 'Average Bandwidth'))
+
+    ax.set_xlabel("Date (GMT)", fontsize='8', fontweight=FONT_WEIGHT)
+    ax.set_xticks(range(0, data_points, 7))
+    ax.set_xticklabels(times, fontsize=X_FONT_SIZE,
+                       fontweight=FONT_WEIGHT, rotation=LABEL_ROT)
+
+    ax.set_ylabel("Bandwidth (MiB)",
+                  fontsize='8', fontweight=FONT_WEIGHT)
+    ax.set_ylim(ymin=0, ymax=2000)
+    ax.set_yticks(range(0, 2501, 250))
+
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label1.set_fontsize(Y_FONT_SIZE)
+        tick.label1.set_fontweight(FONT_WEIGHT)
+
+    ax.set_title(TITLE, fontsize='12', fontweight=FONT_WEIGHT)
+
+    canvas = FigureCanvas(fig)
+    response = HttpResponse(content_type='image/png')
+    canvas.print_png(response, ha="center")
+    return response

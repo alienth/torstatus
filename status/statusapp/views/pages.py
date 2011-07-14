@@ -25,7 +25,9 @@ def splash(request):
     """
     The splash page for the TorStatus website.
     """
-    return render_to_response("base.html")
+    client_address = request.META['REMOTE_ADDR']
+    template_values = {'client_address': client_address}
+    return render_to_response("splash.html", template_values)
 
 
 # INIT Variables ------------------------------------------------------
@@ -173,9 +175,9 @@ def unpaged(request, sort_filter):
 
     # GENERATE HTML: TABLE ROWS ---------------------------------------
     # -----------------------------------------------------------------
-    html_table_rows = generate_table_rows(
-                    statusentries, current_columns, html_current_columns) 
-   
+    html_table_rows = generate_table_rows(statusentries, current_columns,
+                                html_current_columns)
+
     # GENERATE HTML: ADVANCE QUERY ------------------------------------
     # -----------------------------------------------------------------
     html_query_list_options = generate_query_list_options(query_options)

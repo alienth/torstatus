@@ -8,14 +8,74 @@
 
 {% block headerTitle %} TorStatus {% endblock %}
 
-{% block extraHeader %}
-<table cellspacing="2" cellpadding="2" class="displayStatus">
+{% block mainPage %}
+{% load index_filters %}
+<table class="bottomTables1">
 <tr>
-	<td id="mainLinks">
-		<a class="link" href="https://check.torproject.org/"> Check if you are using Tor (via TorCheck)</a>
-		<br />
-        Your IP Address is: {{ client_address }}
-	</td>
+    <td>
+        <table id="sortRouterListing">
+        <tr>
+            <td id="sortRouterListing" colspan="2"> Search </td>
+        </tr>
+        <tr>
+            <td>
+            <select id="sortRouterListing" name="criteria">
+            <option value ="nickname" {% if queryOptions and queryOptions|key:'criteria' == "nickname" %}
+                                                            SELECTED {% endif %}>Router Name</option>
+            <option value ="fingerprint" {% if not queryOptions or queryOptions|key:'criteria' == "fingerprint" %}
+                                                            SELECTED {% endif %}>Fingerprint</option>
+            <option value ="geoip" {% if queryOptions and queryOptions|key:'criteria' == "geoip" %}
+                                                            SELECTED {% endif %}>Country Code</option>
+            <option value ="bandwidthobserved" {% if queryOptions and queryOptions|key:'criteria' == "bandwidthobserved" %}
+                                                            SELECTED {% endif %}>Bandwidth (kb/s)</option>
+            <option value ="uptime" {% if queryOptions and queryOptions|key:'criteria' == "uptime" %}
+                                                            SELECTED {% endif %}>Uptime (days)</option>
+            <option value ="published" {% if queryOptions and queryOptions|key:'criteria' == "published" %}
+                                                            SELECTED {% endif %}>Last Descriptor Published</option>
+            <option value ="address" {% if queryOptions and queryOptions|key:'criteria' == "address" %}
+                                                            SELECTED {% endif %}>IP Address</option>
+            <option value ="hostname" {% if queryOptions and queryOptions|key:'criteria' == "hostname" %}
+                                                            SELECTED {% endif %}>Hostname</option>
+            <option value ="orport" {% if queryOptions and queryOptions|key:'criteria' == "orport" %}
+                                                            SELECTED {% endif %}>Onion Router Port</option>
+            <option value ="dirport" {% if queryOptions and queryOptions|key:'criteria' == "dirport" %}
+                                                            SELECTED {% endif %}>Directory Sever Port</option>
+            <option value ="platform" {% if queryOptions and queryOptions|key:'criteria' == "platform" %}
+                                                            SELECTED {% endif %}>Platform</option>
+            </select>
+            </td>
+            <td>
+            <select id="sortRouterListing" name="boolLogic">
+            <option value ="equals" {% if not queryOptions or queryOptions|key:'boolLogic' == "equals" %}
+                                                            SELECTED {% endif %}>Equals</option>
+            <option value ="contains" {% if queryOptions and queryOptions|key:'boolLogic' == "contains" %}
+                                                            SELECTED {% endif %}>Contains</option>
+            <option value ="less" {% if queryOptions and queryOptions|key:'boolLogic' == "less" %}
+                                                            SELECTED {% endif %}>Is Less Than</option>
+            <option value ="greater" {% if queryOptions and queryOptions|key:'boolLogic' == "greater" %}
+                                                            SELECTED {% endif %}>Is Greater Than</option>
+            </select>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+            <input id="sortRouterListing" type="text" name="searchValue" {% if queryOptions and queryOptions|key:'searchValue' %}
+                                                                    value="{{queryOptions|key:'searchValue'}}"
+                                                                    {% endif %}/>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" align="center">
+        <input id="sortRouterListing_Button" type="submit" value="Apply Options" />
+            </td>
+        </tr>
+        </table>
+    </td>
+</tr>
+<tr>
+    <td>
+        <img src="/network-statistic-graphs/networktotalbw.png" alt="Network Total Bandwidth" title="Network Total Bandwidth" border="1px">
+    </td>
 </tr>
 </table>
-
+{% endblock %}

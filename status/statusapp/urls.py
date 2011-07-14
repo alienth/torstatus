@@ -17,7 +17,7 @@ urlpatterns = patterns('',
     # Unpaged Index and related pages
     (r'^unpaged/(?P<sort_filter>\w*)$', 'statusapp.views.pages.unpaged'),
     (r'^unpaged/column-preferences/$', 'statusapp.views.pages.columnpreferences'),
-    (r'^unpaged/exit-node-query/$', 'statusapp.views.pages.exitnodequery'),
+    (r'^exit-node-query/$', 'statusapp.views.pages.exitnodequery'),
 
     # Media Files
     (r'^flags/(?P<country_code>\w\w).gif$','statusapp.views.displayFlag'),
@@ -52,6 +52,8 @@ urlpatterns = patterns('',
         'statusapp.views.graphs.byobservedbandwidth'),
     (r'^network-statistic-graphs/byplatform.png$',
         'statusapp.views.graphs.byplatform'),
+    (r'^network-statistic-graphs/networktotalbw.png$',
+        'statusapp.views.graphs.networktotalbw'),
 
     # CSV Files
     (r'^Tor-Query-Export.csv$', 'statusapp.views.csvs.current_results_csv'),
