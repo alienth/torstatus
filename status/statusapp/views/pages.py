@@ -34,6 +34,55 @@ NOT_MOVABLE_COLUMNS = ["Named", "Exit", "Authority", "Fast", "Guard",
                        "Stable", "Running", "Valid", "V2Dir",
                        "Platform",]
 
+def index(request):
+    """
+    """
+    
+    template_values = {}
+
+    return render_to_response('index.html', template_values)
+
+def advanced_search(request):
+    """
+    Generates the form where the user can input more
+    detailed query parameters
+    """
+
+    last_va = Statusentry.objects.aggregate(
+              last=Max('validafter'))['last']
+
+    statusentries = Statusentry.objects.filter(
+                    validafter=last_va).extra(
+                    select={'geoip':
+                    'geoip_lookup(statusentry.address)'})
+
+    template_values = {'test_access': statusentries[0].address}
+
+
+    return render_to_response('advanced_search.html', template_values)
+
+def search_results(request):
+    """
+    Generates a page showing the results of the query.
+    """
+
+    last_va = Statusentry.objects.aggregate(
+              last=Max('validafter'))['last']
+
+    statusentries = Statusentry.objects.filter(
+                    validafter=last_va).extra(
+                    select={'geoip':
+                    'geoip_lookup(statusentry.address)'})
+
+    template_values = {'test_access': statusentries[0].address}
+
+
+    return render_to_response('advanced_search.html', template_values)
+
+
+
+
+
 @cache_page(60 * 15, key_prefix="index")
 def index(request, sort_filter):
     """

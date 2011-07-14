@@ -8,6 +8,16 @@ from django.conf import settings
 from django.views.decorators.cache import cache_page
 
 urlpatterns = patterns('',
+
+    #Search Splash
+    (r'^$', 'newstatusapp.views.index'),
+    (r'^advanced_search$', 'newstatusapp.views.advanced_search'),
+    (r'^search_results$', 'newstatusapp.views.search_results'),
+
+    #(r'^Tortus.png$', 'statusapp.views.tortus'),
+    (r'^(?P<path>.*)$', 'django.views.static.serve',
+            {'document_root': settings.MEDIA_ROOT}),
+
     # Main pages
     (r'^(?P<sort_filter>\w*)$', 'statusapp.views.pages.index'),
     (r'^column-preferences/$', 'statusapp.views.pages.columnpreferences'),
