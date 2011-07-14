@@ -15,15 +15,15 @@
     <td>
         <table id="sortRouterListing">
         <tr>
-            <td id="sortRouterListing" colspan="2"> Advanced Search </td>
+            <td id="sortRouterListing" colspan="2"> Search </td>
         </tr>
         <tr>
             <td>
             <select id="sortRouterListing" name="criteria">
-            <option value ="fingerprint" {% if not queryOptions or queryOptions|key:'criteria' == "fingerprint" %}
-                                                            SELECTED {% endif %}>Fingerprint</option>
             <option value ="nickname" {% if queryOptions and queryOptions|key:'criteria' == "nickname" %}
                                                             SELECTED {% endif %}>Router Name</option>
+            <option value ="fingerprint" {% if not queryOptions or queryOptions|key:'criteria' == "fingerprint" %}
+                                                            SELECTED {% endif %}>Fingerprint</option>
             <option value ="geoip" {% if queryOptions and queryOptions|key:'criteria' == "geoip" %}
                                                             SELECTED {% endif %}>Country Code</option>
             <option value ="bandwidthobserved" {% if queryOptions and queryOptions|key:'criteria' == "bandwidthobserved" %}
@@ -70,6 +70,11 @@
             </td>
         </tr>
         </table>
+    </td>
+</tr>
+<tr>
+    <td>
+        <img src="/network-statistic-graphs/networktotalbw.png" alt="Network Total Bandwidth" title="Network Total Bandwidth" border="1px">
     </td>
 </tr>
 </table>
