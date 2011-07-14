@@ -13,11 +13,14 @@ from django.http import HttpResponse
 
 # Matplotlib-specific import statements -------------------------------
 import matplotlib
+from pylab import legend
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
+from matplotlib.ticker import MaxNLocator
 
 # TorStatus specific import statements --------------------------------
-from statusapp.models import Statusentry, Bwhist, TotalBandwidth
+from statusapp.models import Statusentry, Bwhist, TotalBandwidth, \
+        NetworkSize
 from custom.aggregate import CountCase
 from helpers import draw_bar_graph, draw_line_graph
 
@@ -142,6 +145,7 @@ def exitbycountrycode(request):
     ys = [country_map[key] for key in keys]
 
     return draw_bar_graph(xs, ys, keys, params)
+
 
 @cache_page(60 * 5)
 def bytimerunning(request):
@@ -366,17 +370,17 @@ def networktotalbw(request):
     @return: A graph representing the total bandwidth of the
         Tor Network.
     """
-    TITLE = 'Tor Network Bandwidth History'
-    HEIGHT = 320
+    TITLE = 'Tor Network Status'
+    HEIGHT = 200
     WIDTH = 480
     TOP_MARGIN = 25
-    BOTTOM_MARGIN = 80
+    BOTTOM_MARGIN = 28
     LEFT_MARGIN = 48
-    RIGHT_MARGIN = 5
+    RIGHT_MARGIN = 48
     X_FONT_SIZE = 8
     Y_FONT_SIZE = 8
     LABEL_FONT_SIZE = 8
-    LABEL_ROT = 'vertical'
+    LABEL_ROT = 'horizontal'
     FONT_WEIGHT = 'bold'
 
     tbw_entries = list(TotalBandwidth.objects.all().order_by('-date')[:93])
@@ -400,8 +404,8 @@ def networktotalbw(request):
     start_date = tbw_entries[-1].date
     for i in range(0, data_points, 7):
         to_add_date = start_date + datetime.timedelta(days=(1 * i))
-        to_add_str = "%s-%0*d-%0*d" % (to_add_date.year, 2, to_add_date.month,
-                                   2, to_add_date.day)
+        to_add_str = "%s-%0*d" % (to_add_date.month,
+                                  2, to_add_date.day)
         times.append(to_add_str)
 
     # Set margins according to specification.
@@ -419,44 +423,77 @@ def networktotalbw(request):
 
     fig = Figure(facecolor='white', edgecolor='black',
                  figsize=(width_inches, height_inches), frameon=False)
-    ax = fig.add_subplot(111)
-    ax.grid(color='#888888')
+
+    # Draw bandwidth observed line
+    ax1 = fig.add_subplot(111)
+    #ax1.grid(color='#888888')
 
     # ax.plot(xs, ys_bwobserved, color='#66CD00',
     #         xs, ys_bwburst, color='#68228B',
     #         xs, ys_bwadvertised, color='#22688B',
     #         xs, ys_bwavg, color='#CD6600')
-    ax.plot(xs, ys_bwobserved,
-            color='#66CD00', label='Observed Bandwidth')
-    ax.plot(xs, ys_bwadvertised,
-            color='#68228B', label='Advertised Bandwidth')
+    observed_bw = ax1.plot(xs, ys_bwobserved, color='#68228B',
+                           label='Observed Bandwidth')
 
-    ax.fill_between(xs, 0, ys_bwobserved, color='#DAC8E2')
-    ax.fill_between(xs, ys_bwobserved, ys_bwadvertised, color='#D9F3C0')
+    ax1.fill_between(xs, 0, ys_bwobserved, color='#DAC8E2')
 
-    fontparam = matplotlib.font_manager.FontProperties(
-                size=8, weight='bold')
-    ax.legend(prop=fontparam, loc='upper left')
+    ax1.set_xlabel("Date (GMT)", fontsize='8', fontweight=FONT_WEIGHT)
+    ax1.set_xticks(range(0, data_points, 7))
+    ax1.set_xticklabels(times, fontsize=X_FONT_SIZE,
+                        fontweight=FONT_WEIGHT, rotation=LABEL_ROT)
 
-    #fig.legend(ax, ('Observed Bandwidth'))#, 'Burst Bandwidth',
-    #            #'Advertised Bandwidth', 'Average Bandwidth'))
-
-    ax.set_xlabel("Date (GMT)", fontsize='8', fontweight=FONT_WEIGHT)
-    ax.set_xticks(range(0, data_points, 7))
-    ax.set_xticklabels(times, fontsize=X_FONT_SIZE,
-                       fontweight=FONT_WEIGHT, rotation=LABEL_ROT)
-
-    ax.set_ylabel("Bandwidth (MiB)",
+    ax1.set_ylabel("Bandwidth (MiB)",
                   fontsize='8', fontweight=FONT_WEIGHT)
-    ax.set_ylim(ymin=0, ymax=2000)
-    ax.set_yticks(range(0, 2501, 250))
+    #ax1.set_yticks(range(0, 3001, 250))
 
-    for tick in ax.yaxis.get_major_ticks():
+    for tick in ax1.yaxis.get_major_ticks():
         tick.label1.set_fontsize(Y_FONT_SIZE)
         tick.label1.set_fontweight(FONT_WEIGHT)
 
-    ax.set_title(TITLE, fontsize='12', fontweight=FONT_WEIGHT)
+    for tick in ax1.get_yticklabels():
+        tick.set_color('#68228B')
 
+    # Draw average relays running line
+    # Assume that the dates in net_size are the same as in tbw_entries
+    net_size = list(NetworkSize.objects.all().order_by('-date')[:93])
+
+    ys = []
+    for i in range(data_points - 1, -1, -1):
+        ys.append(net_size[i].avg_running)
+
+    ax2 = ax1.twinx()
+    active_relays = ax2.plot(xs, ys, color='#66CD00',
+                             label='Average Active Relays')
+
+    ax2.set_xticks(range(0, data_points, 7))
+    ax2.set_xticklabels(times, fontsize=X_FONT_SIZE,
+                        fontweight=FONT_WEIGHT, rotation=LABEL_ROT)
+
+    ax2.set_ylabel('Relays', fontsize='8', fontweight=FONT_WEIGHT)
+
+    for tick in ax2.yaxis.get_major_ticks():
+        tick.label2.set_fontsize(Y_FONT_SIZE)
+        tick.label2.set_fontweight(FONT_WEIGHT)
+
+    for tick in ax2.get_yticklabels():
+        tick.set_color('#66CD00')
+
+    # Label entire graph
+    ax1.set_title(TITLE, fontsize='12', fontweight=FONT_WEIGHT)
+    fontparam = matplotlib.font_manager.FontProperties(
+                size=8, weight='bold')
+
+    # TODO: put both labels in one legend. How?
+    ax1.legend(prop=fontparam, loc='lower left')
+    ax2.legend(prop=fontparam, loc='lower right')
+
+    # TODO: Make the grid work for both lines.
+    # Set tick marks such that a grid applies to both lines.
+    ax1.set_ylim(ymin=0)
+    ax2.set_ylim(ymin=max((0, min(ys))))
+    ax1.yaxis.set_major_locator(MaxNLocator(8))
+    ax2.yaxis.set_major_locator(MaxNLocator(8))
+    #ax1.grid(color='#888888')
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
     canvas.print_png(response, ha="center")
