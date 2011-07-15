@@ -11,6 +11,7 @@
 {% block mainPage %}
 
 {% load details_filters %}
+{% load global_filters %}
 {% spaceless %}
 <table cellspacing="2" cellpadding="2" class="displayStatus">
 <tr>
@@ -73,8 +74,8 @@
     <td id="detailsInfo">{{ descriptor.dirport }}</td>
 </tr>
 <tr>
-	<td id="detailsLabel">Country Code:</td>
-    <td id="detailsInfo">{{ statusentry.country }}</td>
+	<td id="detailsLabel">Country:</td>
+    <td id="detailsInfo">{{ statusentry.country|code_to_country }}</td>
 </tr>
 <tr>
     <td id="detailsLabel">Latitude, Longitude:</td>

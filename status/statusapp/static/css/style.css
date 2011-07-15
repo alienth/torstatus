@@ -329,7 +329,6 @@ div.footer {
     text-align: center;
     padding: 5px 0 0 0;
     margin: 25px 0 0 0;
-    border-top: 1px solid rgb(100,100,100);
     color: rgb(100, 100, 100);
 }
 
@@ -337,6 +336,25 @@ p#trademark {
     text-align: center;
     font-size: 0.750em;
     margin: 0 0 1px 0;
+}
+
+* {
+    margin: 0;
+}
+
+html, body {
+    height: 100%;
+}
+
+.wrapper {
+    min-height: 100%
+    height: auto;
+    height: 100%;
+    margin: 0 auto -4em;
+}
+
+.footer, .push {
+    height: 4em;
 }
 
 table.bottomTables1 {
@@ -349,7 +367,7 @@ table.bottomTables1 {
 }
 
 table#sortRouterListing {
-    font-size: 18px;
+    font-size: 30px;
     width:auto;
     border-spacing: 3px;
     margin-left: auto;
