@@ -47,6 +47,7 @@ class BigIntegerArrayField(models.Field):
 
 # MODELS --------------------------------------------------------------
 # ---------------------------------------------------------------------
+# tordir.public -------------------------------------------------------
 class Descriptor(models.Model):
     """
     Model for descriptors published by routers.
@@ -265,7 +266,7 @@ class Statusentry(models.Model):
     @type isguard: BooleanField (C{boolean})
     @ivar isguard: True if the relay is a guard server, False otherwise.
     @type ishsdir: BooleanField (C{boolean})
-    @ivar ishsdir: True if the relay is a high-speed directory,
+    @ivar ishsdir: True if the relay is a hidden service directory,
         False otherwise.
     @type isnamed: BooleanField (C{boolean})
     @ivar isnamed: True if the relay's name has been validated,
@@ -1125,3 +1126,171 @@ class GettorStats(models.Model):
 
     def __unicode__(self):
         return str(self.date) + ": " + self.bundle
+
+# tordir.cache --------------------------------------------------------
+class ActiveDescriptor(models.Model):
+    """
+    Model for the most recent descriptors for each relay published in
+    the last 24 hours.
+    """
+    descriptor = models.CharField(max_length=40, primary_key=True)
+    nickname = models.CharField(max_length=19)
+    fingerprint = models.CharField(max_length=40)
+    published = models.DateTimeField()
+    bandwidthavg = models.BigIntegerField()
+    bandwidthburst = models.BigIntegerField()
+    bandwidthobserved = models.BigIntegerField()
+    platform = models.CharField(max_length=256)
+    uptime = models.BigIntegerField()
+    rawdesc = models.TextField()
+
+    class Meta:
+        verbose_name = "active descriptor"
+        db_table = 'cache\".\"active_descriptor'
+
+    def __unicode__(self):
+        return str(self.descriptor)
+
+
+class ActiveRelay(models.Model):
+    """
+    Model for the relays in the two most recent consensuses, with all
+    relevant and available information.
+
+    @type validafter: DateTimeField (C{datetime})
+    @ivar validafter: The publication time of the last consensus
+        that the relay appeared in.
+    @type nickname: CharField (C{string})
+    @ivar nickname: The nickname of the relay.
+    @type fingerprint: CharField (C{string})
+    @ivar fingerprint: The unique fingerprint hash of the relay.
+    @type address: CharField (C{string})
+    @ivar address: The IP address of the relay.
+    @type orport: IntegerField (C{int})
+    @ivar orport: The ORPort of the relay.
+    @type dirport: IntegerField (C{int})
+    @ivar dirport: The DirPort of the relay.
+    @type isauthority: BooleanField (C{bool})
+    @ivar isauthority: True if the relay is an authority,
+        False otherwise.
+    @type isbadexit: BooleanField (C{bool})
+    @ivar isbadexit: True if the relay is a bad exit,
+        False otherwise.
+    @type isbaddirectory: BooleanField (C{bool})
+    @ivar isbaddirectory: True if the relay is a bad directory,
+        False otherwise.
+    @type isexit: BooleanField (C{bool})
+    @ivar isexit: True if the relay is an exit relay,
+        False otherwise.
+    @type isfast: BooleanField (C{bool})
+    @ivar isfast: True if the relay is considered \'fast\',
+        False otherwise.
+    @type isguard: BooleanField (C{bool})
+    @ivar isguard: True if the relay is a guard,
+        False otherwise.
+    @type ishsdir: BooleanField (C{bool})
+    @ivar ishsdir: True if the relay is a hidden service directory,
+        False otherwise.
+    @type isnamed: BooleanField (C{bool})
+    @ivar isnamed: True if the relay is named,
+        False otherwise.
+    @type isstable: BooleanField (C{bool})
+    @ivar isstable: True if the relay is stable,
+        False otherwise.
+    @type isrunning: BooleanField (C{bool})
+    @ivar isrunning: True if the relay is running,
+        False otherwise.
+    @type isunnamed: BooleanField (C{bool})
+    @ivar isunnamed: True if the relay is unnamed,
+        False otherwise.
+    @type isvalid: BooleanField (C{bool})
+    @ivar isvalid: True if the relay is valid,
+        False otherwise.
+    @type isv2dir: BooleanField (C{bool})
+    @ivar isv2dir: True if the relay is a version 2 directory,
+        False otherwise.
+    @type isv3dir: BooleanField (C{bool})
+    @ivar isv3dir: True if the relay is a version 3 directory,
+        False otherwise.
+    @type descriptor: CharField (C{string})
+    @ivar descriptor: The unique descriptor hash of the relay.
+    @type published: DateTimeField (C{datetime})
+    @ivar published: The time that the descriptor associated with
+        the relay was published.
+    @type bandwidthavg: BigIntegerField (C{long})
+    @ivar bandwidthavg: The average bandwidth of the relay, in Bps.
+    @type bandwidthburst: BigIntegerField (C{long})
+    @ivar bandwidthburst: The burst bandwidth of the relay, in Bps.
+    @type bandwidthobserved: BigIntegerField (C{long})
+    @ivar bandwidthobserved: The observed bandwidth of the relay, in
+        Bps.
+    @type bandwidthkbps: BigIntegerField (C{long})
+    @ivar bandwidthkbps: The observed bandwidth of the relay, in KBps.
+    @type uptime: BigIntegerField (C{long})
+    @ivar uptime: The uptime of the relay in seconds.
+    @type uptimedays: BigIntegerField (C{long})
+    @ivar uptimedays: The uptime of the relay in days.
+    @type platform: CharField (C{string})
+    @ivar platform: The platform of the relay.
+    @type contact: CharField (C{string})
+    @ivar contact: The contact information of the operator of the
+        relay.
+    @type onionkey: CharField (C{string})
+    @ivar onionkey: The unique onionkey of the relay.
+    @type signingkey: CharField (C{string})
+    @ivar signingkey: The unique signing key of the relay.
+    @type exitpolicy: TextField (C{string})
+    @ivar exitpolicy: The exitpolicy information of the relay.
+    @type family: TextField (C{string})
+    @ivar family: The family that the relay belongs to.
+    @type country: CharField (C{string})
+    @ivar country: The country that the relay is located in.
+    @type latitude: DecimalField (C{float})
+    @ivar latitude: The latitude at which the relay is located.
+    @type longitude: DecimalField (C{float})
+    @ivar longitude: The longitude at which the relay is located.
+    """
+    validafter = models.DateTimeField()
+    nickname = models.CharField(max_length=19)
+    fingerprint = models.CharField(max_length=40, primary_key=True)
+    address = models.CharField(max_length=15) # Make to ipaddr field
+    orport = models.IntegerField()
+    dirport = models.IntegerField()
+    isauthority = models.BooleanField()
+    isbadexit = models.BooleanField()
+    isbaddirectory = models.BooleanField()
+    isexit = models.BooleanField()
+    isfast = models.BooleanField()
+    isguard = models.BooleanField()
+    ishsdir = models.BooleanField()
+    isnamed = models.BooleanField()
+    isstable = models.BooleanField()
+    isrunning = models.BooleanField()
+    isunnamed = models.BooleanField()
+    isvalid = models.BooleanField()
+    isv2dir = models.BooleanField()
+    isv3dir = models.BooleanField()
+    descriptor = models.CharField(max_length=40, blank=True)
+    published = models.DateTimeField(blank=True)
+    bandwidthavg = models.BigIntegerField(blank=True)
+    bandwidthburst = models.BigIntegerField(blank=True)
+    bandwidthobserved = models.BigIntegerField(blank=True)
+    bandwidthkbps = models.BigIntegerField(blank=True)
+    uptime = models.BigIntegerField(blank=True)
+    uptimedays = models.BigIntegerField(blank=True)
+    platform = models.CharField(max_length=256, blank=True)
+    contact = models.CharField(max_length=96, blank=True)
+    onionkey = models.CharField(max_length=188, blank=True)
+    signingkey = models.CharField(max_length=188, blank=True)
+    exitpolicy = models.TextField(blank=True)
+    family = models.TextField(blank=True)
+    country = models.CharField(max_length=2, blank=True)
+    latitude = models.DecimalField(max_digits=7, decimal_places=4, blank=True)
+    longitude = models.DecimalField(max_digits=7, decimal_places=4, blank=True)
+
+    class Meta:
+        verbose_name = 'active relay'
+        db_table = 'cache\".\"active_relay'
+
+    def __unicode__(self):
+        return ': '.join((str(self.nickname), str(self.fingerprint)))
