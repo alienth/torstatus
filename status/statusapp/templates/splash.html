@@ -13,7 +13,7 @@
     <table class="header">
         <tr>
             <td id="TorBannerPicture">
-            <img src="/static/img/splash-banner.png" alt="TorStatus" title="Network Total Bandwidth">
+            <img src="/static/img/logo.png" alt="TorStatus" title="TorStatus">
             </td>
         <td id="mainLinks">
         <a class="link" href="/index">List of All Routers</a> |
@@ -23,16 +23,7 @@
 		<a class="link" href="/network-statistic-graphs">Network Statistics</a>
     </td>
 </tr>
-<tr>
-	<td>
-		<br />
-	</td>
-</tr>
 </table>
-
-
-
-
 
 {% endblock %}
 
@@ -52,14 +43,14 @@
             <td colspan="2">
             <input id="sortRouterListing" type="text" name="searchValue" size="40" {% if queryOptions and queryOptions|key:'searchValue' %}
                                                                     value="{{queryOptions|key:'searchValue'}}"
-                                                                    {% endif %}/>
+                                                                    {% endif %}>
             </td>
         </tr>
     </table>
         <table id="sortRouterListing">
         <tr>
             <td colspan="2" align="center">
-        <input id="sortRouterListing_Button" type="submit" value="Search" size="20" />
+        <input id="sortRouterListing_Button" type="submit" value="Search" size="20">
             </td>
         </tr>
     </form>
