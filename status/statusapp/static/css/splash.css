@@ -322,18 +322,33 @@ table.relayTable {
     border: 1px solid black;
 }
 
-div.footer {
-    text-align: center;
-    padding: 5px 0 0 0;
-    margin: 25px 0 0 0;
-    border-top: 1px solid rgb(100,100,100);
-    color: rgb(100, 100, 100);
+* {
+    margin: 0;
+}
+
+html, body {
+    height: 100%;
+}
+
+.wrapper {
+    min-height: 100%
+    height: auto;
+    height: 100%;
+    margin: 0 auto -2em;
 }
 
 p#trademark {
     text-align: center;
     font-size: 0.750em;
     margin: 0 0 1px 0;
+}
+
+.footer, .push {
+    height: 2em;
+    text-align: center;
+    padding: 5px 0 0 0;
+    margin: 25px 0 0 0;
+    color: rgb(100, 100, 100);
 }
 
 table.bottomTables1 {
