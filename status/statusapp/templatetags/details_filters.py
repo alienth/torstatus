@@ -61,7 +61,6 @@ def format_fing(fingerprint):
 
 @register.filter
 def format_family(family_list):
-    #TODO: This method almost certainly belongs in statusapp.views.
     """
     Get the family of a relay from its raw descriptor.
 

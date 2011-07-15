@@ -17,14 +17,14 @@ from matplotlib.figure import Figure
 from statusapp.models import Bwhist
 
 # INIT Variables ------------------------------------------------------
-COLUMN_VALUE_NAME = {'Country Code': 'geoip', 
-                     'Router Name': 'nickname', 
-                     'Bandwidth': 'bandwidthobserved', 
+COLUMN_VALUE_NAME = {'Country Code': 'geoip',
+                     'Router Name': 'nickname',
+                     'Bandwidth': 'bandwidthobserved',
                      'Uptime': 'uptime',
-                     'IP': 'address', 
-                     'Hostname': 'hostname', 
+                     'IP': 'address',
+                     'Hostname': 'hostname',
                      'Icons': 'icons',
-                     'ORPort': 'orport', 
+                     'ORPort': 'orport',
                      'DirPort': 'dirport',
                      'BadExit': 'isbadexit',
                      'Named': 'isnamed',
@@ -42,10 +42,10 @@ COLUMN_VALUE_NAME = {'Country Code': 'geoip',
                      'Contact': 'contact',
                      'BadDir': 'isbaddirectory',
                     }
-    
+
 NOT_COLUMNS = ['Running', 'Hostname', 'Named', 'Valid',]
-    
-ICONS = ['Fast', 'Exit', 'V2Dir', 'Guard', 'Stable', 'Authority', 
+
+ICONS = ['Fast', 'Exit', 'V2Dir', 'Guard', 'Stable', 'Authority',
          'Platform',]
 
 
@@ -54,6 +54,12 @@ def filter_statusentries(statusentries, query_options):
     Helper function that gets a QuerySet of status entries and a
     dictionary of search query options and filteres the QuerySet
     based on this dictionary.
+
+    @type statusentries: C{QuerySet}
+    @param statusentries: A QuerySet of the statusentries.
+    @type query_options: C{dict}
+    @param query_options: A list of the columns that will be displayed on
+                        this session.
 
     @see: index
     @rtype: QuerySet
@@ -69,7 +75,7 @@ def filter_statusentries(statusentries, query_options):
     valid_options = filter(lambda k: query_options[k] != '' \
                             and k in options, query_options)
     filterby = {}
-    for opt in valid_options: 
+    for opt in valid_options:
         filterby[opt] = 1 if query_options[opt] == 'yes' else 0
 
     if 'searchValue' in query_options and \
@@ -113,13 +119,14 @@ def filter_statusentries(statusentries, query_options):
     statusentries = statusentries.filter(**filterby)
 
     options = ['nickname', 'fingerprint', 'geoip', 'bandwidthobserved',
-               'uptime', 'published', 'hostname', 'address', 'orport', 
-               'dirport', 'platform', 'isauthority', 
+               'uptime', 'published', 'hostname', 'address', 'orport',
+               'dirport', 'platform', 'isauthority',
                'isbaddirectory', 'isbadexit', 'isexit',
-               'isfast', 'isguard', 'isnamed', 'isstable', 'isrunning', 
+               'isfast', 'isguard', 'isnamed', 'isstable', 'isrunning',
                'isvalid', 'isv2dir']
 
-    descriptorlist_options = ['platform', 'uptime', 'contact', 'bandwidthobserved']
+    descriptorlist_options = ['platform', 'uptime', 'contact',
+                            'bandwidthobserved']
     if 'sortListings' in query_options: 
         selected_option = query_options['sortListings']
     else:
@@ -139,6 +146,18 @@ def button_choice(request, button, field, current_columns,
     Helper function that manages the changes in the L{columnpreferences}
     arrays/lists.
 
+    @type button: C{string}
+    @param button: A string that indicates which button was clicked.
+    @type field: C{string}
+    @param field: A string that indicates from which preferences column
+        was the corresponding value selected
+        (ADD column, REMOVE column).
+    @type current_columns: C{list}
+    @param current_columns: A list of the columns that will be
+        displayed on this session.
+    @type available_columns: C{list}
+    @param available_columns: A list of the columns that can be added
+        to the current ones.
     @rtype: list(list(int), list(int), string)
     @return: column_lists
     """
@@ -415,17 +434,23 @@ def get_if_exists(request, title):
 
 def sorting_link(sort_order, column_name):
     """
-    Returns the proper URL after checking how the sorting is currently set up.
-    
+    Returns the proper URL after checking how the sorting is currently
+    set up.
+
+    @type sort_order: C{string}
+    @param sort_order: A string - the type of order
+        (ascending/descending).
+    @type column_name: C{string}
+    @param column_name: A string - the name of the column that is
+                    currently ordering by.
     @rtype: C{string}
     @return The proper link for sorting the tables.
     """
-    
     if sort_order == "ascending":
         return "/" + column_name + "_descending"
     return "/" + column_name + "_ascending"
-    
- 
+
+
 def kilobytes_ps(bytes_ps):
     """
     Convert a bandwidth value in bytes to a bandwidth value in kilobytes
@@ -441,7 +466,7 @@ def kilobytes_ps(bytes_ps):
         return 0
     else:
         return int(bytes_ps) / 1024
-        
+
 
 def days(seconds):
     """
@@ -458,7 +483,7 @@ def days(seconds):
         return 0
     else:
         return int(seconds) / 86400
-        
+
 
 def contact(rawdesc):
     """
@@ -477,7 +502,7 @@ def contact(rawdesc):
             contact_raw = line[8:]
             return contact_raw.decode('raw_unicode_escape')
     return "No contact information given"
-    
+
 
 def country(location):
     """
@@ -524,11 +549,13 @@ def longitude(geoip):
 
 def get_platform(platform):
     """
-    Method that searches in the platform string for the corresponding 
+    Method that searches in the platform string for the corresponding
     platform name.
-    
+
+    @type platform: C{string}
+    @param platform: A string, raw version of the platform of a relay.
     @rtype: C{string}
-    @return: The platform name of the relay.
+    @return: The cleaned version of the platform name.
     """
     # Dictionary of {NameInPlatform: NameOfTheIcon}
     supported_platforms = {'Linux': 'Linux',
@@ -540,7 +567,7 @@ def get_platform(platform):
                            'NetBSD': 'NetBSD',
                            'OpenBSD': 'OpenBSD',
                            'SunOS': 'SunOS',
-                           'IRIX': 'IRIX', 
+                           'IRIX': 'IRIX',
                            'Cygwin': 'Cygwin',
                            'Dragon': 'Dragon',
                           }
@@ -551,19 +578,29 @@ def get_platform(platform):
 
 
 def generate_table_headers(current_columns, order_column_name, sort_order):
-    """ 
-    Generates a dictionary of {header_name: html_string_code}. 
-    
+    """
+    Generates a dictionary of {header_name: html_string_code}.
+
+    @type current_columns: C{list}
+    @param current_columns: A list of the columns that will be
+        displayed on this session.
+    @type order_column_name: C{string}
+    @param order_column_name: A string - the name of the column that is
+        currently ordering by.
+    @type sort_order: C{string}
+    @param sort_order: A string - the type of order
+        (ascending/descending).
     @rtype: C{dict}, C{list}
     @return: Dictionary that contains the header name and the HTML code.
-        List of the current columns that will be displayed.
+    @rtype: C{list}
+    @return: List of the current columns that will be displayed.
     """
-    
+
     # NOTE: The html_current_columns list is needed to preserve the order
     #   of the displayed columns. It is used in the template to iterate
     #   through the current columns in the right order that they should be
     #   displayed.
-    
+
     html_table_headers = {}
     html_current_columns = []
     for column in current_columns:
@@ -576,44 +613,58 @@ def generate_table_headers(current_columns, order_column_name, sort_order):
             elif sort_order == 'descending':
                 sort_arrow = "&darr;"
         html_class = "relayHeader hoverable" if database_name != "icons" \
-                                                else "relayHeader"    
-                                           
+                                                else "relayHeader"
+
         if column not in ICONS and column not in NOT_COLUMNS:
             if column == "Icons":
                 if filter(lambda c: c in current_columns, ICONS):
-                    html_table_headers[column] = "<th class='" + html_class + "' id='" \
-                                        + database_name + "'>" + display_name + "</th>"
+                    html_table_headers[column] = "<th class='" + html_class +\
+                                        "' id='" \
+                                        + database_name + "'>" + display_name +\
+                                        "</th>"
                     html_current_columns.append(column)
             else:
-                html_table_headers[column] = "<th class='" + html_class + "' id='" \
-                                    + database_name + "'><a class='sortLink' \
-                                    href='" + sorting_link(sort_order, database_name) \
-                                    + "'>" + display_name + " " + sort_arrow + "</a></th>"
+                html_table_headers[column] = "<th class='" + html_class + \
+                                    "' id='" + database_name + "'>\
+                                    <a class='sortLink' href='" + \
+                                    sorting_link(sort_order, database_name) \
+                                    + "'>" + display_name + " " + sort_arrow +\
+                                    "</a></th>"
                 html_current_columns.append(column)
-    return html_table_headers, html_current_columns 
-    
-    
-def generate_table_rows(statusentries, current_columns, html_current_columns):
+    return html_table_headers, html_current_columns
+
+
+def generate_table_rows(statusentries, current_columns,
+        html_current_columns):
     """
-    Generates a list of HTML strings. Each string represents a row in the 
-    main template table.
-    
+    Generates a list of HTML strings. Each string represents a row in
+    the main template table.
+
+    @type statusentries: C{QuerySet}
+    @param statusentries: A QuerySet of the statusentries.
+    @type current_columns: C{list}
+    @param current_columns: A list of the columns that will be displayed
+        on this session.
+    @type html_current_columns: C{list}
+    @param html_current_columns: A list of the HTML string version of
+        the current columns.
+
     @rtype: C{list}
     @return: List of HTML strings.
     """
-    
     html_table_rows = []
-    
+
     for relay in statusentries:
-    
-        #TODO: CLEAN THE CODE - QUERY ONLY ON THE NECESSARY COLUMNS 
+        #TODO: CLEAN THE CODE - QUERY ONLY ON THE NECESSARY COLUMNS
         #               AND THROW IN DICTIONARY AFTERWARDS!!!
-        
-        # Declarations in order to avoid multiple queries. 
-        r_isbadexit = relay.isbadexit      
-        field_isbadexit = "<img src='static/img/bg_" + ("yes" if r_isbadexit else "no") + \
-                        ".png' width='12' height='12' alt='" + ("Bad Exit' title='Bad Exit'" \
-                        if r_isbadexit else "Not a Bad Exit' title='Not a Bad Exit'") + ">"  
+        # Declarations made in order to avoid multiple queries.
+        r_isbadexit = relay.isbadexit
+        field_isbadexit = "<img src='/static/img/bg_" + \
+                        ("yes" if r_isbadexit else "no") + \
+                        ".png' width='12' height='12' alt='" + \
+                        ("Bad Exit' title='Bad Exit'" \
+                        if r_isbadexit else \
+                        "Not a Bad Exit' title='Not a Bad Exit'") + ">"
         field_geoip = relay.geoip
         field_isnamed = relay.isnamed
         field_fingerprint = relay.fingerprint
@@ -622,35 +673,45 @@ def generate_table_rows(statusentries, current_columns, html_current_columns):
                                   " KB/s"
         field_uptime = str(days(relay.descriptorid.uptime)) + " d"
         r_address = relay.address
-        field_address = "[<a href='details/" + r_address + "/whois'>" + \
-                        r_address + "</a>]"
+        field_address = "[<a href='details/" + r_address + \
+                        "/whois'>" + r_address + "</a>]"
         field_published = str(relay.published)
         field_contact = contact(relay.descriptorid.rawdesc)
         r_isbaddir = relay.isbaddirectory
-        field_isbaddirectory = "<img src='static/img/bg_" + ("yes" if r_isbaddir else "no") + \
-                        ".png' width='12' height='12' alt='" + ("Bad Directory' title='Bad Directory'" \
-                        if r_isbaddir else "Not a Bad Directory' title='Not a Bad Directory'") + ">"                   
-        field_isfast = "<img src='static/img/status/Fast.png' alt='Fast Server' title='Fast Server'>" \
+        field_isbaddirectory = "<img src='/static/img/bg_" + \
+                        ("yes" if r_isbaddir else "no") + \
+                        ".png' width='12' height='12' alt='" + \
+                        ("Bad Directory' title='Bad Directory'" \
+                        if r_isbaddir else "Not a Bad Directory' \
+                        title='Not a Bad Directory'") + ">"
+        field_isfast = "<img src='/static/img/status/Fast.png' \
+                        alt='Fast Server' title='Fast Server'>" \
                         if relay.isfast else ""
-        field_isv2dir = "<img src='static/img/status/Dir.png' alt='Directory Server' title='Directory Server'>" \
+        field_isv2dir = "<img src='/static/img/status/Dir.png' \
+                        alt='Directory Server' title='Directory Server'>" \
                         if relay.isv2dir else ""
-        field_isexit = "<img src='static/img/status/Exit.png' alt='Exit Server' title='Exit Server'>" \
+        field_isexit = "<img src='/static/img/status/Exit.png' \
+                        alt='Exit Server' title='Exit Server'>" \
                         if relay.isexit else ""
-        field_isguard = "<img src='static/img/status/Guard.png' alt='Guard Server' title='Guard Server'>" \
+        field_isguard = "<img src='/static/img/status/Guard.png' \
+                        alt='Guard Server' title='Guard Server'>" \
                         if relay.isguard else ""
-        field_isstable = "<img src='static/img/status/Stable.png' alt='Stable Server' title='Stable Server'>" \
+        field_isstable = "<img src='/static/img/status/Stable.png' \
+                        alt='Stable Server' title='Stable Server'>" \
                         if relay.isstable else ""
-        field_isauthority = "<img src='static/img/status/Authority.png' alt='Authority Server' title='Authority Server'>" \
+        field_isauthority = "<img src='/static/img/status/Authority.png' \
+                        alt='Authority Server' title='Authority Server'>" \
                         if relay.isauthority else ""
         r_platform = relay.descriptorid.platform
         r_os_platform = get_platform(r_platform)
-        field_platform = "<img src='static/img/os-icons/" + r_os_platform + ".png' alt='" + r_os_platform + \
-                         "' title='" + r_platform + "'>" if r_os_platform else ""
+        field_platform = "<img src='/static/img/os-icons/" + r_os_platform + \
+                        ".png' alt='" + r_os_platform + "' title='" + \
+                        r_platform + "'>" if r_os_platform else ""
         field_orport = str(relay.orport)
         r_dirport = str(relay.dirport)
         field_dirport = r_dirport if r_dirport else "None"
-        
-        
+
+
         RELAY_FIELDS = {'isbadexit': field_isbadexit,
                         'geoip': field_geoip,
                         'isnamed': field_isnamed,
@@ -664,49 +725,54 @@ def generate_table_rows(statusentries, current_columns, html_current_columns):
                         'isbaddirectory': field_isbaddirectory,
                         'isfast': field_isfast,
                         'isv2dir': field_isv2dir,
-                        'isexit': field_isexit, 
+                        'isexit': field_isexit,
                         'isguard': field_isguard,
                         'isstable': field_isstable,
                         'isauthority': field_isauthority,
                         'platform': field_platform,
                         'orport': field_orport,
                         'dirport': field_dirport,
-                       }                  
-                        
+                       }
+
         html_row_code = ''
-        
+
         if 'isbadexit' in RELAY_FIELDS:
             html_row_code = "<tr " + ("class='relayBadExit'" if r_isbadexit \
                             else "class='relay'") + ">"
         else:
             html_row_code = "<tr class='relay'>"
-            
+
         for column in html_current_columns:
             value_name = COLUMN_VALUE_NAME[column]
-            
+
             # Special Case: Country Code
             if column == 'Country Code':
                 c_country = country(RELAY_FIELDS[value_name])
                 c_latitude = latitude(RELAY_FIELDS[value_name])
-                c_longitude = longitude(RELAY_FIELDS[value_name])               
-                html_row_code = html_row_code + "<td id='col_relayName'><a href=\
-                                'http://www.openstreetmap.org/?mlon=" + c_longitude + \
-                                "&mlat=" + c_latitude + "&zoom=6'> \
-                                <img src='static/img/flags/" + c_country + \
-                                ".gif' alt='" + c_country + "' title='" + \
-                                c_country + ":" + c_latitude + ", " + \
-                                c_longitude + "' border=0></a></td>"
+                c_longitude = longitude(RELAY_FIELDS[value_name])
+                html_row_code = html_row_code + "<td id='col_relayName'> \
+                                <a href='http://www.openstreetmap.org/?mlon="\
+                                 + c_longitude + "&mlat=" + c_latitude + \
+                                 "&zoom=6'><img src='/static/img/flags/" + \
+                                 c_country + ".gif' alt='" + c_country + \
+                                 "' title='" + c_country + ":" + c_latitude +\
+                                 ", " + c_longitude + "' border=0></a></td>"
             # Special Case: Router Name and Named
             elif column == 'Router Name':
                 if 'Named' in current_columns:
-                    html_router_name = "<a href='/details/" + \
+                    html_router_name = "<a class='link' href='/details/" + \
                                         RELAY_FIELDS['fingerprint'] + "' \
-                                        target='_BLANK'>" + RELAY_FIELDS[value_name] + \
-                                        "</a>"
+                                        target='_BLANK'>" + \
+                                        RELAY_FIELDS[value_name] + "</a>"
                     if RELAY_FIELDS['isnamed']:
                         html_router_name = "<b>" + html_router_name + "</b>"
-                    html_row_code = html_row_code + "<td id='col_relayName'>" + \
-                                    html_router_name + "</td>"
+                else:
+                    html_router_name = "<a class='link' href='/details/" + \
+                                        RELAY_FIELDS['fingerprint'] + "' \
+                                        target='_BLANK'>" + \
+                                        RELAY_FIELDS[value_name] + "</a>"
+                html_row_code = html_row_code + "<td id='col_relayName'>"\
+                                    + html_router_name + "</td>"
             # Special Case: Icons
             elif column == 'Icons':
                 html_icons = "<td id='col_relayIcons'>"
@@ -716,14 +782,107 @@ def generate_table_rows(statusentries, current_columns, html_current_columns):
                         html_icons = html_icons + RELAY_FIELDS[value_icon]
                 html_icons = html_icons + "</td>"
                 html_row_code = html_row_code + html_icons
-            else:              
-                html_row_code = html_row_code + "<td id='col_relay" + column + "'>" + \
-                                RELAY_FIELDS[value_name] + "</td>"
+            else:
+                html_row_code = html_row_code + "<td id='col_relay" + column \
+                                + "'>" + RELAY_FIELDS[value_name] + "</td>"
+        html_row_code = html_row_code + "</tr>"
+        html_table_rows.append(html_row_code)
 
-        html_row_code = html_row_code + "</tr>"          
-        html_table_rows.append(html_row_code)  
-        
     return html_table_rows
+
+
+def generate_query_list_options(query_options):
+    """
+    Generates the HTML version of each option in the Query List Options
+    field.
+
+    @type query_options: C{dict}
+    @param query_options: A dictionary of the current query options.
+    @rtype: C{list}
+    @return: List of strings - each string represents the HTML version
+        of an option.
+    """
+    # TODO: Finish this. It will clean up the
+    # Advanced Query Options search.
+    LIST_OPTIONS = {'Router Name': 'nickname',
+                    'Fingerprint': 'fingerprint',
+                    'Country Code': 'geoip',
+                    'Bandwidth': 'bandwidthobserved',
+                    'Uptime': 'uptime',
+                    'Last Descriptor Published': 'published',
+                    #'Hostname': 'hostname',
+                    'IP Address': 'address',
+                    'ORPort': 'orport',
+                    'DirPort': 'dirport',
+                    'Platform': 'platform',
+                    'Contact': 'contact',
+                    'Authority': 'isauthority',
+                    'Bad Directory': 'isbaddirectory',
+                    'Bad Exit': 'isbadexit',
+                    'Exit': 'isexit',
+                    'Fast': 'isfast',
+                    'Guard': 'isguard',
+                    #'Hibernating': 'ishibernating',
+                    'Named': 'isnamed',
+                    'Stable': 'isstable',
+                    'Valid': 'isvalid',
+                    'Directory': 'isv2dir',
+                   }
+
+    html_query_list_options = []
+    for option in LIST_OPTIONS:
+        list_option = "<option value='" + LIST_OPTIONS[option] + "'"
+        if (query_options and query_options['sortListings'] ==
+                LIST_OPTIONS[option]):
+            list_option = list_option + " SELECTED>" + option + "</option>"
+        else:
+            list_option = list_option + ">" + option + "</option>"
+        html_query_list_options.append(list_option)
+    return html_query_list_options
+
+
+def generate_query_input_options(query_options):
+    """
+    Generates the HTML version of each input option in the Required Flags
+    feature.
+
+    @type query_options: C{dict}
+    @param query_options: A dictionary of the current query options.
+
+    @rtype: C{list}
+    @return: List of strings - each string represents the HTML version of 
+        an input option.
+    """
+    INPUT_OPTIONS = {'Authority': 'isauthority',
+                    'Bad Directory': 'isbaddirectory',
+                    'Bad Exit': 'isbadexit',
+                    'Exit': 'isexit',
+                    'Fast': 'isfast',
+                    'Guard': 'isguard',
+                    #'Hibernating': 'ishibernating',
+                    'Named': 'isnamed',
+                    'Stable': 'isstable',
+                    'Valid': 'isvalid',
+                    'V2Dir': 'isv2dir',
+                   }
+    sorted_input_options = sorted(INPUT_OPTIONS.keys())
+    html_query_input_options = []
+    for option in sorted_input_options:
+        input_option = "<td> " + option + ": </td>"
+        input_string = ''
+        for value in ['', 'yes', 'no']:
+            input_string = input_string + "<input type='radio' \
+                name='" + INPUT_OPTIONS[option] + "' value='" + value + "'"
+            if not query_options and value == '':
+                input_string = input_string + " CHECKED"
+            if (query_options and query_options[INPUT_OPTIONS[option]] == \
+                value):
+                input_string = input_string + " CHECKED"
+            input_string = input_string + " />" + ("Off" if value == '' else \
+                value.capitalize())
+        input_option = input_option + "<td>" + input_string + "</td>"
+        html_query_input_options.append(input_option)
+    return html_query_input_options
 
 
 def draw_bar_graph(xs, ys, labels, params):
@@ -816,6 +975,7 @@ def draw_bar_graph(xs, ys, labels, params):
     canvas.print_png(response, ha="center")
     return response
 
+
 def draw_line_graph(fingerprint, bwtype, color, shade):
     """
     Draws a line graph with given data points and display parameters.
@@ -889,7 +1049,7 @@ def draw_line_graph(fingerprint, bwtype, color, shade):
         day_before = last_hist.date - datetime.timedelta(days=1)
 
         try:
-            day_before_hist = Bwhist.objects.get(\
+            day_before_hist = Bwhist.objects.get(
                     fingerprint=fingerprint,
                     date=str(day_before))
             if bwtype == 'Read':

@@ -39,7 +39,7 @@ DATABASES = {
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as
 # your system time zone.
-TIME_ZONE = 'GMT' + str((time.timezone / 3600) - time.daylight)
+# TIME_ZONE = 'GMT' + str((time.timezone / 3600) - time.daylight)
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -68,7 +68,7 @@ MEDIA_URL = '/static/'
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/media/'
+#ADMIN_MEDIA_PREFIX = '/media/'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'p@y@6b2vc#6=rxe^p67ti4vlp_9n+@x27wac1g7mta)hfrmds2'
@@ -111,6 +111,7 @@ INSTALLED_APPS = (
     #'django.contrib.sites',
     #'django.contrib.messages',
     'statusapp',
+    #'debug_toolbar',
     # Enabled this app in order to fix errors given when running tests
     # with python manage.py test.
     # @see: http://www.mail-archive.com/django-users@googlegroups.com/
@@ -119,3 +120,5 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
+
+#CACHE_BACKEND = 'locmem://'

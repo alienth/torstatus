@@ -8,19 +8,15 @@ from django.conf import settings
 from django.views.decorators.cache import cache_page
 
 urlpatterns = patterns('',
+    # Splash page
+    (r'^$', 'statusapp.views.pages.splash'),
 
-    #Search Splash
-    (r'^$', 'newstatusapp.views.index'),
-    (r'^advanced_search$', 'newstatusapp.views.advanced_search'),
-    (r'^search_results$', 'newstatusapp.views.search_results'),
+    # Index and related pages
+    (r'^index$', 'statusapp.views.pages.index'),
 
-    #(r'^Tortus.png$', 'statusapp.views.tortus'),
-    (r'^(?P<path>.*)$', 'django.views.static.serve',
-            {'document_root': settings.MEDIA_ROOT}),
-
-    # Main pages
-    (r'^(?P<sort_filter>\w*)$', 'statusapp.views.pages.index'),
-    (r'^column-preferences/$', 'statusapp.views.pages.columnpreferences'),
+    # Unpaged Index and related pages
+    (r'^unpaged/(?P<sort_filter>\w*)$', 'statusapp.views.pages.unpaged'),
+    (r'^unpaged/column-preferences/$', 'statusapp.views.pages.columnpreferences'),
     (r'^exit-node-query/$', 'statusapp.views.pages.exitnodequery'),
 
     # Media Files
@@ -56,6 +52,8 @@ urlpatterns = patterns('',
         'statusapp.views.graphs.byobservedbandwidth'),
     (r'^network-statistic-graphs/byplatform.png$',
         'statusapp.views.graphs.byplatform'),
+    (r'^network-statistic-graphs/networktotalbw.png$',
+        'statusapp.views.graphs.networktotalbw'),
 
     # CSV Files
     (r'^Tor-Query-Export.csv$', 'statusapp.views.csvs.current_results_csv'),

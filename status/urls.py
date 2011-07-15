@@ -10,6 +10,5 @@ from django.conf import settings
 
 
 urlpatterns = patterns('',
-    (r'^', include('newstatus.urls')),
     (r'^', include('statusapp.urls')),
 )

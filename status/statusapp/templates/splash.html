@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block mainCSS %}
+<link rel="stylesheet" type="text/css" href="/static/css/splash.css"></link>
+{% endblock %}
+
+{% block mainTitle %} TorStatus {% endblock %}
+
+{% block headerTitle %} TorStatus {% endblock %}
+
+{% block banner %}
+
+    <table class="header">
+        <tr>
+            <td id="TorBannerPicture">
+            <img src="/static/img/splash-banner.png" alt="TorStatus" title="Network Total Bandwidth">
+            </td>
+        <td id="mainLinks">
+        <a class="link" href="/index">List of All Routers</a> |
+        <a class="link" href="/exit-node-query">Tor Exit Node Query</a> |
+		<a class="link" href="/index/#advancedquery">Advanced Search Options</a> |
+        <a class="link" href="/index/#advanceddisplayoptions">Display Options</a> |
+		<a class="link" href="/network-statistic-graphs">Network Statistics</a>
+    </td>
+</tr>
+<tr>
+	<td>
+		<br />
+	</td>
+</tr>
+</table>
+
+
+
+
+
+{% endblock %}
+
+{% block mainPage %}
+{% load index_filters %}
+<table class="bottomTables1">
+<tr>
+    <td>
+        <img src="/network-statistic-graphs/networktotalbw.png" alt="Network Total Bandwidth" title="Network Total Bandwidth">
+    </td>
+</tr>
+<tr>
+    <td>
+        <form>
+        <table id="sortRouterListing">
+        <tr>
+            <td colspan="2">
+            <input id="sortRouterListing" type="text" name="searchValue" size="40" {% if queryOptions and queryOptions|key:'searchValue' %}
+                                                                    value="{{queryOptions|key:'searchValue'}}"
+                                                                    {% endif %}/>
+            </td>
+        </tr>
+    </table>
+        <table id="sortRouterListing">
+        <tr>
+            <td colspan="2" align="center">
+        <input id="sortRouterListing_Button" type="submit" value="Search" size="20" />
+            </td>
+        </tr>
+    </form>
+        </table>
+    </td>
+</tr>
+</table>
+{% endblock %}

@@ -349,9 +349,8 @@ table.bottomTables1 {
 }
 
 table#sortRouterListing {
-    font-size: 18px;
+    font-size: 30px;
     width:auto;
-    padding: 10px;
     border-spacing: 3px;
     margin-left: auto;
     margin-right: auto;
@@ -374,8 +373,11 @@ input#sortRouterListing_Button {
 td#sortRouterListing {
     background-color: #7BD4F7;
     text-align: center;
+    font-weight: bold;
     color: #000000;
     border-top: 1px solid black;
     border-bottom: 1px solid black;
+    border-right: 1px solid black;
+    border-left: 1px solid black;
     white-space:nowrap;
 }
