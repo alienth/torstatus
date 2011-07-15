@@ -97,8 +97,6 @@ table.header {
     border-style: none;
     margin-left: auto;
     margin-right: auto;
-    border-spacing: 1px;
-    padding: 2px;
 }
 
 td#mainTitle {
@@ -114,14 +112,13 @@ td#mainTitle {
 }
 
 td#mainLinks {
-    background-color: #7BD4F7;
-    border-style: solid;
-    border-color: black;
-    border-width: 1px;
-    text-align: center;
+    text-align: left;
     font-size: 0.75em;
     color: red;
     padding: 10px;
+}
+td#TorBannerPicture {
+
 }
 
 table.displayStatus {
@@ -329,6 +326,7 @@ div.footer {
     text-align: center;
     padding: 5px 0 0 0;
     margin: 25px 0 0 0;
+    border-top: 1px solid rgb(100,100,100);
     color: rgb(100, 100, 100);
 }
 
@@ -380,3 +378,4 @@ td#sortRouterListing {
     border-left: 1px solid black;
     white-space:nowrap;
 }
+
