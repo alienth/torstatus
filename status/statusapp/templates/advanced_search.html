@@ -1,2 +1,168 @@
-You made it!
-{{ test_access }}
+{% extends "base.html" %}
+
+{% block auxCSS %}
+<link rel="stylesheet" type="text/css" href="/static/css/splash.css"></link>
+{% endblock %}
+
+{% block mainTitle %} TorStatus {% endblock %}
+
+{% block headerTitle %} TorStatus {% endblock %}
+
+{% block banner %}
+
+    <table class="header">
+        <tr>
+            <td id="TorBannerPicture">
+            <img src="/static/img/splash-banner.png" alt="TorStatus" title="Network Total Bandwidth">
+            </td>
+        <td id="mainLinks">
+        <a class="link" href="/index">List of All Routers</a> |
+        <a class="link" href="/exit-node-query">Tor Exit Node Query</a> |
+		<a class="link" href="/index/#advancedquery">Advanced Search Options</a> |
+        <a class="link" href="/index/#advanceddisplayoptions">Display Options</a> |
+		<a class="link" href="/network-statistic-graphs">Network Statistics</a>
+    </td>
+</tr>
+<tr>
+	<td>
+		<br />
+	</td>
+</tr>
+</table>
+
+
+
+
+
+{% endblock %}
+
+{% block mainPage %}
+{% load index_filters %}
+
+<table class="bottomTables1">
+<tr>
+<td>
+</td>
+<tr>
+<td>
+<table class="aggStatisticSummary" id="advancedquery">
+<tr>
+    <td class="boxTitle" colspan="1">Custom / Advanced Query Options</td>
+</tr>
+<tr>
+    <td>
+        <table id="sortRouterListing">
+        <tr>
+            <td colspan="2">
+                <form action="/" method="get">
+                    <input type="hidden" name="resetQuery" value="resetQuery" />
+                    <input id="sortRouterListing_Button" type="submit" value="Reset the Query to DEFAULT" />
+                </form>
+            </td>
+        </tr>
+        </table>
+    </td>
+</tr>
+<tr>
+    <td>
+        <table id="sortRouterListing">
+        <tr>
+            <td> Sort Router Listing By: </td>
+            <td>
+                <form action="/" method="get">
+                <select id="sortRouterListing" name="sortListings">
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td> Sort Order: </td>
+            <td>
+                <select id="sortRouterListing" name="sortOrder">
+                <option value="ascending" {% if queryOptions and queryOptions|key:'sortOrder' == "ascending" %} 
+                                                            SELECTED {% endif %}>Ascending</option>
+                <option value="descending" {% if queryOptions and queryOptions|key:'sortOrder' == "descending" %} 
+                                                            SELECTED {% endif %}>Descending</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td id="sortRouterListing" colspan="2"> Require Flags </td>
+        </tr>
+        </table>
+</tr>
+<tr>
+    <td>
+        <table id="sortRouterListing">
+        <tr>
+            <td id="sortRouterListing" colspan="2"> Advanced Search </td>
+        </tr>
+        <tr>
+            <td>
+            <select id="sortRouterListing" name="criteria">
+            <option value ="fingerprint" {% if not queryOptions or queryOptions|key:'criteria' == "fingerprint" %}
+                                                            SELECTED {% endif %}>Fingerprint</option>
+            <option value ="nickname" {% if queryOptions and queryOptions|key:'criteria' == "nickname" %}
+                                                            SELECTED {% endif %}>Router Name</option>
+            <option value ="geoip" {% if queryOptions and queryOptions|key:'criteria' == "geoip" %}
+                                                            SELECTED {% endif %}>Country Code</option>
+            <option value ="bandwidthobserved" {% if queryOptions and queryOptions|key:'criteria' == "bandwidthobserved" %}
+                                                            SELECTED {% endif %}>Bandwidth (kb/s)</option>
+            <option value ="uptime" {% if queryOptions and queryOptions|key:'criteria' == "uptime" %}
+                                                            SELECTED {% endif %}>Uptime (days)</option>
+            <option value ="published" {% if queryOptions and queryOptions|key:'criteria' == "published" %}
+                                                            SELECTED {% endif %}>Last Descriptor Published</option>
+            <option value ="address" {% if queryOptions and queryOptions|key:'criteria' == "address" %}
+                                                            SELECTED {% endif %}>IP Address</option>
+            <option value ="hostname" {% if queryOptions and queryOptions|key:'criteria' == "hostname" %}
+                                                            SELECTED {% endif %}>Hostname</option>
+            <option value ="orport" {% if queryOptions and queryOptions|key:'criteria' == "orport" %}
+                                                            SELECTED {% endif %}>Onion Router Port</option>
+            <option value ="dirport" {% if queryOptions and queryOptions|key:'criteria' == "dirport" %}
+                                                            SELECTED {% endif %}>Directory Sever Port</option>
+            <option value ="platform" {% if queryOptions and queryOptions|key:'criteria' == "platform" %}
+                                                            SELECTED {% endif %}>Platform</option>
+            </select>
+            </td>
+            <td>
+            <select id="sortRouterListing" name="boolLogic">
+            <option value ="equals" {% if not queryOptions or queryOptions|key:'boolLogic' == "equals" %}
+                                                            SELECTED {% endif %}>Equals</option>
+            <option value ="contains" {% if queryOptions and queryOptions|key:'boolLogic' == "contains" %}
+                                                            SELECTED {% endif %}>Contains</option>
+            <option value ="less" {% if queryOptions and queryOptions|key:'boolLogic' == "less" %}
+                                                            SELECTED {% endif %}>Is Less Than</option>
+            <option value ="greater" {% if queryOptions and queryOptions|key:'boolLogic' == "greater" %}
+                                                            SELECTED {% endif %}>Is Greater Than</option>
+            </select>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+            <input id="sortRouterListing" type="text" name="searchValue" {% if queryOptions and queryOptions|key:'searchValue' %}
+                                                                    value="{{queryOptions|key:'searchValue'}}" 
+                                                                    {% endif %}/>
+            </td>
+        </tr>
+        </table>
+    </td>
+</tr>
+<tr>
+    <td>
+        <table id="sortRouterListing">
+        <tr>
+            <td colspan="2">
+                <input id="sortRouterListing_Button" type="submit" value="Apply Options" />
+            </td>
+        </tr>
+        </table>
+        </form>
+    </td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+<td>
+</table>
+
+{% endblock %}

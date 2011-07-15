@@ -316,20 +316,13 @@ td#col_relayLastDescPublished {
 }
 
 td {
-    font-size: 0.5625em;
+    font-size: auto;
 }
 
 table.relayTable {
     width: 100%;
     border-spacing: 0px;
     border: 1px solid black;
-}
-
-div.footer {
-    text-align: center;
-    padding: 5px 0 0 0;
-    margin: 25px 0 0 0;
-    color: rgb(100, 100, 100);
 }
 
 p#trademark {
@@ -350,11 +343,15 @@ html, body {
     min-height: 100%
     height: auto;
     height: 100%;
-    margin: 0 auto -4em;
+    margin: 0 auto -2em;
 }
 
 .footer, .push {
-    height: 4em;
+    height: 2em;
+    text-align: center;
+    padding: 5px 0 0 0;
+    margin: 25px 0 0 0;
+    color: rgb(100, 100, 100);
 }
 
 table.bottomTables1 {

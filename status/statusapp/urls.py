@@ -13,6 +13,9 @@ urlpatterns = patterns('',
 
     # Index and related pages
     (r'^index$', 'statusapp.views.pages.index'),
+    
+    # Index and related pages
+    (r'^advanced-search$', 'statusapp.views.pages.advanced_search'),
 
     # Unpaged Index and related pages
     (r'^unpaged/(?P<sort_filter>\w*)$', 'statusapp.views.pages.unpaged'),

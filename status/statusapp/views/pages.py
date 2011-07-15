@@ -506,6 +506,6 @@ def columnpreferences(request):
 
     return render_to_response('columnpreferences.html', template_values)
 
-def mainindex(request):
-    hello = 'Hello New Page'
-    return render_to_response('mainindex.html', hello)
+def advanced_search(request):
+    template_values = {}
+    return render_to_response('advanced_search.html', template_values)
