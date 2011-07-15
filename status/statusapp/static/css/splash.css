@@ -1,0 +1,57 @@
+table.mainTable {
+    font-size: 30px;
+    width: auto;
+    padding: 10px;
+    border-spacing: 10px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+table#searchBox {
+    font-size: 18px;
+    width:auto;
+    border-spacing: 3px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+select#searchBox {
+    background-color: #95E4AF;
+}
+
+input#searchBox {
+    width: 100%;
+    background-color: #B6EA96;
+}
+
+input#searchBox_Button {
+    width: 100px;
+    background-color: #9242DC;
+    color: #B6EA96;
+    font-weight: bold;
+    opacity: 0.6;
+}
+
+input.btn { 
+	  color:#050; 
+	  font: bold 84% 'trebuchet ms',helvetica,sans-serif; 
+	  background-color:#fed; 
+      border: 1px solid; 
+	  border-color: #696 #363 #363 #696; 
+	  filter:progid:DXImageTransform.Microsoft.Gradient 
+	  (GradientType=0,StartColorStr='#ffffffff',EndColorStr='#ffeeddaa'); 
+} 
+
+input#btn {
+    border-color: #c63 #930 #930 #63;
+}
+
+
+td#searchBox {
+    background-color: #7BD4F7;
+    text-align: center;
+    color: #000000;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+    white-space:nowrap;
+}

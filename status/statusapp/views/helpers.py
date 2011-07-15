@@ -518,7 +518,7 @@ def country(location):
     @rtype: C{string}
     @return: The country code in the tuple as a string.
     """
-    return location[1:3].lower()
+    return str(location)[1:3].lower()
 
 
 def latitude(geoip):
@@ -531,7 +531,12 @@ def latitude(geoip):
     @rtype: C{string}
     @return: The latitude associated with C{geoip}.
     """
-    return str(geoip).split(',')[1]
+    geoip_list = str(geoip).split(',')
+    cols = len(geoip_list)
+    if cols > 1:
+        return geoip_list[1]
+    else:
+        return ''
 
 
 def longitude(geoip):
@@ -544,7 +549,12 @@ def longitude(geoip):
     @rtype: C{string}
     @return: The longitude associated with C{geoip}.
     """
-    return str(geoip).strip('()').split(',')[2]
+    geoip_list = str(geoip).split(',')
+    cols = len(geoip_list)
+    if cols > 2:
+        return geoip_list[2]
+    else:
+        return ''
 
 
 def get_platform(platform):
