@@ -14,55 +14,36 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 {% endblock %}
 <title>{% block mainTitle %} {% endblock %}</title>
 </head>
-
 <body>
-    <div class ="wrapper">
     {% block banner %}
-<table class="header">
-<tr>
-	<td id="mainTitle">
-		<a class="link" href="/">{% block headerTitle %} {% endblock %} </a>
-	</td>
-</tr>
-<tr>
-    <td id="mainLinks">
-        <a class="link" href="/">Home</a> |
+    <table class="header">
+        <tr>
+            <td id="TorBanner">
+                <a class="link" href="">
+                    <img id="TorBannerPicture" src="/static/img/resize.png" alt="TorStatus" title="Network Total Bandwidth" border="0">
+                </a>
+            </td>
+        <td id="mainLinks">
         <a class="link" href="/index">List of All Routers</a> |
         <a class="link" href="/exit-node-query">Tor Exit Node Query</a> |
-		<a class="link" href="/index/#serverdetails">TorStatus Server Details</a> |
-		<a class="link" href="/index/#advancedquery">Advanced Query Options</a> |
-        <a class="link" href="/index/#advanceddisplayoptions">Advanced Display Options</a> |
-        <a class="link" href="/index/#networkstatisticsummary">Network Statistic Summary</a> |
-		<a class="link" href="/network-statistic-graphs">Network Statistic Graphs</a> |
-        <a class="link" href="/unpaged">Full Unpaged List of Routers (large)</a> |
-        <a class="link" href="https://check.torproject.org/">Check If You Are Using Tor (TorCheck)</a>
+        <a class="link" href="/index/#advanceddisplayoptions">Display Options</a> |
+        <a class="link" href="/advanced-search">Advanced Search</a> |
+        <a class="link" href="/network-statistic-graphs">Network Statistics</a>
     </td>
 </tr>
-<tr>
-    <td id="mainLinks">
-        <a class="link" href="/Tor-Query-Export.csv">CSV List of Current Result Set</a> |
-		<a class="link" href="/Tor-IP-List-All.csv">CSV List of All Current Tor Server IP Addresses</a> |
-		<a class="link" href="/Tor-IP-List-Exit.csv">CSV List of All Current Tor Server Exit Node IP Addresses</a>
-	</td>
-</tr>
-<tr>
-	<td>
-		<br />
-	</td>
-</tr>
 </table>
-</div>
+
 {% endblock %}
 
 {% block extraHeader %} {% endblock %}
-<br />
+
 {% block mainPage %} {% endblock %}
 
-<div class="footer">
+<div id="footer">
 				<p id="trademark">
 					"Tor" and the "Onion Logo" are <a target=_BLANK href="https://www.torproject.org/docs/trademark-faq">registered trademarks</a> of The Tor Project, Inc.
 				</p>
 			</div>
-</body>
+        </body>
 </html>
 {% endspaceless %}
