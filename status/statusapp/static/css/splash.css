@@ -1,3 +1,7 @@
+td {
+    font-size: 100%;
+}
+
 table.mainTable {
     font-size: 30px;
     width: auto;
@@ -32,8 +36,6 @@ input#searchButton:hover {
 	background-color:#fed; 
     border: 1px solid; 
     border-color: #696 #363 #363 #696;
-	filter:progid:DXImageTransform.Microsoft.Gradient 
-	(GradientType=0,StartColorStr='#ffffffff',EndColorStr='#ffeeddaa');
 	opacity: 1;
 	cursor: pointer;
 }
@@ -44,9 +46,7 @@ input#searchButton:focus {
     font-size: 0.938em;
 	background-color:#fed; 
     border: 1px solid; 
-    border-color: #61a #315 #315 #61a;
-	filter:progid:DXImageTransform.Microsoft.Gradient 
-	(GradientType=0,StartColorStr='#ffffffff',EndColorStr='#ffeeddaa'); 
+    border-color: #696 #363 #363 #696;
 	opacity: 1;
 	cursor: pointer;
 }
@@ -55,9 +55,7 @@ input#searchBox {
     font: 0.625em 'trebuchet ms',helvetica,sans-serif; 
     font-size: 0.938em;
     border: 1px solid; 
-    border-color: #61a #315 #315 #61a;
-	filter:progid:DXImageTransform.Microsoft.Gradient 
-	(GradientType=0,StartColorStr='#ffffffff',EndColorStr='#ffeeddaa'); 
+    border-color: #61a #315 #315 #61a; 
 	width: 400px;
 }
 
@@ -65,9 +63,7 @@ input#searchBox:hover {
     font: 0.625em 'trebuchet ms',helvetica,sans-serif; 
     font-size: 0.938em;
     border: 1px solid; 
-    border-color: #696 #363 #363 #696;
-	filter:progid:DXImageTransform.Microsoft.Gradient 
-	(GradientType=0,StartColorStr='#ffffffff',EndColorStr='#ffeeddaa'); 
+    border-color: #696 #363 #363 #696; 
 	width: 400px;
 }
 
@@ -76,7 +72,5 @@ input#searchBox:focus {
     font-size: 0.938em;
     border: 1px solid; 
     border-color: #696 #363 #363 #696;
-	filter:progid:DXImageTransform.Microsoft.Gradient 
-	(GradientType=0,StartColorStr='#ffffffff',EndColorStr='#ffeeddaa'); 
 	width: 400px;
 }
