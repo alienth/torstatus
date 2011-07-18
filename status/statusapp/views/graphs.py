@@ -6,7 +6,6 @@ from copy import copy
 import datetime
 
 # Django-specific import statements -----------------------------------
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Max
 from django.views.decorators.cache import cache_page
 from django.http import HttpResponse

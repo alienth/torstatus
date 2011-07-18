@@ -346,22 +346,22 @@ $$ LANGUAGE plpgsql;
 
 
 -- Purging functions --------------------------------------------------
--- Keep descriptors for no more than 24 hours
+-- Keep descriptors for no more than 36 hours
 CREATE OR REPLACE FUNCTION purge_descriptor()
 RETURNS TRIGGER AS $check_to_purge_descriptor$
     BEGIN
     DELETE FROM cache.active_descriptor
-    WHERE published < (SELECT localtimestamp) - INTERVAL '24 hours';
+    WHERE published < (SELECT localtimestamp) - INTERVAL '36 hours';
 RETURN NULL;
 END;
 $check_to_purge_descriptor$ LANGUAGE plpgsql;
 
--- Keep relays for no more than 90 minutes
+-- Keep relays for no more than 3 hours
 CREATE OR REPLACE FUNCTION purge_relay()
 RETURNS TRIGGER AS $check_to_purge_relay$
     BEGIN
     DELETE FROM cache.active_relay
-    WHERE validafter < (SELECT localtimestamp) - INTERVAL '90 minutes';
+    WHERE validafter < (SELECT localtimestamp) - INTERVAL '3 hours';
 RETURN NULL;
 END;
 $check_to_purge_relay$ LANGUAGE plpgsql;
