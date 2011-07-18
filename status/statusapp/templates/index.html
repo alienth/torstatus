@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "baseindex.html" %}
 
 {% block mainCSS %}
 <link rel="stylesheet" type="text/css" href="/static/css/style.css"></link>
@@ -7,60 +7,6 @@
 {% block mainTitle %} TorStatus Unpaged Index {% endblock %}
 
 {% block headerTitle %} TorStatus {% endblock %}
-
-{% block extraHeader %}
-<table cellspacing="1" cellpadding="2" class="legend">
-<tr>
-	<td class="boxTitle">Legend</td>
-</tr>
-<tr>
-	<td class="relayOK">Router is ok</td>
-</tr>
-<!-- We can not check for these at the moment -->
-<!-- 
-<tr>
-	<td class="relayHibernating">Router is hibernating</td>
-</tr>
-<tr>
-	<td class="relayDown">Router is currently down</td>
-</tr>
--->
-<tr>
-	<td class="relayBadExit">Router is a bad exit node</td>
-</tr>
-</table>
-<br />
-<table class="appServerDetails" id="serverdetails">
-<tr>
-	<td class="boxTitle" colspan="2">Application Server Details</td>
-</tr>
-<tr id="row_appServerDetails">
-	<td>Cache Last Updated (Local Server Time):</td>
-    <td>{{ cache_updated }}</td>
-</tr>
-<tr id="row_appServerDetails">
-	<td>Last Update Cycle Processing Time (Seconds):</td>
-    <td>{{ proc_time }}</td>
-</tr>
-<tr id="row_appServerDetails">
-	<td>Current Cache Expire Time (Seconds):</td>
-    <td>{{ exp_time }}</td>
-</tr>
-<tr id="row_appServerDetails">
-	<td>Number of Routers In Cache:</td>
-    <td>{{ num_routers }}</td>
-</tr>
-<tr id="row_appServerDetails">
-	<td>Number of Descriptors In Cache:</td>
-    <td>{{ num_descs }}</td>
-</tr>
-<tr id="row_appServerDetails">
-	<td>Approximate Page Generation Time (Seconds):</td>
-    <td>{{ gen_time }}</td>
-</tr>
-</table>
-
-{% endblock %}
 
 {% block mainPage %}
 

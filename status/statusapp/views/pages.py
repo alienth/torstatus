@@ -72,7 +72,8 @@ def unpaged(request, sort_filter):
     statusentries = Statusentry.objects.filter(
                     validafter=last_va).extra(
                     select={'geoip':
-                    'geoip_lookup(statusentry.address)'})
+                    'geoip_lookup(statusentry.address)'})\
+                    .order_by('nickname')
 
     num_routers = statusentries.count()
 

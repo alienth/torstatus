@@ -92,7 +92,10 @@ def bycountrycode(request):
     for entry in statusentries:
         # 'geoip' is a string, where the second and third characters
         # make the country code.
-        country = entry.geoip[1:3]
+        if entry.geoip is None:
+            country = '??'
+        else:
+            country = entry.geoip[1:3]
         if country in country_map:
             country_map[country] += 1
         else:
@@ -132,7 +135,10 @@ def exitbycountrycode(request):
     for entry in statusentries:
         # 'geoip' is a string, where the second and third characters
         # make the country code.
-        country = entry.geoip[1:3]
+        if entry.geoip is None:
+            country = '??'
+        else:
+            country = entry.geoip[1:3]
         if country in country_map:
             country_map[country] += 1
         else:

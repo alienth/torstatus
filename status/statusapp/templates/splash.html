@@ -8,25 +8,6 @@
 
 {% block headerTitle %} TorStatus {% endblock %}
 
-{% block banner %}
-
-    <table class="header">
-        <tr>
-            <td id="TorBannerPicture">
-            <img src="/static/img/logo.png" alt="TorStatus" title="TorStatus">
-            </td>
-        <td id="mainLinks">
-        <a class="link" href="/index">List of All Routers</a> |
-        <a class="link" href="/exit-node-query">Tor Exit Node Query</a> |
-		<a class="link" href="/index/#advancedquery">Advanced Search Options</a> |
-        <a class="link" href="/index/#advanceddisplayoptions">Display Options</a> |
-		<a class="link" href="/network-statistic-graphs">Network Statistics</a>
-    </td>
-</tr>
-</table>
-
-{% endblock %}
-
 {% block mainPage %}
 {% load index_filters %}
 <table class="bottomTables1">

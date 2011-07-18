@@ -113,17 +113,6 @@ td#mainTitle {
     padding: 10px;
 }
 
-td#mainLinks {
-    background-color: #7BD4F7;
-    border-style: solid;
-    border-color: black;
-    border-width: 1px;
-    text-align: center;
-    font-size: 0.75em;
-    color: red;
-    padding: 10px;
-}
-
 table.displayStatus {
     width: 300px;
     border-style: none;
@@ -315,6 +304,15 @@ td#col_relayLastDescPublished {
     text-align: center;
 }
 
+td#mainLinks {
+    text-align: left;
+    font-size: 0.75em;
+    color: red;
+}
+
+td#TorBannerPicture {
+}
+
 td {
     font-size: 0.5625em;
 }
@@ -345,6 +343,12 @@ table.bottomTables1 {
     border-spacing: 10px;
     margin-left: auto;
     margin-right: auto;
+}
+
+table.header {
+    width: 100%;
+    border-style: none;
+    background-color: #95E4AF;
 }
 
 table#sortRouterListing {

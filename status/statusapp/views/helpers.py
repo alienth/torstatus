@@ -579,7 +579,7 @@ def get_platform(platform):
                            'SunOS': 'SunOS',
                            'IRIX': 'IRIX',
                            'Cygwin': 'Cygwin',
-                           'Dragon': 'Dragon',
+                           'Dragon': 'DragonFly',
                           }
     for name in supported_platforms:
         if name in platform:
@@ -776,7 +776,7 @@ def generate_table_rows(statusentries, current_columns,
                                 <a href='http://www.openstreetmap.org/?mlon="\
                                  + c_longitude + "&mlat=" + c_latitude + \
                                  "&zoom=6'><img src='/static/img/flags/" + \
-                                 c_country + ".gif' alt='" + c_country + \
+                                 c_country + ".png' alt='" + c_country + \
                                  "' title='" + c_country + ":" + c_latitude +\
                                  ", " + c_longitude + "' border=0></a></td>"
             # Special Case: Router Name and Named
