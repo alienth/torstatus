@@ -14,9 +14,12 @@ urlpatterns = patterns('',
     # Index and related pages
     (r'^index$', 'statusapp.views.pages.index'),
 
+    # Search
+    (r'^advanced-search$', 'statusapp.views.pages.advanced_search'),
+
     # Unpaged Index and related pages
     (r'^unpaged/(?P<sort_filter>\w*)$', 'statusapp.views.pages.unpaged'),
-    (r'^unpaged/column-preferences/$', 'statusapp.views.pages.columnpreferences'),
+    (r'^display-options/$', 'statusapp.views.pages.display_options'),
     (r'^exit-node-query/$', 'statusapp.views.pages.exitnodequery'),
 
     # Media Files
@@ -56,7 +59,7 @@ urlpatterns = patterns('',
         'statusapp.views.graphs.networktotalbw'),
 
     # CSV Files
-    (r'^Tor-Query-Export.csv$', 'statusapp.views.csvs.current_results_csv'),
-    (r'^Tor-IP-List-All.csv$', 'statusapp.views.csvs.exits_or_ips', {'all_flag': True}),
-    (r'^Tor-IP-List-Exit.csv$', 'statusapp.views.csvs.exits_or_ips', {'all_flag': False}),
+    (r'^tor-query-export.csv$', 'statusapp.views.csvs.current_results_csv'),
+    (r'^Tor-IP-List-All.csv$', 'statusapp.views.csvs.custom_csv', {'flags': []}),
+    (r'^Tor-IP-List-Exit.csv$', 'statusapp.views.csvs.custom_csv', {'flags': ['isexit']}),
 )
