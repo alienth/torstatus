@@ -519,7 +519,9 @@ def display_options(request):
 
 
 def advanced_search(request):
-    search_value = request.GET['searchValue']
+    search_value = ''
+    if request.GET and 'searchValue' in request.GET:
+        search_value = request.GET['searchValue']
     
     sort_options_order = ADVANCED_SEARCH_DECLR['sort_options_order']
     sort_options = ADVANCED_SEARCH_DECLR['sort_options']
