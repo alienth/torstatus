@@ -269,6 +269,15 @@ td#col_relayLastDescPublished {
     text-align: center;
 }
 
+td#mainLinks {
+    text-align: left;
+    font-size: 0.75em;
+    color: red;
+}
+
+td#TorBannerPicture {
+}
+
 td {
     font-size: 0.5625em;
 }
@@ -342,14 +351,6 @@ p#trademark {
     text-align: center;
     font-size: 0.750em;
     margin: 0 0 1px 0;
-}
-
-#TorBannerPicture {
-
-}
-
-td#TorBanner {
-    
 }
 
 table.csv {

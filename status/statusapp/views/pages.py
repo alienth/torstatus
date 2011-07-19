@@ -55,7 +55,7 @@ def splash(request):
 
 
 #@cache_page(60 * 15) #, key_prefix="index")
-def unpaged(request, sort_filter):
+def index(request, sort_filter):
     """
     Supply a dictionary to the index.html template consisting of a list
     of active relays.
@@ -83,7 +83,8 @@ def unpaged(request, sort_filter):
     statusentries = Statusentry.objects.filter(
                     validafter=last_va).extra(
                     select={'geoip':
-                    'geoip_lookup(statusentry.address)'})
+                    'geoip_lookup(statusentry.address)'})\
+                    .order_by('nickname')
 
     num_routers = statusentries.count()
 
@@ -209,7 +210,7 @@ def unpaged(request, sort_filter):
                        'htmlQueryListOptions': html_query_list_options,
                        'htmlQueryInputOptions': html_query_input_options,
                       }
-    return render_to_response('unpaged.html', template_values)
+    return render_to_response('index.html', template_values)
 
 
 def details(request, fingerprint):

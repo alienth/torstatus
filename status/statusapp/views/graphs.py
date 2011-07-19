@@ -6,7 +6,6 @@ from copy import copy
 import datetime
 
 # Django-specific import statements -----------------------------------
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Max
 from django.views.decorators.cache import cache_page
 from django.http import HttpResponse
@@ -93,7 +92,10 @@ def bycountrycode(request):
     for entry in statusentries:
         # 'geoip' is a string, where the second and third characters
         # make the country code.
-        country = entry.geoip[1:3]
+        if entry.geoip is None:
+            country = '??'
+        else:
+            country = entry.geoip[1:3]
         if country in country_map:
             country_map[country] += 1
         else:
@@ -133,7 +135,10 @@ def exitbycountrycode(request):
     for entry in statusentries:
         # 'geoip' is a string, where the second and third characters
         # make the country code.
-        country = entry.geoip[1:3]
+        if entry.geoip is None:
+            country = '??'
+        else:
+            country = entry.geoip[1:3]
         if country in country_map:
             country_map[country] += 1
         else:
@@ -370,13 +375,13 @@ def networktotalbw(request):
     @return: A graph representing the total bandwidth of the
         Tor Network.
     """
-    TITLE = 'Tor Network Status'
-    HEIGHT = 200
-    WIDTH = 480
-    TOP_MARGIN = 25
+    #TITLE = 'Tor Network Status'
+    HEIGHT = 160
+    WIDTH = 440
+    TOP_MARGIN = 8
     BOTTOM_MARGIN = 28
-    LEFT_MARGIN = 48
-    RIGHT_MARGIN = 48
+    LEFT_MARGIN = 50
+    RIGHT_MARGIN = 50
     X_FONT_SIZE = 8
     Y_FONT_SIZE = 8
     LABEL_FONT_SIZE = 8
@@ -479,7 +484,7 @@ def networktotalbw(request):
         tick.set_color('#66CD00')
 
     # Label entire graph
-    ax1.set_title(TITLE, fontsize='12', fontweight=FONT_WEIGHT)
+    #ax1.set_title(TITLE, fontsize='12', fontweight=FONT_WEIGHT)
     fontparam = matplotlib.font_manager.FontProperties(
                 size=8, weight='bold')
 
