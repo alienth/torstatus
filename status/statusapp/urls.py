@@ -11,8 +11,6 @@ urlpatterns = patterns('',
     # Splash page
     (r'^$', 'statusapp.views.pages.splash'),
 
-    # Index and related pages
-    (r'^index$', 'statusapp.views.pages.index'),
     
     # Index and related pages
     (r'^advanced-search$', 'statusapp.views.pages.advanced_search'),
@@ -21,7 +19,7 @@ urlpatterns = patterns('',
     (r'^advanced-search$', 'statusapp.views.pages.advanced_search'),
 
     # Unpaged Index and related pages
-    (r'^unpaged/(?P<sort_filter>\w*)$', 'statusapp.views.pages.unpaged'),
+    (r'^index/(?P<sort_filter>\w*)$', 'statusapp.views.pages.index'),
     (r'^display-options/$', 'statusapp.views.pages.display_options'),
     (r'^exit-node-query/$', 'statusapp.views.pages.exitnodequery'),
 
