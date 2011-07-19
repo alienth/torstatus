@@ -44,7 +44,7 @@ NOT_MOVABLE_COLUMNS = ["Named", "Exit", "Authority", "Fast", "Guard",
                        "Platform",]
 
 #@cache_page(60 * 15) #, key_prefix="index")
-def unpaged(request, sort_filter):
+def index(request, sort_filter):
     """
     Supply a dictionary to the index.html template consisting of a list
     of active relays.

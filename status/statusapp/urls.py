@@ -12,11 +12,8 @@ urlpatterns = patterns('',
     (r'^$', 'statusapp.views.pages.splash'),
 
     # Index and related pages
-    (r'^index$', 'statusapp.views.pages.index'),
-
-    # Unpaged Index and related pages
-    (r'^unpaged/(?P<sort_filter>\w*)$', 'statusapp.views.pages.unpaged'),
-    (r'^unpaged/column-preferences/$', 'statusapp.views.pages.columnpreferences'),
+    (r'^index/(?P<sort_filter>\w*)$', 'statusapp.views.pages.index'),
+    (r'^index/column-preferences/$', 'statusapp.views.pages.columnpreferences'),
     (r'^exit-node-query/$', 'statusapp.views.pages.exitnodequery'),
 
     # Media Files
