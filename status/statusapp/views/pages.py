@@ -13,6 +13,7 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpRequest
 from django.db.models import Max, Sum, Count
 from django.views.decorators.cache import cache_page
+from django.core.paginator import Paginator, InvalidPage, EmptyPage
 
 # TorStatus specific import statements --------------------------------
 from statusapp.models import Statusentry, Descriptor, Bwhist,\
@@ -182,6 +183,23 @@ def index(request, sort_filter):
     # -----------------------------------------------------------------
     html_query_list_options = generate_query_list_options(query_options)
     html_query_input_options = generate_query_input_options(query_options)
+
+    # PAGINATION ------------------------------------------------------
+    # -----------------------------------------------------------------
+    paginator = Paginator(statusentries, 50) # Show 50 statusentries
+                                             # per page
+
+    # Make sure page request is an int. If not, deliver first page.
+    try:
+        page = int(request.GET.get('page', '1'))
+    except ValueError:
+        page = 1
+
+    # If page request is out of range, deliver last page of results.
+    try:
+        statusentries = paginator.page(page)
+    except (EmptyPage, InvalidPage):
+        statusentries = paginator.page(paginator.num_pages)
 
     template_values = {'relay_list': statusentries,
                        'client_address': client_address,

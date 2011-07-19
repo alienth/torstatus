@@ -13,6 +13,12 @@
 {% load index_filters %}
 {% spaceless %}
 
+<!--
+{% if relay_list.object_list %}
+{% for relay in relay_list.object_list %}
+    (ITERATE)
+    {% endfor %}
+    {% endif %} -->
 {% if relay_list %}
 <table class="relayTable">
     <tr>
@@ -35,7 +41,21 @@
     </tr>
 </table>
 {% endif %}
+<div class="pagination">
+    <span class="step-links">
+        {% if relay_list.has_previous %}
+            <a href="?page={{ relay_list.previous_page_number }}">previous</a>
+        {% endif %}
 
+        <span class="current">
+            Page {{ relay_list.number }} of {{ relay_list.paginator.num_pages }}.
+        </span>
+
+        {% if relay_list.has_next %}
+            <a href="?page={{ relay_list.next_page_number }}">next</a>
+        {% endif %}
+    </span>
+</div>
 
 <br />
 <br />
@@ -92,9 +112,9 @@
             <td> Sort Order: </td>
             <td>
                 <select id="sortRouterListing" name="sortOrder">
-                <option value="ascending" {% if queryOptions and queryOptions|key:'sortOrder' == "ascending" %} 
+                <option value="ascending" {% if queryOptions and queryOptions|key:'sortOrder' == "ascending" %}
                                                             SELECTED {% endif %}>Ascending</option>
-                <option value="descending" {% if queryOptions and queryOptions|key:'sortOrder' == "descending" %} 
+                <option value="descending" {% if queryOptions and queryOptions|key:'sortOrder' == "descending" %}
                                                             SELECTED {% endif %}>Descending</option>
                 </select>
             </td>
