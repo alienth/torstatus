@@ -5,8 +5,8 @@ Helper functions for views.csvs, views.graphs, and views.pages.
 import datetime
 
 # Django-specific import statements -----------------------------------
-from django.http import HttpRequest
-from django.http import HttpResponse
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpRequest, HttpResponse
 
 # Matplotlib-specific import statements -------------------------------
 import matplotlib
@@ -14,7 +14,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 # TorStatus-specific import statements --------------------------------
-from statusapp.models import Bwhist
+from statusapp.models import Bwhist, Descriptor
 
 # INIT Variables ------------------------------------------------------
 COLUMN_VALUE_NAME = {'Country Code': 'geoip',
@@ -579,12 +579,12 @@ def get_platform(platform):
                            'SunOS': 'SunOS',
                            'IRIX': 'IRIX',
                            'Cygwin': 'Cygwin',
-                           'Dragon': 'Dragon',
+                           'Dragon': 'DragonFly',
                           }
     for name in supported_platforms:
         if name in platform:
             return supported_platforms[name]
-    return None
+    return 'NotAvailable'
 
 
 def generate_table_headers(current_columns, order_column_name, sort_order):
@@ -679,14 +679,23 @@ def generate_table_rows(statusentries, current_columns,
         field_isnamed = relay.isnamed
         field_fingerprint = relay.fingerprint
         field_nickname = relay.nickname
-        field_bandwidthobserved = str(kilobytes_ps(relay.descriptorid.bandwidthobserved)) + \
-                                  " KB/s"
-        field_uptime = str(days(relay.descriptorid.uptime)) + " d"
+        try:
+            field_bandwidthobserved = str(kilobytes_ps(
+                    relay.descriptorid.bandwidthobserved)) + " KB/s"
+        except Descriptor.DoesNotExist:
+            field_bandwidthobserved = "0 KB/s"
+        try:
+            field_uptime = str(days(relay.descriptorid.uptime)) + " d"
+        except Descriptor.DoesNotExist:
+            field_uptime = "0 d"
         r_address = relay.address
         field_address = "[<a href='details/" + r_address + \
                         "/whois'>" + r_address + "</a>]"
         field_published = str(relay.published)
-        field_contact = contact(relay.descriptorid.rawdesc)
+        try:
+            field_contact = contact(relay.descriptorid.rawdesc)
+        except Descriptor.DoesNotExist:
+            field_contact = ''
         r_isbaddir = relay.isbaddirectory
         field_isbaddirectory = "<img src='/static/img/bg_" + \
                         ("yes" if r_isbaddir else "no") + \
@@ -712,7 +721,10 @@ def generate_table_rows(statusentries, current_columns,
         field_isauthority = "<img src='/static/img/status/Authority.png' \
                         alt='Authority Server' title='Authority Server'>" \
                         if relay.isauthority else ""
-        r_platform = relay.descriptorid.platform
+        try:
+            r_platform = relay.descriptorid.platform
+        except:
+            r_platform = 'Not Available'
         r_os_platform = get_platform(r_platform)
         field_platform = "<img src='/static/img/os-icons/" + r_os_platform + \
                         ".png' alt='" + r_os_platform + "' title='" + \
@@ -764,7 +776,7 @@ def generate_table_rows(statusentries, current_columns,
                                 <a href='http://www.openstreetmap.org/?mlon="\
                                  + c_longitude + "&mlat=" + c_latitude + \
                                  "&zoom=6'><img src='/static/img/flags/" + \
-                                 c_country + ".gif' alt='" + c_country + \
+                                 c_country + ".png' alt='" + c_country + \
                                  "' title='" + c_country + ":" + c_latitude +\
                                  ", " + c_longitude + "' border=0></a></td>"
             # Special Case: Router Name and Named

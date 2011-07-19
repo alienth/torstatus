@@ -83,7 +83,8 @@ def index(request, sort_filter):
     statusentries = Statusentry.objects.filter(
                     validafter=last_va).extra(
                     select={'geoip':
-                    'geoip_lookup(statusentry.address)'})
+                    'geoip_lookup(statusentry.address)'})\
+                    .order_by('nickname')
 
     num_routers = statusentries.count()
 
@@ -519,7 +520,9 @@ def display_options(request):
 
 
 def advanced_search(request):
-    search_value = request.GET['searchValue']
+    search_value = ''
+    if request.GET and 'searchValue' in request.GET:
+        search_value = request.GET['searchValue']
     
     sort_options_order = ADVANCED_SEARCH_DECLR['sort_options_order']
     sort_options = ADVANCED_SEARCH_DECLR['sort_options']
