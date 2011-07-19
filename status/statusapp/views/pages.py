@@ -457,7 +457,7 @@ def networkstatisticgraphs(request):
     return render_to_response('statisticgraphs.html')
 
 
-def columnpreferences(request):
+def display_options(request):
     """
     Let the user choose what columns should be displayed on the index
     page. This view makes use of the sessions in order to store two
@@ -515,7 +515,8 @@ def columnpreferences(request):
                        'availableColumns': column_lists[1],
                        'selectedEntry': column_lists[2]}
 
-    return render_to_response('columnpreferences.html', template_values)
+    return render_to_response('displayoptions.html', template_values)
+
 
 def advanced_search(request):
     search_value = request.GET['searchValue']
@@ -545,4 +546,5 @@ def advanced_search(request):
                        'filterOptionsOrder': filter_options_order,
                        'filterOptions': filter_options,
                       }
+
     return render_to_response('advanced_search.html', template_values)

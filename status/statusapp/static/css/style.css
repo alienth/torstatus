@@ -93,10 +93,10 @@ th.hoverable:hover {
 }
 
 table.header {
-    width: 100%;
     border-style: none;
     margin-left: auto;
     margin-right: auto;
+    border-style: 1px;
     border-spacing: 1px;
     padding: 2px;
 }
@@ -111,37 +111,6 @@ td#mainTitle {
     border-color: black;
     border-width: 1px;
     padding: 10px;
-}
-
-td#mainLinks {
-    background-color: #7BD4F7;
-    border-style: solid;
-    border-color: black;
-    border-width: 1px;
-    text-align: center;
-    font-size: 0.75em;
-    color: red;
-    padding: 10px;
-}
-
-table.displayStatus {
-    width: 300px;
-    border-style: none;
-    margin-left: auto;
-    margin-right: auto;
-    border-spacing: 1px;
-    padding: 2px;
-}
-
-table.legend {
-    width: 300px;
-    border-style: solid;
-    border-color: black;
-    border-width: 1px;
-    margin-left: auto;
-    margin-right: auto;
-    border-spacing: 1px;
-    padding: 2px;
 }
 
 table#noTableError {
@@ -205,16 +174,6 @@ a.linkDetails {
     background-color: red;
 }
 
-table.appServerDetails {
-    width: 350px;
-    border-style: solid;
-    border-color: black;
-    border-width: 1px;
-    margin-left: auto;
-    margin-right: auto;
-    border-spacing: 1px;
-}
-
 table.advancedQuery {
     width: 250px;
     border-style: solid;
@@ -223,11 +182,6 @@ table.advancedQuery {
     margin-right: auto;
     margin-left: auto;
     border-spacing: 1px;
-}
-
-tr#row_appServerDetails:hover {
-    background-color: #7BD4F7;
-    cursor: pointer;
 }
 
 table.aggStatisticSummary {
@@ -331,33 +285,10 @@ p#trademark {
     margin: 0 0 1px 0;
 }
 
-* {
-    margin: 0;
-}
-
-html, body {
-    height: 100%;
-}
-
-.wrapper {
-    min-height: 100%
-    height: auto;
-    height: 100%;
-    margin: 0 auto -2em;
-}
-
-.footer, .push {
-    height: 2em;
-    text-align: center;
-    padding: 5px 0 0 0;
-    margin: 25px 0 0 0;
-    color: rgb(100, 100, 100);
-}
-
 table.bottomTables1 {
     font-size: 30px;
     width: auto;
-    padding: 10px;
+    /*padding: 10px;*/
     border-spacing: 10px;
     margin-left: auto;
     margin-right: auto;
@@ -392,4 +323,46 @@ td#sortRouterListing {
     border-top: 1px solid black;
     border-bottom: 1px solid black;
     white-space:nowrap;
+}
+
+td#mainLinks {
+    text-align: center;
+    font-size: 0.75em;
+    color: red;
+    padding: 10px;
+}
+
+table.relayTable {
+    width: 100%;
+    border-spacing: 0px;
+    border: 1px solid black;
+}
+
+p#trademark {
+    text-align: center;
+    font-size: 0.750em;
+    margin: 0 0 1px 0;
+}
+
+#TorBannerPicture {
+
+}
+
+td#TorBanner {
+    
+}
+
+table.csv {
+    border: 1px solid black;
+    padding: 0px;
+    font-size: 20px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+td.csv {
+    font-size: 100%;
+    text-align: center;
+    color: red;
+    padding: 0px;
 }

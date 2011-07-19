@@ -29,7 +29,7 @@ def current_results_csv(request):
     current_columns.remove("Icons")
     current_columns.remove("Valid")
     current_columns.remove("Running")
-    current_columns.remove("Hibernating")
+    #current_columns.remove("Hibernating")
     current_columns.remove("Named")
 
     #Performs the query.
@@ -69,7 +69,8 @@ def current_results_csv(request):
     #Populates the row dictionary with all field values.
     for entry in statusentries:
         fields_access = [("Router Name", entry.nickname),\
-                ("Country Code", entry.geoip.split(',')[0][1:3]),\
+                #Sometimes no country code I included a check below.
+                ("Country Code", ""),\
                 ("Bandwidth", entry.descriptorid.bandwidthobserved),\
                 ("Uptime", entry.descriptorid.uptime),\
                 ("IP", entry.address),\
@@ -84,6 +85,11 @@ def current_results_csv(request):
                 ("Platform", entry.descriptorid.platform),\
                 ("Stable", entry.isstable), ("ORPort", entry.orport),\
                 ("BadExit", entry.isbadexit)]
+
+        #Removes cases when country code is inaccesible
+        if entry.geoip:
+            fields_access[fields_access.index(("Country Code", ""))] =\
+                    ("Country Code", entry.geoip.split(',')[0][1:3])
         for k, v in fields_access:
             if k in current_columns: rows[k].append(v)
 
@@ -105,7 +111,7 @@ def current_results_csv(request):
     return response
 
 
-def exits_or_ips(request, all_flag):
+def custom_csv(request, flags):
     """
     Returns a csv formatted file that contains either all Tor ip
         addresses or all Tor exit node ip addresses.
@@ -119,6 +125,16 @@ def exits_or_ips(request, all_flag):
         exit node ip addresses.
     """
     
+    filterby = {}
+    for element in flags:
+        filterby[element] = True
+    
+    last_va = Statusentry.objects.aggregate(
+                last=Max('validafter'))['last']
+    statusentries = Statusentry.objects.filter(validafter=last_va, **filterby)
+
+
+    """
     #Performs the necessary query depending on what is requested
     if all_flag:
         last_va = Statusentry.objects.aggregate(
@@ -129,19 +145,19 @@ def exits_or_ips(request, all_flag):
                 last=Max('validafter'))['last']
         statusentries = Statusentry.objects.filter(
                 validafter=last_va, isexit=True)
+    """
 
     #Initialize list to hold ips and populates it.
     IPs = []
     for entry in statusentries:
         IPs.append(entry.address)
 
+    response = HttpResponse(mimetype= 'text/csv') 
     #Creates the proper csv response type.
-    if all_flag:
-        response = HttpResponse(mimetype= 'text/csv')
+    if flags:
         response['Content-Disposition'] = 'attachment; filename=all_ips.csv'
     else:
-        response = HttpResponse(mimetype= 'text/csv')
-        response['Content-Disposition'] = 'attachment; filename=all_exit_ips.csv'
+        response['Content-Disposition'] = 'attachment; filename=custom_ips.csv'
 
     #Writes IP list to csv response file.
     writer = csv.writer(response)
