@@ -366,7 +366,7 @@ def aggregatesummary(request):
     return draw_bar_graph(xs, ys, labels, params)
 
 
-@cache_page(60 * 5)
+cache_page(60 * 5)
 def networktotalbw(request):
     """
     Return a graph representing the total bandwidth of the Tor network.
@@ -449,7 +449,7 @@ def networktotalbw(request):
 
     ax1.set_ylabel("Bandwidth (MiB)",
                   fontsize='8', fontweight=FONT_WEIGHT)
-    #ax1.set_yticks(range(0, 3001, 250))
+    #ax1.set_yticks(range(0, 3001, 500))
 
     for tick in ax1.yaxis.get_major_ticks():
         tick.label1.set_fontsize(Y_FONT_SIZE)
@@ -496,8 +496,8 @@ def networktotalbw(request):
     # Set tick marks such that a grid applies to both lines.
     ax1.set_ylim(ymin=0)
     ax2.set_ylim(ymin=max((0, min(ys))))
-    ax1.yaxis.set_major_locator(MaxNLocator(8))
-    ax2.yaxis.set_major_locator(MaxNLocator(8))
+    ax1.yaxis.set_major_locator(MaxNLocator(4))
+    ax2.yaxis.set_major_locator(MaxNLocator(5))
     #ax1.grid(color='#888888')
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')

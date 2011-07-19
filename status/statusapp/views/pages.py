@@ -20,16 +20,7 @@ from statusapp.models import Statusentry, Descriptor, Bwhist,\
         TotalBandwidth
 from custom.aggregate import CountCase
 from helpers import *
-
-
-def splash(request):
-    """
-    The splash page for the TorStatus website.
-    """
-    client_address = request.META['REMOTE_ADDR']
-    template_values = {'client_address': client_address}
-    return render_to_response("splash.html", template_values)
-
+from display_helpers import *
 
 # INIT Variables ------------------------------------------------------
 CURRENT_COLUMNS = ["Country Code", "Router Name", "Bandwidth",
@@ -43,6 +34,26 @@ AVAILABLE_COLUMNS = ["Fingerprint", "LastDescriptorPublished",
 NOT_MOVABLE_COLUMNS = ["Named", "Exit", "Authority", "Fast", "Guard",
                        "Stable", "Running", "Valid", "V2Dir",
                        "Platform",]
+
+
+def splash(request):
+    """
+    The splash page for the TorStatus website.
+    """
+    #TODO: CLEAN IF STATEMENT
+    client_address = request.META['REMOTE_ADDR']
+    template_values = {}
+    if 'button' in request.GET:
+        if request.GET['button'] == 'Search':
+            # SEND STUFF TO THE INDEX PAGE
+            template_values = { 'search_for': request.GET['searchValue'],
+                              }
+            return render_to_response("splash.html", template_values)
+        elif request.GET['button'] == 'Advanced Search':
+            return advanced_search(request)
+    else:
+        return render_to_response("splash.html", template_values)
+
 
 #@cache_page(60 * 15) #, key_prefix="index")
 def index(request, sort_filter):
@@ -465,7 +476,7 @@ def networkstatisticgraphs(request):
     return render_to_response('statisticgraphs.html')
 
 
-def columnpreferences(request):
+def display_options(request):
     """
     Let the user choose what columns should be displayed on the index
     page. This view makes use of the sessions in order to store two
@@ -523,8 +534,38 @@ def columnpreferences(request):
                        'availableColumns': column_lists[1],
                        'selectedEntry': column_lists[2]}
 
-    return render_to_response('columnpreferences.html', template_values)
+    return render_to_response('displayoptions.html', template_values)
 
-def mainindex(request):
-    hello = 'Hello New Page'
-    return render_to_response('mainindex.html', hello)
+
+def advanced_search(request):
+    search_value = ''
+    if request.GET and 'searchValue' in request.GET:
+        search_value = request.GET['searchValue']
+    
+    sort_options_order = ADVANCED_SEARCH_DECLR['sort_options_order']
+    sort_options = ADVANCED_SEARCH_DECLR['sort_options']
+    
+    search_options_fields_order = ADVANCED_SEARCH_DECLR[
+                                    'search_options_fields_order']
+    search_options_fields = ADVANCED_SEARCH_DECLR['search_options_fields']
+                          
+    search_options_booleans_order = ADVANCED_SEARCH_DECLR[
+                                    'search_options_booleans_order']
+    search_options_booleans = ADVANCED_SEARCH_DECLR['search_options_booleans']
+                            
+    filter_options_order = ADVANCED_SEARCH_DECLR['filter_options_order']
+    filter_options = ADVANCED_SEARCH_DECLR['filter_options']
+                           
+    
+    template_values = {'searchValue': search_value,
+                       'sortOptionsOrder': sort_options_order,
+                       'sortOptions': sort_options,
+                       'searchOptionsFieldsOrder': search_options_fields_order,
+                       'searchOptionsFields': search_options_fields,
+                       'searchOptionsBooleansOrder': search_options_booleans_order,
+                       'searchOptionsBooleans': search_options_booleans,
+                       'filterOptionsOrder': filter_options_order,
+                       'filterOptions': filter_options,
+                      }
+
+    return render_to_response('advanced_search.html', template_values)
