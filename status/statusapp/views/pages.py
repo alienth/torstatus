@@ -9,10 +9,11 @@ import datetime
 from socket import getfqdn
 
 # Django-specific import statements -----------------------------------
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, redirect
 from django.http import HttpResponse, HttpRequest
 from django.db.models import Max, Sum, Count
 from django.views.decorators.cache import cache_page
+from django.core.paginator import Paginator, InvalidPage, EmptyPage
 
 # TorStatus specific import statements --------------------------------
 from statusapp.models import Statusentry, Descriptor, Bwhist,\
@@ -53,10 +54,10 @@ def splash(request):
     else:
         return render_to_response("splash.html", template_values)
 
-
+"""
 #@cache_page(60 * 15) #, key_prefix="index")
 def index(request, sort_filter):
-    """
+    
     Supply a dictionary to the index.html template consisting of a list
     of active relays.
 
@@ -72,7 +73,7 @@ def index(request, sort_filter):
     @return: A dictionary consisting of information about each router
         in the network as well as aggregate information about the
         network itself.
-    """
+    
     # INITIAL QUERY ---------------------------------------------------
     # -----------------------------------------------------------------
     # Get the initial query and necessary aggregate values for the
@@ -194,6 +195,23 @@ def index(request, sort_filter):
     html_query_list_options = generate_query_list_options(query_options)
     html_query_input_options = generate_query_input_options(query_options)
 
+    # PAGINATION ------------------------------------------------------
+    # -----------------------------------------------------------------
+    paginator = Paginator(statusentries, 50) # Show 50 statusentries
+                                             # per page
+
+    # Make sure page request is an int. If not, deliver first page.
+    try:
+        page = int(request.GET.get('page', '1'))
+    except ValueError:
+        page = 1
+
+    # If page request is out of range, deliver last page of results.
+    try:
+        statusentries = paginator.page(page)
+    except (EmptyPage, InvalidPage):
+        statusentries = paginator.page(paginator.num_pages)
+
     template_values = {'relay_list': statusentries,
                        'client_address': client_address,
                        'num_routers': num_routers,
@@ -211,10 +229,241 @@ def index(request, sort_filter):
                        'htmlQueryInputOptions': html_query_input_options,
                       }
     return render_to_response('index.html', template_values)
+"""
+from django.shortcuts import render_to_response
+from django.http import HttpResponse, HttpRequest
+from django.db.models import Q, Max
+from django.core.paginator import Paginator, InvalidPage, EmptyPage
+from statusapp.models import ActiveRelay
 
+def index(request):
+    """
+    Supply a dictionary to the index.html template consisting of a list
+    of active relays.
+
+    Currently, an "active relay" is a relay that has a status entry
+    that was published in the last consensus.
+
+    @rtype: HttpResponse
+    @return: A dictionary consisting of information about each router
+        in the network as well as aggregate information about the
+        network itself.
+    """
+    # Get all relays in last consensus
+    last_validafter = '2011-07-19 14:00:00'
+                      # ActiveRelay.objects.aggregate(
+                      # last=Max('validafter'))['last'] - not working
+                      # correctly, it's a schema/db problem... :(
+    active_relays = ActiveRelay.objects.filter(
+                    validafter=last_validafter).order_by('nickname')
+
+    basic_input = request.GET.get('search', '')
+
+    if basic_input:
+        active_relays = active_relays.filter(
+                        Q(nickname__istartswith=basic_input) | \
+                        Q(fingerprint__istartswith=basic_input) | \
+                        Q(address__istartswith=basic_input))
+    else:
+        filter_params = _get_filter_params(request)
+                        # Get this from request.get,
+                        # make dict ('isexit': 1, etc)
+        #col_prefs = _get_col_prefs(request)
+                    # Get this from request.get, too - a LIST of STRING
+                    # such that we can use as col headers and query
+                    # filters... may also need mappings.
+        order = _get_order(request)
+
+        active_relays = active_relays.filter(
+                        **filter_params).order_by(
+                        order) # .values_list(*col_prefs)
+
+    # If the search returns only one relay, go to the details page for
+    # that relay.
+    if active_relays.count() == 1:
+        url = ''.join(('/details/', active_relays[0].fingerprint))
+        return redirect(url)
+
+    # Make sure paginated is an integer. If 0, then do not paginate.
+    # Otherwise, paginate.
+    try:
+        all_relays = int(request.GET.get('all', '0'))
+    except ValueError:
+        all_relays = 0
+
+    if not all_relays:
+        # Make sure entries per page is an integer. If not, or
+        # if no value is specified, make entries per page 50.
+        try:
+            per_page = int(request.GET.get('pp', 50))
+        except ValueError:
+            per_page = 50
+
+        paginator = Paginator(active_relays, per_page)
+
+        # Make sure page request is an int. If not, deliver first page.
+        try:
+            page = int(request.GET.get('page', '1'))
+        except ValueError:
+            page = 1
+
+        # If page request is out of range, deliver last
+        # page of results.
+        try:
+            paged_relays = paginator.page(page)
+        except (EmptyPage, InvalidPage):
+            paged_relays = paginator.page(paginator.num_pages)
+    else:
+        paginator = Paginator(active_relays, active_relays.count())
+        paged_relays = paginator.page(1)
+
+    template_values = {'paged_relays': paged_relays,
+                       'current_columns': ('Country Code',
+                            'Router Name', 'Bandwidth', 'Uptime', 'IP',
+                            'Fingerprint', 'LastDescriptorPublished',
+                            'Contact', 'BadDir', 'Icons', 'Exit',
+                            'Authority', 'Fast', 'V2Dir', 'Platform',
+                            'Stable', 'ORPort', 'DirPort', 'BadExit')}
+    return render_to_response('index.html', template_values)
+
+
+# TODO
+def _get_filter_params(request):
+    """
+    Get the filter preferences provided by the user via the
+    HttpRequest.
+
+    @type request: HttpRequest
+    @param request: The HttpRequest provided by the client
+    @rtype: C{dict} of C{string} to C{string}
+    @return: A dictionary mapping query parameters to user-supplied
+        input.
+    """
+    return {}
+
+
+# TODO
+_DEFAULT_COL_PREFS = []
+def _get_col_prefs(request):
+    """
+    Get the order on the columns and the columns themselves from the
+    user via the HttpRequest.
+
+    @type request: HttpRequest
+    @param request: The HttpRequest provided by the client.
+    @rtype: C{list} of C{string}
+    @return: The column preferences specified by the client.
+    """
+    return _DEFAULT_COL_PREFS
+
+
+_SORT_OPTIONS = set((
+                'validafter',
+                'nickname',
+                'fingerprint',
+                'address',
+                'orport',
+                'dirport',
+                'isauthority',
+                'isbadexit',
+                'isbaddirectory',
+                'isexit',
+                'isfast',
+                'isguard',
+                'ishsdir',
+                'isnamed',
+                'isstable',
+                'isrunning',
+                'isunnamed',
+                'isvalid',
+                'isv2dir',
+                'isv3dir',
+                'descriptor',
+                'published',
+                'bandwidthavg',
+                'bandwidthburst',
+                'bandwidthobserved',
+                'bandwidthkbps',
+                'uptime',
+                'uptimedays',
+                'platform',
+                'contact',
+                'onionkey',
+                'signingkey',
+                'exitpolicy',
+                'family',
+                'country',
+                'latitude',
+                'longitude'
+                ))
+def _get_order(request):
+    """
+    Get the sorting parameter and order from the user via the
+    HttpRequest.
+
+    This function returns 'nickname' if no order is specified or if
+    there is an error parsing the supplied information.
+
+    @type request: HttpRequest
+    @param request: The HttpRequest provided by the client.
+    @rtype: C{string}
+    @return: The sorting parameter and order as specified by the
+        HttpRequest object.
+    """
+    if 'sortparam' in request.GET and 'sortparam' in _SORT_OPTIONS:
+        param = request.GET.get('sortparam')
+    else:
+        param = 'nickname'
+
+    order = request.GET.get('ord', '')
+    if order != '-':
+        order = ''
+
+    return ''.join((order, param))
 
 def details(request, fingerprint):
     """
+    Supply the L{ActiveRelay} information associated with a
+    relay with a given fingerprint to the details.html template.
+
+    @type fingerprint: C{string}
+    @param fingerprint: The fingerprint of the router to display the
+        details of.
+    @rtype: HttpResponse
+    @return: The L{ActiveRelay} information of the router.
+    """
+    poss_relay = ActiveRelay.objects.filter(
+                 fingerprint=fingerprint).order_by('-validafter')[:1]
+
+    if not poss_relay:
+        return archive(HttpRequest(), fingerprint)
+    relay = poss_relay[0]
+
+    # Some clients may want to look up old relays. Create an attribute
+    # to flag active and unactive relays.
+    last_va = ActiveRelay.objects.aggregate(
+              last=Max('validafter'))['last']
+
+    if last_va != relay.validafter:
+        relay.active = False
+    else:
+        relay.active = True
+        published = relay.published
+        now = datetime.datetime.now()
+        diff = now - published
+        diff_sec = (diff.microseconds + (
+                    diff.seconds + diff.days * 24 * 3600) * 10**6) \
+                    / 10**6
+        relay.adjuptime = relay.uptime + diff_sec
+
+    relay.hostname = getfqdn(str(relay.address))
+
+    template_values = {'relay': relay}
+    return render_to_response('details.html', template_values)
+
+"""
+def details(request, fingerprint):
+    
     Supply the L{Statusentry} and L{Geoipdb} objects associated with a
     relay with a given fingerprint to the details.html template.
 
@@ -224,7 +473,7 @@ def details(request, fingerprint):
     @rtype: HttpResponse
     @return: The L{Statusentry}, L{Descriptor}, and L{Geoipdb}
         information of the router.
-    """
+    
     # The SQL function 'geoip_lookup' is used here, since greater than
     # and less than are incorrectly implemented for IPAddressFields.
     # [:1] is djangonese for 'LIMIT 1', and
@@ -288,7 +537,7 @@ def details(request, fingerprint):
     template_values = {'descriptor': descriptor, 'statusentry':
                        statusentry}
     return render_to_response('details.html', template_values)
-
+"""
 
 def whois(request, address):
     """

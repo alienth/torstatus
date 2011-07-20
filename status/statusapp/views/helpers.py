@@ -854,8 +854,8 @@ def generate_query_list_options(query_options):
     html_query_list_options = []
     for option in LIST_OPTIONS:
         list_option = "<option value='" + LIST_OPTIONS[option] + "'"
-        if (query_options and query_options['sortListings'] ==
-                LIST_OPTIONS[option]):
+        if ('sortListings' in query_options and \
+                query_options['sortListings'] == LIST_OPTIONS[option]):
             list_option = list_option + " SELECTED>" + option + "</option>"
         else:
             list_option = list_option + ">" + option + "</option>"
@@ -897,8 +897,8 @@ def generate_query_input_options(query_options):
                 name='" + INPUT_OPTIONS[option] + "' value='" + value + "'"
             if not query_options and value == '':
                 input_string = input_string + " CHECKED"
-            if (query_options and query_options[INPUT_OPTIONS[option]] == \
-                value):
+            if (INPUT_OPTIONS[option] in query_options and \
+                    query_options[INPUT_OPTIONS[option]] == value):
                 input_string = input_string + " CHECKED"
             input_string = input_string + " />" + ("Off" if value == '' else \
                 value.capitalize())
