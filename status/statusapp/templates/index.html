@@ -32,20 +32,45 @@
 
 {% if paged_relays.object_list %}
 <div class="pagination">
-    <span class="step-links">
+    <span>
         {% if paged_relays.has_previous %}
-            <a href="?page={{ paged_relays.previous_page_number }}">previous</a>
+        <a class="pageLinks" href="?page={{ paged_relays.previous_page_number }}">⇽</a>&nbsp;
         {% endif %}
+
+        {% if paged_relays.number > 2 %}
+        <a class="pageLinks" href="?page=1">1</a>&nbsp;
+        {% endif %}
+
+        {% if paged_relays.number > 3 %}
+        ...&nbsp;
+        {% endif %}
+
+        {% if paged_relays.has_previous %}
+        <a class="pageLinks" href="?page={{ paged_relays.previous_page_number }}">{{ paged_relays.previous_page_number }}</a>&nbsp;
+        {% endif %}
+
         <span class="current">
-            Page {{ paged_relays.number }} of {{ paged_relays.paginator.num_pages }}.
+            {{ paged_relays.number }}&nbsp;
         </span>
 
         {% if paged_relays.has_next %}
-            <a href="?page={{ paged_relays.next_page_number }}">next</a>
+        <a class="pageLinks" href="?page={{ paged_relays.next_page_number }}">{{ paged_relays.next_page_number }}</a>&nbsp;
+        {% endif %}
+
+        {% if paged_relays.paginator.num_pages|subtract:paged_relays.number >= 3 %}
+        ...&nbsp;
+        {% endif %}
+
+        {% if paged_relays.paginator.num_pages|subtract:paged_relays.number >= 2 %}
+        <a class="pageLinks" href="?page={{ paged_relays.paginator.num_pages }}">{{ paged_relays.paginator.num_pages }}</a>&nbsp;
+        {% endif %}
+
+        {% if paged_relays.has_next %}
+        <a class="pageLinks" href="?page={{ paged_relays.next_page_number }}">⇾</a>
         {% endif %}
     </span>
 </div>
-<table class="relayTable sortable">
+<table class="relayTable">
 	<tr>
 	{% for column_name in current_columns %}
 	    {% if column_name == "Country Code" %}
@@ -227,20 +252,7 @@
 		</tr>
 	{% endfor %}
 </table>
-<div class="pagination">
-    <span class="step-links">
-        {% if paged_relays.has_previous %}
-            <a href="?page={{ paged_relays.previous_page_number }}">previous</a>
-        {% endif %}
-        <span class="current">
-            Page {{ paged_relays.number }} of {{ paged_relays.paginator.num_pages }}.
-        </span>
 
-        {% if paged_relays.has_next %}
-            <a href="?page={{ paged_relays.next_page_number }}">next</a>
-        {% endif %}
-    </span>
-</div>
 {% else %}
 <table id="noTableError">
     <tr>
