@@ -24,6 +24,7 @@ CREATE TABLE active_descriptor (
     signingkey CHARACTER(188),
     exitpolicy TEXT,
     family TEXT,
+    ishibernating BOOLEAN DEFAULT FALSE,
     CONSTRAINT active_descriptor_unique PRIMARY KEY (descriptor)
 );
 
@@ -66,6 +67,7 @@ CREATE TABLE active_relay (
     signingkey CHARACTER(188),
     exitpolicy TEXT,
     family TEXT,
+    ishibernating BOOLEAN,
     country CHARACTER VARYING(2),
     latitude NUMERIC(7, 4),
     longitude NUMERIC(7, 4),
@@ -225,6 +227,10 @@ CREATE OR REPLACE FUNCTION update_descriptor()
                              regexp_matches(
                              CAST(NEW.rawdesc AS TEXT),
                              E'\\\\012family\ (.*?)\\\\012'))::TEXT);
+            nishibernating BOOLEAN := (SELECT CASE
+                                       WHEN position('opt hibernating 1'
+                                       in NEW.rawdesc::text) > 0 THEN TRUE
+                                       ELSE FALSE END);
         BEGIN
         UPDATE cache.active_relay
         SET
@@ -243,7 +249,8 @@ CREATE OR REPLACE FUNCTION update_descriptor()
             onionkey = nonionkey,
             signingkey = nsigningkey,
             exitpolicy = nsigningkey,
-            family = nfamily
+            family = nfamily,
+            ishibernating = nishibernating
         WHERE cache.active_relay.fingerprint = NEW.fingerprint
         AND CASE WHEN cache.active_relay.published IS NULL THEN '1980-01-01 01:00:00' ELSE cache.active_relay.published END < NEW.published;
         IF ((SELECT COUNT(*) FROM cache.active_descriptor
@@ -259,12 +266,13 @@ CREATE OR REPLACE FUNCTION update_descriptor()
                 fingerprint, published, bandwidthavg, bandwidthburst,
                 bandwidthobserved, bandwidthkbps, platform, uptime,
                 uptimedays, contact, onionkey, signingkey, exitpolicy,
-                family)
+                family, ishibernating)
             VALUES
                 (ndescriptor, nnickname, nfingerprint, npublished,
                  nbandwidthavg, nbandwidthburst, nbandwidthobserved,
                  nbandwidthkbps, nplatform, nuptime, nuptimedays,
-                 ncontact, nonionkey, nsigningkey, nexitpolicy, nfamily);
+                 ncontact, nonionkey, nsigningkey, nexitpolicy, nfamily,
+                 nishibernating);
         END IF;
         END;
     END IF;
@@ -293,16 +301,19 @@ CREATE OR REPLACE FUNCTION insert_descriptor_info (
         nsigningkey CHARACTER(188);
         nexitpolicy TEXT;
         nfamily TEXT;
+        nishibernating BOOLEAN;
     BEGIN
       SELECT INTO ndescriptor, nnickname, nfingerprint, npublished,
                   nbandwidthavg, nbandwidthburst, nbandwidthobserved,
                   nbandwidthkbps, nplatform, nuptime, nuptimedays,
-                  ncontact, nonionkey, nsigningkey, nexitpolicy, nfamily
+                  ncontact, nonionkey, nsigningkey, nexitpolicy, nfamily,
+                  nishibernating
 
                   descriptor, nickname, fingerprint, published,
                   bandwidthavg, bandwidthburst, bandwidthobserved,
                   bandwidthkbps, platform, uptime, uptimedays,
-                  contact, onionkey, signingkey, exitpolicy, family
+                  contact, onionkey, signingkey, exitpolicy, family,
+                  nishibernating
                   FROM cache.active_descriptor
                   WHERE fingerprint = given_fingerprint;
     UPDATE cache.active_relay
@@ -322,7 +333,8 @@ CREATE OR REPLACE FUNCTION insert_descriptor_info (
         onionkey = nonionkey,
         signingkey = nsigningkey,
         exitpolicy = nexitpolicy,
-        family = nfamily
+        family = nfamily,
+        ishibernating = nishibernating
     WHERE cache.active_relay.fingerprint = given_fingerprint;
     RETURN 1;
     END;

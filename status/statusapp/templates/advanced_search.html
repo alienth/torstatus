@@ -12,7 +12,7 @@
 {% load index_filters %}
 
 {{searchValue}}
-
+{% spaceless %}
 <table class="advSearchTable">
     <tr>
         <td id="advSearchTitle"> Advanced Search </td>
@@ -73,9 +73,9 @@
             <td colspan="2" id="advSearchToolText" align="center">
             Router flags
             </td>
-        </tr>
         {% for option in filterOptionsOrder %}
-        <tr>
+        {% if not forloop.counter|divisibleby:"2" %}
+        </tr><tr>{% endif %}
             <td id="advSearchToolText"> {{option}} </td>
             <td>
             <input type="radio" {% if not queryOptions %} CHECKED
@@ -86,8 +86,8 @@
             <input type="radio" name="{{filterOptions|key:option}}" value="0" {% if queryOptions and queryOptions|key:'isauthority' == "0" %}
                                                             CHECKED {% endif %} />No
             </td>
+            {% endfor %}
         </tr>
-        {% endfor %}
         <tr>
             <td colspan="2" align="center">
                 <input type="submit" value="Search" id="searchButton">
@@ -101,6 +101,7 @@
         <td>
 
 </table>
+{% endspaceless %}
 {% endblock %}
 
 <tr>
@@ -159,4 +160,3 @@
                 </select>
             </td>
         </tr>
-

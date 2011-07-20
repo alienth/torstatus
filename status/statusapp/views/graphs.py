@@ -18,8 +18,8 @@ from matplotlib.figure import Figure
 from matplotlib.ticker import MaxNLocator
 
 # TorStatus specific import statements --------------------------------
-from statusapp.models import Statusentry, Bwhist, TotalBandwidth, \
-        NetworkSize
+from statusapp.models import Bwhist, TotalBandwidth, NetworkSize, \
+        ActiveRelay
 from custom.aggregate import CountCase
 from helpers import draw_bar_graph, draw_line_graph
 
@@ -30,7 +30,7 @@ DEFAULT_PARAMS = {'WIDTH': 960, 'HEIGHT': 320, 'TOP_MARGIN': 25,
                   'Y_FONT_SIZE': '9', 'LABEL_FONT_SIZE': '8',
                   'LABEL_FLOAT': 3, 'LABEL_ROT': 'horizontal',
                   'FONT_WEIGHT': 'bold', 'BAR_WIDTH': 0.5,
-                  'COLOR': '#66CD00', 'TITLE': ''}
+                  'COLOR': '#005500', 'TITLE': ''}
 def readhist(request, fingerprint):
     """
     Create a graph of read bandwidth history for the last twenty-four
@@ -80,22 +80,17 @@ def bycountrycode(request):
     params['LABEL_ROT'] = 'vertical'
     params['TITLE'] = 'Number of Routers by Country Code'
 
-    last_va = Statusentry.objects.aggregate(
+    last_va = ActiveRelay.objects.aggregate(
               last=Max('validafter'))['last']
 
-    statusentries = Statusentry.objects.filter(
-                    validafter=last_va).extra(
-                            select={'geoip': 'geoip_lookup(address)'})
+    relays = ActiveRelay.objects.filter(validafter=last_va)
 
     country_map = {}
 
-    for entry in statusentries:
-        # 'geoip' is a string, where the second and third characters
-        # make the country code.
-        if entry.geoip is None:
+    for relay in relays:
+        country = relay.country
+        if country is None:
             country = '??'
-        else:
-            country = entry.geoip[1:3]
         if country in country_map:
             country_map[country] += 1
         else:
@@ -123,22 +118,17 @@ def exitbycountrycode(request):
     params['LABEL_ROT'] = 'vertical'
     params['TITLE'] = 'Number of Exit Routers by Country Code'
 
-    last_va = Statusentry.objects.aggregate(
+    last_va = ActiveRelay.objects.aggregate(
               last=Max('validafter'))['last']
 
-    statusentries = Statusentry.objects.filter(
-                    validafter=last_va, isexit=1).extra(
-                            select={'geoip': 'geoip_lookup(address)'})
+    relays = ActiveRelay.objects.filter(validafter=last_va, isexit=1)
 
     country_map = {}
 
-    for entry in statusentries:
-        # 'geoip' is a string, where the second and third characters
-        # make the country code.
-        if entry.geoip is None:
+    for relay in relays:
+        country = relay.country
+        if country is None:
             country = '??'
-        else:
-            country = entry.geoip[1:3]
         if country in country_map:
             country_map[country] += 1
         else:
@@ -166,20 +156,22 @@ def bytimerunning(request):
     params['X_FONT_SIZE'] = '9'
     params['TITLE'] = 'Number of Routers by Time Running (weeks)'
 
-    last_va = Statusentry.objects.aggregate(
+    last_va = ActiveRelay.objects.aggregate(
               last=Max('validafter'))['last']
 
-    statusentries = Statusentry.objects.filter(
-                    validafter=last_va)
+    relays = ActiveRelay.objects.filter(validafter=last_va)
 
     uptime_map = {}
 
     # This step is very inefficient; a custom SUM(CASE WHERE...
     # should be written.
-    for entry in statusentries:
+    for relay in relays:
         # The uptime in weeks is seconds / (seconds/min * min/hour
         # * hour/day * day/week), where / signifies floor division.
-        weeks = entry.descriptorid.uptime / (60 * 60 * 24 * 7)
+        uptimedays = relay.uptimedays
+        if uptimedays is None:
+            continue
+        weeks = relay.uptimedays / 7
         if weeks in uptime_map:
             uptime_map[weeks] += 1
         else:
@@ -219,11 +211,10 @@ def byobservedbandwidth(request):
     RANGES = [(0, 10), (11, 20), (21, 50), (51, 100), (101, 500),
               (501, 1000), (1001, 2000), (2001, 3000), (3001, 5000)]
 
-    last_va = Statusentry.objects.aggregate(
+    last_va = ActiveRelay.objects.aggregate(
               last=Max('validafter'))['last']
 
-    statusentries = Statusentry.objects.filter(
-                    validafter=last_va)
+    relays = ActiveRelay.objects.filter(validafter=last_va)
 
     bw_map = {}
     excess = RANGES[-1][1] + 1
@@ -232,12 +223,10 @@ def byobservedbandwidth(request):
         bw_map[rng] = 0
     bw_map[excess] = 0
 
-    for entry in statusentries:
-        kbps = entry.descriptorid.bandwidthobserved / 1024
+    for relay in relays:
+        kbps = relay.bandwidthkbps
 
         # Binary search
-        # Is there a way to clean up this bit? It could be its own
-        # function...
         rngs = RANGES
         while (rngs and (not rngs[len(rngs) / 2][0] <= kbps <= \
                              rngs[len(rngs) / 2][1])):
@@ -249,7 +238,6 @@ def byobservedbandwidth(request):
             bw_map[rngs[len(rngs) / 2][0], rngs[len(rngs) / 2][1]] += 1
         else:
             bw_map[excess] += 1
-
 
     num_params = len(bw_map)
     xs = range(num_params)
@@ -278,11 +266,10 @@ def byplatform(request):
     params['X_FONT_SIZE'] = '9'
     params['TITLE'] = 'Number of Routers by Platform'
 
-    last_va = Statusentry.objects.aggregate(
+    last_va = ActiveRelay.objects.aggregate(
               last=Max('validafter'))['last']
 
-    statusentries = Statusentry.objects.filter(
-                    validafter=last_va)
+    relays = ActiveRelay.objects.filter(validafter=last_va)
 
     platform_map = {}
     keys = ['Linux', 'Windows', 'FreeBSD', 'Darwin', 'OpenBSD',
@@ -295,8 +282,11 @@ def byplatform(request):
     # Inefficient for the same reason that the observed bandwidth
     # graph is inefficient; a custom SUM(CASE WHERE... should be
     # necessary here.
-    for entry in statusentries:
-        platform = entry.descriptorid.platform
+    for relay in relays:
+        platform = relay.platform
+        if platform is None:
+            platform_map['Unknown'] += 1
+            continue
         for key in keys:
             if key in platform:
                 platform_map[key] += 1
@@ -330,19 +320,20 @@ def aggregatesummary(request):
     params['TITLE'] = 'Aggregate Summary -- Number of Routers Matching' \
                     + ' Specified Criteria'
 
-    last_va = Statusentry.objects.aggregate(
+    last_va = ActiveRelay.objects.aggregate(
               last=Max('validafter'))['last']
 
-    statusentries = Statusentry.objects.filter(validafter=last_va)
+    relays = ActiveRelay.objects.filter(validafter=last_va)
 
-    total = statusentries.count()
-    counts = Statusentry.objects.filter(validafter=last_va).aggregate(
+    total = relays.count()
+    counts = ActiveRelay.objects.filter(validafter=last_va).aggregate(
              isauthority=CountCase('isauthority', when=True),
              isbaddirectory=CountCase('isbaddirectory', when=True),
              isbadexit=CountCase('isbadexit', when=True),
              isexit=CountCase('isexit', when=True),
              isfast=CountCase('isfast', when=True),
              isguard=CountCase('isguard', when=True),
+             ishibernating=CountCase('ishibernating', when=True),
              isnamed=CountCase('isnamed', when=True),
              isstable=CountCase('isstable', when=True),
              isrunning=CountCase('isrunning', when=True),
@@ -350,11 +341,11 @@ def aggregatesummary(request):
              isv2dir=CountCase('isv2dir', when=True))
 
     keys = ['isauthority', 'isbaddirectory', 'isbadexit', 'isexit',
-            'isfast', 'isguard', 'isnamed', 'isstable', 'isrunning',
-            'isvalid', 'isv2dir']
+            'isfast', 'isguard', 'ishibernating', 'isnamed',
+            'isstable', 'isrunning', 'isvalid', 'isv2dir']
     labels = ['Total', 'Authority', 'BadDirectory', 'BadExit', 'Exit',
-            'Fast', 'Guard', 'Named', 'Stable', 'Running', 'Valid',
-            'V2Dir']
+              'Fast', 'Guard', 'Hibernating', 'Named', 'Stable',
+              'Running', 'Valid', 'V2Dir']
     num_params = len(labels)
     xs = range(num_params)
 
@@ -366,7 +357,7 @@ def aggregatesummary(request):
     return draw_bar_graph(xs, ys, labels, params)
 
 
-cache_page(60 * 5)
+@cache_page(60 * 5)
 def networktotalbw(request):
     """
     Return a graph representing the total bandwidth of the Tor network.

@@ -17,8 +17,8 @@ td#advSearchToolText {
     text-align: center;
     border-color: #61a #315 #315 #61a;
     white-space:nowrap;
-    padding-right: 15px;
-    padding-left: 15px;
+    /*padding-right: 15px;
+    padding-left: 15px;*/
 }
 
 table.advSearchTable {
