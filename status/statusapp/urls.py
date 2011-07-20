@@ -12,7 +12,8 @@ urlpatterns = patterns('',
     (r'^$', 'statusapp.views.pages.splash'),
 
     # Index and related pages
-    (r'^index/(?P<sort_filter>\w*)$', 'statusapp.views.pages.index'),
+    #(r'^index/(?P<sort_filter>\w*)$', 'statusapp.views.pages.index'),
+    (r'^index/$', 'statusapp.views.pages.index'),
 
     # Search
     (r'^advanced-search$', 'statusapp.views.pages.advanced_search'),
@@ -22,7 +23,6 @@ urlpatterns = patterns('',
     (r'^exit-node-query/$', 'statusapp.views.pages.exitnodequery'),
 
     # Media Files
-    (r'^flags/(?P<country_code>\w\w).gif$','statusapp.views.displayFlag'),
     (r'^static/(?P<path>.*)$', 'django.views.static.serve',
             {'document_root': settings.MEDIA_ROOT}),
 

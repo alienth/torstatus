@@ -9,7 +9,7 @@ from django import template
 from django.db.models import Max, Count
 
 # TorStatus-specific import statements --------------------------------
-from statusapp.models import Statusentry
+from statusapp.models import Statusentry, ActiveRelay
 
 register = template.Library()
 
@@ -60,36 +60,46 @@ def format_fing(fingerprint):
 
 
 @register.filter
-def format_family(family_list):
+def format_family(family):
     """
     Get the family of a relay from its raw descriptor.
 
     It is possible that no family information for a relay exists in its
     raw descriptor. If this is the case, "No family given" is returned.
 
-    @type rawdesc: C{string} or C{buffer}
-    @param rawdesc: The raw descriptor of a relay.
+    @type family: C{string}, C{list} or C{buffer}
+    @param family: The family information of a relay.
     @rtype: C{string}
     @return: The family of a relay.
     """
+    if isinstance(family, list):
+        family_list = family
+    elif isinstance(family, str) or isinstance(family, unicode) or \
+         isinstance(family, buffer):
+        family_list = str(family).split(' ')
+    else:
+        family_list = []
+
     if family_list:
         links = []
 
-        one_day = datetime.timedelta(days=1)
-        last_consensus = Statusentry.objects.aggregate(\
-                last_consensus=Max('validafter'))['last_consensus']
-        oldest_usable = last_consensus - one_day
+        #one_day = datetime.timedelta(days=1)
+        #last_consensus = Statusentry.objects.aggregate(\
+        #        last_consensus=Max('validafter'))['last_consensus']
+        #oldest_usable = last_consensus - one_day
 
         for entry in family_list:
             if (entry[0] == "$" and len(entry[1:]) == 40):
                 # Assume the entry is a fingerprint.
 
                 fingerprint = entry[1:].lower()
-                poss_entries = Statusentry.objects.filter(
-                        fingerprint=fingerprint,
-                        validafter__gte=oldest_usable)\
-                        .order_by('-validafter')
-
+                #poss_entries = Statusentry.objects.filter(
+                #        fingerprint=fingerprint,
+                #        validafter__gte=oldest_usable)\
+                #        .order_by('-validafter')
+                poss_entries = ActiveRelay.objects.filter(
+                               fingerprint=fingerprint).order_by(
+                               '-validafter')
                 # Fingerprints are unique, so either an entry with the
                 # fingerprint is found or not. Use only the most
                 # recent entry.
@@ -103,11 +113,11 @@ def format_family(family_list):
 
             else:
                 # Assume the entry is a nickname.
-                poss_entries = Statusentry.objects.filter(\
-                        nickname=entry, \
-                        validafter__gte=oldest_usable)
-                poss_fingerprints = poss_entries.values('fingerprint')\
-                        .annotate(Count('fingerprint'))
+                poss_entries = ActiveRelay.objects.filter(
+                               nickname=entry)
+                poss_fingerprints = poss_entries.values(
+                                    'fingerprint').annotate(
+                                    Count('fingerprint'))
 
                 if not poss_fingerprints:
                     # Can't find a fingerprint, so just return the
@@ -119,10 +129,10 @@ def format_family(family_list):
                     # with a hyperlink.
                     fingerprint = poss_fingerprints[0]['fingerprint']
                     links.append("<a href=\"/details/%s\">%s</a>" % \
-                            (fingerprint, entry))
+                                (fingerprint, entry))
                 else:
-                    # Multiple nicknames match the fingerprint. There is
-                    # nothing to do except returning the nickname.
+                    # Multiple fingerprints match the nickname. There is
+                    # nothing to do except return the nickname.
                     links.append("(%s)" % entry)
 
         return "\n".join(links)
