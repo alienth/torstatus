@@ -55,7 +55,7 @@ CREATE TABLE active_relay (
     uptime BIGINT,
     uptimedays BIGINT,
     platform CHARACTER VARYING(256),
-    contact CHARACTER VARYING(96),
+    contact TEXT,
     onionkey CHARACTER(188),
     signingkey CHARACTER(188),
     exitpolicy TEXT,
@@ -99,7 +99,7 @@ CREATE OR REPLACE FUNCTION update_statusentry_relay()
     IF ((SELECT COUNT(*) FROM cache.active_relay
         WHERE validafter = NEW.validafter
         AND fingerprint = NEW.fingerprint) > 0
-        OR (NEW.validafter < (SELECT localtimestamp) - INTERVAL '90 minutes'))
+        OR (NEW.validafter < (SELECT localtimestamp) - INTERVAL '4 hours'))
         THEN
             RETURN NULL;
     ELSE IF (SELECT COUNT(*) FROM cache.active_relay
@@ -198,7 +198,7 @@ CREATE OR REPLACE FUNCTION update_descriptor_relay()
     BEGIN
     IF ((SELECT COUNT(*) FROM cache.active_descriptor
          WHERE (descriptor = NEW.descriptor OR published > NEW.published)) > 0
-         OR (NEW.published < (SELECT localtimestamp) - INTERVAL '24 hours'))
+         OR (NEW.published < (SELECT localtimestamp) - INTERVAL '72 hours'))
          THEN
              RETURN NULL;
     ELSE
@@ -215,24 +215,24 @@ CREATE OR REPLACE FUNCTION update_descriptor_relay()
             bandwidthkbps = (NEW.bandwidthobserved / 1024),
             platform = NEW.platform,
             uptime = NEW.uptime,
-            uptimedays = (NEW.uptime / 1024),
+            uptimedays = (NEW.uptime / 86400),
             contact = (SELECT regexp_replace(
                        unnest(
                        regexp_matches(
                        CAST(NEW.rawdesc AS TEXT),
-                       E'contact\ ([^\\\\012]*)'))::CHARACTER VARYING(96),
+                       E'contact\ ([^\\\\012]*)'))::TEXT,
                        E'\\\\012', E'\n', 'g')),
             onionkey = (SELECT regexp_replace(
                         unnest(
                         regexp_matches(
                         CAST(NEW.rawdesc AS TEXT),
-                        E'onion-key\\\\012-----BEGIN\ RSA\ PUBLIC\ KEY-----\\\\012(.*)-----END\ RSA\ PUBLIC\ KEY-----'))::CHARACTER VARYING(200),
+                        E'onion-key\\\\012-----BEGIN\ RSA\ PUBLIC\ KEY-----\\\\012(.*)-----END\ RSA\ PUBLIC\ KEY-----'))::CHARACTER(188),
                         E'\\\\012', E'\n', 'g')),
             signingkey = (SELECT regexp_replace(
                           unnest(
                           regexp_matches(
                           CAST(NEW.rawdesc AS TEXT),
-                          E'signing-key\\\\012-----BEGIN\ RSA\ PUBLIC\ KEY-----\\\\012(.*)-----END\ RSA\ PUBLIC\ KEY-----'))::CHARACTER VARYING(200),
+                          E'signing-key\\\\012-----BEGIN\ RSA\ PUBLIC\ KEY-----\\\\012(.*)-----END\ RSA\ PUBLIC\ KEY-----'))::CHARACTER(188),
                           E'\\\\012', E'\n', 'g')),
             exitpolicy = (SELECT regexp_replace(
                           unnest(
@@ -241,9 +241,9 @@ CREATE OR REPLACE FUNCTION update_descriptor_relay()
                           E'\\\\012([ar][ce][cj][e][pc][t]\ .*)\\\\012router-signature'))::TEXT,
                           E'\\\\012', E'\n', 'g')),
             family = (SELECT unnest(
-                          regexp_matches(
-                          CAST(NEW.rawdesc AS TEXT),
-                          E'\\\\012family\ ([^\\\\012]*)'))::TEXT)
+                      regexp_matches(
+                      CAST(NEW.rawdesc AS TEXT),
+                      E'\\\\012family\ (.*?)\\\\012'))::TEXT)
         WHERE cache.active_relay.fingerprint = NEW.fingerprint
         AND CASE WHEN cache.active_relay.published IS NULL THEN '1980-01-01 01:00:00' ELSE cache.active_relay.published END < NEW.published;
         END;
@@ -258,7 +258,7 @@ CREATE OR REPLACE FUNCTION update_descriptor_descriptor()
     BEGIN
     IF ((SELECT COUNT(*) FROM cache.active_descriptor
          WHERE (descriptor = NEW.descriptor OR published > NEW.published)) > 0
-         OR (NEW.published < (SELECT localtimestamp) - INTERVAL '24 hours'))
+         OR (NEW.published < (SELECT localtimestamp) - INTERVAL '72 hours'))
          THEN
             RETURN NULL;
     ELSE
@@ -308,12 +308,12 @@ CREATE OR REPLACE FUNCTION insert_descriptor_info (
             bandwidthkbps = (insert_bandwidthobserved / 1024),
             platform = insert_platform,
             uptime = insert_uptime,
-            uptimedays = (insert_uptime / 1024),
+            uptimedays = (insert_uptime / 86400),
             contact = (SELECT regexp_replace(
                        unnest(
                        regexp_matches(
                        CAST(insert_rawdesc AS TEXT),
-                       E'contact\ ([^\\\\012]*)'))::CHARACTER VARYING(96),
+                       E'contact\ ([^\\\\012]*)'))::TEXT,
                        E'\\\\012', E'\n', 'g')),
             onionkey = (SELECT regexp_replace(
                         unnest(
@@ -336,7 +336,7 @@ CREATE OR REPLACE FUNCTION insert_descriptor_info (
             family = (SELECT unnest(
                       regexp_matches(
                       CAST(insert_rawdesc AS TEXT),
-                      E'\\\\012family\ ([^\\\\012]*)'))::TEXT)
+                      E'\\\\012family\ (.*?)\\\\012'))::TEXT)
         WHERE cache.active_relay.fingerprint = insert_fingerprint;
         END;
     END IF;
@@ -356,12 +356,12 @@ RETURN NULL;
 END;
 $check_to_purge_descriptor$ LANGUAGE plpgsql;
 
--- Keep relays for no more than 3 hours
+-- Keep relays for no more than 4 hours
 CREATE OR REPLACE FUNCTION purge_relay()
 RETURNS TRIGGER AS $check_to_purge_relay$
     BEGIN
     DELETE FROM cache.active_relay
-    WHERE validafter < (SELECT localtimestamp) - INTERVAL '3 hours';
+    WHERE validafter < (SELECT localtimestamp) - INTERVAL '4 hours';
 RETURN NULL;
 END;
 $check_to_purge_relay$ LANGUAGE plpgsql;
@@ -369,12 +369,12 @@ $check_to_purge_relay$ LANGUAGE plpgsql;
 -- TRIGGERS -----------------------------------------------------------
 -- Add and purge descriptors
 CREATE TRIGGER cache_descriptor
-    AFTER UPDATE OR INSERT ON public.descriptor
+    BEFORE UPDATE OR INSERT ON public.descriptor
     FOR EACH ROW
     EXECUTE PROCEDURE update_descriptor_descriptor();
 
 CREATE TRIGGER add_descriptor
-    AFTER UPDATE OR INSERT ON public.descriptor
+    BEFORE UPDATE OR INSERT ON public.descriptor
     FOR EACH ROW
     EXECUTE PROCEDURE update_descriptor_relay();
 
@@ -386,7 +386,7 @@ CREATE TRIGGER check_to_purge_descriptor
 
 -- Add and purge statusentries
 CREATE TRIGGER update_statusentry
-    AFTER UPDATE OR INSERT ON public.statusentry
+    BEFORE UPDATE OR INSERT ON public.statusentry
     FOR EACH ROW
     EXECUTE PROCEDURE update_statusentry_relay();
 

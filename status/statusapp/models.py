@@ -85,6 +85,7 @@ class Descriptor(models.Model):
         the L{Descriptor} describes.
     @type published: DateTimeField (C{datetime})
     @ivar published: The time that the L{Descriptor} was published.
+
     @type uptime: BigIntegerField (C{long})
     @ivar uptime: The time, in seconds, that the router that the
         L{Descriptor} describes has been continuously running.
@@ -1146,7 +1147,7 @@ class ActiveDescriptor(models.Model):
 
     class Meta:
         verbose_name = "active descriptor"
-        db_table = 'cache\".\"active_descriptor'
+        db_table = 'cacheold\".\"active_descriptor'
 
     def __unicode__(self):
         return str(self.descriptor)
@@ -1290,7 +1291,7 @@ class ActiveRelay(models.Model):
 
     class Meta:
         verbose_name = 'active relay'
-        db_table = 'cache\".\"active_relay'
+        db_table = 'cacheold\".\"active_relay'
 
     def __unicode__(self):
         return ': '.join((str(self.nickname), str(self.fingerprint)))
