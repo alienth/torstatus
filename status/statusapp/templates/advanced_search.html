@@ -19,16 +19,16 @@
     </tr>
     <tr>
         <td>
-        <form name="searchForm" action="" method="get">
+        <form name="searchForm" action="/index" method="get">
         <table class="">
             <tr>
                 <td id='advSearchToolText'>
-                Filter By
+                Filters
                 </td>
                 <td>
                 <select id="advSearchButton" name="criteria">
                 {% for option in searchOptionsFieldsOrder %}
-                    <option value="{{searchOptionsFields|key:option}}" 
+                    <option value="{{searchOptionsFields|key:option}}"
                     {% if queryOptions and queryOptions|key:'criteria' == "{{searchOptionsFields|key: option}}" %}
                                 SELECTED {% endif %}>{{option}}</option>
                 {% endfor %}
@@ -37,8 +37,8 @@
                 <td>
                 <select id="advSearchButton" name="boolLogic">
                 {% for option in searchOptionsBooleansOrder %}
-                    <option value="{{searchOptionsBooleans|key:option}}" 
-                    {% if queryOptions and queryOptions|key:'boolLogic' == "{{searchOptionsBooleans|key:option}}" %} 
+                    <option value="{{searchOptionsBooleans|key:option}}"
+                    {% if queryOptions and queryOptions|key:'boolLogic' == "{{searchOptionsBooleans|key:option}}" %}
                                 SELECTED {% endif %}>{{option}}</option>
                 {% endfor %}
                 </select>
@@ -54,49 +54,52 @@
                 <td>
                 <select id="advSearchButton" name="sortListing">
                 {% for option in sortOptionsOrder %}
-                    <option value="{{sortOptions|key:option}}" 
-                    {% if queryOptions and queryOptions|key:'sortListings' == "{{sortOptions|key:option}}" %} 
+                    <option value="{{sortOptions|key:option}}"
+                    {% if queryOptions and queryOptions|key:'sortListings' == "{{sortOptions|key:option}}" %}
                                                             SELECTED {% endif %}>{{option}}</option>
                 {% endfor %}
                 </select>
                 </td>
                 <td>
                 <select id="advSearchButton" name="sortOrder">
-                <option value="ascending" {% if queryOptions and queryOptions|key:'sortOrder' == "ascending" %} 
+                <option value="ascending" {% if queryOptions and queryOptions|key:'sortOrder' == "ascending" %}
                                                             SELECTED {% endif %}>Ascending</option>
-                <option value="descending" {% if queryOptions and queryOptions|key:'sortOrder' == "descending" %} 
+                <option value="descending" {% if queryOptions and queryOptions|key:'sortOrder' == "descending" %}
                                                             SELECTED {% endif %}>Descending</option>
                 </select>
                 </td>
             </tr>
         <tr>
-            <td id="advSearchToolText"> 
-            Require Flags 
+            <td colspan="2" id="advSearchToolText" align="center">
+            Router flags
             </td>
         </tr>
         {% for option in filterOptionsOrder %}
         <tr>
             <td id="advSearchToolText"> {{option}} </td>
             <td>
-            <input type="radio" name="{{filterOptions|key:option}}" value="" {% if not queryOptions %} CHECKED 
+            <input type="radio" {% if not queryOptions %} CHECKED
                                             {% else %} {% if queryOptions and queryOptions|key:'isauthority' == "" %}
                                                             CHECKED {% endif %}{% endif %} />Off
-            <input type="radio" name="{{filterOptions|key:option}}" value="yes" {% if queryOptions and queryOptions|key:'isauthority' == "yes" %}
+            <input type="radio" name="{{filterOptions|key:option}}" value="1" {% if queryOptions and queryOptions|key:'isauthority' == "1" %}
                                                             CHECKED {% endif %} />Yes
-            <input type="radio" name="{{filterOptions|key:option}}" value="no" {% if queryOptions and queryOptions|key:'isauthority' == "no" %}
+            <input type="radio" name="{{filterOptions|key:option}}" value="0" {% if queryOptions and queryOptions|key:'isauthority' == "0" %}
                                                             CHECKED {% endif %} />No
             </td>
         </tr>
         {% endfor %}
-
+        <tr>
+            <td colspan="2" align="center">
+                <input type="submit" value="Search" id="searchButton">
+            </td>
+        </tr>
         </table>
         </form>
         </td>
     </tr>
     <tr>
         <td>
-        
-    
+
 </table>
 {% endblock %}
 
@@ -105,53 +108,53 @@
             <td>
                 <form action="/" method="get">
                 <select id="sortRouterListing" name="sortListings">
-                <option value="nickname" {% if not queryOptions or queryOptions|key:'sortListings' == "nickname" %} 
+                <option value="nickname" {% if not queryOptions or queryOptions|key:'sortListings' == "nickname" %}
                                                             SELECTED {% endif %}>Router Name</option>
-                <option value="fingerprint" {% if queryOptions and queryOptions|key:'sortListings' == "fingerprint" %} 
+                <option value="fingerprint" {% if queryOptions and queryOptions|key:'sortListings' == "fingerprint" %}
                                                             SELECTED {% endif %}>Fingerprint</option>
-                <option value="geoip" {% if queryOptions and queryOptions|key:'sortListings' == "geoip" %} 
+                <option value="geoip" {% if queryOptions and queryOptions|key:'sortListings' == "geoip" %}
                                                             SELECTED {% endif %}>Country Code</option>
-                <option value="bandwidthobserved" {% if queryOptions and queryOptions|key:'sortListings' == "bandwidthobserved" %} 
+                <option value="bandwidthobserved" {% if queryOptions and queryOptions|key:'sortListings' == "bandwidthobserved" %}
                                                             SELECTED {% endif %}>Bandwidth</option>
-                <option value="uptime" {% if queryOptions and queryOptions|key:'sortListings' == "uptime" %} 
+                <option value="uptime" {% if queryOptions and queryOptions|key:'sortListings' == "uptime" %}
                                                             SELECTED {% endif %}>Uptime</option>
-                <option value="published" {% if queryOptions and queryOptions|key:'sortListings' == "published" %} 
+                <option value="published" {% if queryOptions and queryOptions|key:'sortListings' == "published" %}
                                                             SELECTED {% endif %}>Last Descriptor Published</option>
-                <option value="hostname" {% if queryOptions and queryOptions|key:'sortListings' == "hostname" %} 
+                <option value="hostname" {% if queryOptions and queryOptions|key:'sortListings' == "hostname" %}
                                                             SELECTED {% endif %}>Hostname</option>
-                <option value="address" {% if queryOptions and queryOptions|key:'sortListings' == "address" %} 
+                <option value="address" {% if queryOptions and queryOptions|key:'sortListings' == "address" %}
                                                             SELECTED {% endif %}>IP Address</option>
-                <option value="orport" {% if queryOptions and queryOptions|key:'sortListings' == "orport" %} 
+                <option value="orport" {% if queryOptions and queryOptions|key:'sortListings' == "orport" %}
                                                             SELECTED {% endif %}>ORPort</option>
-                <option value="dirport" {% if queryOptions and queryOptions|key:'sortListings' == "dirport" %} 
+                <option value="dirport" {% if queryOptions and queryOptions|key:'sortListings' == "dirport" %}
                                                             SELECTED {% endif %}>DirPort</option>
-                <option value="platform" {% if queryOptions and queryOptions|key:'sortListings' == "platform" %} 
+                <option value="platform" {% if queryOptions and queryOptions|key:'sortListings' == "platform" %}
                                                             SELECTED {% endif %}>Platform</option>
-                <option value="contact" {% if queryOptions and queryOptions|key:'sortListings' == "contact" %} 
+                <option value="contact" {% if queryOptions and queryOptions|key:'sortListings' == "contact" %}
                                                             SELECTED {% endif %}>Contact</option>
-                <option value="isauthority" {% if queryOptions and queryOptions|key:'sortListings' == "isauthority" %} 
+                <option value="isauthority" {% if queryOptions and queryOptions|key:'sortListings' == "isauthority" %}
                                                             SELECTED {% endif %}>Authority</option>
-                <option value="isbaddirectory" {% if queryOptions and queryOptions|key:'sortListings' == "isbaddirectory" %} 
+                <option value="isbaddirectory" {% if queryOptions and queryOptions|key:'sortListings' == "isbaddirectory" %}
                                                             SELECTED {% endif %}>Bad Directory</option>
-                <option value="isbadexit" {% if queryOptions and queryOptions|key:'sortListings' == "isbadexit" %} 
+                <option value="isbadexit" {% if queryOptions and queryOptions|key:'sortListings' == "isbadexit" %}
                                                             SELECTED {% endif %}>Bad Exit</option>
-                <option value="isexit" {% if queryOptions and queryOptions|key:'sortListings' == "isexit" %} 
+                <option value="isexit" {% if queryOptions and queryOptions|key:'sortListings' == "isexit" %}
                                                             SELECTED {% endif %}>Exit</option>
-                <option value="isfast" {% if queryOptions and queryOptions|key:'sortListings' == "isfast" %} 
+                <option value="isfast" {% if queryOptions and queryOptions|key:'sortListings' == "isfast" %}
                                                             SELECTED {% endif %}>Fast</option>
-                <option value="isguard" {% if queryOptions and queryOptions|key:'sortListings' == "isguard" %} 
+                <option value="isguard" {% if queryOptions and queryOptions|key:'sortListings' == "isguard" %}
                                                             SELECTED {% endif %}>Guard</option>
-                <option value="ishibernating" {% if queryOptions and queryOptions|key:'sortListings' == "ishibernating" %} 
+                <option value="ishibernating" {% if queryOptions and queryOptions|key:'sortListings' == "ishibernating" %}
                                                             SELECTED {% endif %}>Hibernating</option>
-                <option value="isnamed" {% if queryOptions and queryOptions|key:'sortListings' == "isnamed" %} 
+                <option value="isnamed" {% if queryOptions and queryOptions|key:'sortListings' == "isnamed" %}
                                                             SELECTED {% endif %}>Named</option>
-                <option value="isstable" {% if queryOptions and queryOptions|key:'sortListings' == "isstable" %} 
+                <option value="isstable" {% if queryOptions and queryOptions|key:'sortListings' == "isstable" %}
                                                             SELECTED {% endif %}>Stable</option>
-                <option value="isrunning" {% if queryOptions and queryOptions|key:'sortListings' == "isrunning" %} 
+                <option value="isrunning" {% if queryOptions and queryOptions|key:'sortListings' == "isrunning" %}
                                                             SELECTED {% endif %}>Running</option>
-                <option value="isvalid" {% if queryOptions and queryOptions|key:'sortListings' == "isvalid" %} 
+                <option value="isvalid" {% if queryOptions and queryOptions|key:'sortListings' == "isvalid" %}
                                                             SELECTED {% endif %}>Valid</option>
-                <option value="isv2dir" {% if queryOptions and queryOptions|key:'sortListings' == "isv2dir" %} 
+                <option value="isv2dir" {% if queryOptions and queryOptions|key:'sortListings' == "isv2dir" %}
                                                             SELECTED {% endif %}>Directory</option>
                 </select>
             </td>

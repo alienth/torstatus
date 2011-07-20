@@ -1127,7 +1127,8 @@ class GettorStats(models.Model):
     def __unicode__(self):
         return str(self.date) + ": " + self.bundle
 
-# tordir.cache --------------------------------------------------------
+# tordir.cache  --------------------------------------------------------
+# ----------------------------------------------------------------------
 class ActiveDescriptor(models.Model):
     """
     Model for the most recent descriptors for each relay published in

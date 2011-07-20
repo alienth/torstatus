@@ -765,25 +765,22 @@ def display_options(request):
 
 
 def advanced_search(request):
-    search_value = ''
-    if request.GET and 'search' in request.GET:
-        search_value = request.GET['search']
-    
+    search_value = request.GET.get('search', '')
+
     sort_options_order = ADVANCED_SEARCH_DECLR['sort_options_order']
     sort_options = ADVANCED_SEARCH_DECLR['sort_options']
-    
+
     search_options_fields_order = ADVANCED_SEARCH_DECLR[
                                     'search_options_fields_order']
     search_options_fields = ADVANCED_SEARCH_DECLR['search_options_fields']
-                          
+
     search_options_booleans_order = ADVANCED_SEARCH_DECLR[
                                     'search_options_booleans_order']
     search_options_booleans = ADVANCED_SEARCH_DECLR['search_options_booleans']
-                            
+
     filter_options_order = ADVANCED_SEARCH_DECLR['filter_options_order']
     filter_options = ADVANCED_SEARCH_DECLR['filter_options']
-                           
-    
+
     template_values = {'search': search_value,
                        'sortOptionsOrder': sort_options_order,
                        'sortOptions': sort_options,

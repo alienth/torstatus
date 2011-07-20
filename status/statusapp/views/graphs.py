@@ -467,7 +467,7 @@ def networktotalbw(request):
         ys.append(net_size[i].avg_running)
 
     ax2 = ax1.twinx()
-    active_relays = ax2.plot(xs, ys, color='#66CD00',
+    active_relays = ax2.plot(xs, ys, color='#005500',
                              label='Average Active Relays')
 
     ax2.set_xticks(range(0, data_points, 7))
@@ -481,7 +481,7 @@ def networktotalbw(request):
         tick.label2.set_fontweight(FONT_WEIGHT)
 
     for tick in ax2.get_yticklabels():
-        tick.set_color('#66CD00')
+        tick.set_color('#005500')
 
     # Label entire graph
     #ax1.set_title(TITLE, fontsize='12', fontweight=FONT_WEIGHT)
@@ -495,8 +495,10 @@ def networktotalbw(request):
     # TODO: Make the grid work for both lines.
     # Set tick marks such that a grid applies to both lines.
     ax1.set_ylim(ymin=0)
+    ax1.set_xlim(xmin=0)
     ax2.set_ylim(ymin=max((0, min(ys))))
-    ax1.yaxis.set_major_locator(MaxNLocator(4))
+    ax2.set_xlim(xmin=0)
+    ax1.yaxis.set_major_locator(MaxNLocator(5))
     ax2.yaxis.set_major_locator(MaxNLocator(5))
     #ax1.grid(color='#888888')
     canvas = FigureCanvas(fig)
