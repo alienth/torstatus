@@ -45,10 +45,7 @@ def splash(request):
     template_values = {}
     if 'button' in request.GET:
         if request.GET['button'] == 'Search':
-            # SEND STUFF TO THE INDEX PAGE
-            template_values = { 'search_for': request.GET['searchValue'],
-                              }
-            return render_to_response("splash.html", template_values)
+            return index(request)
         elif request.GET['button'] == 'Advanced Search':
             return advanced_search(request)
     else:
@@ -323,7 +320,8 @@ def index(request):
                             'Fingerprint', 'LastDescriptorPublished',
                             'Contact', 'BadDir', 'Icons', 'Exit',
                             'Authority', 'Fast', 'V2Dir', 'Platform',
-                            'Stable', 'ORPort', 'DirPort', 'BadExit')}
+                            'Stable', 'ORPort', 'DirPort', 'BadExit'),
+                      }
     return render_to_response('index.html', template_values)
 
 
@@ -770,8 +768,8 @@ def display_options(request):
 
 def advanced_search(request):
     search_value = ''
-    if request.GET and 'searchValue' in request.GET:
-        search_value = request.GET['searchValue']
+    if request.GET and 'search' in request.GET:
+        search_value = request.GET['search']
     
     sort_options_order = ADVANCED_SEARCH_DECLR['sort_options_order']
     sort_options = ADVANCED_SEARCH_DECLR['sort_options']
@@ -788,7 +786,7 @@ def advanced_search(request):
     filter_options = ADVANCED_SEARCH_DECLR['filter_options']
                            
     
-    template_values = {'searchValue': search_value,
+    template_values = {'search': search_value,
                        'sortOptionsOrder': sort_options_order,
                        'sortOptions': sort_options,
                        'searchOptionsFieldsOrder': search_options_fields_order,

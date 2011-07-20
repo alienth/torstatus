@@ -11,6 +11,8 @@
 {% block mainPage %}
 {% load index_filters %}
 
+{{searchValue}}
+
 <table class="advSearchTable">
     <tr>
         <td id="advSearchTitle"> Advanced Search </td>
@@ -42,7 +44,7 @@
                 </select>
                 </td>
                 <td>
-                <input id="advSearchBox" type="text" name="searchValue" value="{{searchValue}}"/>
+                <input id="advSearchBox" type="text" name="search" value="{{search}}"/>
                 </td>
             </tr>
             <tr>
