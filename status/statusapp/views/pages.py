@@ -247,10 +247,8 @@ def index(request):
         network itself.
     """
     # Get all relays in last consensus
-    last_validafter = '2011-07-19 14:00:00'
-                      # ActiveRelay.objects.aggregate(
-                      # last=Max('validafter'))['last'] - not working
-                      # correctly, it's a schema/db problem... :(
+    last_validafter = ActiveRelay.objects.aggregate(
+                      last=Max('validafter'))['last']
     active_relays = ActiveRelay.objects.filter(
                     validafter=last_validafter).order_by('nickname')
 
