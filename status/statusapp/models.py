@@ -1127,7 +1127,8 @@ class GettorStats(models.Model):
     def __unicode__(self):
         return str(self.date) + ": " + self.bundle
 
-# tordir.cache --------------------------------------------------------
+# tordir.cache  --------------------------------------------------------
+# ----------------------------------------------------------------------
 class ActiveDescriptor(models.Model):
     """
     Model for the most recent descriptors for each relay published in
@@ -1152,7 +1153,7 @@ class ActiveDescriptor(models.Model):
 
     class Meta:
         verbose_name = "active descriptor"
-        db_table = 'cacheold\".\"active_descriptor'
+        db_table = 'cache\".\"active_descriptor'
 
     def __unicode__(self):
         return str(self.descriptor)
@@ -1296,7 +1297,7 @@ class ActiveRelay(models.Model):
 
     class Meta:
         verbose_name = 'active relay'
-        db_table = 'cacheold\".\"active_relay'
+        db_table = 'cache\".\"active_relay'
 
     def __unicode__(self):
         return ': '.join((str(self.nickname), str(self.fingerprint)))
