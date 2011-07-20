@@ -313,14 +313,14 @@ def index(request):
     else:
         paginator = Paginator(active_relays, active_relays.count())
         paged_relays = paginator.page(1)
+        
+    current_columns = []
+    if not ('currentColumns' in request.session):
+        request.session['currentColumns'] = CURRENT_COLUMNS
+    current_columns = request.session['currentColumns']
 
     template_values = {'paged_relays': paged_relays,
-                       'current_columns': ('Country Code',
-                            'Router Name', 'Bandwidth', 'Uptime', 'IP',
-                            'Fingerprint', 'LastDescriptorPublished',
-                            'Contact', 'BadDir', 'Icons', 'Exit',
-                            'Authority', 'Fast', 'V2Dir', 'Platform',
-                            'Stable', 'ORPort', 'DirPort', 'BadExit'),
+                       'current_columns': current_columns,
                       }
     return render_to_response('index.html', template_values)
 

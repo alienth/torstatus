@@ -48,6 +48,21 @@ NOT_COLUMNS = ['Running', 'Hostname', 'Named', 'Valid',]
 ICONS = ['Fast', 'Exit', 'V2Dir', 'Guard', 'Stable', 'Authority',
          'Platform',]
 
+# Dictionary of {NameInPlatform: NameOfTheIcon}
+SUPPORTED_PLATFORMS = {'Linux': 'Linux',
+                       'XP': 'WindowsXP',
+                       'Windows Server': 'WindowsServer',
+                       'Windows': 'WindowsOther',
+                       'Darwin': 'Darwin',
+                       'FreeBSD': 'FreeBSD',
+                       'NetBSD': 'NetBSD',
+                       'OpenBSD': 'OpenBSD',
+                       'SunOS': 'SunOS',
+                       'IRIX': 'IRIX',
+                       'Cygwin': 'Cygwin',
+                       'Dragon': 'DragonFly',
+                      }
+
 
 def filter_statusentries(statusentries, query_options):
     """
@@ -447,8 +462,8 @@ def sorting_link(sort_order, column_name):
     @return The proper link for sorting the tables.
     """
     if sort_order == "ascending":
-        return "/" + column_name + "_descending"
-    return "/" + column_name + "_ascending"
+        return "/index/" + column_name + "_descending"
+    return "/index/" + column_name + "_ascending"
 
 
 def kilobytes_ps(bytes_ps):
@@ -501,7 +516,7 @@ def contact(rawdesc):
         if (line.startswith("contact")):
             contact_raw = line[8:]
             return contact_raw.decode('raw_unicode_escape')
-    return "No contact information given"
+    return None
 
 
 def country(location):
@@ -536,7 +551,7 @@ def latitude(geoip):
     if cols > 1:
         return geoip_list[1]
     else:
-        return ''
+        return None
 
 
 def longitude(geoip):
@@ -554,37 +569,24 @@ def longitude(geoip):
     if cols > 2:
         return geoip_list[2]
     else:
-        return ''
+        return None
 
 
 def get_platform(platform):
     """
     Method that searches in the platform string for the corresponding
-    platform name.
+    platform name and matching it to the corresponding icon name.
 
     @type platform: C{string}
     @param platform: A string, raw version of the platform of a relay.
     @rtype: C{string}
-    @return: The cleaned version of the platform name.
+    @return: The icon name of the specific platform name.
     """
-    # Dictionary of {NameInPlatform: NameOfTheIcon}
-    supported_platforms = {'Linux': 'Linux',
-                           'XP': 'WindowsXP',
-                           'Windows Server': 'WindowsServer',
-                           'Windows': 'WindowsOther',
-                           'Darwin': 'Darwin',
-                           'FreeBSD': 'FreeBSD',
-                           'NetBSD': 'NetBSD',
-                           'OpenBSD': 'OpenBSD',
-                           'SunOS': 'SunOS',
-                           'IRIX': 'IRIX',
-                           'Cygwin': 'Cygwin',
-                           'Dragon': 'DragonFly',
-                          }
+
     for name in supported_platforms:
         if name in platform:
             return supported_platforms[name]
-    return 'NotAvailable'
+    return None
 
 
 def generate_table_headers(current_columns, order_column_name, sort_order):
