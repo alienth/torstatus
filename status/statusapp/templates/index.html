@@ -167,6 +167,11 @@
             {% endif %}
             {% if column_name == "Icons" %}
             <td id="col_relayIcons">
+                {% if "Hibernating" in current_columns %}
+                {% if relay.ishibernating %}
+                    <img src="/static/img/status/Fast.png" alt="Hibernating Server" title="Hibernating Server">
+                {% endif %}
+                {% endif %}
                 {% if "Fast" in current_columns %}
                 {% if relay.isfast == 1 %}
                     <img src="/static/img/status/Fast.png" alt="Fast Server" title="Fast Server">
