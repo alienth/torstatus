@@ -4,25 +4,18 @@
 <link rel="stylesheet" type="text/css" href="/static/css/style.css"></link>
 {% endblock %}
 
-{% block mainTitle %} TorStatus -- Relay List {% endblock %}
+{% block mainTitle %} - TorStatus - Relay List {% endblock %}
 
-{% block headerTitle %} TorStatus -- Relay List {% endblock %}
+{% block headerTitle %} TorStatus {% endblock %}
 
 <br />
 
 {% block moreLinks %}
-<tr>
-    <td id="csv">
-        <table class="csv">
-            <tr>
-                <td id="csv">
-                    <a class="link" href="/tor-query-export.csv">Download CSV Search File</a>
-                </td>
-            </tr>
-        </table>
-    </td>
-</tr>
+<br /><br />
+<a class="link" id="csv" href="/tor-query-export.csv">Download CSV Search File</a>
 {% endblock %}
+
+{% block pageTitle %} Relay List {% endblock %}
 
 {% block mainPage %}
 <br />
@@ -34,46 +27,46 @@
 <div class="pagination">
     <span class="step-links">
         {% if paged_relays.has_previous %}
-            <a href="?page={{ paged_relays.previous_page_number }}">previous</a>
+            <a href="?page={{ paged_relays.previous_page_number }}" alt="Previous"><img id="prevnexticon" src="/static/img/prev_icon.png" border=0></a>
         {% endif %}
         <span class="current">
-            Page {{ paged_relays.number }} of {{ paged_relays.paginator.num_pages }}.
+            Page {{ paged_relays.number }} of {{ paged_relays.paginator.num_pages }}
         </span>
 
         {% if paged_relays.has_next %}
-            <a href="?page={{ paged_relays.next_page_number }}">next</a>
+            <a href="?page={{ paged_relays.next_page_number }}" alt="Next"><img id="prevnexticon" src="/static/img/next_icon.png" border=0></a>
         {% endif %}
     </span>
 </div>
-<table class="relayTable sortable">
+<table class="relayTable">
 	<tr>
 	{% for column_name in current_columns %}
 	    {% if column_name == "Country Code" %}
-        <th class="relayHeader">&nbsp;</th>
+        <th class="relayHeader hoverable">&nbsp;</th>
         {% endif %}
         {% if column_name == "Router Name" %}
-		<th class="relayHeader" id="routerName">Router Name</th>
+		<th class="relayHeader hoverable" id="routerName">Router Name</th>
 		{% endif %}
 		{% if column_name == "Bandwidth" %}
-		<th class="relayHeader">Bandwidth</th>
+		<th class="relayHeader hoverable">Bandwidth</th>
 		{% endif %}
 		{% if column_name == "Uptime" %}
-        <th class="relayHeader">Uptime</th>
+        <th class="relayHeader hoverable">Uptime</th>
         {% endif %}
         {% if column_name == "IP" %}
-        <th class="relayHeader">IP</th>
+        <th class="relayHeader hoverable">IP</th>
         {% endif %}
         {% if column_name == "Fingerprint" %}
-        <th class="relayHeader">Fingerprint</th>
+        <th class="relayHeader hoverable">Fingerprint</th>
         {% endif %}
         {% if column_name == "LastDescriptorPublished" %}
-        <th class="relayHeader" id="lastDescPub">Last Descriptor Published</th>
+        <th class="relayHeader hoverable" id="lastDescPub">Last Descriptor Published</th>
         {% endif %}
         {% if column_name == "Contact" %}
-        <th class="relayHeader">Contact</th>
+        <th class="relayHeader hoverable">Contact</th>
         {% endif %}
         {% if column_name == "BadDir" %}
-        <th class="relayHeader" id="badDir">Bad Directory</th>
+        <th class="relayHeader hoverable" id="badDir">Bad Directory</th>
         {% endif %}
         {% if column_name == "Icons" %}
         {% if "DirPort" in current_columns or "Exit" in current_columns or "Authority" in current_columns or "Fast" in current_columns or "Guard" in current_columns or "V2Dir" in current_columns or "Platform" in current_columns or "Stable" in current_columns %}
@@ -81,13 +74,13 @@
 		{% endif %}
 		{% endif %}
 		{% if column_name == "ORPort" %}
-        <th class="relayHeader">ORPort</th>
+        <th class="relayHeader hoverable">ORPort</th>
         {% endif %}
         {% if column_name == "DirPort" %}
-        <th class="relayHeader">DirPort</th>
+        <th class="relayHeader hoverable">DirPort</th>
         {% endif %}
         {% if column_name == "BadExit" %}
-        <th class="relayHeader">Bad Exit</th>
+        <th class="relayHeader hoverable">Bad Exit</th>
         {% endif %}
     {% endfor %}
 	</tr>
@@ -230,14 +223,14 @@
 <div class="pagination">
     <span class="step-links">
         {% if paged_relays.has_previous %}
-            <a href="?page={{ paged_relays.previous_page_number }}">previous</a>
+            <a href="?page={{ paged_relays.previous_page_number }}" alt="Previous"><img id="prevnexticon" src="/static/img/prev_icon.png" border=0></a>
         {% endif %}
         <span class="current">
-            Page {{ paged_relays.number }} of {{ paged_relays.paginator.num_pages }}.
+            Page {{ paged_relays.number }} of {{ paged_relays.paginator.num_pages }}
         </span>
 
         {% if paged_relays.has_next %}
-            <a href="?page={{ paged_relays.next_page_number }}">next</a>
+            <a href="?page={{ paged_relays.next_page_number }}" alt="Next"><img id="prevnexticon" src="/static/img/next_icon.png" border=0></a>
         {% endif %}
     </span>
 </div>

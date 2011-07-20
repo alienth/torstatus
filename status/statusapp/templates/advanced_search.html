@@ -4,19 +4,16 @@
 <link rel="stylesheet" type="text/css" href="/static/css/advancedsearch.css"></link>
 {% endblock %}
 
-{% block mainTitle %} TorStatus {% endblock %}
+{% block mainTitle %} - TorStatus - Advanced Search {% endblock %}
 
 {% block headerTitle %} TorStatus {% endblock %}
 
-{% block mainPage %}
 {% load index_filters %}
 
-{{searchValue}}
+{% block pageTitle %} Advanced Search {% endblock %}
 
+{% block mainPage %}
 <table class="advSearchTable">
-    <tr>
-        <td id="pageTitle"> Advanced Search </td>
-    </tr>
     <tr>
         <td>
         <form name="searchForm" action="/index" method="get">
@@ -78,12 +75,12 @@
         <tr>
             <td id="advSearchToolText"> {{option}} </td>
             <td>
-            <input type="radio" {% if not queryOptions %} CHECKED
-                                            {% else %} {% if queryOptions and queryOptions|key:'isauthority' == "" %}
+            <input type="radio" name="{{filterOptions|key:option}}" {% if not queryOptions %} CHECKED
+                                            {% else %} {% if queryOptions and queryOptions|key:option == "" %}
                                                             CHECKED {% endif %}{% endif %} />Off
-            <input type="radio" name="{{filterOptions|key:option}}" value="1" {% if queryOptions and queryOptions|key:'isauthority' == "1" %}
+            <input type="radio" name="{{filterOptions|key:option}}" value="1" {% if queryOptions and queryOptions|key:option == "1" %}
                                                             CHECKED {% endif %} />Yes
-            <input type="radio" name="{{filterOptions|key:option}}" value="0" {% if queryOptions and queryOptions|key:'isauthority' == "0" %}
+            <input type="radio" name="{{filterOptions|key:option}}" value="0" {% if queryOptions and queryOptions|key:option == "0" %}
                                                             CHECKED {% endif %} />No
             </td>
         </tr>

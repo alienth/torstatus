@@ -1,21 +1,20 @@
 {% extends "base.html" %}
 
 {% block auxCSS %}
-<link rel="stylesheet" type="text/css" href="/static/css/columnpreferences.css"></link>
+<link rel="stylesheet" type="text/css" href="/static/css/displayoptions.css"></link>
 {% endblock %}
 
-{% block mainTitle %} TorStatus Column Display Preferences {% endblock %}
+{% block mainTitle %} - TorStatus - Display Options {% endblock %}
 
 {% block headerTitle %} TorStatus {% endblock %}
 
-{% block mainPage %}
-
 {% load columnpreferences_filters %}
 
+{% block pageTitle %} Display Options {% endblock %}
+
+{% block mainPage %}
+
 <table class="displayPref">
-<tr>
-    <td class="boxTitle" colspan="1">Column Display Preferences Detail</td>
-</tr>
 <tr>
     <td>
     <form action='' method='get'>
@@ -27,14 +26,11 @@
                 <select name="selected_removeColumn" size='20' id='selectForm_removeColumn'>
                 
                 {% for entry in currentColumns %}
-                    {% if entry == "Router Name" %}
-                    {% else %}
                         {% if entry|movable %}
                             <option value="{{entry}}" {% ifequal entry selectedEntry %} SELECTED {% endifequal %}>{{entry}}</option>
                         {% else %}
                             <option id="notMovable" value="{{entry}}" {% ifequal entry selectedEntry %} SELECTED {% endifequal %}>{{entry}}</option>
                         {% endif %}
-                    {% endif %}                        
                 {% endfor %}
                 
                 </select>
@@ -52,14 +48,11 @@
                 <select name="selected_addColumn" size='20' id='selectForm_addColumn'>
                 
                 {% for entry in availableColumns %}
-                {% if entry == "Router Name" %}
-                    {% else %}
                         {% if entry|movable %}
                             <option value="{{entry}}">{{entry}}</option>
                         {% else %}
                             <option id="notMovable" value="{{entry}}">{{entry}}</option>
                         {% endif %}
-                    {% endif %}
                 {% endfor %}
                 
                 </select>

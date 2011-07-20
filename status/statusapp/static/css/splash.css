@@ -33,7 +33,7 @@ input#searchButton:hover {
     color: #050; 
     font: bold 'trebuchet ms',helvetica,sans-serif; 
     font-size: 0.938em;
-	background-color:#fed; 
+	background-color: #fed; 
     border: 1px solid; 
     border-color: #696 #363 #363 #696;
 	opacity: 1;
@@ -44,7 +44,7 @@ input#searchButton:focus {
     color: #050; 
     font: bold 'trebuchet ms',helvetica,sans-serif; 
     font-size: 0.938em;
-	background-color:#fed; 
+	background-color: #fed; 
     border: 1px solid; 
     border-color: #696 #363 #363 #696;
 	opacity: 1;

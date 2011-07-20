@@ -4,15 +4,17 @@
 <link rel="stylesheet" type="text/css" href="/static/css/details.css"></link>
 {% endblock %}
 
-{% block mainTitle %} TorStatus Router Details -- {{ descriptor.nickname }} {% endblock %}
+{% block mainTitle %} - TorStatus - Router Details -- {{ relay.nickname }} {% endblock %}
 
 {% block headerTitle %} TorStatus {% endblock %}
 
-{% block mainPage %}
+{% block pageTitle %} Router Details -- {{ relay.nickname }} {% endblock %}
 
 {% load details_filters %}
 {% load global_filters %}
+
 {% spaceless %}
+{% block mainPage %}
 <br />
 <table class="aggStatisticSummary">
 <tr>
@@ -188,5 +190,6 @@
     </td>
 </tr>
 </table>
-{% endspaceless %}
 {% endblock %}
+
+{% endspaceless %}

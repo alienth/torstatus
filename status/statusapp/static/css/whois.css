@@ -8,6 +8,7 @@ table.whois {
     border-collapse: collapse;
    	white-space:nowrap;
 }
+
 pre.whois {
     font-size: 1.33333em;
 }

@@ -27,13 +27,13 @@ CURRENT_COLUMNS = ["Country Code", "Router Name", "Bandwidth",
                    "Uptime", "IP", "Hostname", "Icons", "ORPort",
                    "DirPort", "BadExit", "Named", "Exit",
                    "Authority", "Fast", "Guard", "Stable",
-                   "Running", "Valid", "V2Dir", "Platform",
+                   "Running", "Valid", "V2Dir", "Platform", "Hibernating",
                   ]
 AVAILABLE_COLUMNS = ["Fingerprint", "LastDescriptorPublished",
                      "Contact", "BadDir",]
 NOT_MOVABLE_COLUMNS = ["Named", "Exit", "Authority", "Fast", "Guard",
                        "Stable", "Running", "Valid", "V2Dir",
-                       "Platform",]
+                       "Platform", "Hibernating"]
 
 
 def splash(request):
@@ -692,7 +692,7 @@ def exitnodequery(request):
                        'dest_port_valid': dest_port_valid}
     return render_to_response('nodequery.html', template_values)
 
-@cache_page(60 * 30)
+#@cache_page(60 * 30)
 def networkstatisticgraphs(request):
     """
     Render an HTML template to response.

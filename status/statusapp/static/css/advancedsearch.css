@@ -2,16 +2,6 @@ td {
     font-size: 0.875em;
 }
 
-td#advSearchTitle {
-    color: #050;
-    background-color: white;
-    text-align: center;
-    border-top: 1px solid;
-    border-bottom: 1px solid;
-    border-color: #61a #315 #315 #61a;
-    white-space:nowrap;
-}
-
 td#advSearchToolText {
     color: #050;
     text-align: center;
