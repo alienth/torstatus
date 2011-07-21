@@ -24,45 +24,41 @@
 {% spaceless %}
 
 {% if paged_relays.object_list %}
-<div class="pagination">
-    <span>
+<table>
+    <tr>
         {% if paged_relays.has_previous %}
-        <a class="pageLinks" href="?page={{ paged_relays.previous_page_number }}">⇽</a>&nbsp;
+        <td id="paginatorLinks"><a class="pageLinks" href="?page={{ paged_relays.previous_page_number }}">⇽</a></td>
         {% endif %}
 
         {% if paged_relays.number > 2 %}
-        <a class="pageLinks" href="?page=1">1</a>&nbsp;
+        <td id="paginatorLinks"><a class="pageLinks" href="?page=1">1</a></td>
         {% endif %}
 
         {% if paged_relays.number > 3 %}
-        ...&nbsp;
+        <td id="paginatorText">...</td>
         {% endif %}
 
         {% if paged_relays.has_previous %}
-        <a class="pageLinks" href="?page={{ paged_relays.previous_page_number }}">{{ paged_relays.previous_page_number }}</a>&nbsp;
+        <td id="paginatorLinks"><a class="pageLinks" href="?page={{ paged_relays.previous_page_number }}">{{ paged_relays.previous_page_number }}</a></td>
         {% endif %}
 
-        <span class="current">
-            {{ paged_relays.number }}&nbsp;
-        </span>
+        <td id="paginatorText">{{ paged_relays.number }}</td>
 
         {% if paged_relays.has_next %}
-        <a class="pageLinks" href="?page={{ paged_relays.next_page_number }}">{{ paged_relays.next_page_number }}</a>&nbsp;
+        <td id="paginatorLinks"><a class="pageLinks" href="?page={{ paged_relays.next_page_number }}">{{ paged_relays.next_page_number }}</a></td>
         {% endif %}
 
         {% if paged_relays.paginator.num_pages|subtract:paged_relays.number >= 3 %}
-        ...&nbsp;
+        <td id="paginatorText">...</td>
         {% endif %}
 
         {% if paged_relays.paginator.num_pages|subtract:paged_relays.number >= 2 %}
-        <a class="pageLinks" href="?page={{ paged_relays.paginator.num_pages }}">{{ paged_relays.paginator.num_pages }}</a>&nbsp;
+        <td id="paginatorLinks"><a class="pageLinks" href="?page={{ paged_relays.paginator.num_pages }}">{{ paged_relays.paginator.num_pages }}</a></td>
         {% endif %}
 
         {% if paged_relays.has_next %}
-        <a class="pageLinks" href="?page={{ paged_relays.next_page_number }}">⇾</a>
+        <td id="paginatorLinks"><a class="pageLinks" href="?page={{ paged_relays.next_page_number }}">⇾</a></td>
         {% endif %}
-    </span>
-</div>
 <table class="relayTable">
 	<tr>
 	{% for column_name in current_columns %}

@@ -20,7 +20,7 @@ SORT_OPTIONS = {'Router Name': 'nickname',
                 'ORPort': 'orport',
                 'DirPort': 'dirport',
                 'Platform': 'platform',
-                'Contact': 'contact', 
+                'Contact': 'contact',
                 'Authority': 'isauthority',
                 'Bad Directory': 'isbaddirectory',
                 'Bad Exit': 'isbadexit',
@@ -60,10 +60,10 @@ SEARCH_OPTIONS_BOOLEANS = {'Equals': 'equals',
                            'Is Less Than': 'less',
                            'Is Greater Than': 'greater',
                           }
-                            
+
 FILTER_OPTIONS_ORDER = ['Authority', 'BadDirectory', 'BadExit', 'Exit',
-                        'Fast', 'Guard', 'Hibernating', 'Named', 'Stable', 
-                        'Running', 'Valid', 'V2Dir']
+                        'Fast', 'Guard', 'Hibernating', 'Named',
+                        'Stable', 'Running', 'Valid', 'V2Dir']
 
 FILTER_OPTIONS = {'Authority': 'isauthority',
                   'Bad Directory': 'isbaddirectory',
@@ -78,10 +78,11 @@ FILTER_OPTIONS = {'Authority': 'isauthority',
                   'Valid': 'isvalid',
                   'V2Dir': 'isv2dir',
                  }
-# Dictionary that maps the declared variables to variables in actual code.
+# Dictionary that maps the declared variables to variables
+# in actual code.
 ADVANCED_SEARCH_DECLR = {'sort_options_order': SORT_OPTIONS_ORDER,
                          'sort_options': SORT_OPTIONS,
-                         'search_options_fields_order': 
+                         'search_options_fields_order':
                                     SEARCH_OPTIONS_FIELDS_ORDER,
                          'search_options_fields': SEARCH_OPTIONS_FIELDS,
                          'search_options_booleans_order':

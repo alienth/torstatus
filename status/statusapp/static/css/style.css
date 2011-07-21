@@ -263,6 +263,20 @@ td#mainLinks {
     padding: 10px;
 }
 
+td#paginatorLinks {
+    text-align: center;
+    width: 18px;
+    height: 14px;
+    padding: 3px;
+}
+
+td#paginatorText {
+    text-align: center;
+    width: 18px;
+    height: 14px;
+    padding: 3px;
+}
+
 /* END Table Columns ---------------------------------- */
 
 /* Links ---------------------------------------------- */
@@ -294,8 +308,29 @@ a#csv:hover {
     background-color: #9C6;
 }
 
+a.pageLinks {
+    display: block;
+    text-align: center;
+    width: 100%;
+    color: #050;
+    font-size: 0.875em;
+    text-decoration: none;
+    background-color: #fff4e8;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+    border-left: 1px solid;
+    border-right: 1px solid;
+    border-color: #61a #315 #315 #61a;
+}
+a.pageLinks:hover {
+    background-color: #dac8e2;
+    border-color: #315 #61a #61a #315;
+}
 /* END Links ------------------------------------------ */
-
 /* Other ---------------------------------------------- */
 .relayOK {
     background-color: white;
