@@ -1,13 +1,17 @@
+/* Table -----------------------------------------------*/
 table.whois {
-    border-style: solid;
-    border-color: black;
-    border-width: 1px;
     margin-left: auto;
     margin-right: auto;
     border-spacing: 1px;
     border-collapse: collapse;
    	white-space:nowrap;
 }
+
+/* END Table ------------------------------------------ */
+
+/* Other ---------------------------------------------- */
 pre.whois {
-    font-size: 1.33333em;
+    font-size: 1.125em;
 }
+
+/* END Other ------------------------------------------ */

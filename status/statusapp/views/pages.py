@@ -11,13 +11,14 @@ from socket import getfqdn
 # Django-specific import statements -----------------------------------
 from django.shortcuts import render_to_response, redirect
 from django.http import HttpResponse, HttpRequest
-from django.db.models import Max, Sum, Count
+from django.db.models import Q, Max, Sum, Count
+from django.db import connection
 from django.views.decorators.cache import cache_page
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 
 # TorStatus specific import statements --------------------------------
 from statusapp.models import Statusentry, Descriptor, Bwhist,\
-        TotalBandwidth
+        TotalBandwidth, ActiveRelay
 from custom.aggregate import CountCase
 from helpers import *
 from display_helpers import *
@@ -26,14 +27,13 @@ from display_helpers import *
 CURRENT_COLUMNS = ["Country Code", "Router Name", "Bandwidth",
                    "Uptime", "IP", "Hostname", "Icons", "ORPort",
                    "DirPort", "BadExit", "Named", "Exit",
-                   "Authority", "Fast", "Guard", "Stable",
-                   "Running", "Valid", "V2Dir", "Platform",
-                  ]
+                   "Authority", "Fast", "Guard", "Hibernating",
+                   "Stable", "Running", "Valid", "V2Dir", "Platform",]
 AVAILABLE_COLUMNS = ["Fingerprint", "LastDescriptorPublished",
                      "Contact", "BadDir",]
 NOT_MOVABLE_COLUMNS = ["Named", "Exit", "Authority", "Fast", "Guard",
-                       "Stable", "Running", "Valid", "V2Dir",
-                       "Platform",]
+                       "Hibernating", "Stable", "Running", "Valid",
+                       "V2Dir", "Platform",]
 
 
 def splash(request):
@@ -45,196 +45,12 @@ def splash(request):
     template_values = {}
     if 'button' in request.GET:
         if request.GET['button'] == 'Search':
-            # SEND STUFF TO THE INDEX PAGE
-            template_values = { 'search_for': request.GET['searchValue'],
-                              }
-            return render_to_response('splash.html', template_values)
+            return index(request)
         elif request.GET['button'] == 'Advanced Search':
             return advanced_search(request)
     else:
         return render_to_response('splash.html', template_values)
 
-"""
-#@cache_page(60 * 15) #, key_prefix="index")
-def index(request, sort_filter):
-    
-    Supply a dictionary to the index.html template consisting of a list
-    of active relays.
-
-    Currently, an "active relay" is a relay that has a status entry
-    that was published in the last consensus.
-
-    @type sort_filter: C{string}
-    @param: A string that contains both the column that should be
-        ordered by and the actual ordering (ascending/descending);
-        the values are separated by '_'.
-
-    @rtype: HttpResponse
-    @return: A dictionary consisting of information about each router
-        in the network as well as aggregate information about the
-        network itself.
-    
-    # INITIAL QUERY ---------------------------------------------------
-    # -----------------------------------------------------------------
-    # Get the initial query and necessary aggregate values for the
-    # routers in the last consensus.
-    last_va = Statusentry.objects.aggregate(
-              last=Max('validafter'))['last']
-
-    statusentries = Statusentry.objects.filter(
-                    validafter=last_va).extra(
-                    select={'geoip':
-                    'geoip_lookup(statusentry.address)'})\
-                    .order_by('nickname')
-
-    num_routers = statusentries.count()
-
-    bw_total = TotalBandwidth.objects.all().order_by(
-               '-date')[:1][0].bwobserved
-
-    total_counts = statusentries.aggregate(
-                   bandwidthavg=Sum('descriptorid__bandwidthavg'),
-                   bandwidthburst=Sum('descriptorid__bandwidthburst'),
-                   bandwidthobserved=Sum('descriptorid__bandwidthobserved'))
-    # Convert from B/s to KB/s
-    total_counts['bandwidthavg'] /= 1024
-    total_counts['bandwidthburst'] /= 1024
-    total_counts['bandwidthobserved'] /= 1024
-
-    # USER QUERY MODIFICATIONS ----------------------------------------
-    # -----------------------------------------------------------------
-    current_columns = []
-    if not ('currentColumns' in request.session):
-        request.session['currentColumns'] = CURRENT_COLUMNS
-    current_columns = request.session['currentColumns']
-
-    query_options = {}
-    if (request.GET):
-        if ('resetQuery' in request.GET):
-            if ('queryOptions' in request.session):
-                del request.session['queryOptions']
-        else:
-            query_options = request.GET
-            request.session['queryOptions'] = query_options
-    if (not query_options and 'queryOptions' in request.session):
-            query_options = request.session['queryOptions']
-
-    if query_options:
-        statusentries = filter_statusentries(
-                statusentries, query_options)
-
-    # TABLE SORTING ---------------------------------------------------
-    # -----------------------------------------------------------------
-    sort_order = ''
-    order_column_name = ''
-    if sort_filter:
-        order_column_name, sort_order = sort_filter.split('_')
-        options = ['nickname', 'fingerprint', 'geoip',
-                   'bandwidthobserved', 'uptime', 'published',
-                   'hostname', 'address', 'orport', 'dirport',
-                   'isbaddirectory', 'isbadexit',]
-
-        descriptorlist_options = ['uptime', 'contact',
-                                  'bandwidthobserved']
-        altered_column_name = order_column_name
-        if altered_column_name in options:
-            if altered_column_name in descriptorlist_options:
-                altered_column_name = 'descriptorid__' + \
-                        altered_column_name
-            if sort_order == 'ascending':
-                statusentries = statusentries.order_by(
-                        altered_column_name)
-            elif sort_order == 'descending':
-                statusentries = statusentries.order_by(
-                        '-' + altered_column_name)
-
-    # USER QUERY AGGREGATE STATISTICS ---------------------------------
-    # -----------------------------------------------------------------
-    counts = statusentries.aggregate(
-             isauthority=CountCase('isauthority', when=True),
-             isbaddirectory=CountCase('isbaddirectory', when=True),
-             isbadexit=CountCase('isbadexit', when=True),
-             isexit=CountCase('isexit', when=True),
-             isfast=CountCase('isfast', when=True),
-             isguard=CountCase('isguard', when=True),
-             isnamed=CountCase('isnamed', when=True),
-             isstable=CountCase('isstable', when=True),
-             isrunning=CountCase('isrunning', when=True),
-             isvalid=CountCase('isvalid', when=True),
-             isv2dir=CountCase('isv2dir', when=True),
-             bandwidthavg=Sum('descriptorid__bandwidthavg'),
-             bandwidthburst=Sum('descriptorid__bandwidthburst'),
-             bandwidthobserved=Sum('descriptorid__bandwidthobserved'))
-    # Convert from B/s to KB/s
-    if counts['bandwidthavg']:
-        counts['bandwidthavg'] /= 1024
-    if counts['bandwidthburst']:
-        counts['bandwidthburst'] /= 1024
-    if counts['bandwidthobserved']:
-        counts['bandwidthobserved'] /= 1024
-
-    in_query = statusentries.count()
-
-    bw_disp = TotalBandwidth.objects.all()\
-              .order_by('-date')[:1][0].bwobserved
-
-    client_address = request.META['REMOTE_ADDR']
-
-    # GENERATE HTML: TABLE HEADERS ------------------------------------
-    # -----------------------------------------------------------------
-    html_table_headers, html_current_columns = generate_table_headers(
-            current_columns, order_column_name, sort_order)
-
-    # GENERATE HTML: TABLE ROWS ---------------------------------------
-    # -----------------------------------------------------------------
-    html_table_rows = generate_table_rows(statusentries, current_columns,
-                                html_current_columns)
-
-    # GENERATE HTML: ADVANCE QUERY ------------------------------------
-    # -----------------------------------------------------------------
-    html_query_list_options = generate_query_list_options(query_options)
-    html_query_input_options = generate_query_input_options(query_options)
-
-    # PAGINATION ------------------------------------------------------
-    # -----------------------------------------------------------------
-    paginator = Paginator(statusentries, 50) # Show 50 statusentries
-                                             # per page
-
-    # Make sure page request is an int. If not, deliver first page.
-    try:
-        page = int(request.GET.get('page', '1'))
-    except ValueError:
-        page = 1
-
-    # If page request is out of range, deliver last page of results.
-    try:
-        statusentries = paginator.page(page)
-    except (EmptyPage, InvalidPage):
-        statusentries = paginator.page(paginator.num_pages)
-
-    template_values = {'relay_list': statusentries,
-                       'client_address': client_address,
-                       'num_routers': num_routers,
-                       'in_query': in_query,
-                       'exp_time': 900,
-                       'counts': counts,
-                       'total_counts': total_counts,
-                       'bw_disp': bw_disp,
-                       'bw_total': bw_total,
-                       'queryOptions': query_options,
-                       'htmlTableHeaders': html_table_headers,
-                       'htmlCurrentColumns': html_current_columns,
-                       'htmlRowCode': html_table_rows,
-                       'htmlQueryListOptions': html_query_list_options,
-                       'htmlQueryInputOptions': html_query_input_options,
-                      }
-    return render_to_response('index.html', template_values)
-"""
-from django.shortcuts import render_to_response
-from django.http import HttpResponse, HttpRequest
-from django.db.models import Q, Max
-from django.core.paginator import Paginator, InvalidPage, EmptyPage
-from statusapp.models import ActiveRelay
 
 def index(request):
     """
@@ -274,7 +90,7 @@ def index(request):
 
         active_relays = active_relays.filter(
                         **filter_params).order_by(
-                        order) # .values_list(*col_prefs)
+                        order).select_related() # .values_list(*col_prefs)
 
     # If the search returns only one relay, go to the details page for
     # that relay.
@@ -315,19 +131,50 @@ def index(request):
         paginator = Paginator(active_relays, active_relays.count())
         paged_relays = paginator.page(1)
 
+    current_columns = []
+    if not ('currentColumns' in request.session):
+        request.session['currentColumns'] = CURRENT_COLUMNS
+    current_columns = request.session['currentColumns']
+    
+
     number_results = active_relays.count()
     template_values = {'paged_relays': paged_relays,
                        'number_results': number_results,
-                       'current_columns': ('Country Code',
-                            'Router Name', 'Bandwidth', 'Uptime', 'IP',
-                            'Fingerprint', 'LastDescriptorPublished',
-                            'Contact', 'BadDir', 'Icons', 'Exit',
-                            'Authority', 'Fast', 'V2Dir', 'Platform',
-                            'Stable', 'ORPort', 'DirPort', 'BadExit')}
+                       'current_columns': current_columns,}
+
     return render_to_response('index.html', template_values)
 
 
-# TODO
+_FLAGS = set(('isauthority',
+              'isbaddirectory',
+              'isbadexit',
+              'isexit',
+              'isfast',
+              'isguard',
+              'ishibernating',
+              'isnamed',
+              'isstable',
+              'isrunning',
+              'isvalid',
+              'isv2dir'))
+_SEARCHES = set(('fingerprint',
+                 'nickname',
+                 'country',
+                 'bandwidthkbps',
+                 'uptimedays',
+                 'published',
+                 'address',
+                 'orport',
+                 'dirport',
+                 'platform'))
+_CRITERIA = set(('exact',
+                 'iexact',
+                 'contains',
+                 'icontains',
+                 'lt',
+                 'gt',
+                 'startswith',
+                 'istartswith'))
 def _get_filter_params(request):
     """
     Get the filter preferences provided by the user via the
@@ -339,22 +186,29 @@ def _get_filter_params(request):
     @return: A dictionary mapping query parameters to user-supplied
         input.
     """
-    return {}
+    filters = {}
+    for flag in _FLAGS:
+        filt = request.GET.get(flag, '')
 
+        if filt == '1':
+            filters[flag] = 1
 
-# TODO
-_DEFAULT_COL_PREFS = []
-def _get_col_prefs(request):
-    """
-    Get the order on the columns and the columns themselves from the
-    user via the HttpRequest.
+        elif filt == '0':
+            filters[flag] = 0
 
-    @type request: HttpRequest
-    @param request: The HttpRequest provided by the client.
-    @rtype: C{list} of C{string}
-    @return: The column preferences specified by the client.
-    """
-    return _DEFAULT_COL_PREFS
+    for search in _SEARCHES:
+        search_param = ''.join(('s_', search))
+        searchinput = request.GET.get(search_param, '')
+
+        if searchinput:
+            criteria_param = ''.join(('c_', search))
+            criteriainput = request.GET.get(criteria_param , '')
+
+            if criteriainput in _CRITERIA:
+                key = '__'.join((search, criteriainput))
+                filters[key] = searchinput
+
+    return filters
 
 
 _SORT_OPTIONS = set((
@@ -410,6 +264,9 @@ def _get_order(request):
     @return: The sorting parameter and order as specified by the
         HttpRequest object.
     """
+    #order = request.GET.get('sortOrder', 'ascending')
+    #if order == 'ascending':
+    """
     if 'sortparam' in request.GET and 'sortparam' in _SORT_OPTIONS:
         param = request.GET.get('sortparam')
     else:
@@ -420,6 +277,8 @@ def _get_order(request):
         order = ''
 
     return ''.join((order, param))
+    """
+
 
 def details(request, fingerprint):
     """
@@ -461,83 +320,6 @@ def details(request, fingerprint):
     template_values = {'relay': relay}
     return render_to_response('details.html', template_values)
 
-"""
-def details(request, fingerprint):
-    
-    Supply the L{Statusentry} and L{Geoipdb} objects associated with a
-    relay with a given fingerprint to the details.html template.
-
-    @type fingerprint: C{string}
-    @param fingerprint: The fingerprint of the router to display the
-        details of.
-    @rtype: HttpResponse
-    @return: The L{Statusentry}, L{Descriptor}, and L{Geoipdb}
-        information of the router.
-    
-    # The SQL function 'geoip_lookup' is used here, since greater than
-    # and less than are incorrectly implemented for IPAddressFields.
-    # [:1] is djangonese for 'LIMIT 1', and
-    # [0] gets the object rather than the QuerySet.
-    statusentry = Statusentry.objects.filter(
-                  fingerprint=fingerprint).extra(
-                  select={'geoip': 'geoip_lookup(address)'}).order_by(
-                  '-validafter')[:1][0]
-
-    descriptor = statusentry.descriptorid
-
-    # Some clients may want to look up old relays. Create an attribute
-    # to flag active and unactive relays.
-    last_va = Statusentry.objects.aggregate(
-              last=Max('validafter'))['last']
-
-    if last_va != statusentry.validafter:
-        statusentry.active = False
-    else:
-        statusentry.active = True
-
-    # Get the country, latitude, and longitude from the geoip attribute
-    statusentry.country, lat, lng = statusentry.geoip.strip(
-                                    '()').split(',')
-    statusentry.latitude = float(lat)
-    statusentry.longitude = float(lng)
-
-    # Get the correct uptime, assuming that the router is still running
-    published = descriptor.published
-    now = datetime.datetime.now()
-    diff = now - published
-    diff_sec = (diff.microseconds + (
-                diff.seconds + diff.days * 24 * 3600) * 10**6) / 10**6
-    descriptor.adjuptime = descriptor.uptime + diff_sec
-
-    # Get information from the raw descriptor.
-    raw_list = str(descriptor.rawdesc).split("\n")
-    descriptor.onion_key = ''
-    descriptor.signing_key = ''
-    descriptor.exit_info = []
-    descriptor.contact = ''
-    descriptor.family = []
-    i = 0
-    while (i < len(raw_list)):
-        if raw_list[i].startswith('onion-key'):
-            descriptor.onion_key = '\n'.join(
-                    raw_list[(i + 1):(i + 6)])
-        elif raw_list[i].startswith('signing-key'):
-            descriptor.signing_key = '\n'.join(
-                    raw_list[(i + 1):(i + 6)])
-        elif raw_list[i].startswith(('accept', 'reject')):
-            descriptor.exit_info.append(raw_list[i])
-        elif raw_list[i].startswith('contact'):
-            descriptor.contact = raw_list[i][8:]
-        elif raw_list[i].startswith('family'):
-            descriptor.family = raw_list[i][7:].split()
-        i += 1
-
-    descriptor.hostname = getfqdn(str(statusentry.address))
-
-    template_values = {'descriptor': descriptor, 'statusentry':
-                       statusentry}
-    return render_to_response('details.html', template_values)
-"""
 
 def whois(request, address):
     """
@@ -696,7 +478,7 @@ def exitnodequery(request):
                        'dest_port_valid': dest_port_valid}
     return render_to_response('nodequery.html', template_values)
 
-@cache_page(60 * 30)
+#@cache_page(60 * 30)
 def networkstatisticgraphs(request):
     """
     Render an HTML template to response.
@@ -769,79 +551,42 @@ def display_options(request):
 
 
 def advanced_search(request):
-    search_value = ''
-    if request.GET and 'searchValue' in request.GET:
-        search_value = request.GET['searchValue']
-    
+    search_value = request.GET.get('search', '')
+
     sort_options_order = ADVANCED_SEARCH_DECLR['sort_options_order']
     sort_options = ADVANCED_SEARCH_DECLR['sort_options']
-    
+
     search_options_fields_order = ADVANCED_SEARCH_DECLR[
                                     'search_options_fields_order']
     search_options_fields = ADVANCED_SEARCH_DECLR['search_options_fields']
-                          
+    search_options_fields_booleans = ADVANCED_SEARCH_DECLR[
+                                    'search_options_fields_booleans']
+
     search_options_booleans_order = ADVANCED_SEARCH_DECLR[
                                     'search_options_booleans_order']
     search_options_booleans = ADVANCED_SEARCH_DECLR['search_options_booleans']
-                            
+
     filter_options_order = ADVANCED_SEARCH_DECLR['filter_options_order']
     filter_options = ADVANCED_SEARCH_DECLR['filter_options']
-                           
+    
+    TEST = 'FAIL'
+    if request.GET:
+        TEST = request.GET
+    
 
-
-    #Displayoptions method stuff
-    current_columns = []
-    available_columns = []
-    not_movable_columns = NOT_MOVABLE_COLUMNS
-
-    if ('resetPreferences' in request.GET):
-        del request.session['currentColumns']
-        del request.session['availableColumns']
-
-    if not ('currentColumns' in request.session and 'availableColumns'
-            in request.session):
-        request.session['currentColumns'] = CURRENT_COLUMNS
-        request.session['availableColumns'] = AVAILABLE_COLUMNS
-    current_columns = request.session['currentColumns']
-    available_columns = request.session['availableColumns']
-
-    column_lists = [current_columns, available_columns, '']
-    if ('removeColumn' in request.GET and 'selected_removeColumn'
-        in request.GET):
-        column_lists = button_choice(request, 'removeColumn',
-                      'selected_removeColumn', current_columns,
-                      available_columns)
-    elif ('addColumn' in request.GET and 'selected_addColumn'
-          in request.GET):
-        column_lists = button_choice(request, 'addColumn',
-                'selected_addColumn', current_columns, available_columns)
-    elif ('upButton' in request.GET and 'selected_removeColumn'
-          in request.GET):
-        if not(request.GET['selected_removeColumn'] in
-               not_movable_columns):
-            column_lists = button_choice(request, 'upButton',
-                          'selected_removeColumn', current_columns,
-                          available_columns)
-    elif ('downButton' in request.GET and 'selected_removeColumn'
-          in request.GET):
-        if not(request.GET['selected_removeColumn'] in
-               not_movable_columns):
-            column_lists = button_choice(request, 'downButton',
-                          'selected_removeColumn', current_columns,
-                          available_columns)
-
-    template_values = {'searchValue': search_value,
+    template_values = {'search': search_value,
                        'sortOptionsOrder': sort_options_order,
                        'sortOptions': sort_options,
                        'searchOptionsFieldsOrder': search_options_fields_order,
                        'searchOptionsFields': search_options_fields,
-                       'searchOptionsBooleansOrder': search_options_booleans_order,
+                       'searchOptionsFieldsBooleans': 
+                                                search_options_fields_booleans,
+                       'searchOptionsBooleansOrder': 
+                                                search_options_booleans_order,
                        'searchOptionsBooleans': search_options_booleans,
                        'filterOptionsOrder': filter_options_order,
                        'filterOptions': filter_options,
-                       'currentColumns': column_lists[0],
-                       'availableColumns': column_lists[1],
-                       'selectedEntry': column_lists[2]
+                       'TEST': TEST,                      
                       }
 
     return render_to_response('advanced_search.html', template_values)

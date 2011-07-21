@@ -15,7 +15,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 <title>{% block mainTitle %} {% endblock %}</title>
 </head>
 
-<body onLoad="document.forms.searchForm.searchValue.focus()">
+<body onLoad="document.forms.searchForm.search.focus()">
     {% block banner %}
     <table class="header">
         <tr>
@@ -29,16 +29,23 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
                 <a class="link" href="/exit-node-query">Tor Exit Node Query</a> |
                 <a class="link" href="/advanced-search">Advanced Search & Display Options</a> |
                 <a class="link" href="/network-statistic-graphs">Network Statistics</a>
+                {% block moreLinks %}{% endblock %}
             </td>
         </tr>
-        {% block moreLinks %}{% endblock %}
 </table>
 
 {% endblock %}
 
 {% block extraHeader %} {% endblock %}
 
-{% block mainPage %} {% endblock %}
+<table class="mainPage">
+<tr> 
+    {% block noPageTitle %} <td id="pageTitle"> {% block pageTitle %} {% endblock %} </td> {% endblock %}
+</tr>
+<tr>
+    <td> {% block mainPage %} {% endblock %} </td>
+</tr>
+</table>
 
 <div id="footer">
 				<p id="trademark">

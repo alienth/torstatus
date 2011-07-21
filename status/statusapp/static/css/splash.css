@@ -1,7 +1,12 @@
+/* General Settings ------------------------------- */
 td {
     font-size: 100%;
 }
 
+
+/* END General Settings ------------------------------- */
+
+/* Table -----------------------------------------------*/
 table.mainTable {
     font-size: 30px;
     width: auto;
@@ -19,9 +24,12 @@ table#searchTable {
     margin-right: auto;
 }
 
+
+/* END Table ------------------------------------------ */
+
+/* Input ---------------------------------------------- */
 input#searchButton { 
     color: #050; 
-    font: bold 'trebuchet ms',helvetica,sans-serif; 
     font-size: 0.938em;
 	background-color:#fed; 
     border: 1px solid; 
@@ -31,9 +39,8 @@ input#searchButton {
 
 input#searchButton:hover {
     color: #050; 
-    font: bold 'trebuchet ms',helvetica,sans-serif; 
     font-size: 0.938em;
-	background-color:#fed; 
+	background-color: #fed; 
     border: 1px solid; 
     border-color: #696 #363 #363 #696;
 	opacity: 1;
@@ -42,9 +49,8 @@ input#searchButton:hover {
 
 input#searchButton:focus {
     color: #050; 
-    font: bold 'trebuchet ms',helvetica,sans-serif; 
     font-size: 0.938em;
-	background-color:#fed; 
+	background-color: #fed; 
     border: 1px solid; 
     border-color: #696 #363 #363 #696;
 	opacity: 1;
@@ -52,7 +58,6 @@ input#searchButton:focus {
 }
 
 input#searchBox {
-    font: 0.625em 'trebuchet ms',helvetica,sans-serif; 
     font-size: 0.938em;
     border: 1px solid; 
     border-color: #61a #315 #315 #61a; 
@@ -60,7 +65,6 @@ input#searchBox {
 }
 
 input#searchBox:hover {
-    font: 0.625em 'trebuchet ms',helvetica,sans-serif; 
     font-size: 0.938em;
     border: 1px solid; 
     border-color: #696 #363 #363 #696; 
@@ -68,9 +72,10 @@ input#searchBox:hover {
 }
 
 input#searchBox:focus {
-    font: 0.625em 'trebuchet ms',helvetica,sans-serif; 
     font-size: 0.938em;
     border: 1px solid; 
     border-color: #696 #363 #363 #696;
 	width: 400px;
 }
+
+/* END Input ------------------------------------------ */

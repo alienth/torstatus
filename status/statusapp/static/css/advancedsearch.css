@@ -1,26 +1,12 @@
 td {
-    font-size: 100%;
-}
-
-td#advSearchTitle {
-    color: #050;
-    font-size: 0.625em;
-    background-color: white;
-    text-align: center;
-    border-top: 1px solid;
-    border-bottom: 1px solid;
-    border-color: #61a #315 #315 #61a;
-    white-space:nowrap;
+    font-size: 0.875em;
 }
 
 td#advSearchToolText {
     color: #050;
-    font-size: 0.438em;
     text-align: center;
     border-color: #61a #315 #315 #61a;
     white-space:nowrap;
-    padding-right: 15px;
-    padding-left: 15px;
 }
 
 table.advSearchTable {
@@ -44,34 +30,56 @@ table.advSearchFlagTable {
 }
 
 input#advSearchBox {
-    font: 0.438em; 
-    font-size: 0.438em;
-    border: 1px solid; 
+    font-size: 1.0625em;
+    border: 1px solid;
     border-color: #61a #315 #315 #61a;
 	width: 400px;
 }
 
 input#advSearchBox:hover {
-    font: 0.438em; 
-    font-size: 0.438em;
-    border: 1px solid; 
+    border: 1px solid;
     border-color: #696 #363 #363 #696;
 	width: 400px;
 }
 
 input#advSearchBox:focus {
-    font: 0.438em; 
-    font-size: 0.438em;
-    border: 1px solid; 
-    border-color: #696 #363 #363 #696; 
+    border: 1px solid;
+    border-color: #696 #363 #363 #696;
 	width: 400px;
 }
 
-select#advSearchButton { 
-    color: #050; 
-    font: bold; 
-    font-size: 0.438em;
-	background-color: #fed; 
-    border: 1px solid; 
+select#advSearchButton {
+    font-size: 1.0625em;
+    color: #050;
+    font: bold;
+	background-color: #fed;
+    border: 1px solid;
     border-color: #61a #315 #315 #61a;
-} 
+}
+
+input#searchButton {
+    color: #050;
+    width: 300px;
+	background-color:#fed;
+    border: 1px solid;
+    border-color: #61a #315 #315 #61a;
+	opacity: 0.4;
+}
+
+input#searchButton:hover {
+    color: #050;
+	background-color: #fed;
+    border: 1px solid;
+    border-color: #696 #363 #363 #696;
+	opacity: 1;
+	cursor: pointer;
+}
+
+input#searchButton:focus {
+    color: #050;
+	background-color: #fed;
+    border: 1px solid;
+    border-color: #696 #363 #363 #696;
+	opacity: 1;
+	cursor: pointer;
+}

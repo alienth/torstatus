@@ -48,6 +48,21 @@ NOT_COLUMNS = ['Running', 'Hostname', 'Named', 'Valid',]
 ICONS = ['Fast', 'Exit', 'V2Dir', 'Guard', 'Stable', 'Authority',
          'Platform',]
 
+# Dictionary of {NameInPlatform: NameOfTheIcon}
+SUPPORTED_PLATFORMS = {'Linux': 'Linux',
+                       'XP': 'WindowsXP',
+                       'Windows Server': 'WindowsServer',
+                       'Windows': 'WindowsOther',
+                       'Darwin': 'Darwin',
+                       'FreeBSD': 'FreeBSD',
+                       'NetBSD': 'NetBSD',
+                       'OpenBSD': 'OpenBSD',
+                       'SunOS': 'SunOS',
+                       'IRIX': 'IRIX',
+                       'Cygwin': 'Cygwin',
+                       'Dragon': 'DragonFly',
+                      }
+
 
 def filter_statusentries(statusentries, query_options):
     """
@@ -139,6 +154,7 @@ def filter_statusentries(statusentries, query_options):
         elif query_options['sortOrder'] == 'descending':
             statusentries = statusentries.order_by('-' + selected_option)
     return statusentries
+
 
 def button_choice(request, button, field, current_columns,
         available_columns):
@@ -447,8 +463,8 @@ def sorting_link(sort_order, column_name):
     @return The proper link for sorting the tables.
     """
     if sort_order == "ascending":
-        return "/" + column_name + "_descending"
-    return "/" + column_name + "_ascending"
+        return "/index/" + column_name + "_descending"
+    return "/index/" + column_name + "_ascending"
 
 
 def kilobytes_ps(bytes_ps):
@@ -501,7 +517,7 @@ def contact(rawdesc):
         if (line.startswith("contact")):
             contact_raw = line[8:]
             return contact_raw.decode('raw_unicode_escape')
-    return "No contact information given"
+    return None
 
 
 def country(location):
@@ -536,7 +552,7 @@ def latitude(geoip):
     if cols > 1:
         return geoip_list[1]
     else:
-        return ''
+        return None
 
 
 def longitude(geoip):
@@ -554,37 +570,24 @@ def longitude(geoip):
     if cols > 2:
         return geoip_list[2]
     else:
-        return ''
+        return None
 
 
 def get_platform(platform):
     """
     Method that searches in the platform string for the corresponding
-    platform name.
+    platform name and matching it to the corresponding icon name.
 
     @type platform: C{string}
     @param platform: A string, raw version of the platform of a relay.
     @rtype: C{string}
-    @return: The cleaned version of the platform name.
+    @return: The icon name of the specific platform name.
     """
-    # Dictionary of {NameInPlatform: NameOfTheIcon}
-    supported_platforms = {'Linux': 'Linux',
-                           'XP': 'WindowsXP',
-                           'Windows Server': 'WindowsServer',
-                           'Windows': 'WindowsOther',
-                           'Darwin': 'Darwin',
-                           'FreeBSD': 'FreeBSD',
-                           'NetBSD': 'NetBSD',
-                           'OpenBSD': 'OpenBSD',
-                           'SunOS': 'SunOS',
-                           'IRIX': 'IRIX',
-                           'Cygwin': 'Cygwin',
-                           'Dragon': 'DragonFly',
-                          }
+
     for name in supported_platforms:
         if name in platform:
             return supported_platforms[name]
-    return 'NotAvailable'
+    return None
 
 
 def generate_table_headers(current_columns, order_column_name, sort_order):
@@ -905,229 +908,3 @@ def generate_query_input_options(query_options):
         input_option = input_option + "<td>" + input_string + "</td>"
         html_query_input_options.append(input_option)
     return html_query_input_options
-
-
-def draw_bar_graph(xs, ys, labels, params):
-    """
-    Draws a bar graph, given data points, labels, and presentation
-    parameters.
-
-    @type xs: C{list}
-    @param xs: The x values to be plotted.
-    @type ys: C{list}
-    @param ys: The y values to be plotted.
-    @type labels: C{list} of C{string}
-    @param labels: The labels to be used for each data point, where
-        C{labels[i]} labels C{(xs[i], ys[i])}.
-    @type params: C{dict} of C{string} and C{int}
-    @param params: Parameters specifying how the graph is to be drawn.
-        Params must contain the keys: WIDTH, HEIGHT, TOP_MARGIN,
-        BOTTOM_MARGIN, LEFT_MARGIN, RIGHT_MARGIN, X_FONT_SIZE,
-        Y_FONT_SIZE, LABEL_FONT_SIZE, FONT_WEIGHT, BAR_WIDTH,
-        COLOR, LABEL_FLOAT, LABEL_ROT, and TITLE.
-    @rtype: HttpResponse
-    @return: The graph as specified by the parameters given.
-    """
-    ## Get the parameters from the params dictionary
-    # Width and height of the graph in pixels
-    WIDTH = params['WIDTH']
-    HEIGHT = params['HEIGHT']
-    # Space in pixels given around plot
-    TOP_MARGIN = params['TOP_MARGIN']
-    BOTTOM_MARGIN = params['BOTTOM_MARGIN']
-    LEFT_MARGIN = params['LEFT_MARGIN']
-    RIGHT_MARGIN = params['RIGHT_MARGIN']
-    # Font sizes, in pixels
-    X_FONT_SIZE = params['X_FONT_SIZE']
-    Y_FONT_SIZE = params['Y_FONT_SIZE']
-    LABEL_FONT_SIZE = params['LABEL_FONT_SIZE']
-    # How many pixels above each bar the labels should be
-    LABEL_FLOAT = params['LABEL_FLOAT']
-    # How the labels should be presented
-    LABEL_ROT = params['LABEL_ROT']
-    # Font weight used for labels and titles
-    FONT_WEIGHT = params['FONT_WEIGHT']
-    BAR_WIDTH = params['BAR_WIDTH']
-    COLOR = params['COLOR']
-    # Title of graph
-    TITLE = params['TITLE']
-
-    # Set margins according to specification.
-    matplotlib.rcParams['figure.subplot.left'] = \
-            float(LEFT_MARGIN) / WIDTH
-    matplotlib.rcParams['figure.subplot.right'] = \
-            float(WIDTH - RIGHT_MARGIN) / WIDTH
-    matplotlib.rcParams['figure.subplot.top'] = \
-            float(HEIGHT - TOP_MARGIN) / HEIGHT
-    matplotlib.rcParams['figure.subplot.bottom'] = \
-            float(BOTTOM_MARGIN) / HEIGHT
-
-    # Draw the figure.
-    width_inches = float(WIDTH) / 80
-    height_inches = float(HEIGHT) / 80
-    fig = Figure(facecolor='white', edgecolor='black',
-                 figsize=(width_inches, height_inches), frameon=False)
-    ax = fig.add_subplot(111)
-
-    # Plot the data.
-    ax.bar(xs, ys, color=COLOR, width=BAR_WIDTH)
-
-    # Label the height of each bar.
-    label_float_ydist = ax.get_ylim()[1] * LABEL_FLOAT / (
-                        HEIGHT - TOP_MARGIN - BOTTOM_MARGIN)
-    num_params = len(xs)
-    for i in range(num_params):
-        ax.text(xs[i] + (BAR_WIDTH / 2.0),
-                ys[i] + (label_float_ydist), str(ys[i]),
-                fontsize=LABEL_FONT_SIZE, horizontalalignment='center')
-
-    x_index = matplotlib.numpy.arange(num_params)
-    ax.set_xticks(x_index + (BAR_WIDTH / 2.0))
-    ax.set_xticklabels(labels, fontsize=X_FONT_SIZE,
-                       fontweight=FONT_WEIGHT, rotation=LABEL_ROT)
-
-    for tick in ax.yaxis.get_major_ticks():
-        tick.label1.set_fontsize(Y_FONT_SIZE)
-        tick.label1.set_fontweight(FONT_WEIGHT)
-
-    ax.set_title(TITLE, fontsize='12', fontweight=FONT_WEIGHT)
-
-    canvas = FigureCanvas(fig)
-    response = HttpResponse(content_type='image/png')
-    canvas.print_png(response, ha="center")
-    return response
-
-
-def draw_line_graph(fingerprint, bwtype, color, shade):
-    """
-    Draws a line graph with given data points and display parameters.
-
-    @type fingerprint: C{string}
-    @param fingerprint: The fingerprint of the router that the graph
-        is to be drawn for.
-    @type bwtype: C{string}
-    @param bwtype: Either 'read' or 'written', depending on whether the
-        graph to be drawn will be of recent read bandwidth or recent
-        written bandwdith.
-    @type color: C{string}
-    @param color: The color to draw the line graph with.
-    @type shade: C{string}
-    @param shade: The color to shade under the line graph.
-    @rtype: HttpResponse
-    @return: The graph as specified by the parameters given.
-    """
-    # Width and height of the graph in pixels
-    WIDTH = 480
-    HEIGHT = 320
-    # Space in pixels given around plot
-    TOP_MARGIN = 42
-    BOTTOM_MARGIN = 32
-    LEFT_MARGIN = 98
-    RIGHT_MARGIN = 5
-    # Font sizes, in pixels
-    X_FONT_SIZE = '8'
-    Y_FONT_SIZE = '8'
-    # Font weight used for labels and titles.
-    FONT_WEIGHT = 'bold'
-
-    # Set margins according to specification.
-    matplotlib.rcParams['figure.subplot.left'] = \
-            float(LEFT_MARGIN) / WIDTH
-    matplotlib.rcParams['figure.subplot.right'] = \
-            float(WIDTH - RIGHT_MARGIN) / WIDTH
-    matplotlib.rcParams['figure.subplot.top'] = \
-            float(HEIGHT - TOP_MARGIN) / HEIGHT
-    matplotlib.rcParams['figure.subplot.bottom'] = \
-            float(BOTTOM_MARGIN) / HEIGHT
-
-    last_hist = Bwhist.objects.filter(fingerprint=fingerprint)\
-                .order_by('-date')[:1][0]
-
-    if bwtype == 'Read':
-        t_start, t_end, tr_list = last_hist.read
-    elif bwtype == 'Written':
-        t_start, t_end, tr_list = last_hist.written
-
-    recent_date = last_hist.date
-    recent_time = datetime.datetime.combine(recent_date,
-                  datetime.time())
-
-    # It's possible that we might be missing some entries at the
-    # beginning; add values of 0 in this case.
-    tr_list[0:0] = ([0] * t_start)
-
-    # We want to have 96 data points in our graph; if we don't have
-    # them, get some data points from the day before, if we can.
-    to_fill = 96 - len(tr_list)
-
-    start_time = recent_time - datetime.timedelta(
-                 minutes=(15 * to_fill))
-    end_time = start_time + datetime.timedelta(
-               days=1) - datetime.timedelta(minutes=15)
-
-    # If less than 96 entries in the array, get earlier entries.
-    # If they don't exist, fill in the array with '0' values.
-    if to_fill:
-        day_before = last_hist.date - datetime.timedelta(days=1)
-
-        try:
-            day_before_hist = Bwhist.objects.get(
-                    fingerprint=fingerprint,
-                    date=str(day_before))
-            if bwtype == 'Read':
-                y_start, y_end, y_list = day_before_hist.read
-            elif bwtype == 'Written':
-                y_start, y_end, y_list = day_before_hist.written
-            y_list.extend([0] * (95 - y_end))
-            y_list[0:0] = ([0] * y_start)
-
-        except ObjectDoesNotExist:
-            y_list = ([0] * 96)
-        tr_list[0:0] = y_list[(-1 * to_fill):]
-
-    width_inches = float(WIDTH) / 80
-    height_inches = float(HEIGHT) / 80
-    fig = Figure(facecolor='white', edgecolor='black',
-                 figsize=(width_inches, height_inches), frameon=False)
-    ax = fig.add_subplot(111)
-
-    # Return bytes per second, not total bandwidth for 15 minutes.
-    bps = map(lambda x: x / (15 * 60), tr_list)
-    times = []
-    for i in range(0, 104, 8):
-        to_add_date = start_time + datetime.timedelta(minutes=(15 * i))
-        to_add_str = "%0*d:%0*d" % (2, to_add_date.hour,
-                                    2, to_add_date.minute)
-        times.append(to_add_str)
-
-    dates = range(96)
-
-    # Draw the graph and give the graph a light shade underneath it.
-    ax.plot(dates, bps, color=color)
-    ax.fill_between(dates, 0, bps, color=shade)
-
-    ax.set_xlabel("Time (GMT)", fontsize='12')
-    ax.set_xticks(range(0, 104, 8))
-    ax.set_xticklabels(times, fontsize=X_FONT_SIZE,
-                       fontweight=FONT_WEIGHT)
-
-    ax.set_ylabel("Bandwidth (bytes/sec)", fontsize='12')
-
-    # Don't extend the y-axis to negative numbers, in any circumstance.
-    ax.set_ylim(ymin=0)
-
-    # Don't use scientific notation.
-    ax.yaxis.major.formatter.set_scientific(False)
-    for tick in ax.yaxis.get_major_ticks():
-        tick.label1.set_fontsize(Y_FONT_SIZE)
-        tick.label1.set_fontweight(FONT_WEIGHT)
-
-    ax.set_title("Average Bandwidth " + bwtype + " History:\n"
-            + start_time.strftime("%Y-%m-%d %H:%M") + " to "
-            + end_time.strftime("%Y-%m-%d %H:%M"), fontsize='12',
-            fontweight=FONT_WEIGHT)
-
-    canvas = FigureCanvas(fig)
-    response = HttpResponse(content_type='image/png')
-    canvas.print_png(response, ha="center")
-    return response
