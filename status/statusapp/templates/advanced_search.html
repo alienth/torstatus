@@ -13,12 +13,11 @@
 {% block pageTitle %} Advanced Search {% endblock %}
 
 {% block mainPage %}
-{{TEST}}
 
 <table class="advSearchTable">
     <tr>
         <td>
-        <form name="searchForm" action="/advanced-search" method="get">
+        <form name="searchForm" action="/index" method="get">
         <table class="">
                 {% for option in searchOptionsFieldsOrder %}
                 <tr>

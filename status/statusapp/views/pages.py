@@ -7,6 +7,7 @@ This module contains a single controller for each page type.
 import subprocess
 import datetime
 from socket import getfqdn
+import re
 
 # Django-specific import statements -----------------------------------
 from django.shortcuts import render_to_response, redirect
@@ -40,16 +41,7 @@ def splash(request):
     """
     The splash page for the TorStatus website.
     """
-    #TODO: CLEAN IF STATEMENT
-    client_address = request.META['REMOTE_ADDR']
-    template_values = {}
-    if 'button' in request.GET:
-        if request.GET['button'] == 'Search':
-            return index(request)
-        elif request.GET['button'] == 'Advanced Search':
-            return advanced_search(request)
-    else:
-        return render_to_response("splash.html", template_values)
+    return render_to_response("splash.html")
 
 
 def index(request):
@@ -80,17 +72,11 @@ def index(request):
                         Q(address__istartswith=basic_input))
     else:
         filter_params = _get_filter_params(request)
-                        # Get this from request.get,
-                        # make dict ('isexit': 1, etc)
-        #col_prefs = _get_col_prefs(request)
-                    # Get this from request.get, too - a LIST of STRING
-                    # such that we can use as col headers and query
-                    # filters... may also need mappings.
         order = _get_order(request)
 
         active_relays = active_relays.filter(
                         **filter_params).order_by(
-                        order).select_related() # .values_list(*col_prefs)
+                        order).select_related()
 
     # If the search returns only one relay, go to the details page for
     # that relay.
@@ -136,8 +122,14 @@ def index(request):
         request.session['currentColumns'] = CURRENT_COLUMNS
     current_columns = request.session['currentColumns']
 
+    gets = request.get_full_path().split('index/')[1]
+    match = re.search(r"[?&]page=[^?&]*", gets)
+    if match:
+        gets = gets[:match.start()] + gets[match.end():]
+
     template_values = {'paged_relays': paged_relays,
                        'current_columns': current_columns,
+                       'gets': gets,
                       }
     return render_to_response('index.html', template_values)
 
@@ -184,6 +176,8 @@ def _get_filter_params(request):
         input.
     """
     filters = {}
+
+    # Add filters for flags only if the parameter is a 0 or a 1
     for flag in _FLAGS:
         filt = request.GET.get(flag, '')
 
@@ -193,6 +187,7 @@ def _get_filter_params(request):
         elif filt == '0':
             filters[flag] = 0
 
+    # Add search filters only if a search term is provided
     for search in _SEARCHES:
         search_param = ''.join(('s_', search))
         searchinput = request.GET.get(search_param, '')
@@ -201,6 +196,7 @@ def _get_filter_params(request):
             criteria_param = ''.join(('c_', search))
             criteriainput = request.GET.get(criteria_param , '')
 
+            # Format the key for django's filter
             if criteriainput in _CRITERIA:
                 key = '__'.join((search, criteriainput))
                 filters[key] = searchinput
@@ -261,20 +257,20 @@ def _get_order(request):
     @return: The sorting parameter and order as specified by the
         HttpRequest object.
     """
+    # Get the order bit -- that is, '-' or the empty string.
+    # If neither descending or ascending is given, choose ascending.
     order = request.GET.get('sortOrder', 'ascending')
-    if order == 'ascending'
-    """
-    if 'sortparam' in request.GET and 'sortparam' in _SORT_OPTIONS:
-        param = request.GET.get('sortparam')
-    else:
+    orderbit = ''
+    if order == 'descending':
+        orderbit = '-'
+
+    # Get the order parameter.
+    # If the given value is not a valid parameter, choose nickname.
+    param = request.GET.get('sortListing', 'nickname')
+    if param not in _SORT_OPTIONS:
         param = 'nickname'
 
-    order = request.GET.get('ord', '')
-    if order != '-':
-        order = ''
-
-    return ''.join((order, param))
-    """
+    return ''.join((orderbit, param))
 
 
 def details(request, fingerprint):

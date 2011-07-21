@@ -671,7 +671,7 @@ def draw_line_graph(fingerprint, bwtype, color, shade):
             y_list.extend([0] * (95 - y_end))
             y_list[0:0] = ([0] * y_start)
 
-        except ObjectDoesNotExist:
+        except Bwhist.DoesNotExist:
             y_list = ([0] * 96)
         tr_list[0:0] = y_list[(-1 * to_fill):]
 

@@ -81,7 +81,7 @@ SEARCH_OPTIONS_FIELDS_BOOLEANS = {
         'Directory Server Port': ['Equals',
                                   'Is Less Than',
                                   'Is Greater Than',],
-        'Platform': ['Equals (case insensitive)',],
+        'Platform': ['Contains (case insensitive)',],
        }
 
 SEARCH_OPTIONS_BOOLEANS_ORDER = ['Equals',
