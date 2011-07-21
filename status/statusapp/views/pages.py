@@ -592,6 +592,8 @@ def advanced_search(request):
     search_options_fields_order = ADVANCED_SEARCH_DECLR[
                                     'search_options_fields_order']
     search_options_fields = ADVANCED_SEARCH_DECLR['search_options_fields']
+    search_options_fields_booleans = ADVANCED_SEARCH_DECLR[
+                                    'search_options_fields_booleans']
 
     search_options_booleans_order = ADVANCED_SEARCH_DECLR[
                                     'search_options_booleans_order']
@@ -599,16 +601,25 @@ def advanced_search(request):
 
     filter_options_order = ADVANCED_SEARCH_DECLR['filter_options_order']
     filter_options = ADVANCED_SEARCH_DECLR['filter_options']
+    
+    TEST = 'FAIL'
+    if request.GET:
+        TEST = request.GET
+    
 
     template_values = {'search': search_value,
                        'sortOptionsOrder': sort_options_order,
                        'sortOptions': sort_options,
                        'searchOptionsFieldsOrder': search_options_fields_order,
                        'searchOptionsFields': search_options_fields,
-                       'searchOptionsBooleansOrder': search_options_booleans_order,
+                       'searchOptionsFieldsBooleans': 
+                                                search_options_fields_booleans,
+                       'searchOptionsBooleansOrder': 
+                                                search_options_booleans_order,
                        'searchOptionsBooleans': search_options_booleans,
                        'filterOptionsOrder': filter_options_order,
                        'filterOptions': filter_options,
+                       'TEST': TEST,                      
                       }
 
     return render_to_response('advanced_search.html', template_values)
