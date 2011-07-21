@@ -203,6 +203,10 @@ td#col_relayName:hover {
     background-color: #9C6;
 }
 
+td#col_relayAddress {
+    font-color: #61a;
+}
+
 td#col_relayBandwidth {
     width: 100px;
 }
@@ -330,6 +334,7 @@ a.pageLinks:hover {
     background-color: #dac8e2;
     border-color: #315 #61a #61a #315;
 }
+
 /* END Links ------------------------------------------ */
 /* Other ---------------------------------------------- */
 .relayOK {

@@ -236,6 +236,7 @@ def _get_order(request):
 
     return ''.join((order, param))
 
+
 def details(request, fingerprint):
     """
     Supply the L{ActiveRelay} information associated with a
@@ -276,83 +277,6 @@ def details(request, fingerprint):
     template_values = {'relay': relay}
     return render_to_response('details.html', template_values)
 
-"""
-def details(request, fingerprint):
-    
-    Supply the L{Statusentry} and L{Geoipdb} objects associated with a
-    relay with a given fingerprint to the details.html template.
-
-    @type fingerprint: C{string}
-    @param fingerprint: The fingerprint of the router to display the
-        details of.
-    @rtype: HttpResponse
-    @return: The L{Statusentry}, L{Descriptor}, and L{Geoipdb}
-        information of the router.
-    
-    # The SQL function 'geoip_lookup' is used here, since greater than
-    # and less than are incorrectly implemented for IPAddressFields.
-    # [:1] is djangonese for 'LIMIT 1', and
-    # [0] gets the object rather than the QuerySet.
-    statusentry = Statusentry.objects.filter(
-                  fingerprint=fingerprint).extra(
-                  select={'geoip': 'geoip_lookup(address)'}).order_by(
-                  '-validafter')[:1][0]
-
-    descriptor = statusentry.descriptorid
-
-    # Some clients may want to look up old relays. Create an attribute
-    # to flag active and unactive relays.
-    last_va = Statusentry.objects.aggregate(
-              last=Max('validafter'))['last']
-
-    if last_va != statusentry.validafter:
-        statusentry.active = False
-    else:
-        statusentry.active = True
-
-    # Get the country, latitude, and longitude from the geoip attribute
-    statusentry.country, lat, lng = statusentry.geoip.strip(
-                                    '()').split(',')
-    statusentry.latitude = float(lat)
-    statusentry.longitude = float(lng)
-
-    # Get the correct uptime, assuming that the router is still running
-    published = descriptor.published
-    now = datetime.datetime.now()
-    diff = now - published
-    diff_sec = (diff.microseconds + (
-                diff.seconds + diff.days * 24 * 3600) * 10**6) / 10**6
-    descriptor.adjuptime = descriptor.uptime + diff_sec
-
-    # Get information from the raw descriptor.
-    raw_list = str(descriptor.rawdesc).split("\n")
-    descriptor.onion_key = ''
-    descriptor.signing_key = ''
-    descriptor.exit_info = []
-    descriptor.contact = ''
-    descriptor.family = []
-    i = 0
-    while (i < len(raw_list)):
-        if raw_list[i].startswith('onion-key'):
-            descriptor.onion_key = '\n'.join(
-                    raw_list[(i + 1):(i + 6)])
-        elif raw_list[i].startswith('signing-key'):
-            descriptor.signing_key = '\n'.join(
-                    raw_list[(i + 1):(i + 6)])
-        elif raw_list[i].startswith(('accept', 'reject')):
-            descriptor.exit_info.append(raw_list[i])
-        elif raw_list[i].startswith('contact'):
-            descriptor.contact = raw_list[i][8:]
-        elif raw_list[i].startswith('family'):
-            descriptor.family = raw_list[i][7:].split()
-        i += 1
-
-    descriptor.hostname = getfqdn(str(statusentry.address))
-
-    template_values = {'descriptor': descriptor, 'statusentry':
-                       statusentry}
-    return render_to_response('details.html', template_values)
-"""
 
 def whois(request, address):
     """

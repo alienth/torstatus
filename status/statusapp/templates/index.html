@@ -129,13 +129,13 @@
             </td>
             {% endif %}
             {% if column_name == "Bandwidth" %}
-            <td id="col_relayBandwidth">{{ relay.bandwidthkbps }} KB/s</td>
+            <td id="col_relayBandwidth">{{ relay.bandwidthkbps }}KB/s</td>
             {% endif %}
             {% if column_name == "Uptime" %}
             <td id="col_relayUptime">{{ relay.uptimedays }} d</td>
             {% endif %}
             {% if column_name == "IP" %}
-            <td id="col_relayAddress">[<a href="/details/{{ relay.address }}/whois">{{ relay.address }}</a>]</td>
+            <td>[<a id="relayAddress" href="/details/{{ relay.address }}/whois">{{ relay.address }}</a>]</td>
             {% endif %}
             {% if column_name == "Fingerprint" %}
             <td id="col_relayFingerprint">{{ relay.fingerprint }}</td>
