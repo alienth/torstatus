@@ -142,7 +142,36 @@ def index(request):
     return render_to_response('index.html', template_values)
 
 
-# TODO
+_FLAGS = set(('isauthority',
+              'isbaddirectory',
+              'isbadexit',
+              'isexit',
+              'isfast',
+              'isguard',
+              'ishibernating',
+              'isnamed',
+              'isstable',
+              'isrunning',
+              'isvalid',
+              'isv2dir'))
+_SEARCHES = set(('fingerprint',
+                 'nickname',
+                 'country',
+                 'bandwidthkbps',
+                 'uptimedays',
+                 'published',
+                 'address',
+                 'orport',
+                 'dirport',
+                 'platform'))
+_CRITERIA = set(('exact',
+                 'iexact',
+                 'contains',
+                 'icontains',
+                 'lt',
+                 'gt',
+                 'startswith',
+                 'istartswith'))
 def _get_filter_params(request):
     """
     Get the filter preferences provided by the user via the
@@ -154,22 +183,29 @@ def _get_filter_params(request):
     @return: A dictionary mapping query parameters to user-supplied
         input.
     """
-    return {}
+    filters = {}
+    for flag in _FLAGS:
+        filt = request.GET.get(flag, '')
 
+        if filt == '1':
+            filters[flag] = 1
 
-# TODO
-_DEFAULT_COL_PREFS = []
-def _get_col_prefs(request):
-    """
-    Get the order on the columns and the columns themselves from the
-    user via the HttpRequest.
+        elif filt == '0':
+            filters[flag] = 0
 
-    @type request: HttpRequest
-    @param request: The HttpRequest provided by the client.
-    @rtype: C{list} of C{string}
-    @return: The column preferences specified by the client.
-    """
-    return _DEFAULT_COL_PREFS
+    for search in _SEARCHES:
+        search_param = ''.join(('s_', search))
+        searchinput = request.GET.get(search_param, '')
+
+        if searchinput:
+            criteria_param = ''.join(('c_', search))
+            criteriainput = request.GET.get(criteria_param , '')
+
+            if criteriainput in _CRITERIA:
+                key = '__'.join((search, criteriainput))
+                filters[key] = searchinput
+
+    return filters
 
 
 _SORT_OPTIONS = set((
@@ -225,6 +261,9 @@ def _get_order(request):
     @return: The sorting parameter and order as specified by the
         HttpRequest object.
     """
+    order = request.GET.get('sortOrder', 'ascending')
+    if order == 'ascending'
+    """
     if 'sortparam' in request.GET and 'sortparam' in _SORT_OPTIONS:
         param = request.GET.get('sortparam')
     else:
@@ -235,6 +274,7 @@ def _get_order(request):
         order = ''
 
     return ''.join((order, param))
+    """
 
 
 def details(request, fingerprint):

@@ -7,8 +7,6 @@ td#advSearchToolText {
     text-align: center;
     border-color: #61a #315 #315 #61a;
     white-space:nowrap;
-    /*padding-right: 15px;
-    padding-left: 15px;*/
 }
 
 table.advSearchTable {
@@ -22,28 +20,55 @@ table.advSearchTable {
 
 input#advSearchBox {
     font-size: 1.0625em;
-    border: 1px solid; 
+    border: 1px solid;
     border-color: #61a #315 #315 #61a;
 	width: 400px;
 }
 
 input#advSearchBox:hover {
-    border: 1px solid; 
+    border: 1px solid;
     border-color: #696 #363 #363 #696;
 	width: 400px;
 }
 
 input#advSearchBox:focus {
-    border: 1px solid; 
-    border-color: #696 #363 #363 #696; 
+    border: 1px solid;
+    border-color: #696 #363 #363 #696;
 	width: 400px;
 }
 
-select#advSearchButton { 
+select#advSearchButton {
     font-size: 1.0625em;
-    color: #050; 
-    font: bold; 
-	background-color: #fed; 
-    border: 1px solid; 
+    color: #050;
+    font: bold;
+	background-color: #fed;
+    border: 1px solid;
     border-color: #61a #315 #315 #61a;
-} 
+}
+
+input#searchButton {
+    color: #050;
+    width: 300px;
+	background-color:#fed;
+    border: 1px solid;
+    border-color: #61a #315 #315 #61a;
+	opacity: 0.4;
+}
+
+input#searchButton:hover {
+    color: #050;
+	background-color: #fed;
+    border: 1px solid;
+    border-color: #696 #363 #363 #696;
+	opacity: 1;
+	cursor: pointer;
+}
+
+input#searchButton:focus {
+    color: #050;
+	background-color: #fed;
+    border: 1px solid;
+    border-color: #696 #363 #363 #696;
+	opacity: 1;
+	cursor: pointer;
+}
