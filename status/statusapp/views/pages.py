@@ -12,6 +12,7 @@ from socket import getfqdn
 from django.shortcuts import render_to_response, redirect
 from django.http import HttpResponse, HttpRequest
 from django.db.models import Q, Max, Sum, Count
+from django.db import connection
 from django.views.decorators.cache import cache_page
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 
@@ -89,7 +90,7 @@ def index(request):
 
         active_relays = active_relays.filter(
                         **filter_params).order_by(
-                        order) # .values_list(*col_prefs)
+                        order).select_related() # .values_list(*col_prefs)
 
     # If the search returns only one relay, go to the details page for
     # that relay.
@@ -129,7 +130,7 @@ def index(request):
     else:
         paginator = Paginator(active_relays, active_relays.count())
         paged_relays = paginator.page(1)
-        
+
     current_columns = []
     if not ('currentColumns' in request.session):
         request.session['currentColumns'] = CURRENT_COLUMNS

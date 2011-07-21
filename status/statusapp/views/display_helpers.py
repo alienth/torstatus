@@ -34,9 +34,9 @@ SORT_OPTIONS = {'Router Name': 'nickname',
                 'Valid': 'isvalid',
                 'Directory': 'isv2dir',
                }
-    
-SEARCH_OPTIONS_FIELDS_ORDER = ['Fingerprint', 'Router Name', 
-                            'Country Code', 'Bandwidth (kb/s)', 
+
+SEARCH_OPTIONS_FIELDS_ORDER = ['Fingerprint', 'Router Name',
+                            'Country Code', 'Bandwidth (kb/s)',
                             'Uptime (days)', 'Last Descriptor Published',
                             'IP Address', 'Hostname', 'Onion Router Port',
                             'Directory Server Port', 'Platform']
@@ -52,7 +52,7 @@ SEARCH_OPTIONS_FIELDS = {'Fingerprint': 'fingerprint',
                          'Directory Server Port': 'dirport',
                          'Platform': 'platform',
                         }
-                          
+
 SEARCH_OPTIONS_BOOLEANS_ORDER = ['Equals', 'Contains', 'Is Less Than',
                                 'Is Greater Than']
 SEARCH_OPTIONS_BOOLEANS = {'Equals': 'equals',
@@ -60,13 +60,13 @@ SEARCH_OPTIONS_BOOLEANS = {'Equals': 'equals',
                            'Is Less Than': 'less',
                            'Is Greater Than': 'greater',
                           }
-                            
-FILTER_OPTIONS_ORDER = ['Authority', 'BadDirectory', 'BadExit', 'Exit',
-                        'Fast', 'Guard', 'Named', 'Stable', 'Running',
+
+FILTER_OPTIONS_ORDER = ['Authority', 'Bad Directory', 'Bad Exit', 'Exit',
+                        'Fast', 'Hibernating', 'Guard', 'Named', 'Stable', 'Running',
                         'Valid', 'V2Dir']
 FILTER_OPTIONS = {'Authority': 'isauthority',
-                  'BadDirectory': 'isbaddirectory',
-                  'BadExit': 'isbadexit',
+                  'Bad Directory': 'isbaddirectory',
+                  'Bad Exit': 'isbadexit',
                   'Exit': 'isexit',
                   'Fast': 'isfast',
                   'Guard': 'isguard',
@@ -89,4 +89,4 @@ ADVANCED_SEARCH_DECLR = {'sort_options_order': SORT_OPTIONS_ORDER,
                          'filter_options_order': FILTER_OPTIONS_ORDER,
                          'filter_options': FILTER_OPTIONS,
                         }
-                         
+
