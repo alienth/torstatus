@@ -155,6 +155,7 @@ def filter_statusentries(statusentries, query_options):
             statusentries = statusentries.order_by('-' + selected_option)
     return statusentries
 
+
 def button_choice(request, button, field, current_columns,
         available_columns):
     """

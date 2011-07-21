@@ -16,7 +16,7 @@
 {% spaceless %}
 {% block mainPage %}
 <br />
-<table class="aggStatisticSummary">
+<table class="detailsTable">
 <tr>
     <td id="details_boxTitle" colspan="2">General Information</td>
 </tr>
@@ -95,7 +95,7 @@
 </tr>
 </table>
 <br />
-<table class="aggStatisticSummary" id="networkstatisticsummary">
+<table class="detailsTable" id="networkstatisticsummary">
 <tr>
     <td id="details_boxTitle" colspan="2"> Graphs </td>
 </tr>
@@ -113,10 +113,10 @@
                 <td id="details_boxTitle"> Router Keys </td>
             </tr>
             <tr>
-                <td>Onion Key:<pre>{{ relay.onionkey }}</pre></td>
+                <td>Onion Key:<pre id="key">{{ relay.onionkey }}</pre></td>
             </tr>
             <tr>
-                <td>Signing Key:<pre>{{ relay.signingkey }}</pre></td>
+                <td>Signing Key:<pre id="key">{{ relay.signingkey }}</pre></td>
             </tr>
         </table>
     </td>

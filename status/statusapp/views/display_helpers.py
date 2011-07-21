@@ -62,8 +62,8 @@ SEARCH_OPTIONS_BOOLEANS = {'Equals': 'equals',
                           }
                             
 FILTER_OPTIONS_ORDER = ['Authority', 'BadDirectory', 'BadExit', 'Exit',
-                        'Fast', 'Guard', 'Named', 'Stable', 'Running',
-                        'Valid', 'V2Dir']
+                        'Fast', 'Guard', 'Hibernating', 'Named', 'Stable', 
+                        'Running', 'Valid', 'V2Dir']
 FILTER_OPTIONS = {'Authority': 'isauthority',
                   'BadDirectory': 'isbaddirectory',
                   'BadExit': 'isbadexit',

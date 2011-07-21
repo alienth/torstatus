@@ -47,7 +47,7 @@ table.relayTable {
     width: 100%;
     font-size: 0.813em;
     border-spacing: 0px;
-    border: 1px solid black;
+    /*border: 1px solid black;*/
 }
 
 
@@ -55,21 +55,28 @@ table.relayTable {
 
 /* Table Headers -------------------------------------- */
 th.relayHeader {
-    font-style: #89FB69; 
+    color: #050;
+    background-color: white;
     text-align: left;
-    font-weight: bold;
-    background-color: #dac8e2;
-    border-bottom: 1px solid black;
+    border-top: 1px solid;
+    border-bottom: 1px solid;
     border-color: #61a #315 #315 #61a;
+    white-space:nowrap;
+    font-weight: bold;
+    font-size: 1em;
 }
 
 th#relayHeaderInv {
-    text-align: left;
+    color: #050;
     font: bold 0px Arial;
-    background-color: #dac8e2;
-    border-bottom: 1px solid black;
-    cursor: pointer;
-    min-width: 60px;
+    background-color: white;
+    text-align: center;
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+    border-color: #61a #315 #315 #61a;
+    white-space:nowrap;
+    font-weight: bold;
+    font-size: 1em;
 }
 
 th#icons {
@@ -137,7 +144,7 @@ th#orport:hover {
 }
 
 th.hoverable:hover {
-    background-color: #9C6;
+    background-color: #dac8e2;
     cursor: pointer;
 }
 
@@ -288,7 +295,7 @@ a.linkDetails {
     text-decoration: none;
 }
 
-a#csv {
+a#csv:hover {
     background-color: #9C6;
 }
 
