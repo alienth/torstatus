@@ -29,14 +29,14 @@
                 <tr>
                     <td> {{option}} </td>
                     <td>
-                    <select id="advSearchButton" name="criteria_{{option}}"> 
+                    <select id="advSearchButton" name="criteria_{{searchOptionsFields|key:option}}"> 
                     {% for boolean_option in searchOptionsFieldsBooleans|key:option %}
                         <option value="{{searchOptionsBooleans|key:boolean_option}}">{{boolean_option}}</option>
                     {% endfor %}
                     </select>
                     </td>
                     <td>
-                    <input id="advSearchBox" type="text" name="search_{{option}}" value="{{search}}"/>
+                    <input id="advSearchBox" type="text" name="search_{{searchOptionsFields|key:option}}" value="{{search}}"/>
                     </td>
                 </tr>
                 {% endfor %}
