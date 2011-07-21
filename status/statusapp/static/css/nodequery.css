@@ -47,78 +47,67 @@ td#searchQError {
     color: red;
 }
 
-
 /* END Table Columns ---------------------------------- */
 
 /* Input ---------------------------------------------- */
-
 input#ipSearch_AddressQ {
-    font: 0.625em 'trebuchet ms',helvetica,sans-serif; 
-    font-size: 0.938em;
+    font: 0.938em 'trebuchet ms',helvetica,sans-serif; 
     border: 1px solid; 
     border-color: #61a #315 #315 #61a; 
 	width: auto;
 }
 
 input#ipSearch_AddressQ:hover {
-    font: 0.625em 'trebuchet ms',helvetica,sans-serif; 
-    font-size: 0.938em;
+    font: 0.938em 'trebuchet ms',helvetica,sans-serif; 
     border: 1px solid; 
     border-color: #696 #363 #363 #696; 
 	width: auto;
 }
 
 input#ipSearch_AddressQ:focus {
-    font: 0.625em 'trebuchet ms',helvetica,sans-serif; 
-    font-size: 0.938em;
+    font: 0.938em 'trebuchet ms',helvetica,sans-serif; 
     border: 1px solid; 
     border-color: #696 #363 #363 #696;
 	width: auto;
 }
 
 input#ipSearch_DestIP {
-    font: 0.625em 'trebuchet ms',helvetica,sans-serif; 
-    font-size: 0.938em;
+    font: 0.938em 'trebuchet ms',helvetica,sans-serif; 
     border: 1px solid; 
     border-color: #61a #315 #315 #61a; 
 	width: auto;
 }
 
 input#ipSearch_DestIP:hover {
-    font: 0.625em 'trebuchet ms',helvetica,sans-serif; 
-    font-size: 0.938em;
+    font: 0.938em 'trebuchet ms',helvetica,sans-serif; 
     border: 1px solid; 
     border-color: #696 #363 #363 #696; 
 	width: auto;
 }
 
 input#ipSearch_DestIP:focus {
-    font: 0.625em 'trebuchet ms',helvetica,sans-serif; 
-    font-size: 0.938em;
+    font: 0.938em 'trebuchet ms',helvetica,sans-serif; 
     border: 1px solid; 
     border-color: #696 #363 #363 #696;
 	width: auto;
 }
 
 input#ipSearch_DestPort {
-    font: 0.625em 'trebuchet ms',helvetica,sans-serif; 
-    font-size: 0.938em;
+    font: 0.938em 'trebuchet ms',helvetica,sans-serif; 
     border: 1px solid; 
     border-color: #61a #315 #315 #61a; 
 	width: auto;
 }
 
 input#ipSearch_DestPort:hover {
-    font: 0.625em 'trebuchet ms',helvetica,sans-serif; 
-    font-size: 0.938em;
+    font: 0.938em 'trebuchet ms',helvetica,sans-serif; 
     border: 1px solid; 
     border-color: #696 #363 #363 #696; 
 	width: auto;
 }
 
 input#ipSearch_DestPort:focus {
-    font: 0.625em 'trebuchet ms',helvetica,sans-serif; 
-    font-size: 0.938em;
+    font: 0.938em 'trebuchet ms',helvetica,sans-serif; 
     border: 1px solid; 
     border-color: #696 #363 #363 #696;
 	width: auto;
@@ -126,7 +115,7 @@ input#ipSearch_DestPort:focus {
 
 input#ipSearch_SUBMIT { 
     color: #050; 
-    font: bold 'trebuchet ms',helvetica,sans-serif; 
+    font-weight: bold;
     font-size: 0.938em;
 	background-color:#fed; 
     border: 1px solid; 
@@ -138,8 +127,9 @@ input#ipSearch_SUBMIT:hover {
     color: #050; 
     font: bold 'trebuchet ms',helvetica,sans-serif; 
     font-size: 0.938em;
+    font-weight: bold;
 	background-color: #fed; 
-    border: 1px solid; 
+    border: 1px solid;
     border-color: #696 #363 #363 #696;
 	opacity: 1;
 	cursor: pointer;
@@ -149,12 +139,12 @@ input#ipSearch_SUBMIT:focus {
     color: #050; 
     font: bold 'trebuchet ms',helvetica,sans-serif; 
     font-size: 0.938em;
+    font-weight: bold;
 	background-color: #fed; 
     border: 1px solid; 
     border-color: #696 #363 #363 #696;
 	opacity: 1;
 	cursor: pointer;
 }
-
 
 /* END Input ------------------------------------------ */

@@ -47,9 +47,7 @@ table.relayTable {
     width: 100%;
     font-size: 0.813em;
     border-spacing: 0px;
-    /*border: 1px solid black;*/
 }
-
 
 /* END Table ------------------------------------------ */
 
@@ -148,7 +146,6 @@ th.hoverable:hover {
     cursor: pointer;
 }
 
-
 /* END Table Headers ---------------------------------- */
 
 /* Table Rows ----------------------------------------- */
@@ -159,7 +156,6 @@ tr.relay {
 tr.relay:hover {
     background-color: #9C6;
 }
-
 
 /* END Table Rows */
 
@@ -267,7 +263,6 @@ td#mainLinks {
     padding: 10px;
 }
 
-
 /* END Table Columns ---------------------------------- */
 
 /* Links ---------------------------------------------- */
@@ -299,20 +294,11 @@ a#csv:hover {
     background-color: #9C6;
 }
 
-
 /* END Links ------------------------------------------ */
 
 /* Other ---------------------------------------------- */
 .relayOK {
     background-color: white;
-}
-
-.relayHibernating {
-    background-color: #F9BD67;
-}
-
-.relayDown {
-    background-color: yellow;
 }
 
 .relayBadExit {
@@ -335,6 +321,5 @@ img#prevnexticon {
 img#prevnexticon:hover {
     opacity: 1;
 }
-
 
 /* END Other ------------------------------------------ */

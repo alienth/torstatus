@@ -10,7 +10,6 @@ table.aggNetworkStatistic {
    	white-space:nowrap;
 }
 
-
 /* END Table ------------------------------------------ */
 
 /* Table Columns -------------------------------------- */
@@ -18,7 +17,6 @@ td#graphEntry {
     border-bottom: 1px solid;
     border-color: #61a #315 #315 #61a;
 }
-
 
 /* END Table Columns ---------------------------------- */
 
