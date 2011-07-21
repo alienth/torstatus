@@ -250,11 +250,8 @@ def index(request):
         network itself.
     """
     # Get all relays in last consensus
-    last_validafter = '2011-07-19 14:00:00'
-                      # ActiveRelay.objects.aggregate(
-                      # last=Max('validafter'))['last'] - not working
-                      # correctly, it's a schema/db problem... :(
-
+    last_validafter = ActiveRelay.objects.aggregate(
+                      last=Max('validafter'))['last']
     active_relays = ActiveRelay.objects.filter(
                     validafter=last_validafter).order_by('nickname')
 
@@ -790,7 +787,49 @@ def advanced_search(request):
     filter_options_order = ADVANCED_SEARCH_DECLR['filter_options_order']
     filter_options = ADVANCED_SEARCH_DECLR['filter_options']
                            
-    
+
+
+    #Displayoptions method stuff
+    current_columns = []
+    available_columns = []
+    not_movable_columns = NOT_MOVABLE_COLUMNS
+
+    if ('resetPreferences' in request.GET):
+        del request.session['currentColumns']
+        del request.session['availableColumns']
+
+    if not ('currentColumns' in request.session and 'availableColumns'
+            in request.session):
+        request.session['currentColumns'] = CURRENT_COLUMNS
+        request.session['availableColumns'] = AVAILABLE_COLUMNS
+    current_columns = request.session['currentColumns']
+    available_columns = request.session['availableColumns']
+
+    column_lists = [current_columns, available_columns, '']
+    if ('removeColumn' in request.GET and 'selected_removeColumn'
+        in request.GET):
+        column_lists = button_choice(request, 'removeColumn',
+                      'selected_removeColumn', current_columns,
+                      available_columns)
+    elif ('addColumn' in request.GET and 'selected_addColumn'
+          in request.GET):
+        column_lists = button_choice(request, 'addColumn',
+                'selected_addColumn', current_columns, available_columns)
+    elif ('upButton' in request.GET and 'selected_removeColumn'
+          in request.GET):
+        if not(request.GET['selected_removeColumn'] in
+               not_movable_columns):
+            column_lists = button_choice(request, 'upButton',
+                          'selected_removeColumn', current_columns,
+                          available_columns)
+    elif ('downButton' in request.GET and 'selected_removeColumn'
+          in request.GET):
+        if not(request.GET['selected_removeColumn'] in
+               not_movable_columns):
+            column_lists = button_choice(request, 'downButton',
+                          'selected_removeColumn', current_columns,
+                          available_columns)
+
     template_values = {'searchValue': search_value,
                        'sortOptionsOrder': sort_options_order,
                        'sortOptions': sort_options,
@@ -800,6 +839,9 @@ def advanced_search(request):
                        'searchOptionsBooleans': search_options_booleans,
                        'filterOptionsOrder': filter_options_order,
                        'filterOptions': filter_options,
+                       'currentColumns': column_lists[0],
+                       'availableColumns': column_lists[1],
+                       'selectedEntry': column_lists[2]
                       }
 
     return render_to_response('advanced_search.html', template_values)

@@ -24,7 +24,17 @@ td#advSearchToolText {
 }
 
 table.advSearchTable {
-    font-size: 30px;
+    font-size: 20px;
+    width: auto;
+    padding: 10px;
+    border-spacing: 10px;
+    border: 1px bold;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+table.advSearchFlagTable {
+    font-size: 15px;
     width: auto;
     padding: 10px;
     border-spacing: 10px;

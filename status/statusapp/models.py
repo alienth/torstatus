@@ -1141,13 +1141,19 @@ class ActiveDescriptor(models.Model):
     bandwidthavg = models.BigIntegerField()
     bandwidthburst = models.BigIntegerField()
     bandwidthobserved = models.BigIntegerField()
-    platform = models.CharField(max_length=256)
+    bandwidthkbps = models.BigIntegerField()
     uptime = models.BigIntegerField()
-    rawdesc = models.TextField()
+    uptimedays = models.BigIntegerField()
+    platform = models.CharField(max_length=256)
+    contact = models.TextField()
+    onionkey = models.CharField(max_length=188)
+    signingkey = models.CharField(max_length=188)
+    exitpolicy = models.TextField()
+    family = models.TextField()
 
     class Meta:
         verbose_name = "active descriptor"
-        db_table = 'cacheold\".\"active_descriptor'
+        db_table = 'cache\".\"active_descriptor'
 
     def __unicode__(self):
         return str(self.descriptor)
@@ -1280,7 +1286,7 @@ class ActiveRelay(models.Model):
     uptime = models.BigIntegerField(blank=True)
     uptimedays = models.BigIntegerField(blank=True)
     platform = models.CharField(max_length=256, blank=True)
-    contact = models.CharField(max_length=96, blank=True)
+    contact = models.TextField()
     onionkey = models.CharField(max_length=188, blank=True)
     signingkey = models.CharField(max_length=188, blank=True)
     exitpolicy = models.TextField(blank=True)
@@ -1291,7 +1297,7 @@ class ActiveRelay(models.Model):
 
     class Meta:
         verbose_name = 'active relay'
-        db_table = 'cacheold\".\"active_relay'
+        db_table = 'cache\".\"active_relay'
 
     def __unicode__(self):
         return ': '.join((str(self.nickname), str(self.fingerprint)))

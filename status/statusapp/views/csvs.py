@@ -33,10 +33,9 @@ def current_results_csv(request):
     current_columns.remove("Named")
 
     #Performs the query.
-    last_va = Statusentry.objects.aggregate(
+    last_va = ActiveRelay.objects.aggregate(
             last=Max('validafter'))['last']
-    statusentries = Statusentry.objects.filter(validafter=last_va).\
-            extra(select={'geoip': 'geoip_lookup(address)'}).\
+    statusentries = ActiveRelay.objects.filter(validafter=last_va).\
             order_by('nickname')
 
     #Gets the query options.
@@ -70,26 +69,23 @@ def current_results_csv(request):
     for entry in statusentries:
         fields_access = [("Router Name", entry.nickname),\
                 #Sometimes no country code I included a check below.
-                ("Country Code", ""),\
-                ("Bandwidth", entry.descriptorid.bandwidthobserved),\
-                ("Uptime", entry.descriptorid.uptime),\
+                ("Country Code", entry.country),\
+                ("Bandwidth", entry.bandwidthobserved),\
+                ("Uptime", entry.uptime),\
                 ("IP", entry.address),\
                 ("Fingerprint", entry.fingerprint),\
                 ("LastDescriptorPublished", entry.published),\
-                ("Contact", entry.descriptorid.rawdesc),\
+                ("Contact", entry.contact),\
                 ("BadDir", entry.isbaddirectory),\
                 ("DirPort", entry.dirport), ("Exit", entry.isexit),\
                 ("Authority", entry.isauthority),\
                 ("Fast", entry.isfast), ("Guard", entry.isguard),\
                 ("V2Dir", entry.isv2dir),\
-                ("Platform", entry.descriptorid.platform),\
+                ("Platform", entry.platform),\
                 ("Stable", entry.isstable), ("ORPort", entry.orport),\
                 ("BadExit", entry.isbadexit)]
 
-        #Removes cases when country code is inaccesible
-        if entry.geoip:
-            fields_access[fields_access.index(("Country Code", ""))] =\
-                    ("Country Code", entry.geoip.split(',')[0][1:3])
+        #Removes cases when country code is inaccesible 
         for k, v in fields_access:
             if k in current_columns: rows[k].append(v)
 

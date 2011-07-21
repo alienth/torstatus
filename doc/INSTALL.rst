@@ -83,3 +83,20 @@ in your web browser to view it.
 
 If there are any changes that you would like to see in TorStatus, please
 let us know by sending e-mail to torstatus@gmail.com.
+
+3: Running Apache and Deployment
+________________________________
+Get the appropriate packages. With a minimal debian sqeeze platform you should
+have the necessary packages already.
+
+You should get apache2-mpm-worker
+apache2-utils
+apache2.2-bin
+apache2.2-common
+
+Two packages are most popular for embedding python into the Apache server:
+libapache2-mod-python
+*recommend mod_wsgi*
+
+documentation for mod_wsgi is located at: code.google.com/p/modwsgi/wiki
+documentation for mod_python
