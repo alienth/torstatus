@@ -11,13 +11,14 @@ from socket import getfqdn
 # Django-specific import statements -----------------------------------
 from django.shortcuts import render_to_response, redirect
 from django.http import HttpResponse, HttpRequest
-from django.db.models import Max, Sum, Count
+from django.db.models import Q, Max, Sum, Count
+from django.db import connection
 from django.views.decorators.cache import cache_page
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 
 # TorStatus specific import statements --------------------------------
 from statusapp.models import Statusentry, Descriptor, Bwhist,\
-        TotalBandwidth
+        TotalBandwidth, ActiveRelay
 from custom.aggregate import CountCase
 from helpers import *
 from display_helpers import *
@@ -26,14 +27,13 @@ from display_helpers import *
 CURRENT_COLUMNS = ["Country Code", "Router Name", "Bandwidth",
                    "Uptime", "IP", "Hostname", "Icons", "ORPort",
                    "DirPort", "BadExit", "Named", "Exit",
-                   "Authority", "Fast", "Guard", "Stable",
-                   "Running", "Valid", "V2Dir", "Platform", "Hibernating",
-                  ]
+                   "Authority", "Fast", "Guard", "Hibernating",
+                   "Stable", "Running", "Valid", "V2Dir", "Platform",]
 AVAILABLE_COLUMNS = ["Fingerprint", "LastDescriptorPublished",
                      "Contact", "BadDir",]
 NOT_MOVABLE_COLUMNS = ["Named", "Exit", "Authority", "Fast", "Guard",
-                       "Stable", "Running", "Valid", "V2Dir",
-                       "Platform", "Hibernating"]
+                       "Hibernating", "Stable", "Running", "Valid",
+                       "V2Dir", "Platform",]
 
 
 def splash(request):
@@ -51,187 +51,6 @@ def splash(request):
     else:
         return render_to_response("splash.html", template_values)
 
-"""
-#@cache_page(60 * 15) #, key_prefix="index")
-def index(request, sort_filter):
-    
-    Supply a dictionary to the index.html template consisting of a list
-    of active relays.
-
-    Currently, an "active relay" is a relay that has a status entry
-    that was published in the last consensus.
-
-    @type sort_filter: C{string}
-    @param: A string that contains both the column that should be
-        ordered by and the actual ordering (ascending/descending);
-        the values are separated by '_'.
-
-    @rtype: HttpResponse
-    @return: A dictionary consisting of information about each router
-        in the network as well as aggregate information about the
-        network itself.
-    
-    # INITIAL QUERY ---------------------------------------------------
-    # -----------------------------------------------------------------
-    # Get the initial query and necessary aggregate values for the
-    # routers in the last consensus.
-    last_va = Statusentry.objects.aggregate(
-              last=Max('validafter'))['last']
-
-    statusentries = Statusentry.objects.filter(
-                    validafter=last_va).extra(
-                    select={'geoip':
-                    'geoip_lookup(statusentry.address)'})\
-                    .order_by('nickname')
-
-    num_routers = statusentries.count()
-
-    bw_total = TotalBandwidth.objects.all().order_by(
-               '-date')[:1][0].bwobserved
-
-    total_counts = statusentries.aggregate(
-                   bandwidthavg=Sum('descriptorid__bandwidthavg'),
-                   bandwidthburst=Sum('descriptorid__bandwidthburst'),
-                   bandwidthobserved=Sum('descriptorid__bandwidthobserved'))
-    # Convert from B/s to KB/s
-    total_counts['bandwidthavg'] /= 1024
-    total_counts['bandwidthburst'] /= 1024
-    total_counts['bandwidthobserved'] /= 1024
-
-    # USER QUERY MODIFICATIONS ----------------------------------------
-    # -----------------------------------------------------------------
-    current_columns = []
-    if not ('currentColumns' in request.session):
-        request.session['currentColumns'] = CURRENT_COLUMNS
-    current_columns = request.session['currentColumns']
-
-    query_options = {}
-    if (request.GET):
-        if ('resetQuery' in request.GET):
-            if ('queryOptions' in request.session):
-                del request.session['queryOptions']
-        else:
-            query_options = request.GET
-            request.session['queryOptions'] = query_options
-    if (not query_options and 'queryOptions' in request.session):
-            query_options = request.session['queryOptions']
-
-    if query_options:
-        statusentries = filter_statusentries(
-                statusentries, query_options)
-
-    # TABLE SORTING ---------------------------------------------------
-    # -----------------------------------------------------------------
-    sort_order = ''
-    order_column_name = ''
-    if sort_filter:
-        order_column_name, sort_order = sort_filter.split('_')
-        options = ['nickname', 'fingerprint', 'geoip',
-                   'bandwidthobserved', 'uptime', 'published',
-                   'hostname', 'address', 'orport', 'dirport',
-                   'isbaddirectory', 'isbadexit',]
-
-        descriptorlist_options = ['uptime', 'contact',
-                                  'bandwidthobserved']
-        altered_column_name = order_column_name
-        if altered_column_name in options:
-            if altered_column_name in descriptorlist_options:
-                altered_column_name = 'descriptorid__' + \
-                        altered_column_name
-            if sort_order == 'ascending':
-                statusentries = statusentries.order_by(
-                        altered_column_name)
-            elif sort_order == 'descending':
-                statusentries = statusentries.order_by(
-                        '-' + altered_column_name)
-
-    # USER QUERY AGGREGATE STATISTICS ---------------------------------
-    # -----------------------------------------------------------------
-    counts = statusentries.aggregate(
-             isauthority=CountCase('isauthority', when=True),
-             isbaddirectory=CountCase('isbaddirectory', when=True),
-             isbadexit=CountCase('isbadexit', when=True),
-             isexit=CountCase('isexit', when=True),
-             isfast=CountCase('isfast', when=True),
-             isguard=CountCase('isguard', when=True),
-             isnamed=CountCase('isnamed', when=True),
-             isstable=CountCase('isstable', when=True),
-             isrunning=CountCase('isrunning', when=True),
-             isvalid=CountCase('isvalid', when=True),
-             isv2dir=CountCase('isv2dir', when=True),
-             bandwidthavg=Sum('descriptorid__bandwidthavg'),
-             bandwidthburst=Sum('descriptorid__bandwidthburst'),
-             bandwidthobserved=Sum('descriptorid__bandwidthobserved'))
-    # Convert from B/s to KB/s
-    if counts['bandwidthavg']:
-        counts['bandwidthavg'] /= 1024
-    if counts['bandwidthburst']:
-        counts['bandwidthburst'] /= 1024
-    if counts['bandwidthobserved']:
-        counts['bandwidthobserved'] /= 1024
-
-    in_query = statusentries.count()
-
-    bw_disp = TotalBandwidth.objects.all()\
-              .order_by('-date')[:1][0].bwobserved
-
-    client_address = request.META['REMOTE_ADDR']
-
-    # GENERATE HTML: TABLE HEADERS ------------------------------------
-    # -----------------------------------------------------------------
-    html_table_headers, html_current_columns = generate_table_headers(
-            current_columns, order_column_name, sort_order)
-
-    # GENERATE HTML: TABLE ROWS ---------------------------------------
-    # -----------------------------------------------------------------
-    html_table_rows = generate_table_rows(statusentries, current_columns,
-                                html_current_columns)
-
-    # GENERATE HTML: ADVANCE QUERY ------------------------------------
-    # -----------------------------------------------------------------
-    html_query_list_options = generate_query_list_options(query_options)
-    html_query_input_options = generate_query_input_options(query_options)
-
-    # PAGINATION ------------------------------------------------------
-    # -----------------------------------------------------------------
-    paginator = Paginator(statusentries, 50) # Show 50 statusentries
-                                             # per page
-
-    # Make sure page request is an int. If not, deliver first page.
-    try:
-        page = int(request.GET.get('page', '1'))
-    except ValueError:
-        page = 1
-
-    # If page request is out of range, deliver last page of results.
-    try:
-        statusentries = paginator.page(page)
-    except (EmptyPage, InvalidPage):
-        statusentries = paginator.page(paginator.num_pages)
-
-    template_values = {'relay_list': statusentries,
-                       'client_address': client_address,
-                       'num_routers': num_routers,
-                       'in_query': in_query,
-                       'exp_time': 900,
-                       'counts': counts,
-                       'total_counts': total_counts,
-                       'bw_disp': bw_disp,
-                       'bw_total': bw_total,
-                       'queryOptions': query_options,
-                       'htmlTableHeaders': html_table_headers,
-                       'htmlCurrentColumns': html_current_columns,
-                       'htmlRowCode': html_table_rows,
-                       'htmlQueryListOptions': html_query_list_options,
-                       'htmlQueryInputOptions': html_query_input_options,
-                      }
-    return render_to_response('index.html', template_values)
-"""
-from django.shortcuts import render_to_response
-from django.http import HttpResponse, HttpRequest
-from django.db.models import Q, Max
-from django.core.paginator import Paginator, InvalidPage, EmptyPage
-from statusapp.models import ActiveRelay
 
 def index(request):
     """
@@ -271,7 +90,7 @@ def index(request):
 
         active_relays = active_relays.filter(
                         **filter_params).order_by(
-                        order) # .values_list(*col_prefs)
+                        order).select_related() # .values_list(*col_prefs)
 
     # If the search returns only one relay, go to the details page for
     # that relay.
@@ -311,7 +130,7 @@ def index(request):
     else:
         paginator = Paginator(active_relays, active_relays.count())
         paged_relays = paginator.page(1)
-        
+
     current_columns = []
     if not ('currentColumns' in request.session):
         request.session['currentColumns'] = CURRENT_COLUMNS

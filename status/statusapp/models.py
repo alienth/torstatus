@@ -1250,6 +1250,9 @@ class ActiveRelay(models.Model):
     @ivar exitpolicy: The exitpolicy information of the relay.
     @type family: TextField (C{string})
     @ivar family: The family that the relay belongs to.
+    @type ishibernating: BooleanField (C{bool})
+    @ivar ishibernating: True if the relay is hibernating, False
+        otherwise.
     @type country: CharField (C{string})
     @ivar country: The country that the relay is located in.
     @type latitude: DecimalField (C{float})
@@ -1291,6 +1294,7 @@ class ActiveRelay(models.Model):
     signingkey = models.CharField(max_length=188, blank=True)
     exitpolicy = models.TextField(blank=True)
     family = models.TextField(blank=True)
+    ishibernating = models.BooleanField(blank=True)
     country = models.CharField(max_length=2, blank=True)
     latitude = models.DecimalField(max_digits=7, decimal_places=4, blank=True)
     longitude = models.DecimalField(max_digits=7, decimal_places=4, blank=True)

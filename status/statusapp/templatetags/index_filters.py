@@ -113,3 +113,15 @@ def key(d, key_name):
     if key_name in d:
         return d[key_name]
 
+
+@register.filter
+def subtract(a, b):
+    """
+    Return the difference of two integers.
+
+    @type a: C{int}
+    @param a: The number to subtract from.
+    @type b: C{int}
+    @param b: The number to subtract.
+    """
+    return a - b
