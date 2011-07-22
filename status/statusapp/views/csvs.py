@@ -24,12 +24,11 @@ def current_results_csv(request):
     current_columns = request.session['currentColumns']
 
     # Don't provide certain flag information in the csv
-    #current_columns.remove("Hostname")
-    #current_columns.remove("Icons")
-    #current_columns.remove("Valid")
-    #current_columns.remove("Running")
-    #current_columns.remove("Hibernating")
-    #current_columns.remove("Named")
+    current_columns.remove("Hostname")
+    current_columns.remove("Icons")
+    current_columns.remove("Valid")
+    current_columns.remove("Running")
+    current_columns.remove("Named")
 
     last_va = ActiveRelay.objects.aggregate(
               last=Max('validafter'))['last']
@@ -48,7 +47,17 @@ def current_results_csv(request):
     if (not query_options and 'queryOptions' in request.session):
             query_options = request.session['queryOptions']
 
+    #method rendered useless
     relays = filter_statusentries(relays, query_options)
+
+    #new way of filtering but it would be nice to abstract to another method
+    basic_input = request.GET.get('search', '')
+
+    if basic_input:
+        relays = active_relays.filter(
+                        Q(nickname__istartswith=basic_input) | \
+                        Q(fingerprint__istartswith=basic_input) | \
+                        Q(address__istartswith=basic_input))
 
     # Create the HttpResponse object with the appropriate CSV header.
     response = HttpResponse(mimetype='text/csv')
