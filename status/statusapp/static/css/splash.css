@@ -3,7 +3,6 @@ td {
     font-size: 100%;
 }
 
-
 /* END General Settings ------------------------------- */
 
 /* Table -----------------------------------------------*/
@@ -23,7 +22,6 @@ table#searchTable {
     margin-left: auto;
     margin-right: auto;
 }
-
 
 /* END Table ------------------------------------------ */
 
@@ -79,3 +77,10 @@ input#searchBox:focus {
 }
 
 /* END Input ------------------------------------------ */
+
+/* Other ---------------------------------------------- */
+a#advancedSearchButton {
+    text-decoration: none;
+}
+
+/* END Other ------------------------------------------ */

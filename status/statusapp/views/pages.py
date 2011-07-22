@@ -71,6 +71,8 @@ def index(request):
                         Q(fingerprint__istartswith=basic_input) | \
                         Q(address__istartswith=basic_input))
     else:
+        if 'query_filters' in request.session:
+            del request.session['query_filters']
         filter_params = _get_filter_params(request)
         order = _get_order(request)
 
@@ -130,6 +132,7 @@ def index(request):
     template_values = {'paged_relays': paged_relays,
                        'current_columns': current_columns,
                        'gets': gets,
+                       'request': request,
                       }
     return render_to_response('index.html', template_values)
 
@@ -176,31 +179,34 @@ def _get_filter_params(request):
         input.
     """
     filters = {}
+    
+    if 'query_filters' not in request.session:
+        # Add filters for flags only if the parameter is a 0 or a 1
+        for flag in _FLAGS:
+            filt = request.GET.get(flag, '')
 
-    # Add filters for flags only if the parameter is a 0 or a 1
-    for flag in _FLAGS:
-        filt = request.GET.get(flag, '')
+            if filt == '1':
+                filters[flag] = 1
+    
+            elif filt == '0':
+                filters[flag] = 0
 
-        if filt == '1':
-            filters[flag] = 1
+        # Add search filters only if a search term is provided
+        for search in _SEARCHES:
+            search_param = ''.join(('s_', search))
+            searchinput = request.GET.get(search_param, '')
+    
+            if searchinput:
+                criteria_param = ''.join(('c_', search))
+                criteriainput = request.GET.get(criteria_param , '')
 
-        elif filt == '0':
-            filters[flag] = 0
-
-    # Add search filters only if a search term is provided
-    for search in _SEARCHES:
-        search_param = ''.join(('s_', search))
-        searchinput = request.GET.get(search_param, '')
-
-        if searchinput:
-            criteria_param = ''.join(('c_', search))
-            criteriainput = request.GET.get(criteria_param , '')
-
-            # Format the key for django's filter
-            if criteriainput in _CRITERIA:
-                key = '__'.join((search, criteriainput))
-                filters[key] = searchinput
-
+                # Format the key for django's filter
+                if criteriainput in _CRITERIA:
+                    key = '__'.join((search, criteriainput))
+                    filters[key] = searchinput
+        request.session['query_filters'] = filters
+    
+    filters = request.session['query_filters']
     return filters
 
 
