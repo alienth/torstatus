@@ -34,8 +34,6 @@ input#advSearchBox {
 	width: 400px;
 }
 
-request.GET['search']
-
 input#advSearchBox:hover {
     border: 1px solid;
     border-color: #696 #363 #363 #696;

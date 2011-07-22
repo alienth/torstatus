@@ -64,15 +64,16 @@ def index(request):
                     validafter=last_validafter).order_by('nickname')
 
     basic_input = request.GET.get('search', '')
-
+    
+    if 'query_filters' in request.session:
+            del request.session['query_filters']
+    
     if basic_input:
         active_relays = active_relays.filter(
                         Q(nickname__istartswith=basic_input) | \
                         Q(fingerprint__istartswith=basic_input) | \
                         Q(address__istartswith=basic_input))
     else:
-        if 'query_filters' in request.session:
-            del request.session['query_filters']
         filter_params = _get_filter_params(request)
         order = _get_order(request)
 
