@@ -1,14 +1,4 @@
-td {
-    font-size: 0.875em;
-}
-
-td#advSearchToolText {
-    color: #050;
-    text-align: center;
-    border-color: #61a #315 #315 #61a;
-    white-space:nowrap;
-}
-
+/* Table -----------------------------------------------*/
 table.advSearchTable {
     width: auto;
     padding: 10px;
@@ -18,6 +8,25 @@ table.advSearchTable {
     margin-right: auto;
 }
 
+table.flags {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* END Table ------------------------------------------ */
+
+/* Table Columns -------------------------------------- */
+td#advSearchToolText {
+    font-size: 100%;
+    color: #050;
+    text-align: center;
+    border-color: #61a #315 #315 #61a;
+    white-space:nowrap;
+}
+
+/* END Table Columns ---------------------------------- */
+
+/* Input, Select, Option ------------------------------ */
 input#advSearchBox {
     font-size: 1.0625em;
     border: 1px solid;
@@ -72,3 +81,5 @@ input#searchButton:focus {
 	opacity: 1;
 	cursor: pointer;
 }
+
+/* END Input, Select, Option -------------------------- */

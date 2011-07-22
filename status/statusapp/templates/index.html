@@ -12,7 +12,9 @@
 
 {% block moreLinks %}
 <br /><br />
-<a class="link" id="csv" href="/tor-query-export.csv">Download CSV Search File</a>
+<form>
+    <a class="link" id="csv" href="/tor-query-export.csv">Download CSV Search File</a>
+    {{filter}}
 {% endblock %}
 
 {% block pageTitle %} Active Relays {% endblock %}

@@ -99,6 +99,7 @@ class Descriptor(models.Model):
         the L{Descriptor} describes.
     @type published: DateTimeField (C{datetime})
     @ivar published: The time that the L{Descriptor} was published.
+
     @type uptime: BigIntegerField (C{long})
     @ivar uptime: The time, in seconds, that the router that the
         L{Descriptor} describes has been continuously running.

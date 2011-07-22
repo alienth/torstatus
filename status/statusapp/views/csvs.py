@@ -13,6 +13,11 @@ import csv
 # TorStatus specific import statements --------------------------------
 from statusapp.models import ActiveRelay
 from helpers import *
+from pages import *
+
+NOT_MOVABLE_COLUMNS = ["Named", "Exit", "Authority", "Fast", "Guard",
+                       "Hibernating", "Stable", "Running", "Valid",
+                       "V2Dir", "Platform",]
 
 def current_results_csv(request):
     """
@@ -24,31 +29,45 @@ def current_results_csv(request):
     current_columns = request.session['currentColumns']
 
     # Don't provide certain flag information in the csv
-    #current_columns.remove("Hostname")
-    #current_columns.remove("Icons")
-    #current_columns.remove("Valid")
-    #current_columns.remove("Running")
-    #current_columns.remove("Hibernating")
-    #current_columns.remove("Named")
+    #need to clean this up a bit
+    if "Hostname" in current_columns:
+        current_columns.remove("Hostname")
+    if "Icons" not in current_columns:
+        for flag in NOT_MOVABLE_COLUMNS:
+            if flag in current_columns:
+                current_columns.remove(flag)
+    if "Icons" in current_columns:
+        current_columns.remove("Icons")
+    if "Valid" in current_columns:
+        current_columns.remove("Valid")
+    if "Running" in current_columns:
+        current_columns.remove("Running")
+    if "Named" in current_columns:
+        current_columns.remove("Named")
 
     last_va = ActiveRelay.objects.aggregate(
               last=Max('validafter'))['last']
-    relays = ActiveRelay.objects.filter(
+    active_relays = ActiveRelay.objects.filter(
                     validafter=last_va).order_by('nickname')
 
-    # Get the query options
-    query_options = {}
-    if (request.GET):
-        if ('resetQuery' in request.GET):
-            if ('queryOptions' in request.session):
-                del request.session['queryOptions']
-        else:
-            query_options = request.GET
-            request.session['queryOptions'] = query_options
-    if (not query_options and 'queryOptions' in request.session):
-            query_options = request.session['queryOptions']
+    #new way of filtering but it would be nice to abstract to another method
+    if 'basic_search' in request.session:
+        basic_input = request.session['basic_search']
+    else:
+        basic_input = ''
 
-    relays = filter_statusentries(relays, query_options)
+    if basic_input:
+        active_relays = active_relays.filter(
+                        Q(nickname__istartswith=basic_input) | \
+                        Q(fingerprint__istartswith=basic_input) | \
+                        Q(address__istartswith=basic_input))
+    else:
+        filter_params = get_filter_params(request)
+        order = get_order(request)
+
+        active_relays = active_relays.filter(
+                        **filter_params).order_by(
+                        order).select_related()
 
     # Create the HttpResponse object with the appropriate CSV header.
     response = HttpResponse(mimetype='text/csv')
@@ -62,7 +81,7 @@ def current_results_csv(request):
     for column in current_columns: rows[column] = []
 
     # Populates the row dictionary with all field values.
-    for relay in relays:
+    for relay in active_relays:
         fields_access = [
                 ("Router Name", relay.nickname),
                 ("Country Code", relay.country),
