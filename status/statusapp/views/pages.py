@@ -84,6 +84,7 @@ def index(request):
                         **filter_params).order_by(
                         order).select_related()
 
+    num_results = active_relays.count()
     # If the search returns only one relay, go to the details page for
     # that relay.
     if active_relays.count() == 1:
@@ -120,7 +121,7 @@ def index(request):
         except (EmptyPage, InvalidPage):
             paged_relays = paginator.page(paginator.num_pages)
     else:
-        paginator = Paginator(active_relays, active_relays.count())
+        paginator = Paginator(active_relays, num_results)
         paged_relays = paginator.page(1)
 
     current_columns = []
@@ -137,6 +138,7 @@ def index(request):
                        'current_columns': current_columns,
                        'gets': gets,
                        'request': request,
+                       'number_of_results': num_results,
                       }
     return render_to_response('index.html', template_values)
 
@@ -431,11 +433,6 @@ def advanced_search(request):
     filter_options_order = ADVANCED_SEARCH_DECLR['filter_options_order']
     filter_options = ADVANCED_SEARCH_DECLR['filter_options']
     
-    TEST = 'FAIL'
-    if request.GET:
-        TEST = request.GET
-    
-
     template_values = {'search': search_value,
                        'sortOptionsOrder': sort_options_order,
                        'sortOptions': sort_options,
