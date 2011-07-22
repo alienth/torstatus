@@ -13,7 +13,7 @@
 {% block moreLinks %}
 <br /><br />
 <form>
-    <a class="link" id="csv" href="/tor-query-export.csv">Download CSV Search File</a>
+    <a class="link" id="csv" href="/tor-query-export.csv">Download Relay List CSV File</a>
     {{filter}}
 {% endblock %}
 
@@ -61,6 +61,9 @@
         {% if paged_relays.has_next %}
         <td id="paginatorLinks"><a class="pageLinks" href="{% if gets %}{{ gets }}&amp;{% else %}?{% endif %}page={{ paged_relays.next_page_number }}">⇾</a></td>
         {% endif %}
+    </tr>
+</table>
+
 <table class="relayTable">
 	<tr>
 	{% for column_name in current_columns %}

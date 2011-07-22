@@ -84,6 +84,7 @@ def index(request):
                         **filter_params).order_by(
                         order).select_related()
 
+    num_results = active_relays.count()
     # If the search returns only one relay, go to the details page for
     # that relay.
     if active_relays.count() == 1:
@@ -120,14 +121,14 @@ def index(request):
         except (EmptyPage, InvalidPage):
             paged_relays = paginator.page(paginator.num_pages)
     else:
-        paginator = Paginator(active_relays, active_relays.count())
+        paginator = Paginator(active_relays, num_results)
         paged_relays = paginator.page(1)
 
     current_columns = []
     if not ('currentColumns' in request.session):
         request.session['currentColumns'] = CURRENT_COLUMNS
     current_columns = request.session['currentColumns']
-    
+
     gets = request.get_full_path().split('index/')[1]
     match = re.search(r"[?&]page=[^?&]*", gets)
     if match:
@@ -137,6 +138,7 @@ def index(request):
                        'current_columns': current_columns,
                        'gets': gets,
                        'request': request,
+                       'number_of_results': num_results,
                       }
     return render_to_response('index.html', template_values)
 
@@ -447,9 +449,9 @@ def advanced_search(request):
                        'sortOptions': sort_options,
                        'searchOptionsFieldsOrder': search_options_fields_order,
                        'searchOptionsFields': search_options_fields,
-                       'searchOptionsFieldsBooleans': 
+                       'searchOptionsFieldsBooleans':
                                                 search_options_fields_booleans,
-                       'searchOptionsBooleansOrder': 
+                       'searchOptionsBooleansOrder':
                                                 search_options_booleans_order,
                        'searchOptionsBooleans': search_options_booleans,
                        'filterOptionsOrder': filter_options_order,

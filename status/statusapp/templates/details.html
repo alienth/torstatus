@@ -140,19 +140,19 @@
                 <td id="detailBox"> Bad Directory: </td>
                 <td {% if relay.isbaddirectory %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
-            <tr> 
+            <tr>
                 <td id="detailBox"> Bad Exit: </td>
                 <td {% if relay.isbadexit %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
-            <tr> 
+            <tr>
                 <td id="detailBox"> Exit: </td>
                 <td {% if relay.isexit %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
-            <tr> 
+            <tr>
                 <td id="detailBox"> Fast: </td>
                 <td {% if relay.isfast %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
-            <tr> 
+            <tr>
                 <td id="detailBox"> Guard: </td>
                 <td {% if relay.isguard %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
@@ -162,23 +162,23 @@
                 <td {% if relay.ishibernating %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
             {% endif %}
-            <tr> 
+            <tr>
                 <td id="detailBox"> Named: </td>
                 <td {% if relay.isnamed %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
-            <tr> 
+            <tr>
                 <td id="detailBox"> Stable: </td>
                 <td {% if relay.isstable %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
-            <tr> 
+            <tr>
                 <td id="detailBox"> Running: </td>
                 <td {% if relay.isrunning %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
-            <tr> 
+            <tr>
                 <td id="detailBox"> Valid: </td>
                 <td {% if relay.isvalid %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
-            <tr> 
+            <tr>
                 <td id="detailBox"> V2Dir: </td>
                 <td {% if relay.isauthority %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
@@ -192,7 +192,13 @@
             </tr>
             <tr>
                 <td>
-                    {{ relay.exitpolicy|linebreaksbr }}
+                    {% for line in relay.exitpolicy %}
+                    {% if forloop.counter0|divisibleby:"16" %}
+                    </td>
+                    <td>
+                    {% endif %}
+                    {{ line }}<br />
+                    {% endfor %}
                 </td>
             </tr>
         </table>
