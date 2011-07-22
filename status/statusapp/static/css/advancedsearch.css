@@ -1,34 +1,32 @@
-td {
-    font-size: 0.875em;
+/* Table -----------------------------------------------*/
+table.advSearchTable {
+    width: auto;
+    padding: 10px;
+    border-spacing: 10px;
+    border: 1px bold;
+    margin-left: auto;
+    margin-right: auto;
 }
 
+table.flags {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* END Table ------------------------------------------ */
+
+/* Table Columns -------------------------------------- */
 td#advSearchToolText {
+    font-size: 100%;
     color: #050;
     text-align: center;
     border-color: #61a #315 #315 #61a;
     white-space:nowrap;
 }
 
-table.advSearchTable {
-    font-size: 20px;
-    width: auto;
-    padding: 10px;
-    border-spacing: 10px;
-    border: 1px bold;
-    margin-left: auto;
-    margin-right: auto;
-}
+/* END Table Columns ---------------------------------- */
 
-table.advSearchFlagTable {
-    font-size: 15px;
-    width: auto;
-    padding: 10px;
-    border-spacing: 10px;
-    border: 1px bold;
-    margin-left: auto;
-    margin-right: auto;
-}
-
+/* Input, Select, Option ------------------------------ */
 input#advSearchBox {
     font-size: 1.0625em;
     border: 1px solid;
@@ -83,3 +81,5 @@ input#searchButton:focus {
 	opacity: 1;
 	cursor: pointer;
 }
+
+/* END Input, Select, Option -------------------------- */

@@ -18,76 +18,92 @@
 <table class="advSearchTable">
     <tr>
         <td>
-        <form name="searchForm" action="/index" method="get">
-        <table class="">
-                {% for option in searchOptionsFieldsOrder %}
+            <table class="advSearchTable">
                 <tr>
-                    <td id="advSearchToolText"> {{option}} </td>
+                    <td id="pageTitle"> Filter Options </td>
+                </tr>
+                <tr>
                     <td>
-                    <select id="advSearchButton" name="c_{{searchOptionsFields|key:option}}">
-                    {% for boolean_option in searchOptionsFieldsBooleans|key:option %}
-                        <option value="{{searchOptionsBooleans|key:boolean_option}}">{{boolean_option}}</option>
-                    {% endfor %}
-                    </select>
-                    </td>
-                    <td>
-                    <input id="advSearchBox" type="text" name="s_{{searchOptionsFields|key:option}}" value="{{search}}"/>
+                    <form name="searchForm" action="/index" method="get">
+                    <table class="">
+                        {% for option in searchOptionsFieldsOrder %}
+                        <tr>
+                            <td id="advSearchToolText"> {{option}} </td>
+                            <td>
+                            <select id="advSearchButton" name="c_{{searchOptionsFields|key:option}}">
+                            {% for boolean_option in searchOptionsFieldsBooleans|key:option %}
+                                <option value="{{searchOptionsBooleans|key:boolean_option}}">{{boolean_option}}</option>
+                            {% endfor %}
+                            </select>
+                            </td>
+                            <td>
+                            <input id="advSearchBox" type="text" name="s_{{searchOptionsFields|key:option}}" value="{{search}}"/>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
                     </td>
                 </tr>
-                {% endfor %}
-            <tr>
-                <td id='advSearchToolText'>
-                Sort Order
-                </td>
-                <td>
-                <select id="advSearchButton" name="sortListing">
-                {% for option in sortOptionsOrder %}
-                    <option value="{{sortOptions|key:option}}"
-                    {% if queryOptions and queryOptions|key:'sortListings' == "{{sortOptions|key:option}}" %}
+                <tr>
+                    <td id="pageTitle" colspan="2"> Sort Order </td>
+                </tr>
+                <tr>
+                    <td>
+                    <table class="">
+                        <tr>
+                            <td>
+                            <select id="advSearchButton" name="sortListing">
+                            {% for option in sortOptionsOrder %}
+                            <option value="{{sortOptions|key:option}}"
+                            {% if queryOptions and queryOptions|key:'sortListings' == "{{sortOptions|key:option}}" %}
                                                             SELECTED {% endif %}>{{option}}</option>
-                {% endfor %}
-                </select>
-                </td>
-                <td>
-                <select id="advSearchButton" name="sortOrder">
-                <option value="ascending" {% if queryOptions and queryOptions|key:'sortOrder' == "ascending" %}
+                            {% endfor %}
+                            </select>
+                            </td>
+                            <td>
+                            <select id="advSearchButton" name="sortOrder">
+                            <option value="ascending" {% if queryOptions and queryOptions|key:'sortOrder' == "ascending" %}
                                                             SELECTED {% endif %}>Ascending</option>
-                <option value="descending" {% if queryOptions and queryOptions|key:'sortOrder' == "descending" %}
+                            <option value="descending" {% if queryOptions and queryOptions|key:'sortOrder' == "descending" %}
                                                             SELECTED {% endif %}>Descending</option>
-                </select>
-                </td>
-            </tr>
-        </table>
-        <table align="center">
-        <tr>
-            <td colspan="6" id="advSearchToolText" align="center">
-            Router flags
-            </td>
-        {% for option in filterOptionsOrder %}
-        {% if forloop.counter0|divisibleby:"3" %}
-        </tr><tr>{% endif %}
-        <td id="advSearchToolText"> {{option}} </td>
-        <td>
-            <input type="radio" name="{{filterOptions|key:option}}" value="" {% if not queryOptions %} CHECKED
+                            </select>
+                            </td>
+                        </tr>
+                    </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td id="pageTitle" colspan="6"> Flags </td>
+                </tr>
+                <tr>
+                    <td>
+                    <table class="flags">
+                        <tr>
+                            {% for option in filterOptionsOrder %}
+                                {% if forloop.counter0|divisibleby:"3" %}
+                                </tr><tr>{% endif %}
+                                <td id="advSearchToolText"> {{option}} </td>
+                                <td>
+                                <input type="radio" name="{{filterOptions|key:option}}" value="" {% if not queryOptions %} CHECKED
                                             {% else %} {% if queryOptions and queryOptions|key:option == "" %}
                                                             CHECKED {% endif %}{% endif %} />Off
-            <input type="radio" name="{{filterOptions|key:option}}" value="1" {% if queryOptions and queryOptions|key:option == "1" %}
+                                <input type="radio" name="{{filterOptions|key:option}}" value="1" {% if queryOptions and queryOptions|key:option == "1" %}
                                                             CHECKED {% endif %} />Yes
-            <input type="radio" name="{{filterOptions|key:option}}" value="0" {% if queryOptions and queryOptions|key:option == "0" %}
+                                <input type="radio" name="{{filterOptions|key:option}}" value="0" {% if queryOptions and queryOptions|key:option == "0" %}
                                                             CHECKED {% endif %} />No
-            </td>
-            {% endfor %}
-        </tr>
-        <tr>
-            <td colspan="6" align="center">
-                <input type="submit" value="Search" id="searchButton">
-            </td>
-        </tr>
-        </table>
-    </td>
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    </table>
+                    </td>
+                <tr>
+                    <td colspan="6" align="center">
+                    <input type="submit" value="Search" id="searchButton">
+                    </td>
+                </tr>
+                </form>
+            </table>
+        </td>
     </tr>
-    <tr>
-        <td>
-        </table>
-
+</table>
 {% endblock %}

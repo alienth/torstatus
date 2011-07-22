@@ -80,7 +80,6 @@ def index(request):
     else:
         filter_params = get_filter_params(request)
         order = get_order(request)
-
         active_relays = active_relays.filter(
                         **filter_params).order_by(
                         order).select_related()
@@ -140,79 +139,6 @@ def index(request):
                        'request': request,
                       }
     return render_to_response('index.html', template_values)
-
-
-FLAGS = set(('isauthority',
-              'isbaddirectory',
-              'isbadexit',
-              'isexit',
-              'isfast',
-              'isguard',
-              'ishibernating',
-              'isnamed',
-              'isstable',
-              'isrunning',
-              'isvalid',
-              'isv2dir'))
-SEARCHES = set(('fingerprint',
-                 'nickname',
-                 'country',
-                 'bandwidthkbps',
-                 'uptimedays',
-                 'published',
-                 'address',
-                 'orport',
-                 'dirport',
-                 'platform'))
-CRITERIA = set(('exact',
-                 'iexact',
-                 'contains',
-                 'icontains',
-                 'lt',
-                 'gt',
-                 'startswith',
-                 'istartswith'))
-
-
-SORT_OPTIONS = set((
-                'validafter',
-                'nickname',
-                'fingerprint',
-                'address',
-                'orport',
-                'dirport',
-                'isauthority',
-                'isbadexit',
-                'isbaddirectory',
-                'isexit',
-                'isfast',
-                'isguard',
-                'ishsdir',
-                'isnamed',
-                'isstable',
-                'isrunning',
-                'isunnamed',
-                'isvalid',
-                'isv2dir',
-                'isv3dir',
-                'descriptor',
-                'published',
-                'bandwidthavg',
-                'bandwidthburst',
-                'bandwidthobserved',
-                'bandwidthkbps',
-                'uptime',
-                'uptimedays',
-                'platform',
-                'contact',
-                'onionkey',
-                'signingkey',
-                'exitpolicy',
-                'family',
-                'country',
-                'latitude',
-                'longitude'
-                ))
 
 
 def details(request, fingerprint):
@@ -521,8 +447,7 @@ def advanced_search(request):
                                                 search_options_booleans_order,
                        'searchOptionsBooleans': search_options_booleans,
                        'filterOptionsOrder': filter_options_order,
-                       'filterOptions': filter_options,
-                       'TEST': TEST,                      
+                       'filterOptions': filter_options,                   
                       }
 
     return render_to_response('advanced_search.html', template_values)
