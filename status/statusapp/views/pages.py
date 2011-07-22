@@ -295,7 +295,11 @@ def details(request, fingerprint):
                  fingerprint=fingerprint).order_by('-validafter')[:1]
 
     if not poss_relay:
-        return archive(HttpRequest(), fingerprint)
+        return render_to_response(
+                '404.html',
+                {'debug_message': '''The server could not find any 
+                                  recently active relay with a 
+                                  fingerprint of ''' + fingerprint + '.'})
     relay = poss_relay[0]
 
     # Some clients may want to look up old relays. Create an attribute
@@ -307,6 +311,11 @@ def details(request, fingerprint):
         relay.active = False
     else:
         relay.active = True
+
+    # Not all relays will have descriptors, but if a relay has a
+    # descriptor, its relay.descriptor value will not be null.
+    if relay.descriptor:
+        relay.hasdescriptor = True
         published = relay.published
         now = datetime.datetime.now()
         diff = now - published
@@ -314,6 +323,8 @@ def details(request, fingerprint):
                     diff.seconds + diff.days * 24 * 3600) * 10**6) \
                     / 10**6
         relay.adjuptime = relay.uptime + diff_sec
+    else:
+        relay.hasdescriptor = False
 
     relay.hostname = getfqdn(str(relay.address))
 
@@ -568,11 +579,6 @@ def advanced_search(request):
 
     filter_options_order = ADVANCED_SEARCH_DECLR['filter_options_order']
     filter_options = ADVANCED_SEARCH_DECLR['filter_options']
-    
-    TEST = 'FAIL'
-    if request.GET:
-        TEST = request.GET
-    
 
     template_values = {'search': search_value,
                        'sortOptionsOrder': sort_options_order,
@@ -586,7 +592,6 @@ def advanced_search(request):
                        'searchOptionsBooleans': search_options_booleans,
                        'filterOptionsOrder': filter_options_order,
                        'filterOptions': filter_options,
-                       'TEST': TEST,                      
                       }
 
     return render_to_response('advanced_search.html', template_values)

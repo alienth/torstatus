@@ -4,7 +4,7 @@
 <link rel="stylesheet" type="text/css" href="/static/css/style.css"></link>
 {% endblock %}
 
-{% block mainTitle %} - TorStatus - Relay List {% endblock %}
+{% block mainTitle %} TorStatus -- Active Relays {% endblock %}
 
 {% block headerTitle %} TorStatus {% endblock %}
 
@@ -15,7 +15,7 @@
 <a class="link" id="csv" href="/tor-query-export.csv">Download CSV Search File</a>
 {% endblock %}
 
-{% block pageTitle %} Relay List {% endblock %}
+{% block pageTitle %} Active Relays {% endblock %}
 
 {% block mainPage %}
 <br />
@@ -129,7 +129,7 @@
             </td>
             {% endif %}
             {% if column_name == "Bandwidth" %}
-            <td id="col_relayBandwidth">{{ relay.bandwidthkbps }}KB/s</td>
+            <td id="col_relayBandwidth">{{ relay.bandwidthkbps }} KB/s</td>
             {% endif %}
             {% if column_name == "Uptime" %}
             <td id="col_relayUptime">{{ relay.uptimedays }} d</td>
