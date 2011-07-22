@@ -41,6 +41,7 @@ def splash(request):
     """
     The splash page for the TorStatus website.
     """
+
     return render_to_response("splash.html")
 
 
@@ -64,19 +65,21 @@ def index(request):
                     validafter=last_validafter).order_by('nickname')
 
     basic_input = request.GET.get('search', '')
-    
-    if 'query_filters' in request.session:
-            del request.session['query_filters']
-    
+
+    if 'filters' in request.session:
+        del request.session['filters']
+    if 'basic_search' in request.session:
+        del request.session['basic_search']
+
     if basic_input:
+        request.session['basic_search'] = basic_input
         active_relays = active_relays.filter(
                         Q(nickname__istartswith=basic_input) | \
                         Q(fingerprint__istartswith=basic_input) | \
                         Q(address__istartswith=basic_input))
     else:
-        filter_params = _get_filter_params(request)
-        order = _get_order(request)
-
+        filter_params = get_filter_params(request)
+        order = get_order(request)
         active_relays = active_relays.filter(
                         **filter_params).order_by(
                         order).select_related()
@@ -124,7 +127,7 @@ def index(request):
     if not ('currentColumns' in request.session):
         request.session['currentColumns'] = CURRENT_COLUMNS
     current_columns = request.session['currentColumns']
-
+    
     gets = request.get_full_path().split('index/')[1]
     match = re.search(r"[?&]page=[^?&]*", gets)
     if match:
@@ -136,148 +139,6 @@ def index(request):
                        'request': request,
                       }
     return render_to_response('index.html', template_values)
-
-
-_FLAGS = set(('isauthority',
-              'isbaddirectory',
-              'isbadexit',
-              'isexit',
-              'isfast',
-              'isguard',
-              'ishibernating',
-              'isnamed',
-              'isstable',
-              'isrunning',
-              'isvalid',
-              'isv2dir'))
-_SEARCHES = set(('fingerprint',
-                 'nickname',
-                 'country',
-                 'bandwidthkbps',
-                 'uptimedays',
-                 'published',
-                 'address',
-                 'orport',
-                 'dirport',
-                 'platform'))
-_CRITERIA = set(('exact',
-                 'iexact',
-                 'contains',
-                 'icontains',
-                 'lt',
-                 'gt',
-                 'startswith',
-                 'istartswith'))
-def _get_filter_params(request):
-    """
-    Get the filter preferences provided by the user via the
-    HttpRequest.
-
-    @type request: HttpRequest
-    @param request: The HttpRequest provided by the client
-    @rtype: C{dict} of C{string} to C{string}
-    @return: A dictionary mapping query parameters to user-supplied
-        input.
-    """
-    filters = {}
-    
-    if 'query_filters' not in request.session:
-        # Add filters for flags only if the parameter is a 0 or a 1
-        for flag in _FLAGS:
-            filt = request.GET.get(flag, '')
-
-            if filt == '1':
-                filters[flag] = 1
-    
-            elif filt == '0':
-                filters[flag] = 0
-
-        # Add search filters only if a search term is provided
-        for search in _SEARCHES:
-            search_param = ''.join(('s_', search))
-            searchinput = request.GET.get(search_param, '')
-    
-            if searchinput:
-                criteria_param = ''.join(('c_', search))
-                criteriainput = request.GET.get(criteria_param , '')
-
-                # Format the key for django's filter
-                if criteriainput in _CRITERIA:
-                    key = '__'.join((search, criteriainput))
-                    filters[key] = searchinput
-        request.session['query_filters'] = filters
-    
-    filters = request.session['query_filters']
-    return filters
-
-
-_SORT_OPTIONS = set((
-                'validafter',
-                'nickname',
-                'fingerprint',
-                'address',
-                'orport',
-                'dirport',
-                'isauthority',
-                'isbadexit',
-                'isbaddirectory',
-                'isexit',
-                'isfast',
-                'isguard',
-                'ishsdir',
-                'isnamed',
-                'isstable',
-                'isrunning',
-                'isunnamed',
-                'isvalid',
-                'isv2dir',
-                'isv3dir',
-                'descriptor',
-                'published',
-                'bandwidthavg',
-                'bandwidthburst',
-                'bandwidthobserved',
-                'bandwidthkbps',
-                'uptime',
-                'uptimedays',
-                'platform',
-                'contact',
-                'onionkey',
-                'signingkey',
-                'exitpolicy',
-                'family',
-                'country',
-                'latitude',
-                'longitude'
-                ))
-def _get_order(request):
-    """
-    Get the sorting parameter and order from the user via the
-    HttpRequest.
-
-    This function returns 'nickname' if no order is specified or if
-    there is an error parsing the supplied information.
-
-    @type request: HttpRequest
-    @param request: The HttpRequest provided by the client.
-    @rtype: C{string}
-    @return: The sorting parameter and order as specified by the
-        HttpRequest object.
-    """
-    # Get the order bit -- that is, '-' or the empty string.
-    # If neither descending or ascending is given, choose ascending.
-    order = request.GET.get('sortOrder', 'ascending')
-    orderbit = ''
-    if order == 'descending':
-        orderbit = '-'
-
-    # Get the order parameter.
-    # If the given value is not a valid parameter, choose nickname.
-    param = request.GET.get('sortListing', 'nickname')
-    if param not in _SORT_OPTIONS:
-        param = 'nickname'
-
-    return ''.join((orderbit, param))
 
 
 def details(request, fingerprint):
@@ -562,6 +423,7 @@ def display_options(request):
 
 
 def advanced_search(request):
+
     search_value = request.GET.get('search', '')
 
     sort_options_order = ADVANCED_SEARCH_DECLR['sort_options_order']

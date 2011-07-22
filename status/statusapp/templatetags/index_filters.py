@@ -113,7 +113,6 @@ def key(d, key_name):
     if key_name in d:
         return d[key_name]
 
-
 @register.filter
 def subtract(a, b):
     """

@@ -48,6 +48,78 @@ NOT_COLUMNS = ['Running', 'Hostname', 'Named', 'Valid',]
 ICONS = ['Fast', 'Exit', 'V2Dir', 'Guard', 'Stable', 'Authority',
          'Platform',]
 
+FLAGS = set(('isauthority',
+              'isbaddirectory',
+              'isbadexit',
+              'isexit',
+              'isfast',
+              'isguard',
+              'ishibernating',
+              'isnamed',
+              'isstable',
+              'isrunning',
+              'isvalid',
+              'isv2dir'))
+SEARCHES = set(('fingerprint',
+                 'nickname',
+                 'country',
+                 'bandwidthkbps',
+                 'uptimedays',
+                 'published',
+                 'address',
+                 'orport',
+                 'dirport',
+                 'platform'))
+CRITERIA = set(('exact',
+                 'iexact',
+                 'contains',
+                 'icontains',
+                 'lt',
+                 'gt',
+                 'startswith',
+                 'istartswith'))
+
+
+SORT_OPTIONS = set((
+                'validafter',
+                'nickname',
+                'fingerprint',
+                'address',
+                'orport',
+                'dirport',
+                'isauthority',
+                'isbadexit',
+                'isbaddirectory',
+                'isexit',
+                'isfast',
+                'isguard',
+                'ishsdir',
+                'isnamed',
+                'isstable',
+                'isrunning',
+                'isunnamed',
+                'isvalid',
+                'isv2dir',
+                'isv3dir',
+                'descriptor',
+                'published',
+                'bandwidthavg',
+                'bandwidthburst',
+                'bandwidthobserved',
+                'bandwidthkbps',
+                'uptime',
+                'uptimedays',
+                'platform',
+                'contact',
+                'onionkey',
+                'signingkey',
+                'exitpolicy',
+                'family',
+                'country',
+                'latitude',
+                'longitude'
+                ))
+
 # Dictionary of {NameInPlatform: NameOfTheIcon}
 SUPPORTED_PLATFORMS = {'Linux': 'Linux',
                        'XP': 'WindowsXP',
@@ -908,3 +980,77 @@ def generate_query_input_options(query_options):
         input_option = input_option + "<td>" + input_string + "</td>"
         html_query_input_options.append(input_option)
     return html_query_input_options
+
+def get_filter_params(request):
+    """
+    Get the filter preferences provided by the user via the
+    HttpRequest.
+
+    @type request: HttpRequest
+    @param request: The HttpRequest provided by the client
+    @rtype: C{dict} of C{string} to C{string}
+    @return: A dictionary mapping query parameters to user-supplied
+        input.
+    """
+    filters = {}
+
+    if 'filters' not in request.session:
+        # Add filters for flags only if the parameter is a 0 or a 1
+        for flag in FLAGS:
+            filt = request.GET.get(flag, '')
+
+            if filt == '1':
+                filters[flag] = 1
+
+            elif filt == '0':
+                filters[flag] = 0
+
+        # Add search filters only if a search term is provided
+        for search in SEARCHES:
+            search_param = ''.join(('s_', search))
+            searchinput = request.GET.get(search_param, '')
+
+            if searchinput:
+                criteria_param = ''.join(('c_', search))
+                criteriainput = request.GET.get(criteria_param , '')
+
+                # Format the key for django's filter
+                if criteriainput in CRITERIA:
+                    key = '__'.join((search, criteriainput))
+                    filters[key] = searchinput
+
+        request.session['filters'] = filters
+
+    filters = request.session['filters']
+    return filters
+
+def get_order(request):
+    """
+    Get the sorting parameter and order from the user via the
+    HttpRequest.
+
+    This function returns 'nickname' if no order is specified or if
+    there is an error parsing the supplied information.
+
+    @type request: HttpRequest
+    @param request: The HttpRequest provided by the client.
+    @rtype: C{string}
+    @return: The sorting parameter and order as specified by the
+        HttpRequest object.
+    """
+    # Get the order bit -- that is, '-' or the empty string.
+    # If neither descending or ascending is given, choose ascending.
+    order = request.GET.get('sortOrder', 'ascending')
+    orderbit = ''
+    if order == 'descending':
+        orderbit = '-'
+
+    # Get the order parameter.
+    # If the given value is not a valid parameter, choose nickname.
+    param = request.GET.get('sortListing', 'nickname')
+    if param not in SORT_OPTIONS:
+        param = 'nickname'
+
+    return ''.join((orderbit, param))
+
+
