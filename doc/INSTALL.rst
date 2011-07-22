@@ -86,6 +86,8 @@ let us know by sending e-mail to torstatus@gmail.com.
 
 3: Running Apache and Deployment
 ________________________________
+..Just started this section still needs lots of work..
+
 Get the appropriate packages. With a minimal debian sqeeze platform you should
 have the necessary packages already.
 

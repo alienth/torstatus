@@ -66,14 +66,20 @@ def index(request):
 
     basic_input = request.GET.get('search', '')
 
+    if 'filters' in request.session:
+        del request.session['filters']
+    if 'basic_search' in request.session:
+        del request.session['basic_search']
+
     if basic_input:
+        request.session['basic_search'] = basic_input
         active_relays = active_relays.filter(
                         Q(nickname__istartswith=basic_input) | \
                         Q(fingerprint__istartswith=basic_input) | \
                         Q(address__istartswith=basic_input))
     else:
-        filter_params = _get_filter_params(request)
-        order = _get_order(request)
+        filter_params = get_filter_params(request)
+        order = get_order(request)
 
         active_relays = active_relays.filter(
                         **filter_params).order_by(
@@ -131,11 +137,12 @@ def index(request):
     template_values = {'paged_relays': paged_relays,
                        'current_columns': current_columns,
                        'gets': gets,
+                       'request': request,
                       }
     return render_to_response('index.html', template_values)
 
 
-_FLAGS = set(('isauthority',
+FLAGS = set(('isauthority',
               'isbaddirectory',
               'isbadexit',
               'isexit',
@@ -147,7 +154,7 @@ _FLAGS = set(('isauthority',
               'isrunning',
               'isvalid',
               'isv2dir'))
-_SEARCHES = set(('fingerprint',
+SEARCHES = set(('fingerprint',
                  'nickname',
                  'country',
                  'bandwidthkbps',
@@ -157,7 +164,7 @@ _SEARCHES = set(('fingerprint',
                  'orport',
                  'dirport',
                  'platform'))
-_CRITERIA = set(('exact',
+CRITERIA = set(('exact',
                  'iexact',
                  'contains',
                  'icontains',
@@ -165,47 +172,9 @@ _CRITERIA = set(('exact',
                  'gt',
                  'startswith',
                  'istartswith'))
-def _get_filter_params(request):
-    """
-    Get the filter preferences provided by the user via the
-    HttpRequest.
-
-    @type request: HttpRequest
-    @param request: The HttpRequest provided by the client
-    @rtype: C{dict} of C{string} to C{string}
-    @return: A dictionary mapping query parameters to user-supplied
-        input.
-    """
-    filters = {}
-
-    # Add filters for flags only if the parameter is a 0 or a 1
-    for flag in _FLAGS:
-        filt = request.GET.get(flag, '')
-
-        if filt == '1':
-            filters[flag] = 1
-
-        elif filt == '0':
-            filters[flag] = 0
-
-    # Add search filters only if a search term is provided
-    for search in _SEARCHES:
-        search_param = ''.join(('s_', search))
-        searchinput = request.GET.get(search_param, '')
-
-        if searchinput:
-            criteria_param = ''.join(('c_', search))
-            criteriainput = request.GET.get(criteria_param , '')
-
-            # Format the key for django's filter
-            if criteriainput in _CRITERIA:
-                key = '__'.join((search, criteriainput))
-                filters[key] = searchinput
-
-    return filters
 
 
-_SORT_OPTIONS = set((
+SORT_OPTIONS = set((
                 'validafter',
                 'nickname',
                 'fingerprint',
@@ -244,34 +213,6 @@ _SORT_OPTIONS = set((
                 'latitude',
                 'longitude'
                 ))
-def _get_order(request):
-    """
-    Get the sorting parameter and order from the user via the
-    HttpRequest.
-
-    This function returns 'nickname' if no order is specified or if
-    there is an error parsing the supplied information.
-
-    @type request: HttpRequest
-    @param request: The HttpRequest provided by the client.
-    @rtype: C{string}
-    @return: The sorting parameter and order as specified by the
-        HttpRequest object.
-    """
-    # Get the order bit -- that is, '-' or the empty string.
-    # If neither descending or ascending is given, choose ascending.
-    order = request.GET.get('sortOrder', 'ascending')
-    orderbit = ''
-    if order == 'descending':
-        orderbit = '-'
-
-    # Get the order parameter.
-    # If the given value is not a valid parameter, choose nickname.
-    param = request.GET.get('sortListing', 'nickname')
-    if param not in _SORT_OPTIONS:
-        param = 'nickname'
-
-    return ''.join((orderbit, param))
 
 
 def details(request, fingerprint):
@@ -545,6 +486,7 @@ def display_options(request):
 
 
 def advanced_search(request):
+
     search_value = request.GET.get('search', '')
 
     sort_options_order = ADVANCED_SEARCH_DECLR['sort_options_order']

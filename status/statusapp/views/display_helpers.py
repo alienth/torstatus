@@ -96,7 +96,7 @@ SEARCH_OPTIONS_BOOLEANS = {'Equals': 'exact',
                            'Is Less Than': 'lt',
                            'Is Greater Than': 'gt',
                            'Starts With': 'startswith',
-                           'Starts With': 'istartswith',
+                           'Starts With (case insensitive)': 'istartswith',
                           }
 
 FILTER_OPTIONS_ORDER = ['Authority', 'BadDirectory', 'BadExit', 'Exit',
