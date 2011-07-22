@@ -22,7 +22,7 @@ CREATE TABLE active_descriptor (
     contact TEXT,
     onionkey CHARACTER(188),
     signingkey CHARACTER(188),
-    exitpolicy TEXT,
+    exitpolicy TEXT[],
     family TEXT,
     ishibernating BOOLEAN DEFAULT FALSE,
     CONSTRAINT active_descriptor_unique PRIMARY KEY (descriptor)
@@ -65,7 +65,7 @@ CREATE TABLE active_relay (
     contact TEXT,
     onionkey CHARACTER(188),
     signingkey CHARACTER(188),
-    exitpolicy TEXT,
+    exitpolicy TEXT[],
     family TEXT,
     ishibernating BOOLEAN,
     country CHARACTER VARYING(2),
@@ -217,12 +217,11 @@ CREATE OR REPLACE FUNCTION update_descriptor()
                                            CAST(NEW.rawdesc AS TEXT),
                                            E'signing-key\\\\012-----BEGIN\ RSA\ PUBLIC\ KEY-----\\\\012(.*)-----END\ RSA\ PUBLIC\ KEY-----'))::CHARACTER(188),
                                            E'\\\\012', E'\n', 'g'));
-            nexitpolicy TEXT := (SELECT regexp_replace(
-                                 unnest(
-                                 regexp_matches(
-                                 CAST(NEW.rawdesc AS TEXT),
-                                 E'\\\\012([ar][ce][cj][e][pc][t]\ .*)\\\\012router-signature'))::TEXT,
-                                 E'\\\\012', E'\n', 'g'));
+            nexitpolicy TEXT[] := (SELECT regexp_split_to_array(
+                                   unnest(
+                                   regexp_matches(
+                                   CAST(NEW.rawdesc AS TEXT),
+                                   E'\\\\012([ar][ce][cj][e][pc][t]\ .*)\\\\012router-signature'))::TEXT, E'\\\\012'));
             nfamily TEXT := (SELECT unnest(
                              regexp_matches(
                              CAST(NEW.rawdesc AS TEXT),
@@ -248,7 +247,7 @@ CREATE OR REPLACE FUNCTION update_descriptor()
             contact = ncontact,
             onionkey = nonionkey,
             signingkey = nsigningkey,
-            exitpolicy = nsigningkey,
+            exitpolicy = nexitpolicy,
             family = nfamily,
             ishibernating = nishibernating
         WHERE cache.active_relay.fingerprint = NEW.fingerprint
@@ -299,7 +298,7 @@ CREATE OR REPLACE FUNCTION insert_descriptor_info (
         ncontact TEXT;
         nonionkey CHARACTER(188);
         nsigningkey CHARACTER(188);
-        nexitpolicy TEXT;
+        nexitpolicy TEXT[];
         nfamily TEXT;
         nishibernating BOOLEAN;
     BEGIN
