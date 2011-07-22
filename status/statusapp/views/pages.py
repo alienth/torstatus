@@ -215,7 +215,7 @@ def whois(request, address):
                               stdout=subprocess.PIPE,
                               shell=True)
 
-    whois, err = proc.communicate()
+    whois = proc.communicate()[0]
 
     template_values = {'whois': whois, 'address': address}
     return render_to_response('whois.html', template_values)
@@ -251,17 +251,14 @@ def exitnodequery(request):
 
     # Get the source, dest_ip, and dest_port from the HttpRequest object
     # if they exist, and declare them valid if they are valid.
-    source = get_if_exists(request, 'queryAddress')
-    if (is_ipaddress(source)):
-        source_valid = True
+    source = request.GET.get('queryAddress', '').strip()
+    if is_ipaddress(source): source_valid = True
 
-    dest_ip = get_if_exists(request, 'destinationAddress')
-    if (is_ipaddress(dest_ip)):
-        dest_ip_valid = True
+    dest_ip = request.GET.get('destinationAddress', '').strip()
+    if is_ipaddress(dest_ip): dest_ip_valid = True
 
-    dest_port = get_if_exists(request, 'destinationPort')
-    if (is_port(dest_port)):
-        dest_port_valid = True
+    dest_port = request.GET.get('destinationPort', '').strip()
+    if is_port(dest_port): dest_port_valid = True
 
     # Some users may assume exiting on port 80. If a destination IP
     # address is given without a port, assume that the user means
@@ -280,14 +277,13 @@ def exitnodequery(request):
 
         # Don't search entries published over 24 hours
         # from the most recent entries.
-        last_va = Statusentry.objects.aggregate(
+        last_va = ActiveRelay.objects.aggregate(
                   last=Max('validafter'))['last']
-        oldest_tolerable = last_va - datetime.timedelta(days=1)
 
-        fingerprints = Statusentry.objects.filter(
-                       address=source,
-                       validafter__gte=oldest_tolerable).values(
-                       'fingerprint').annotate(Count('fingerprint'))
+        fingerprints = ActiveRelay.objects.filter(
+                       address=source).values(
+                       'fingerprint').annotate(
+                       Count('fingerprint'))
 
         # Grouped by fingerprints, which are unique. If at least one
         # fingerprint is found, there is a match, so for each
@@ -302,27 +298,22 @@ def exitnodequery(request):
             for fp_entry in fingerprints:
                 # Note that the trailing [:1] is djangonese for
                 # "LIMIT 1", so this query should not be expensive.
-                statusentry_set = Statusentry.objects.filter(
-                                  fingerprint=fp_entry['fingerprint'],
-                                  validafter__gte=(
-                                  oldest_tolerable)).order_by(
-                                  '-validafter')[:1]
-                statusentry = statusentry_set[0]
+                relay = ActiveRelay.objects.filter(
+                        fingerprint=fp_entry['fingerprint']).order_by(
+                        '-validafter')[:1][0]
 
-                nickname = statusentry.nickname
-                fingerprint = statusentry.fingerprint
+                nickname = relay.nickname
+                fingerprint = relay.fingerprint
                 exit_possible = False
 
                 # If the client also wants to test the relay's exit
                 # policy, dest_ip and dest_port cannot be empty strings.
                 if (dest_ip_valid and dest_port_valid):
-                    router_exit_policy = get_exit_policy(
-                                         statusentry.descriptorid.rawdesc)
 
                     # Search the exit policy information for a case in
                     # which the given IP is in a subnet defined in the
                     # exit policy information of a relay.
-                    for policy_line in router_exit_policy:
+                    for policy_line in relay.exitpolicy:
                         condition, network_line = (policy_line.strip())\
                                                    .split(' ')
                         subnet, port_line = network_line.split(':')
@@ -382,8 +373,10 @@ def display_options(request):
     not_movable_columns = NOT_MOVABLE_COLUMNS
 
     if ('resetPreferences' in request.GET):
-        del request.session['currentColumns']
-        del request.session['availableColumns']
+        if 'currentColumns' in request.session:
+            del request.session['currentColumns']
+        if 'availableColumns' in request.session:
+            del request.session['availableColumns']
 
     if not ('currentColumns' in request.session and 'availableColumns'
             in request.session):
