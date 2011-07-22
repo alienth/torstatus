@@ -83,23 +83,15 @@ def format_family(family):
     if family_list:
         links = []
 
-        #one_day = datetime.timedelta(days=1)
-        #last_consensus = Statusentry.objects.aggregate(\
-        #        last_consensus=Max('validafter'))['last_consensus']
-        #oldest_usable = last_consensus - one_day
-
         for entry in family_list:
+            # Assume the entry is a fingerprint.
             if (entry[0] == "$" and len(entry[1:]) == 40):
-                # Assume the entry is a fingerprint.
 
                 fingerprint = entry[1:].lower()
-                #poss_entries = Statusentry.objects.filter(
-                #        fingerprint=fingerprint,
-                #        validafter__gte=oldest_usable)\
-                #        .order_by('-validafter')
                 poss_entries = ActiveRelay.objects.filter(
                                fingerprint=fingerprint).order_by(
                                '-validafter')
+
                 # Fingerprints are unique, so either an entry with the
                 # fingerprint is found or not. Use only the most
                 # recent entry.
@@ -111,30 +103,31 @@ def format_family(family):
                 else:
                     links.append("(%s)" % entry)
 
+            # Assume the entry is a nickname.
             else:
-                # Assume the entry is a nickname.
                 poss_entries = ActiveRelay.objects.filter(
                                nickname=entry)
                 poss_fingerprints = poss_entries.values(
                                     'fingerprint').annotate(
                                     Count('fingerprint'))
 
+                # Can't find a fingerprint, so just return the
+                # nickname.
                 if not poss_fingerprints:
-                    # Can't find a fingerprint, so just return the
-                    # nickname.
-                    links.append("(%s)" % entry)
+                    links.append('(%s)' % entry)
 
+                # Found a unique fingerprint, so return the nickname
+                # with a hyperlink.
                 elif (len(poss_fingerprints) == 1):
-                    # Found a unique fingerprint, so return the nickname
-                    # with a hyperlink.
                     fingerprint = poss_fingerprints[0]['fingerprint']
                     links.append("<a href=\"/details/%s\">%s</a>" % \
                                 (fingerprint, entry))
+
+                # Multiple fingerprints match the nickname. There is
+                # nothing to do except return the nickname.
                 else:
-                    # Multiple fingerprints match the nickname. There is
-                    # nothing to do except return the nickname.
                     links.append("(%s)" % entry)
 
-        return "\n".join(links)
+        return '\n'.join(links)
 
     return None
