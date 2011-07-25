@@ -63,6 +63,13 @@ td#returnLink:hover {
 	cursor: pointer;
 }
 
+td#label {
+    font-size: 0.750em;
+    color: #050;
+    text-align: center;
+    border-color: #61a #315 #315 #61a;
+    white-space:nowrap;
+}
 
 /* END Table Columns ---------------------------------- */
 
@@ -119,6 +126,49 @@ input#addList:hover {
     width: 200px;
     color: #050;
     border: 1px solid;
+    border-color: #696 #363 #363 #696;
+	opacity: 1;
+	cursor: pointer;
+}
+
+input#ppinput {
+    font-size: 0.750em;
+    border: 1px solid;
+    border-color: #61a #315 #315 #61a;
+	width: 100%;
+}
+
+input#ppinput:hover {
+    border: 1px solid;
+    border-color: #696 #363 #363 #696;
+}
+
+input#ppinput:focus {
+    border: 1px solid;
+    border-color: #696 #363 #363 #696;
+}
+
+input#submitButton {
+    color: #050;
+    font-weight: bold;
+    font-size: 0.750em;
+	background-color: #fed;
+    border: 1px solid;
+    border-color: #61a #315 #315 #61a;
+	opacity: 0.4;
+}
+
+input#submitButton:hover {
+    color: #050;
+	background-color: #fed;
+    border-color: #696 #363 #363 #696;
+	opacity: 1;
+	cursor: pointer;
+}
+
+input#submitButton:focus {
+    color: #050;
+	background-color: #fed;
     border-color: #696 #363 #363 #696;
 	opacity: 1;
 	cursor: pointer;

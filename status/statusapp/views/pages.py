@@ -94,7 +94,7 @@ def index(request):
     # Make sure paginated is an integer. If 0, then do not paginate.
     # Otherwise, paginate.
     try:
-        all_relays = int(request.GET.get('all', '0'))
+        all_relays = int(request.session.get('all', '0'))
     except ValueError:
         all_relays = 0
 
@@ -102,7 +102,7 @@ def index(request):
         # Make sure entries per page is an integer. If not, or
         # if no value is specified, make entries per page 50.
         try:
-            per_page = int(request.GET.get('pp', 50))
+            per_page = int(request.session.get('perpage', 50))
         except ValueError:
             per_page = 50
 
@@ -110,7 +110,7 @@ def index(request):
 
         # Make sure page request is an int. If not, deliver first page.
         try:
-            page = int(request.GET.get('page', '1'))
+            page = int(request.GET.get('page', 1))
         except ValueError:
             page = 1
 
@@ -348,9 +348,6 @@ def networkstatisticgraphs(request):
     """
     Render an HTML template to response.
     """
-    # As this page is written now, each graph does it's own querying.
-    # Either this structure should be fixed or the queries should be
-    # cached.
     return render_to_response('statisticgraphs.html')
 
 
@@ -368,6 +365,9 @@ def display_options(request):
     @return: renders to the page the currently selected columns, the
         available columns and the previous selection.
     """
+    if 'pp' in request.GET:
+        request.session['perpage'] = request.GET.get('pp', '')
+
     current_columns = []
     available_columns = []
     not_movable_columns = NOT_MOVABLE_COLUMNS
