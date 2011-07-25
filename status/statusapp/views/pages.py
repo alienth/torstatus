@@ -94,18 +94,12 @@ def index(request):
 
     # Make sure paginated is an integer. If 0, then do not paginate.
     # Otherwise, paginate.
-    try:
-        all_relays = int(request.session.get('all', '0'))
-    except ValueError:
-        all_relays = 0
+    all_relays = request.session.get('all', 0)
 
     if not all_relays:
         # Make sure entries per page is an integer. If not, or
         # if no value is specified, make entries per page 50.
-        try:
-            per_page = int(request.session.get('perpage', 50))
-        except ValueError:
-            per_page = 50
+        per_page = request.session.get('perpage', 50)
 
         paginator = Paginator(active_relays, per_page)
 
@@ -370,7 +364,16 @@ def display_options(request):
         available columns and the previous selection.
     """
     if 'pp' in request.GET:
-        request.session['perpage'] = request.GET.get('pp', '')
+        # Ensure that the supplied information is an integer greater
+        # than zero.
+        try:
+            supplied_pp = int(request.GET.get('pp', ''))
+            if supplied_pp > 1:
+                request.session['perpage'] = supplied_pp
+        except ValueError:
+            pass
+
+    current_pp = int(request.session.get('perpage', 50))
 
     current_columns = []
     available_columns = []
@@ -416,7 +419,8 @@ def display_options(request):
 
     template_values = {'currentColumns': column_lists[0],
                        'availableColumns': column_lists[1],
-                       'selectedEntry': column_lists[2]}
+                       'selectedEntry': column_lists[2],
+                       'current_pp': current_pp}
 
     return render_to_response('displayoptions.html', template_values)
 
