@@ -7,7 +7,6 @@ table.displayPref {
     border-color: #61a #315 #315 #61a;
     margin-left: auto;
     margin-right: auto;
-    border-spacing: 1;
     border-collapse: collapse;
    	white-space:nowrap;
 }
@@ -21,11 +20,9 @@ table.resetButton_Table {
 
 /* Table Columns -------------------------------------- */
 td.boxTitle {
-	font: bold 0.625em;
 	background-color: #7BD4F7;
 	text-align: center;
-	position: center;
-	color: #000000; 
+	color: #000000;
 	border-top: 2px solid black;
 	border-bottom: 2px solid black;
 	white-space:nowrap;
@@ -39,18 +36,18 @@ td#selectForm {
 
 td#returnLink {
     width: 200px;
-    color: #050; 
-	background-color:#fed; 
-    border: 1px solid; 
+    color: #050;
+	background-color:#fed;
+    border: 1px solid;
     border-color: #61a #315 #315 #61a;
-	opacity: 0.5; 
+	opacity: 0.5;
 }
 
 td#returnLink:focus {
     width: 200px;
-    color: #050; 
-	background-color: #fed; 
-    border: 1px solid; 
+    color: #050;
+	background-color: #fed;
+    border: 1px solid;
     border-color: #696 #363 #363 #696;
 	opacity: 1;
 	cursor: pointer;
@@ -58,9 +55,9 @@ td#returnLink:focus {
 
 td#returnLink:hover {
     width: 200px;
-    color: #050; 
-	background-color: #fed; 
-    border: 1px solid; 
+    color: #050;
+	background-color: #fed;
+    border: 1px solid;
     border-color: #696 #363 #363 #696;
 	opacity: 1;
 	cursor: pointer;
@@ -72,18 +69,18 @@ td#returnLink:hover {
 /* Input, Select, Option ------------------------------ */
 input#removeList {
     width: 200px;
-    color: #050; 
-	background-color:#fed; 
-    border: 1px solid; 
+    color: #050;
+	background-color:#fed;
+    border: 1px solid;
     border-color: #61a #315 #315 #61a;
-	opacity: 0.5; 
+	opacity: 0.5;
 }
 
 input#removeList:focus {
     width: 200px;
-    color: #050; 
-	background-color: #fed; 
-    border: 1px solid; 
+    color: #050;
+	background-color: #fed;
+    border: 1px solid;
     border-color: #696 #363 #363 #696;
 	opacity: 1;
 	cursor: pointer;
@@ -91,9 +88,9 @@ input#removeList:focus {
 
 input#removeList:hover {
     width: 200px;
-    color: #050; 
-	background-color: #fed; 
-    border: 1px solid; 
+    color: #050;
+	background-color: #fed;
+    border: 1px solid;
     border-color: #696 #363 #363 #696;
 	opacity: 1;
 	cursor: pointer;
@@ -101,18 +98,18 @@ input#removeList:hover {
 
 input#addList {
     width: 200px;
-    color: #050; 
-	background-color:#fed; 
-    border: 1px solid; 
+    color: #050;
+	background-color:#fed;
+    border: 1px solid;
     border-color: #61a #315 #315 #61a;
 	opacity: 0.5;
 }
 
 input#addList:focus {
     width: 200px;
-    color: #050; 
-	background-color: #fed; 
-    border: 1px solid; 
+    color: #050;
+	background-color: #fed;
+    border: 1px solid;
     border-color: #696 #363 #363 #696;
 	opacity: 1;
 	cursor: pointer;
@@ -121,7 +118,7 @@ input#addList:focus {
 input#addList:hover {
     width: 200px;
     color: #050;
-    border: 1px solid; 
+    border: 1px solid;
     border-color: #696 #363 #363 #696;
 	opacity: 1;
 	cursor: pointer;
@@ -130,46 +127,46 @@ input#addList:hover {
 select#selectForm_removeColumn {
     width: 200px;
     background-color: white;
-    border: 0px solid; 
-    border-color: #61a #315 #315 #61a; 
+    border: 0px solid;
+    border-color: #61a #315 #315 #61a;
 }
 
 select#selectForm_removeColumn:focus {
     width: 200px;
     background-color: white;
-    border: 0px solid; 
-    border-color: #61a #315 #315 #61a; 
+    border: 0px solid;
+    border-color: #61a #315 #315 #61a;
 }
 
 select#selectForm_removeColumn:hover {
     width: 200px;
     background-color: white;
-    border: 0px solid; 
-    border-color: #61a #315 #315 #61a; 
+    border: 0px solid;
+    border-color: #61a #315 #315 #61a;
 }
 
 
 select#selectForm_addColumn {
     width: 200px;
     background-color: white;
-    border: 0px solid; 
+    border: 0px solid;
     border-color: #61a #315 #315 #61a;
 }
 
 input#upButton {
     width: 70px;
-    color: #050; 
-	background-color:#fed; 
-    border: 1px solid; 
+    color: #050;
+	background-color:#fed;
+    border: 1px solid;
     border-color: #61a #315 #315 #61a;
-	opacity: 0.5; 
+	opacity: 0.5;
 }
 
 input#upButton:focus {
     width: 70px;
-    color: #050; 
-	background-color: #fed; 
-    border: 1px solid; 
+    color: #050;
+	background-color: #fed;
+    border: 1px solid;
     border-color: #696 #363 #363 #696;
 	opacity: 1;
 	cursor: pointer;
@@ -177,9 +174,9 @@ input#upButton:focus {
 
 input#upButton:hover {
     width: 70px;
-    color: #050; 
-	background-color: #fed; 
-    border: 1px solid; 
+    color: #050;
+	background-color: #fed;
+    border: 1px solid;
     border-color: #696 #363 #363 #696;
 	opacity: 1;
 	cursor: pointer;
@@ -187,18 +184,18 @@ input#upButton:hover {
 
 input#downButton {
     width: 70px;
-    color: #050; 
-	background-color:#fed; 
-    border: 1px solid; 
+    color: #050;
+	background-color:#fed;
+    border: 1px solid;
     border-color: #61a #315 #315 #61a;
-	opacity: 0.5; 
+	opacity: 0.5;
 }
 
 input#downButton:focus {
     width: 70px;
-    color: #050; 
-	background-color: #fed; 
-    border: 1px solid; 
+    color: #050;
+	background-color: #fed;
+    border: 1px solid;
     border-color: #696 #363 #363 #696;
 	opacity: 1;
 	cursor: pointer;
@@ -206,33 +203,33 @@ input#downButton:focus {
 
 input#downButton:hover {
     width: 70px;
-    color: #050; 
-	background-color: #fed; 
-    border: 1px solid; 
+    color: #050;
+	background-color: #fed;
+    border: 1px solid;
     border-color: #696 #363 #363 #696;
 	opacity: 1;
 	cursor: pointer;
 }
 
 option#notMovable {
-    font-style:italic; 
+    font-style:italic;
     color:red;
 }
 
 input#resetButton {
     width: 200px;
-    color: #050; 
-	background-color:#fed; 
-    border: 1px solid; 
+    color: #050;
+	background-color:#fed;
+    border: 1px solid;
     border-color: #61a #315 #315 #61a;
-	opacity: 0.5; 
+	opacity: 0.5;
 }
 
 input#resetButton:focus {
     width: 200px;
-    color: #050; 
-	background-color: #fed; 
-    border: 1px solid; 
+    color: #050;
+	background-color: #fed;
+    border: 1px solid;
     border-color: #696 #363 #363 #696;
 	opacity: 1;
 	cursor: pointer;
@@ -240,9 +237,9 @@ input#resetButton:focus {
 
 input#resetButton:hover {
     width: 200px;
-    color: #050; 
-	background-color: #fed; 
-    border: 1px solid; 
+    color: #050;
+	background-color: #fed;
+    border: 1px solid;
     border-color: #696 #363 #363 #696;
 	opacity: 1;
 	cursor: pointer;
