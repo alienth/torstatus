@@ -83,4 +83,8 @@ a#advancedSearchButton {
     text-decoration: none;
 }
 
+a#advancedSearchButton:visited {
+    text-decoration: none;
+}
+
 /* END Other ------------------------------------------ */
