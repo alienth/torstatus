@@ -266,7 +266,7 @@ option#notMovable {
     color:red;
 }
 
-input#resetButton {
+input#button {
     width: 200px;
     color: #050;
 	background-color:#fed;
@@ -275,7 +275,7 @@ input#resetButton {
 	opacity: 0.5;
 }
 
-input#resetButton:focus {
+input#button:focus {
     width: 200px;
     color: #050;
 	background-color: #fed;
@@ -285,7 +285,7 @@ input#resetButton:focus {
 	cursor: pointer;
 }
 
-input#resetButton:hover {
+input#button:hover {
     width: 200px;
     color: #050;
 	background-color: #fed;
@@ -300,6 +300,14 @@ input#resetButton:hover {
 /* Other ---------------------------------------------- */
 p#selectForm_text {
     font-size: 10px;
+}
+
+a#returnButtonLink {
+    text-decoration: none;
+}
+
+a#returnButtonLink:visited {
+    text-decoration: none;
 }
 
 /* END Other ------------------------------------------ */

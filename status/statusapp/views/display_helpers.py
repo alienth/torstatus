@@ -2,7 +2,7 @@
 Helper variables, lists, dictionaries, used for a clean display in the template.
 """
 
-# Advanced Search Template -----------------------------------
+# Advanced Search Template Helpers -----------------------------------
 SORT_OPTIONS_ORDER = ['Router Name', 'Fingerprint', 'Country Code',
                     'Bandwidth', 'Uptime', 'Last Descriptor Published',
                     'Hostname', 'IP Address', 'ORPort', 'DirPort',
@@ -135,4 +135,7 @@ ADVANCED_SEARCH_DECLR = {'sort_options_order': SORT_OPTIONS_ORDER,
                          'filter_options_order': FILTER_OPTIONS_ORDER,
                          'filter_options': FILTER_OPTIONS,
                         }
+
+
+# Index Template Helpers ---------------------------------------------
 

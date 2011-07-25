@@ -68,8 +68,8 @@
     <table class="resetButton_Table">
         <tr>
             <td colspan="2">
-                <form action="" method="get">
-                    <input name="resetPreferences" id="resetButton" type="submit" value="Reset Column Preferences" />
+                <form action="/display-options" method="get">
+                    <input name="resetPreferences" id="button" type="submit" value="Reset Column Preferences" />
                 </form>
             </td>
         </tr>
@@ -96,8 +96,11 @@
         </td>
     </tr>
 <tr>
-    <td id="selectForm"><a class="link" href="/">Return to Splash Screen</a> |
-                        <a class="link" href="/index/">Return to Index Page</a></td>
+    <td id="selectForm"><a id="returnButtonLink" href="/">
+                        <input name="returnSplash" id="button" type="submit" value="Return to Splash Screen" /></a>   |   
+                        <a id="returnButtonLink" href="/index/">
+                        <input name="returnIndex" id="button" type="submit" value="Return to Index Page" /></a>
+    </td>
 </tr>
 </table>
 
