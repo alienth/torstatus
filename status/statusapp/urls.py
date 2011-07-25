@@ -11,10 +11,6 @@ urlpatterns = patterns('',
     # Splash page
     (r'^$', 'statusapp.views.pages.splash'),
 
-    # Index and related pages
-    #(r'^index/(?P<sort_filter>\w*)$', 'statusapp.views.pages.index'),
-    (r'^index/$', 'statusapp.views.pages.index'),
-
     # Search
     (r'^advanced-search$', 'statusapp.views.pages.advanced_search'),
 
@@ -59,6 +55,9 @@ urlpatterns = patterns('',
 
     # CSV Files
     (r'^tor-query-export.csv$', 'statusapp.views.csvs.current_results_csv'),
-    (r'^Tor-IP-List-All.csv$', 'statusapp.views.csvs.custom_csv', {'flags': []}),
-    (r'^Tor-IP-List-Exit.csv$', 'statusapp.views.csvs.custom_csv', {'flags': ['isexit']}),
+
+    # Index and related pages
+    (r'^index/sort/(?P<sort_filter>\w*)$', 'statusapp.views.pages.index'),
+    (r'^index/$', 'statusapp.views.pages.index', {'sort_filter': ''}),
+    (r'^reset_index/$', 'statusapp.views.pages.index_reset'),
 )

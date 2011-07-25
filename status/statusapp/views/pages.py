@@ -44,8 +44,40 @@ def splash(request):
 
     return render_to_response("splash.html")
 
+def index_reset(request):
+    if 'filters' in request.session:
+        del request.session['filters']
+    if 'search' in request.session:
+        del request.session['search']
+    if 'sort_filter' in request.session:
+        del request.session['sort_filter']
 
-def index(request):
+    return index(request, "test")
+
+def get_order(sort_filter):
+
+    sort_order = ''
+    order_column_name = ''
+
+    underscore_count = sort_filter.count('_')
+    if not underscore_count == 1:
+        return None, 'ascending'
+    order_column_name, sort_order = sort_filter.split('_')
+    options = ['nickname', 'fingerprint', 'contact',
+                   'bandwidthobserved', 'uptime', 'country',
+                   'address', 'orport', 'dirport',
+                   'isbaddirectory', 'isbadexit',]
+
+    if order_column_name in options:
+        if sort_order == 'ascending':
+            return order_column_name, 'descending'
+        elif sort_order == 'descending':
+            return '-' + order_column_name, 'ascending'
+    else:
+        return None, 'ascending'
+
+
+def index(request, sort_filter):
     """
     Supply a dictionary to the index.html template consisting of a list
     of active relays.
@@ -65,24 +97,34 @@ def index(request):
                     validafter=last_validafter).order_by('nickname')
 
     basic_input = request.GET.get('search', '')
-
-    if 'filters' in request.session:
-        del request.session['filters']
-    if 'basic_search' in request.session:
-        del request.session['basic_search']
-
     if basic_input:
-        request.session['basic_search'] = basic_input
+        request.session['search'] = basic_input
+    elif 'search' in request.session:
+        basic_input = request.session['search']
+    order = 'nickname'
+
+    request.session['sort_filter'] = sort_filter
+
+    if sort_filter:
+        order, ascending_or_descending = get_order(sort_filter)
+    else:
+        ascending_or_descending = 'ascending'
+        if 'filters' in request.session:
+            del request.session['filters']
+        if 'sort_filter' in request.session:
+            del request.session['sort_filter']
+    if not order:
+        order = 'nickname'
+        
+    if basic_input:
         active_relays = active_relays.filter(
                         Q(nickname__istartswith=basic_input) | \
                         Q(fingerprint__istartswith=basic_input) | \
-                        Q(address__istartswith=basic_input))
+                        Q(address__istartswith=basic_input)).order_by(order)
     else:
         filter_params = get_filter_params(request)
-        order = get_order(request)
         active_relays = active_relays.filter(
-                        **filter_params).order_by(
-                        order).select_related()
+                        **filter_params).order_by(order)
 
     num_results = active_relays.count()
     # If the search returns only one relay, go to the details page for
@@ -133,12 +175,16 @@ def index(request):
     match = re.search(r"[?&]page=[^?&]*", gets)
     if match:
         gets = gets[:match.start()] + gets[match.end():]
+    
+    gets_exist = True if '?' in gets else False
 
     template_values = {'paged_relays': paged_relays,
                        'current_columns': current_columns,
                        'gets': gets,
+                       'gets_exist': gets_exist,
                        'request': request,
                        'number_of_results': num_results,
+                       'ascending_or_descending': ascending_or_descending,
                       }
     return render_to_response('index.html', template_values)
 
@@ -414,6 +460,9 @@ def display_options(request):
 
 
 def advanced_search(request):
+
+    if 'search' in request.session:
+            del request.session['search']
 
     search_value = request.GET.get('search', '')
 
