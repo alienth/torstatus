@@ -19,7 +19,7 @@ from statusapp.models import Bwhist, Descriptor
 # INIT Variables ------------------------------------------------------
 COLUMN_VALUE_NAME = {'Country Code': 'geoip',
                      'Router Name': 'nickname',
-                     'Bandwidth': 'bandwidthobserved',
+                     'Bandwidth': 'bandwidthkbps',
                      'Uptime': 'uptime',
                      'IP': 'address',
                      'Hostname': 'hostname',
@@ -43,10 +43,10 @@ COLUMN_VALUE_NAME = {'Country Code': 'geoip',
                      'BadDir': 'isbaddirectory',
                     }
 
-NOT_COLUMNS = ['Running', 'Hostname', 'Named', 'Valid',]
+NOT_COLUMNS = set(('Running', 'Hostname', 'Named', 'Valid'))
 
-ICONS = ['Fast', 'Exit', 'V2Dir', 'Guard', 'Stable', 'Authority',
-         'Platform',]
+ICONS = set(('Fast', 'Exit', 'V2Dir', 'Guard', 'Stable', 'Authority',
+         'Platform'))
 
 FLAGS = set(('isauthority',
               'isbaddirectory',

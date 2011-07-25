@@ -36,6 +36,9 @@ AVAILABLE_COLUMNS = ["Fingerprint", "LastDescriptorPublished",
 NOT_MOVABLE_COLUMNS = ["Named", "Exit", "Authority", "Fast", "Guard",
                        "Hibernating", "Stable", "Running", "Valid",
                        "V2Dir", "Platform",]
+                       
+OS_LIST = ['Linux', 'XP', 'Windows', 'Darwin', 'FreeBSD', 'NetBSD',
+            'OpenBSD', 'SunOS', 'IRIX', 'Cygwin', 'Dragon']
 
 
 def splash(request):
@@ -141,6 +144,7 @@ def index(request):
                        'not_columns': NOT_MOVABLE_COLUMNS,
                        'gets': gets,
                        'request': request,
+                       'os_list': OS_LIST,
                       }
     return render_to_response('index.html', template_values)
 
