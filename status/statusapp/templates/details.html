@@ -145,6 +145,10 @@
                 <td {% if relay.isbadexit %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
             <tr>
+                <td id="detailBox"> Directory: </td>
+                <td {% if relay.isv2dir %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+            </tr>
+            <tr>
                 <td id="detailBox"> Exit: </td>
                 <td {% if relay.isexit %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
@@ -163,6 +167,10 @@
             </tr>
             {% endif %}
             <tr>
+                <td id="detailBox"> HS Directory: </td>
+                <td {% if relay.ishsdir %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+            </tr>
+            <tr>
                 <td id="detailBox"> Named: </td>
                 <td {% if relay.isnamed %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
@@ -177,10 +185,6 @@
             <tr>
                 <td id="detailBox"> Valid: </td>
                 <td {% if relay.isvalid %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
-            </tr>
-            <tr>
-                <td id="detailBox"> V2Dir: </td>
-                <td {% if relay.isauthority %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
         </table>
     </td>

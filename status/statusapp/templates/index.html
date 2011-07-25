@@ -85,7 +85,7 @@
         {% if column_name == "Fingerprint" %}
         <th class="relayHeader hoverable">Fingerprint</th>
         {% endif %}
-        {% if column_name == "LastDescriptorPublished" %}
+        {% if column_name == "Last Descriptor Published" %}
         <th class="relayHeader hoverable" id="lastDescPub">Last Descriptor Published</th>
         {% endif %}
         {% if column_name == "Contact" %}
@@ -95,7 +95,7 @@
         <th class="relayHeader hoverable" id="badDir">Bad Directory</th>
         {% endif %}
         {% if column_name == "Icons" %}
-        {% if "DirPort" in current_columns or "Exit" in current_columns or "Authority" in current_columns or "Fast" in current_columns or "Guard" in current_columns or "V2Dir" in current_columns or "Platform" in current_columns or "Stable" in current_columns %}
+        {% if "DirPort" in current_columns or "Exit" in current_columns or "Authority" in current_columns or "Fast" in current_columns or "Guard" in current_columns or "Directory" in current_columns or "Platform" in current_columns or "Stable" in current_columns %}
 		<th class="" id="relayHeaderInv">Icons</th>
 		{% endif %}
 		{% endif %}
@@ -145,7 +145,7 @@
             {% if column_name == "Fingerprint" %}
             <td id="col_relayFingerprint">{{ relay.fingerprint }}</td>
             {% endif %}
-            {% if column_name == "LastDescriptorPublished" %}
+            {% if column_name == "Last Descriptor Published" %}
             {% load details_filters %}
             <td id="col_relayLastDescPub">{{ relay.published }}</td>
             {% endif %}
@@ -171,7 +171,7 @@
                     <img src="/static/img/status/Fast.png" alt="Fast Server" title="Fast Server">
                 {% endif %}
                 {% endif %}
-                {% if "V2Dir" in current_columns %}
+                {% if "Directory" in current_columns %}
                 {% if relay.isv2dir == 1 %}
                     <img src="/static/img/status/Dir.png" alt="Directory Server" title="Directory Server">
                 {% endif %}

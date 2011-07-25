@@ -35,17 +35,17 @@ COLUMN_VALUE_NAME = {'Country Code': 'geoip',
                      'Stable': 'isstable',
                      'Running': 'isrunning',
                      'Valid': 'isvalid',
-                     'V2Dir': 'isv2dir',
+                     'Directory': 'isv2dir',
                      'Platform': 'platform',
                      'Fingerprint': 'fingerprint',
-                     'LastDescriptorPublished': 'published',
+                     'Last Descriptor Published': 'published',
                      'Contact': 'contact',
                      'BadDir': 'isbaddirectory',
                     }
 
 NOT_COLUMNS = ['Running', 'Hostname', 'Named', 'Valid',]
 
-ICONS = ['Fast', 'Exit', 'V2Dir', 'Guard', 'Stable', 'Authority',
+ICONS = ['Fast', 'Exit', 'Directory', 'Guard', 'Stable', 'Authority',
          'Platform',]
 
 FLAGS = set(('isauthority',
@@ -760,7 +760,7 @@ def generate_query_input_options(query_options):
                     'Named': 'isnamed',
                     'Stable': 'isstable',
                     'Valid': 'isvalid',
-                    'V2Dir': 'isv2dir',
+                    'Directory': 'isv2dir',
                    }
     sorted_input_options = sorted(INPUT_OPTIONS.keys())
     html_query_input_options = []
