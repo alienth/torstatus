@@ -76,4 +76,8 @@ a#advancedSearchButton {
     text-decoration: none;
 }
 
+a#avancedSearchButton:visited {
+    text-decoration: none;
+}
+
 /* END Other ------------------------------------------ */

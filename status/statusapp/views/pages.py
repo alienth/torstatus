@@ -26,10 +26,11 @@ from display_helpers import *
 
 # INIT Variables ------------------------------------------------------
 CURRENT_COLUMNS = ["Country Code", "Router Name", "Bandwidth",
-                   "Uptime", "IP", "Hostname", "Icons", "ORPort",
+                   "Uptime", "IP", "Icons", "ORPort",
                    "DirPort", "BadExit", "Named", "Exit",
                    "Authority", "Fast", "Guard", "Hibernating",
                    "Stable", "Running", "Valid", "V2Dir", "Platform",]
+                   #"Hostname"
 AVAILABLE_COLUMNS = ["Fingerprint", "LastDescriptorPublished",
                      "Contact", "BadDir",]
 NOT_MOVABLE_COLUMNS = ["Named", "Exit", "Authority", "Fast", "Guard",
@@ -133,8 +134,11 @@ def index(request):
     if match:
         gets = gets[:match.start()] + gets[match.end():]
 
+    
+    
     template_values = {'paged_relays': paged_relays,
                        'current_columns': current_columns,
+                       'not_columns': NOT_MOVABLE_COLUMNS,
                        'gets': gets,
                        'request': request,
                       }
