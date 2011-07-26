@@ -1,7 +1,16 @@
 TorStatus README
 ================
-.. Updated 2011-06-28 11:00:00 GMT-5
+.. Updated 2011-07-26 16:00:00 GMT-4
 .. This file is written in reStructuredText.
+
+About TorStatus
+---------------
+TorStatus provides a way for Tor relay operators, clients of the Tor
+network, and anyone else to view aggregate information about the Tor
+network as well as detailed information about active relays in the
+network in real-time.
+
+This implementation is written in Python/Django.
 
 Installation
 ------------
@@ -24,9 +33,8 @@ http://docutils.sourceforge.net/) and run commands analogous to
 the following:
 
     | $ cd doc/
-    | $ rst2html design.rst design.html
+    | $ rst2html example.rst example.html
 
 To view the documentation, open design.html using your favorite web
 browser. If you'd rather view the plaintext documentation, open
 design.rst.
-

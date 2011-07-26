@@ -1,17 +1,17 @@
 TorStatus Design Documentation
 ==============================
-.. This file is written in reStructuredText.
+..
 
-Software
---------
+1: Software
+-----------
 This implementation of TorStatus was developed using Django 1.2.3,
 Python 2.6.6, psycopg 2.2.1-1, matplotlib 0.99.3-1, and a postgreSQL Tor
 Metrics database. While it is possible that TorStatus will run on newer
 versions of this software, we cannot guarantee that TorStatus will
 function properly.
 
-Django
-------
+2: Django
+---------
 TorStatus is written in django to take advantage of Django's
 object-relational mapper (ORM) for straight-forward database access.
 In Django, a database table is analogous to a class, rows are
@@ -23,53 +23,151 @@ schema is a bit confusing: controllers are stored in a module named
 views.py and views are called templates (but models are still,
 thankfully, called models).
 
-Directory Structure
--------------------
-While the directory structure in commit 237303b...00cc7ed seems to be
-the most djangonic file structure that we've used yet, the directory
-structure is not yet settled.
+3: Directory Structure
+----------------------
+Views are stored in status/statusapp/views. Views are organized by
+their functions: views that render a text/html object to response
+are stored in pages.py, views that render png images to response
+are stored in graphs.py, and functions that do not return an
+HttpResponse object are stored elsewhere as helper functions.
 
-Modules in statusapp
---------------------
-__init__.py
-...........
+4: Modules in statusapp
+-----------------------
+4.1: __init__.py
+................
 Contains a custom type cast for BIGINT[] arrays. This is placed in
 __init__.py because it is necessary that the custom type cast is
 run on startup. For more on why this type cast is necessary, consult
 __init__.py itself.
 
-models.py
-.........
+4.2: models.py
+..............
 Contains the classes that corresponds to each table in the
 Tor Metrics database, where an object is analogous to a row in the
 table and a field is analogous to a column in the table.
 
-tests.py
-........
+4.3: tests.py
+.............
 Contains basic doctests where needed, mostly for helper functions and
 custom filters.
 
-urls.py
-.......
+4.4: urls.py
+............
 Contains the URLCONF for TorStatus pages. Most of urls.py consists of
 tuples with two entries: the first uses regular expressions to match
 page requests, and the second specifies what method in views.py will be
 called to serve the page request.
 
-views
-........
+4.5: views
+..........
 Contains the application logic used to serve each page request. Each
 "view" returns an HttpResponse object that refers to an HTML template
 that presents the information to the client.
 
-pages.py
-~~~~~~~~
-Contains the "views" for "pages" of the TorStatus web application.
+4.5.1: csvs.py
+~~~~~~~~~~~~~~
+Contains the views for generating comma-separated values files from
+the relay result set currently displayed.
 
-graphs.py
-~~~~~~~~~
-Contains the "views" for the graphs of the TorStatus web application.
+4.5.2: pages.py
+~~~~~~~~~~~~~~~
+Contains the views for "pages" of the TorStatus web application.
 
-helpers.py
-~~~~~~~~~~
+4.5.3: graphs.py
+~~~~~~~~~~~~~~~~
+Contains the views for the graphs of the TorStatus web application.
+
+4.5.4: helpers.py
+~~~~~~~~~~~~~~~~~
 Contains helper functions for pages.py and graphs.py.
+
+4.5.5: display_helpers.py
+~~~~~~~~~~~~~~~~~~~~~~~~~
+Contains helper functions for the "Display Options" page.
+
+5: Design Decisions
+-------------------
+
+5.1: Page Sizes
+...............
+TorStatus is likely to be viewed by a larger-than-usual number of
+clients of the Tor network. When torified, data transfer is bounded
+by the connection speed of the slowest relay in a Tor relay chain.
+Additionally, many common tools such as cookies or javascript can pose
+more security problems than usual.
+
+The current design displays only 50 relays per page by default, with
+options to go on to the first page, previous page, next page, or last
+page. This reduces page sizes which in turn reduces loading times.
+
+Additionally, we anticipate that many users of TorStatus only want
+to view information about one specific relay in the Tor network.
+Because of this, we've aimed to make the landing page for TorStatus
+as small as is reasonable and to implement a simple search feature
+capable of looking up relays by nickname, IP address, or fingerprint.
+
+5.2: Security
+.............
+Javascript and cookies are not used in this implementation. Instead,
+secure sessions are used to store display options and search filters
+on a per-user basis. Data is stored on the server side, and the sending
+and receiving of cookies is abstracted. These sessions use only a
+hashed session ID rather than the data itself.
+
+For more on Django and sessions, see:
+http://www.djangobook.com/en/2.0/chapter14/
+
+5.3: Databases
+..............
+This implementation of TorStatus was designed to be integrated with the
+Tor Metrics database. In this database, relay data is spread across
+multiple tables, and for good reason. However, this makes displaying
+dynamically-generated relay data somewhat difficult. Additionally,
+clients of TorStatus may have a desire to view information about a
+relay that clients of Tor Metrics rarely have interest in.
+
+Our solution to this problem was to maintain a small schema in the
+Tor Metrics database designed solely for the purpose of holding
+information about active relays in the Tor network. This means that
+the raw descriptor of any relay will only need to be parsed once for
+information that is requested less than frequently.
+
+This schema works by holding descriptors that were published in the
+last 36 hours and by holding statusentries that were published in the
+last 4 hours and keeping one table, "active_relay", that is essentially
+a table that is the result of a join between the statusentry table
+and the descriptor table on the most recent information for each
+relay, though without any descriptor information or relay information
+older than a given interval of time (in this case, 36 hours and 4 hours,
+respectively).
+
+6: Issues
+---------
+
+6.1: Templates
+..............
+Template languages are slow. Django's template language is particularly
+slow. In the past, a few clients of TorStatus have communicated desires
+to view all of the active relays in the Tor network on one page, but it
+currently takes far too long for the server to render such a template
+to an Http Response object.
+
+Fortunately, there are many options available. Thanks to Django's
+"loose-coupling" philosophy, it is relatively easy to swap template
+languages. So far, we have only experimented with Jinja2, a template
+language with syntax that is very similar to Django's, in tandem with
+Coffin, a project that makes the switch from Django's template language
+to Jinja2's template language relatively painless, though there are a
+few key differences. Preliminary tests showed pages rendering 5-6
+times faster using the Jinja2 template language; if you'd like to test
+this for yourself, checkout the branch called "redesign_jinja_coffin".
+Other template languages for python pride themselves on being the
+fastest template languages around, such as include Cheetah and Tenjin.
+However, neither of these template languages are very syntactically
+similar to the Django template language.
+
+There seem to be many ways to decreasing the load on the template,
+but it seems like all of them involve writing HTML into python code
+at some level. Ultimately, this might have to be done on some level,
+but we'd rather defer this decision to the future project maintainer,
+as with the decision of which template language to ultimately use.
