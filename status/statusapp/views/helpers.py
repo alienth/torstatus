@@ -581,7 +581,7 @@ def gen_list_dict(active_relays):
     Method that generates a list of dictionaries, where each dictionary
     contains the fields of a relay.
     
-    @type active_relays: QuerySet
+    @type active_relays: C{QuerySet}
     @param active_relays: A set of all the relays that are going to be 
                         displayed.
     @rtype: C{list}
@@ -619,3 +619,102 @@ def gen_list_dict(active_relays):
                          }
             list_dict.append(relay_dict)
     return list_dict
+
+
+def gen_relay_dict(relay):
+    """
+    Method that generates a dictionary of all the fields of a relay.
+    
+    @type relay: C{ActiveRelay}
+    @param relay: The relay for which the fields are going to be generated.
+    @rtype: C{dict}
+    @return: Dictioanary of the Field Name(key): Field Value(value) for the
+            specific relay.
+    """
+    relay_dict = {'Router Name': relay.nickname,
+                  'Fingerprint': relay.fingerprint,
+                  'Active Relay': 'Yes' if relay.active else 'No',
+                  'Adjusted Uptime': relay.adjuptime,
+                  'Last Consensus Present (GMT)': relay.validafter,
+                  'IP Address': relay.address,
+                  'Hostname': relay.hostname,
+                  'Onion Router Port': relay.orport,
+                  'Directory Server Port': relay.dirport,
+                  'Country': relay.country,
+                  'Latitude, Longitude': str(relay.latitude) + ', ' + \
+                            str(relay.longitude),
+                  'Platform / Version': relay.platform,
+                  'Last Descriptor Published (GMT)': relay.published,
+                  'Published Uptime': relay.uptime,
+                  'Bandwidth (Burst/Avg/Observed - In Bps)': \
+                            str(relay.bandwidthburst) + ' / ' + \
+                            str(relay.bandwidthavg) + ' / ' + \
+                            str(relay.bandwidthobserved),
+                  'Contact': relay.contact,
+                  'Family': relay.family,
+                  'Authority': 1 if relay.isauthority else 0,
+                  'Bad Directory': 1 if relay.isbaddirectory else 0,
+                  'Bad Exit': 1 if relay.isbadexit else 0,
+                  'Exit': 1 if relay.isexit else 0,
+                  'Guard': 1 if relay.isguard else 0,
+                  'Fast': 1 if relay.isfast else 0,
+                  'Named': relay.isnamed,
+                  'Stable': relay.isstable,
+                  'Running': relay.isrunning,
+                  'Valid': relay.isvalid,
+                  'V2Dir': relay.isv2dir, 
+                  'HS Directory': relay.ishsdir,                 
+                 }
+    if relay.hasdescriptor:
+        relay_dict['Hibernating'] = 1 if relay.ishibernating else 0
+    else:
+        relay_dict['Hibernating'] = 0
+    return relay_dict
+
+
+def gen_options_list(relay):
+    """
+    Method that generates a list of the fields that will be displayed 
+    on the details page of a specific relay.
+    
+    @type relay: C{ActiveRelay}
+    @param relay: The relay for which the list of fields will be generated
+    @rtype: C{list}
+    @return: List of the fields that will be displayed at the 
+        bottom of the details page.
+    """
+    options_list = ['Router Name', 'Fingerprint', 'Active Relay',]
+    if relay.active:
+        if relay.hasdescriptor:
+            options_list.append('Adjusted Uptime')
+    else:
+        options_list.append('Last Consensus Present (GMT)')  
+    options_list.extend(['IP Address', 'Hostname', 'Onion Router Port',
+                    'Directory Server Port', 'Country',
+                    'Latitude, Longitude',])                
+    if relay.hasdescriptor:
+        descriptor_options_list = ['Platform / Version', 
+                    'Last Descriptor Published (GMT)', 'Published Uptime',
+                    'Bandwidth (Burst/Avg/Observed - In Bps)', 'Contact',
+                    'Family',]
+        options_list.extend(descriptor_options_list)
+    return options_list
+
+def gen_flags_list(relay):
+    """
+    Method that generates a list of the fields(flags) that will be displayed 
+    on the details page of a specific relay.
+    
+    @type relay: C{ActiveRelay}
+    @param relay: The relay for which the list of fields will be generated
+    @rtype: C{list}
+    @return: List of the fields(flags) that will be displayed at the 
+        bottom of the details page.
+    """
+    flags_list = ['Authority', 'Bad Directory', 'Bad Exit', 'Exit', 'Fast', 
+                'Guard', 'HS Directory',]
+    if relay.hasdescriptor:
+        flags_list.append('Hibernating')
+    flags_list.extend(['Named', 'Stable', 'Running', 'Valid', 'V2Dir'])
+    return flags_list
+       

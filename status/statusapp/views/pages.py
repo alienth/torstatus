@@ -207,44 +207,14 @@ def details(request, fingerprint):
 
     relay.hostname = getfqdn(str(relay.address))
     
-    relay_dict = {'Router Name': relay.nickname,
-                  'Fingerprint': relay.fingerprint,
-                  'Active Relay': relay.active,
-                  'Adjusted Uptime': relay.adjuptime,
-                  'Last Consensus Present (GMT)': relay.validafter,
-                  'IP Address': relay.address,
-                  'Hostname': relay.hostname,
-                  'Onion Router Port': relay.orport,
-                  'Directory Server Port': relay.dirport,
-                  'Country': relay.country,
-                  'Latitude, Longitude': str(relay.latitude) + ', ' + \
-                            str(relay.longitude),
-                  'Platform / Version': relay.platform,
-                  'Last Descriptor Published (GMT)': relay.published,
-                  'Published Uptime': relay.uptime,
-                  'Bandwidth (Burst/Avg/Observed - In Bps)': \
-                            str(relay.bandwidthburst) + ' / ' + \
-                            str(relay.bandwidthavg) + ' / ' + \
-                            str(relay.bandwidthobserved),
-                  'Contact': relay.contact,
-                  'Family': relay.family,
-                 }
-    
-    options_list = ['Router Name', 'Fingerprint', 'Active Relay',
-                    'Adjusted Uptime', 'Last Consensus Present (GMT)',
-                    'IP Address', 'Hostname', 'Onion Router Port',
-                    'Directory Server Port', 'Country',
-                    'Latitude, Longitude',]
-    descriptor_options_list = ['Platform / Version', 
-                    'Last Descriptor Published (GMT)', 'Published Uptime',
-                    'Bandwidth (Burst/Avg/Observed - In Bps)', 'Contact',
-                    'Family',]
-                    
+    relay_dict = gen_relay_dict(relay)                 
+    flags_list = gen_flags_list(relay)
+    options_list = gen_options_list(relay)
 
     template_values = {'relay': relay,
                        'relay_dict': relay_dict,
                        'options_list': options_list,
-                       'descriptor_options_list': descriptor_options_list,
+                       'flags_list': flags_list,
                        }
     return render_to_response('details.html', template_values)
 
