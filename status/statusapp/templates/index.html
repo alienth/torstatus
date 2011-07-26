@@ -93,32 +93,32 @@
 	
 	{% for relay in paged_relays.object_list %}
 	    {% if "BadExit" in current_columns %}
-		<tr {% if relay|field_key:'BadExit' %} class="relayBadExit" {% else %} class="relay" {% endif %}>
+		<tr {% if relay|field_value:'BadExit' %} class="relayBadExit" {% else %} class="relay" {% endif %}>
 		{% else %}
 		<tr class="relay">
 		{% endif %}
 		    {% for column_name in current_columns %}
 		    {% if column_name == "Country Code" %}
-            <td id="col_relayName"><a href="http://www.openstreetmap.org/?mlon={{ relay|field_key:'Longitude' }}&mlat={{ relay|field_key:'Latitude' }}&zoom=6"><img src="/static/img/flags/{{ relay|field_key:column_name|lower }}.png" alt={{ relay|field_key:column_name }} title="{{ relay|field_key:column_name }}: {{ relay|field_key:'Latitude' }}, {{ relay|field_key:'Longitude' }}" border=0></a></td>
+            <td id="col_relayName"><a href="http://www.openstreetmap.org/?mlon={{ relay|field_value:'Longitude' }}&mlat={{ relay|field_value:'Latitude' }}&zoom=6"><img src="/static/img/flags/{{ relay|field_value:column_name|lower }}.png" alt={{ relay|field_value:column_name }} title="{{ relay|field_value:column_name }}: {{ relay|field_value:'Latitude' }}, {{ relay|field_value:'Longitude' }}" border=0></a></td>
 			{% else %}
 			{% if column_name == "Router Name" %}
             <td id="col_relayName">
                 {% if "Named" in current_columns %}
-                {% if relay|field_key:'Named' == 1 %}
-                    <b><a class="linkDetails" href="/details/{{ relay|field_key:'Fingerprint' }}" target="_BLANK">{{ relay|field_key:column_name }}</a></b>
+                {% if relay|field_value:'Named' == 1 %}
+                    <b><a class="linkDetails" href="/details/{{ relay|field_value:'Fingerprint' }}" target="_BLANK">{{ relay|field_value:column_name }}</a></b>
                     {% else %}
-                    <a class="linkDetails" href="/details/{{ relay|field_key:'Fingerprint' }}" target="_BLANK">{{ relay|field_key:column_name }}</a>
+                    <a class="linkDetails" href="/details/{{ relay|field_value:'Fingerprint' }}" target="_BLANK">{{ relay|field_value:column_name }}</a>
                 {% endif %}
                 {% else %}
-                    <a class="linkDetails" href="/details/{{ relay|field_key:'Fingerprint' }}" target="_BLANK">{{ relay|field_key:column_name }}</a>
+                    <a class="linkDetails" href="/details/{{ relay|field_value:'Fingerprint' }}" target="_BLANK">{{ relay|field_value:column_name }}</a>
                 {% endif %}
             </td>
             {% else %}
             {% if column_name == "IP" %}
-            <td>[<a id="relayAddress" href="/details/{{ relay|field_key:column_name }}/whois">{{ relay|field_key:column_name }}</a>]</td>
+            <td>[<a id="relayAddress" href="/details/{{ relay|field_value:column_name }}/whois">{{ relay|field_value:column_name }}</a>]</td>
             {% else %}
             {% if column_name == "BadDir" == 1 %}
-            <td id="col_relayBadDir" {% if relay|field_key:column_name %}>
+            <td id="col_relayBadDir" {% if relay|field_value:column_name %}>
                 	<img src="/static/img/bg_yes.png" width="12" height="12" alt="Bad Directory" title="Bad Directory">
                 {% else %}>
                		<img src="/static/img/bg_no.png" width="12" height="12" alt="Not a Bad Directory" title="Not a Bad Directory">
@@ -129,9 +129,9 @@
                 {% for icon in icons_list %}
                     {% if icon in current_columns %}
                         {% if icon == "Platform" %}
-                            <img src="/static/img/os-icons/{{ relay|field_key:icon|get_os }}.png" alt="{{ relay|field_key:icon|get_os }}" title="{{ relay|field_key:icon }}">
+                            <img src="/static/img/os-icons/{{ relay|field_value:icon|get_os }}.png" alt="{{ relay|field_value:icon|get_os }}" title="{{ relay|field_value:icon }}">
                         {% else %}
-                        {% if relay|field_key:icon == 1 %}
+                        {% if relay|field_value:icon == 1 %}
                             <img src="/static/img/status/{{icon}}.png" alt="{{icon}}" title="{{icon}}">
                         {% endif %}
                         {% endif %}
@@ -142,13 +142,13 @@
             {% if column_name in displayable_columns %}
             <td id="col_relay{{column_name}}">
                 {% if column_name == "BadExit" %}
-                    {% if relay|field_key:column_name == 1 %}
+                    {% if relay|field_value:column_name == 1 %}
                         <img src="/static/img/bg_yes.png" width="12" height="12" alt="Bad Exit" title="Bad Exit">
                     {% else %}
                         <img src="/static/img/bg_no.png" width="12" height="12" alt="Not a Bad Exit" title="Not a Bad Exit">
                     {% endif %}
                 {% else %}
-                    {{ relay|field_key:column_name }}
+                    {{ relay|field_value:column_name }}
                 {% endif %}
             {% endif %}
             </td>
