@@ -25,20 +25,23 @@ from helpers import *
 from display_helpers import *
 
 # INIT Variables ------------------------------------------------------
-CURRENT_COLUMNS = ["Country Code", "Router Name", "Bandwidth",
-                   "Uptime", "IP", "Icons", "ORPort",
-                   "DirPort", "BadExit", "Named", "Exit",
-                   "Authority", "Fast", "Guard", "Hibernating",
-                   "Stable", "Running", "Valid", "V2Dir", "Platform",]
-                   #"Hostname"
-AVAILABLE_COLUMNS = ["Fingerprint", "LastDescriptorPublished",
-                     "Contact", "BadDir",]
-NOT_MOVABLE_COLUMNS = ["Named", "Exit", "Authority", "Fast", "Guard",
-                       "Hibernating", "Stable", "Running", "Valid",
-                       "V2Dir", "Platform",]
-                       
-OS_LIST = ['Linux', 'XP', 'Windows', 'Darwin', 'FreeBSD', 'NetBSD',
-            'OpenBSD', 'SunOS', 'IRIX', 'Cygwin', 'Dragon']
+CURRENT_COLUMNS = ['Country Code', 'Router Name', 'Bandwidth',
+                   'Uptime', 'IP', 'Icons', 'ORPort',
+                   'DirPort', 'BadExit', 'Named', 'Exit',
+                   'Authority', 'Fast', 'Guard', 'Hibernating',
+                   'Stable', 'V2Dir', 'Platform',]
+                   #'Hostname'
+
+AVAILABLE_COLUMNS = ['Fingerprint', 'LastDescriptorPublished',
+                     'Contact', 'BadDir',]
+                 
+NOT_MOVABLE_COLUMNS = ['Named', 'Exit', 'Authority', 'Fast', 'Guard',
+                       'Hibernating', 'Stable', 'V2Dir', 'Platform',]
+                
+DISPLAYABLE_COLUMNS = set(('Country Code', 'Router Name', 'Bandwidth',
+                            'Uptime', 'IP', 'Icons', 'ORPort', 'DirPort',
+                            'BadExit', 'Fingerprint', 
+                            'LastDescriptorPublished', 'Contact', 'BadDir'))
 
 
 def splash(request):
@@ -100,7 +103,8 @@ def index(request):
         all_relays = int(request.GET.get('all', '0'))
     except ValueError:
         all_relays = 0
-
+    
+    active_relays_list_dict = gen_list_dict(active_relays)
     if not all_relays:
         # Make sure entries per page is an integer. If not, or
         # if no value is specified, make entries per page 50.
@@ -108,8 +112,10 @@ def index(request):
             per_page = int(request.GET.get('pp', 50))
         except ValueError:
             per_page = 50
-
-        paginator = Paginator(active_relays, per_page)
+            
+        #paginator = Paginator(active_relays, per_page)
+        # BETA ==
+        paginator = Paginator(active_relays_list_dict, per_page)        
 
         # Make sure page request is an int. If not, deliver first page.
         try:
@@ -124,7 +130,10 @@ def index(request):
         except (EmptyPage, InvalidPage):
             paged_relays = paginator.page(paginator.num_pages)
     else:
-        paginator = Paginator(active_relays, active_relays.count())
+        #paginator = Paginator(active_relays, active_relays.count())
+        # BETA ==
+        paginator = Paginator(active_relays_list_dict,
+                        active_relays_list_dict.count())
         paged_relays = paginator.page(1)
 
     current_columns = []
@@ -141,10 +150,11 @@ def index(request):
     
     template_values = {'paged_relays': paged_relays,
                        'current_columns': current_columns,
+                       'displayable_columns': DISPLAYABLE_COLUMNS,
                        'not_columns': NOT_MOVABLE_COLUMNS,
                        'gets': gets,
                        'request': request,
-                       'os_list': OS_LIST,
+                       'icons_list': ICONS,
                       }
     return render_to_response('index.html', template_values)
 
@@ -196,8 +206,46 @@ def details(request, fingerprint):
         relay.hasdescriptor = False
 
     relay.hostname = getfqdn(str(relay.address))
+    
+    relay_dict = {'Router Name': relay.nickname,
+                  'Fingerprint': relay.fingerprint,
+                  'Active Relay': relay.active,
+                  'Adjusted Uptime': relay.adjuptime,
+                  'Last Consensus Present (GMT)': relay.validafter,
+                  'IP Address': relay.address,
+                  'Hostname': relay.hostname,
+                  'Onion Router Port': relay.orport,
+                  'Directory Server Port': relay.dirport,
+                  'Country': relay.country,
+                  'Latitude, Longitude': str(relay.latitude) + ', ' + \
+                            str(relay.longitude),
+                  'Platform / Version': relay.platform,
+                  'Last Descriptor Published (GMT)': relay.published,
+                  'Published Uptime': relay.uptime,
+                  'Bandwidth (Burst/Avg/Observed - In Bps)': \
+                            str(relay.bandwidthburst) + ' / ' + \
+                            str(relay.bandwidthavg) + ' / ' + \
+                            str(relay.bandwidthobserved),
+                  'Contact': relay.contact,
+                  'Family': relay.family,
+                 }
+    
+    options_list = ['Router Name', 'Fingerprint', 'Active Relay',
+                    'Adjusted Uptime', 'Last Consensus Present (GMT)',
+                    'IP Address', 'Hostname', 'Onion Router Port',
+                    'Directory Server Port', 'Country',
+                    'Latitude, Longitude',]
+    descriptor_options_list = ['Platform / Version', 
+                    'Last Descriptor Published (GMT)', 'Published Uptime',
+                    'Bandwidth (Burst/Avg/Observed - In Bps)', 'Contact',
+                    'Family',]
+                    
 
-    template_values = {'relay': relay}
+    template_values = {'relay': relay,
+                       'relay_dict': relay_dict,
+                       'options_list': options_list,
+                       'descriptor_options_list': descriptor_options_list,
+                       }
     return render_to_response('details.html', template_values)
 
 

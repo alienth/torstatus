@@ -33,7 +33,6 @@ COLUMN_VALUE_NAME = {'Country Code': 'geoip',
                      'Fast': 'isfast',
                      'Guard': 'isguard',
                      'Stable': 'isstable',
-                     'Running': 'isrunning',
                      'Valid': 'isvalid',
                      'V2Dir': 'isv2dir',
                      'Platform': 'platform',
@@ -45,8 +44,8 @@ COLUMN_VALUE_NAME = {'Country Code': 'geoip',
 
 NOT_COLUMNS = set(('Running', 'Hostname', 'Named', 'Valid'))
 
-ICONS = set(('Fast', 'Exit', 'V2Dir', 'Guard', 'Stable', 'Authority',
-         'Platform'))
+ICONS = ['Fast', 'Exit', 'Valid', 'V2Dir', 'Guard', 'Stable', 
+         'Authority', 'Platform']
 
 FLAGS = set(('isauthority',
               'isbaddirectory',
@@ -57,7 +56,6 @@ FLAGS = set(('isauthority',
               'ishibernating',
               'isnamed',
               'isstable',
-              'isrunning',
               'isvalid',
               'isv2dir'))
 SEARCHES = set(('fingerprint',
@@ -1054,3 +1052,38 @@ def get_order(request):
     return ''.join((orderbit, param))
 
 
+def gen_list_dict(active_relays):
+    list_dict = []
+    if active_relays:
+        for relay in active_relays:
+            relay_dict = {'isbadexit': 1 if relay.isbadexit else 0,
+                          'country': relay.country,
+                          'longitude': relay.longitude,
+                          'latitude': relay.latitude,
+                          'nickname': relay.nickname,
+                          'bandwidthkbps': relay.bandwidthkbps,
+                          'uptime': relay.uptimedays,
+                          'address': relay.address,
+                          #'hostname': relay.hostname,
+                          'hibernating': 1 if relay.ishibernating else 0, 
+                          'orport': relay.orport,
+                          'dirport': relay.dirport,
+                          'isbadexit': 1 if relay.isbadexit else 0,
+                          'isnamed': 1 if relay.isnamed else 0,
+                          'isexit': 1 if relay.isexit else 0,
+                          'isauthority': 1 if relay.isauthority else 0,
+                          'isfast': 1 if relay.isfast else 0,
+                          'isguard': 1 if relay.isguard else 0,
+                          'isstable': 1 if relay.isstable else 0,
+                          'isv2dir': 1 if relay.isv2dir else 0,
+                          'platform': relay.platform,
+                          'fingerprint': relay.fingerprint,
+                          'published': relay.published,
+                          'contact': relay.contact,
+                          'isbaddirectory': 1 if relay.isbaddirectory else 0,
+                         }
+            list_dict.append(relay_dict)
+    return list_dict  
+            
+          
+   

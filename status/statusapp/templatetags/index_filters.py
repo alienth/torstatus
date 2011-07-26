@@ -12,8 +12,8 @@ FILTERED_NAME = {'Longitude': 'longitude',
                  'Bandwidth': 'bandwidthkbps',
                  'Uptime': 'uptime',
                  'IP': 'address',
-                 'Hostname': 'hostname',
-                 'Icons': 'icons',
+                 #'Hostname': 'hostname',
+                 'Hibernating': 'hibernating',
                  'ORPort': 'orport',
                  'DirPort': 'dirport',
                  'BadExit': 'isbadexit',
@@ -23,8 +23,6 @@ FILTERED_NAME = {'Longitude': 'longitude',
                  'Fast': 'isfast',
                  'Guard': 'isguard',
                  'Stable': 'isstable',
-                 'Running': 'isrunning',
-                 'Valid': 'isvalid',
                  'V2Dir': 'isv2dir',
                  'Platform': 'platform',
                  'Fingerprint': 'fingerprint',
@@ -32,6 +30,10 @@ FILTERED_NAME = {'Longitude': 'longitude',
                  'Contact': 'contact',
                  'BadDir': 'isbaddirectory',
                 }
+
+OS_LIST = set(('Linux', 'XP', 'Windows', 'Darwin', 'FreeBSD', 'NetBSD',
+            'OpenBSD', 'SunOS', 'IRIX', 'Cygwin', 'Dragon'))
+
 
 register = template.Library()
 
@@ -71,12 +73,14 @@ def percent(a, b):
     else:
         return '%0.2f%%' % (100.0 * a / b)
 
+
 @register.filter
 def key(d, key_name):
     """
     """
     if key_name in d:
         return d[key_name]
+
 
 @register.filter
 def subtract(a, b):
@@ -90,7 +94,19 @@ def subtract(a, b):
     """
     return a - b
     
+
 @register.filter
-def filter_key(relay_dict, key_name):
+def field_key(relay_dict, key_name):
     return relay_dict[FILTERED_NAME[key_name]]
-    
+
+
+@register.filter
+def get_os(platform):
+    if platform:
+        for os in OS_LIST:
+            if os in platform:
+                if os == 'Windows' and 'Server' in platform:
+                    return 'WindowsServer'
+                else:
+                    return os
+    return 'NotAvailable'

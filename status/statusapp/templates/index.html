@@ -24,14 +24,6 @@
 {% load index_filters %}
 {% spaceless %}
 
-
-{% for relay in paged_relays.object_list %}
-    {% if forloop.counter == 1 %}
-        {{relay.nickname}}
-    {% endif %}
-{% endfor %}
-
-
 {% if paged_relays.object_list %}
 <table>
     <tr>
@@ -101,32 +93,32 @@
 	
 	{% for relay in paged_relays.object_list %}
 	    {% if "BadExit" in current_columns %}
-		<tr {% if relay|filter_key:'BadExit' %} class="relayBadExit" {% else %} class="relay" {% endif %}>
+		<tr {% if relay|field_key:'BadExit' %} class="relayBadExit" {% else %} class="relay" {% endif %}>
 		{% else %}
 		<tr class="relay">
 		{% endif %}
 		    {% for column_name in current_columns %}
 		    {% if column_name == "Country Code" %}
-            <td id="col_relayName"><a href="http://www.openstreetmap.org/?mlon={{ relay|filter_key:'Longitude' }}&mlat={{ relay|filter_key:'Latitude' }}&zoom=6"><img src="/static/img/flags/{{ relay|filter_key:'Country'|lower }}.png" alt={{ relay|filter_key:'Country' }} title="{{ relay|filter_key:'Country' }}: {{ relay|filter_key:'Latitude' }}, {{ relay|filter_key:'Longitude' }}" border=0></a></td>
+            <td id="col_relayName"><a href="http://www.openstreetmap.org/?mlon={{ relay|field_key:'Longitude' }}&mlat={{ relay|field_key:'Latitude' }}&zoom=6"><img src="/static/img/flags/{{ relay|field_key:column_name|lower }}.png" alt={{ relay|field_key:column_name }} title="{{ relay|field_key:column_name }}: {{ relay|field_key:'Latitude' }}, {{ relay|field_key:'Longitude' }}" border=0></a></td>
 			{% else %}
 			{% if column_name == "Router Name" %}
             <td id="col_relayName">
                 {% if "Named" in current_columns %}
-                {% if relay.isnamed == 1 %}
-                    <b><a class="linkDetails" href="/details/{{ relay|filter_key:'Fingerprint' }}" target="_BLANK">{{ relay|field_key:column_name }}</a></b>
+                {% if relay|field_key:'Named' == 1 %}
+                    <b><a class="linkDetails" href="/details/{{ relay|field_key:'Fingerprint' }}" target="_BLANK">{{ relay|field_key:column_name }}</a></b>
                     {% else %}
-                    <a class="linkDetails" href="/details/{{ relay|filter_key:'Fingerprint' }}" target="_BLANK">{{ relay|field_key:column_name }}</a>
+                    <a class="linkDetails" href="/details/{{ relay|field_key:'Fingerprint' }}" target="_BLANK">{{ relay|field_key:column_name }}</a>
                 {% endif %}
                 {% else %}
-                    <a class="linkDetails" href="/details/{{ relay|filter_key:'Fingerprint' }}" target="_BLANK">{{ relay|field_key:column_name }}</a>
+                    <a class="linkDetails" href="/details/{{ relay|field_key:'Fingerprint' }}" target="_BLANK">{{ relay|field_key:column_name }}</a>
                 {% endif %}
             </td>
             {% else %}
             {% if column_name == "IP" %}
-            <td>[<a id="relayAddress" href="/details/{{ relay|filter_key:column_name }}/whois">{{ relay|field_key:column_name }}</a>]</td>
-            {% endif %}
-            {% if column_name == "BadDir" %}
-            <td id="col_relayBadDir" {% if relay|filter_key:column_name %}>
+            <td>[<a id="relayAddress" href="/details/{{ relay|field_key:column_name }}/whois">{{ relay|field_key:column_name }}</a>]</td>
+            {% else %}
+            {% if column_name == "BadDir" == 1 %}
+            <td id="col_relayBadDir" {% if relay|field_key:column_name %}>
                 	<img src="/static/img/bg_yes.png" width="12" height="12" alt="Bad Directory" title="Bad Directory">
                 {% else %}>
                		<img src="/static/img/bg_no.png" width="12" height="12" alt="Not a Bad Directory" title="Not a Bad Directory">
@@ -137,31 +129,20 @@
                 {% for icon in icons_list %}
                     {% if icon in current_columns %}
                         {% if icon == "Platform" %}
-                            {% for os in os_list %}
-                                {% if os in relay|field_key:icon %}
-                                    {% if os == "Windows" and "Server" in relay|field_key:icon %}
-                                        <img src="/static/img/os-icons/WindowsServer.png" alt="WindowsServer" title="{{ relay|filter_key:icon }}">
-                                    {% else %}
-                                        <img src="/static/img/os-icons/{{os}}.png" alt="{{os}}" title="{{ relay|filter_key:icon }}">
-                                    {% endif %}
-                                    {% endfor %}
-                                {% else %}
-                                {% if forloop.counter == os_list|length %}
-                                    <img src="/static/img/os-icons/NotAvailable.png" alt="NotAvailable" title="Not Available">
-                                {% endif %}
-                                {% endif %}
-                            {% endfor %}
+                            <img src="/static/img/os-icons/{{ relay|field_key:icon|get_os }}.png" alt="{{ relay|field_key:icon|get_os }}" title="{{ relay|field_key:icon }}">
                         {% else %}
-                        {% if relay|field_key:icon %}
+                        {% if relay|field_key:icon == 1 %}
                             <img src="/static/img/status/{{icon}}.png" alt="{{icon}}" title="{{icon}}">
+                        {% endif %}
                         {% endif %}
                     {% endif %}
                 {% endfor %}
             </td>
             {% else %}
-            <td id="col_relay{{current_column}}">
+            {% if column_name in displayable_columns %}
+            <td id="col_relay{{column_name}}">
                 {% if column_name == "BadExit" %}
-                    {% if relay|field_key:current_column %}
+                    {% if relay|field_key:column_name == 1 %}
                         <img src="/static/img/bg_yes.png" width="12" height="12" alt="Bad Exit" title="Bad Exit">
                     {% else %}
                         <img src="/static/img/bg_no.png" width="12" height="12" alt="Not a Bad Exit" title="Not a Bad Exit">
@@ -169,9 +150,10 @@
                 {% else %}
                     {{ relay|field_key:column_name }}
                 {% endif %}
+            {% endif %}
             </td>
             <!-- add KB/s, d     for the corresponding cases -->
-
+            {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
             {% endfor %}
 		</tr>
 	{% endfor %}
