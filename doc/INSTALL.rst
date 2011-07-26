@@ -40,7 +40,22 @@ correct branch of metrics-web:
     | $ git fetch karsten
     | $ git checkout -b foreignkey karsten/foreignkey
 
-Now follow the instructions in the README to build the database.
+Before following the instructions in the README to build the database,
+be aware that TorStatus maintains relay data from consensuses and
+descriptors in its own schema that is not included in metrics-web.
+So, before importing data into the new database, run the following:
+
+    | $ psql -U metrics tordir
+    | tordir=> \i /absolute/path/to/TorStatus/cache.sql
+
+TorStatus does not regularly use "old" relays. To delete old relays
+from the caching schema, add a crontab for the metrics:
+
+    | $ crontab -e
+    | 35 * * * * psql -U metrics tordir -c 'SELECT * FROM cache.purge();'
+
+Now imported data will be added to the cache schema used with TorStatus.
+
 Note that if you have not previously configured postgreSQL, you may
 prefer to use a "password" verification system rather than a "trust"
 verification system for the user "metrics" to access the database.
@@ -57,10 +72,10 @@ enter all necessary data into the database to run TorStatus.
 
 2: Installing TorStatus
 -----------------------
-If you have not done so already, get the most preview of TorStatus:
+If you have not done so already, get the most recent version of
+TorStatus:
 
     | $ git clone https://github.com/dcalderon/TorStatus
-    | $ git checkout preview
 
 Now change directory to TorStatus/status and edit config.template such
 that TorStatus can connect to the database just built. Save these changes
@@ -86,8 +101,6 @@ let us know by sending e-mail to torstatus@gmail.com.
 
 3: Running Apache and Deployment
 ________________________________
-..Just started this section still needs lots of work..
-
 Get the appropriate packages. With a minimal debian sqeeze platform you should
 have the necessary packages already.
 
