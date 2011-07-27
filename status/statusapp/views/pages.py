@@ -179,20 +179,10 @@ def index(request):
         request.session['currentColumns'] = CURRENT_COLUMNS
     current_columns = request.session['currentColumns']
 
-    #gets = request.get_full_path().split('index/')[1]
-    #match = re.search(r"[?&]page=[^?&]*", gets)
-    #if match:
-    #    gets = gets[:match.start()] + gets[match.end():]
-    #
-    #request.path = '/index/'
-    #gets_exist = True if '?' in gets else False
-
     template_values = {'paged_relays': paged_relays,
                        'current_columns': current_columns,
                        'displayable_columns': DISPLAYABLE_COLUMNS,
                        'not_columns': NOT_MOVABLE_COLUMNS,
-                       #'gets': gets,
-                       #'gets_exist': gets_exist,
                        'request': request,
                        'column_value_name': COLUMN_VALUE_NAME,
                        'icons_list': ICONS,
