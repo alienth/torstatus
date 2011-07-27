@@ -29,11 +29,11 @@
 <table>
     <tr>
         {% if paged_relays.has_previous %}
-        <td id="paginators"><a class="pageLinks" href="{% if gets %}{{ gets }}&amp;{% else %}?{% endif %}page={{ paged_relays.previous_page_number }}">&#8701;</a></td>
+        <td id="paginatorLinks"><a class="pageLinks" href="/index/{% if gets_exist %}{{ gets }}&amp;{% else %}{{ gets }}?{% endif %}page={{ paged_relays.previous_page_number }}">⇽</a></td>
         {% endif %}
 
         {% if paged_relays.number > 2 %}
-        <td id="paginators"><a class="pageLinks" href="{% if gets %}{{ gets }}&amp;{% else %}?{% endif %}page=1">1</a></td>
+        <td id="paginatorLinks"><a class="pageLinks" href="/index/{% if gets_exist %}{{ gets }}&amp;{% else %}{{ gets }}?{% endif %}page=1">1</a></td>
         {% endif %}
 
         {% if paged_relays.number > 3 %}
@@ -41,13 +41,13 @@
         {% endif %}
 
         {% if paged_relays.has_previous %}
-        <td id="paginators"><a class="pageLinks" href="{% if gets %}{{ gets }}&amp;{% else %}?{% endif %}page={{ paged_relays.previous_page_number }}">{{ paged_relays.previous_page_number }}</a></td>
+        <td id="paginatorLinks"><a class="pageLinks" href="/index/{% if gets_exist %}{{ gets }}&amp;{% else %}{{ gets }}?{% endif %}page={{ paged_relays.previous_page_number }}">{{ paged_relays.previous_page_number }}</a></td>
         {% endif %}
 
         <td id="paginators">{{ paged_relays.number }}</td>
 
         {% if paged_relays.has_next %}
-        <td id="paginators"><a class="pageLinks" href="{% if gets %}{{ gets }}&amp;{% else %}?{% endif %}page={{ paged_relays.next_page_number }}">{{ paged_relays.next_page_number }}</a></td>
+        <td id="paginatorLinks"><a class="pageLinks" href="/index/{% if gets_exist %}{{ gets }}&amp;{% else %}{{ gets }}?{% endif %}page={{ paged_relays.next_page_number }}">{{ paged_relays.next_page_number }}</a></td>
         {% endif %}
 
         {% if paged_relays.paginator.num_pages|subtract:paged_relays.number >= 3 %}
@@ -55,11 +55,11 @@
         {% endif %}
 
         {% if paged_relays.paginator.num_pages|subtract:paged_relays.number >= 2 %}
-        <td id="paginators"><a class="pageLinks" href="{% if gets %}{{ gets }}&amp;{% else %}?{% endif %}page={{ paged_relays.paginator.num_pages }}">{{ paged_relays.paginator.num_pages }}</a></td>
+        <td id="paginatorLinks"><a class="pageLinks" href="/index/{% if gets_exist %}{{ gets }}&amp;{% else %}{{ gets }}?{% endif %}page={{ paged_relays.paginator.num_pages }}">{{ paged_relays.paginator.num_pages }}</a></td>
         {% endif %}
 
         {% if paged_relays.has_next %}
-        <td id="paginators"><a class="pageLinks" href="{% if gets %}{{ gets }}&amp;{% else %}?{% endif %}page={{ paged_relays.next_page_number }}">&#8702;</a></td>
+        <td id="paginatorLinks"><a class="pageLinks" href="/index/{% if gets_exist %}{{ gets }}&amp;{% else %}{{ gets }}?{% endif %}page={{ paged_relays.next_page_number }}">⇾</a></td>
         {% endif %}
     </tr>
 </table>
@@ -67,27 +67,47 @@
 <table class="relayTable">
 	<tr>
 	{% for column_name in current_columns %}
-	    {% if column_name == "Icons" %}
-        {% if "DirPort" in current_columns or "Exit" in current_columns or "Authority" in current_columns or "Fast" in current_columns or "Guard" in current_columns or "Directory" in current_columns or "Platform" in current_columns or "Stable" in current_columns %}
+	    {% if column_name == "Country Code" %}
+        <th class="relayHeader hoverable"><a href="/index/sort/country_{{ascending_or_descending}}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></th>
+        {% endif %}
+        {% if column_name == "Router Name" %}
+        <th class="relayHeader hoverable" id="routerName"><a href="/index/sort/nickname_{{ascending_or_descending}}">Router Name</a></th>
+		{% endif %}
+		{% if column_name == "Bandwidth" %}
+		<th class="relayHeader hoverable"><a href="/index/sort/bandwidthobserved_{{ascending_or_descending}}">Bandwidth</a></th>
+		{% endif %}
+		{% if column_name == "Uptime" %}
+        <th class="relayHeader hoverable"><a href="/index/sort/uptime_{{ascending_or_descending}}">Uptime</a></th>
+        {% endif %}
+        {% if column_name == "IP" %}
+        <th class="relayHeader hoverable"><a href="/index/sort/address_{{ascending_or_descending}}">IP</a></th>
+        {% endif %}
+        {% if column_name == "Fingerprint" %}
+        <th class="relayHeader hoverable"><a href="/index/sort/fingerprint_{{ascending_or_descending}}">Fingerprint</a></th>
+        {% endif %}
+        {% if column_name == "LastDescriptorPublished" %}
+        <th class="relayHeader hoverable" id="lastDescPub"><a href="/index/sort/published_{{ascending_or_descending}}">Last Descriptor Published</a></th>
+        {% endif %}
+        {% if column_name == "Contact" %}
+        <th class="relayHeader hoverable"><a href="/index/sort/contact_{{ascending_or_descending}}">Contact</a></th>
+        {% endif %}
+        {% if column_name == "BadDir" %}
+        <th class="relayHeader hoverable" id="badDir"><a href="/index/sort/isbaddirectory_{{ascending_or_descending}}">Bad Directory</a></th>
+        {% endif %}
+        {% if column_name == "Icons" %}
+        {% if "DirPort" in current_columns or "Exit" in current_columns or "Authority" in current_columns or "Fast" in current_columns or "Guard" in current_columns or "V2Dir" in current_columns or "Platform" in current_columns or "Stable" in current_columns %}
 		<th class="" id="relayHeaderInv">Icons</th>
 		{% endif %}
-		{% else %}
-		{% if column_name not in not_columns %}
-	    <th class="relayHeader hoverable" {% if column_name == "Router Name" %}
-	                                            id="routerName"
-	                                      {% else %}
-	                                      {% if column_name == "LastDescriptorPublished" %}
-	                                            id="lastDescPub"
-	                                      {% else %}
-	                                      {% if column_name == "BadDir" %}
-	                                            id="badDir"
-	                                      {% endif %}
-	                                      {% endif %}
-	                                      {% endif %}
-	                                      >
-	        {% if column_name == "Country Code" %} &nbsp; {% else %} {{column_name}} {% endif %}</th>
-	    {% endif %}
-	    {% endif %}
+		{% endif %}
+		{% if column_name == "ORPort" %}
+        <th class="relayHeader hoverable"><a href="/index/sort/orport_{{ascending_or_descending}}">ORPort</a></th>
+        {% endif %}
+        {% if column_name == "DirPort" %}
+        <th class="relayHeader hoverable"><a href="/index/sort/dirport_{{ascending_or_descending}}">DirPort</a></th>
+        {% endif %}
+        {% if column_name == "BadExit" %}
+        <th class="relayHeader hoverable"><a href="/index/sort/isbadexit_{{ascending_or_descending}}">Bad Exit</a></th>
+        {% endif %}
     {% endfor %}
 	</tr>
 	{% for relay in paged_relays.object_list %}
@@ -220,9 +240,9 @@
             </td>
             {% endif %}
             {% if column_name == "BadExit" %}
-            <td id="col_relayBadExit" {% if relay.isbadexit == 1 %}>
+            <td id="col_relayBadExit"> {% if relay.isbadexit == 1 %}
                 	<img src="/static/img/bg_yes.png" width="12" height="12" alt="Bad Exit" title="Bad Exit">
-                {% else %}>
+                {% else %}
                		<img src="/static/img/bg_no.png" width="12" height="12" alt="Not a Bad Exit" title="Not a Bad Exit">
                 {% endif %}
             </td>

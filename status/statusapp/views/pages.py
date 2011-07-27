@@ -45,8 +45,40 @@ def splash(request):
 
     return render_to_response("splash.html")
 
+def index_reset(request):
+    if 'filters' in request.session:
+        del request.session['filters']
+    if 'search' in request.session:
+        del request.session['search']
+    if 'sort_filter' in request.session:
+        del request.session['sort_filter']
 
-def index(request):
+    return index(request, "test")
+
+def get_order(sort_filter):
+
+    sort_order = ''
+    order_column_name = ''
+
+    underscore_count = sort_filter.count('_')
+    if not underscore_count == 1:
+        return None, 'ascending'
+    order_column_name, sort_order = sort_filter.split('_')
+    options = ['nickname', 'fingerprint', 'contact',
+                   'bandwidthobserved', 'uptime', 'country',
+                   'address', 'orport', 'dirport',
+                   'isbaddirectory', 'isbadexit',]
+
+    if order_column_name in options:
+        if sort_order == 'ascending':
+            return order_column_name, 'descending'
+        elif sort_order == 'descending':
+            return '-' + order_column_name, 'ascending'
+    else:
+        return None, 'ascending'
+
+
+def index(request, sort_filter):
     """
     Supply a dictionary to the index.html template consisting of a list
     of active relays.
@@ -65,25 +97,39 @@ def index(request):
     active_relays = ActiveRelay.objects.filter(
                     validafter=last_validafter).order_by('nickname')
 
+    # Two cases of search, either basic search or advanced. This block
+    # needs to handle both of these cases.
     basic_input = request.GET.get('search', '')
+    if basic_input:
+        request.session['search'] = basic_input
+    elif 'search' in request.session:
+        basic_input = request.session['search']
 
-    if 'filters' in request.session:
-        del request.session['filters']
-    if 'basic_search' in request.session:
-        del request.session['basic_search']
+    order = 'nickname'
+
+    if sort_filter:
+        request.session['sort_filter'] = sort_filter
+        order, ascending_or_descending = get_order(sort_filter)
+    else:
+        ascending_or_descending = 'ascending'
+
+    if not order:
+        order = 'nickname'
 
     if basic_input:
-        request.session['basic_search'] = basic_input
+        if 'filters' in request.session:
+            del request.session['filters']
         active_relays = active_relays.filter(
                         Q(nickname__istartswith=basic_input) | \
                         Q(fingerprint__istartswith=basic_input) | \
-                        Q(address__istartswith=basic_input))
+                        Q(address__istartswith=basic_input)).order_by(order)
     else:
+        if 'search' in request.session:
+            del request.session['search']
         filter_params = get_filter_params(request)
-        order = get_order(request)
         active_relays = active_relays.filter(
-                        **filter_params).order_by(
-                        order).select_related()
+                        **filter_params).order_by(order)
+
 
     num_results = active_relays.count()
     # If the search returns only one relay, go to the details page for
@@ -128,6 +174,8 @@ def index(request):
     match = re.search(r"[?&]page=[^?&]*", gets)
     if match:
         gets = gets[:match.start()] + gets[match.end():]
+    
+    gets_exist = True if '?' in gets else False
 
     
     
@@ -135,8 +183,10 @@ def index(request):
                        'current_columns': current_columns,
                        'not_columns': NOT_MOVABLE_COLUMNS,
                        'gets': gets,
+                       'gets_exist': gets_exist,
                        'request': request,
                        'number_of_results': num_results,
+                       'ascending_or_descending': ascending_or_descending,
                       }
     return render_to_response('index.html', template_values)
 
@@ -341,7 +391,7 @@ def exitnodequery(request):
                        'dest_port_valid': dest_port_valid}
     return render_to_response('nodequery.html', template_values)
 
-#@cache_page(60 * 30)
+@cache_page(60 * 30)
 def networkstatisticgraphs(request):
     """
     Render an HTML template to response.
@@ -426,6 +476,9 @@ def display_options(request):
 
 
 def advanced_search(request):
+
+    if 'filters' in request.session:
+            del request.session['filters']
 
     search_value = request.GET.get('search', '')
 
