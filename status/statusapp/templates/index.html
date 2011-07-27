@@ -25,7 +25,7 @@
 {% load index_filters %}
 {% spaceless %}
 
-{% if paged_relays.object_list %}
+{% if paged_relays.object_list.exists %}
 <table>
     <tr>
         {% if paged_relays.has_previous %}

@@ -92,7 +92,7 @@ Contains helper functions for the "Display Options" page.
 ...............
 TorStatus is likely to be viewed by a larger-than-usual number of
 clients of the Tor network. When torified, data transfer is bounded
-by the connection speed of the slowest relay in a Tor relay chain.
+by the connection speed of the slowest relay in a Tor relay circuit.
 Additionally, many common tools such as cookies or javascript can pose
 more security problems than usual.
 
