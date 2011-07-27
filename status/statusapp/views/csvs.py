@@ -51,23 +51,27 @@ def current_results_csv(request):
                     validafter=last_va).order_by('nickname')
 
     #new way of filtering but it would be nice to abstract to another method
-    if 'basic_search' in request.session:
-        basic_input = request.session['basic_search']
-    else:
-        basic_input = ''
+    order = ''
+    basic_input = ''
+    if 'search' in request.session:
+        basic_input = request.session['search']
+        sort_filter = ''
+    elif 'sort_filter' in request.session:
+        sort_filter = request.session['sort_filter']
+        order, ascending_or_descending = get_order(sort_filter)
 
+    if not order:
+        order = 'nickname'
+        
     if basic_input:
         active_relays = active_relays.filter(
                         Q(nickname__istartswith=basic_input) | \
                         Q(fingerprint__istartswith=basic_input) | \
-                        Q(address__istartswith=basic_input))
+                        Q(address__istartswith=basic_input)).order_by(order)
     else:
         filter_params = get_filter_params(request)
-        order = get_order(request)
-
         active_relays = active_relays.filter(
-                        **filter_params).order_by(
-                        order).select_related()
+                        **filter_params).order_by(order)
 
     # Create the HttpResponse object with the appropriate CSV header.
     response = HttpResponse(mimetype='text/csv')
@@ -96,7 +100,7 @@ def current_results_csv(request):
                 ("Uptime", relay.uptime),
                 ("IP", relay.address),
                 ("Fingerprint", relay.fingerprint),
-                ("LastDescriptorPublished", relay.published),
+                ("Last Descriptor Published", relay.published),
                 ("BadDir", relay.isbaddirectory),
                 ("DirPort", relay.dirport),
                 ("Exit", relay.isexit),
@@ -104,7 +108,7 @@ def current_results_csv(request):
                 ("Hibernating", relay.ishibernating),
                 ("Fast", relay.isfast),
                 ("Guard", relay.isguard),
-                ("V2Dir", relay.isv2dir),
+                ("Directory", relay.isv2dir),
                 ("Platform", relay.platform),
                 ("Stable", relay.isstable),
                 ("ORPort", relay.orport),
@@ -126,61 +130,5 @@ def current_results_csv(request):
         for column in current_columns:
             dict_row[column] = rows[column][i]
         writer.writerow(dict_row)
-
-    return response
-
-
-def custom_csv(request, flags):
-    """
-    Returns a csv formatted file that contains either all Tor ip
-        addresses or all Tor exit node ip addresses.
-
-    @oaram all_flag: a variable that represents the clients
-        desire to get all the ips or only the exit node ips from
-        the Tor network.
-
-    @rtype: HttpResponse
-    @return: csv formatted list of either all ip address or all
-        exit node ip addresses.
-    """
-    
-    filterby = {}
-    for element in flags:
-        filterby[element] = True
-    
-    last_va = Statusentry.objects.aggregate(
-                last=Max('validafter'))['last']
-    statusentries = Statusentry.objects.filter(validafter=last_va, **filterby)
-
-
-    """
-    #Performs the necessary query depending on what is requested
-    if all_flag:
-        last_va = Statusentry.objects.aggregate(
-                last=Max('validafter'))['last']
-        statusentries = Statusentry.objects.filter(validafter=last_va)
-    else:
-        last_va = Statusentry.objects.aggregate(
-                last=Max('validafter'))['last']
-        statusentries = Statusentry.objects.filter(
-                validafter=last_va, isexit=True)
-    """
-
-    #Initialize list to hold ips and populates it.
-    IPs = []
-    for entry in statusentries:
-        IPs.append(entry.address)
-
-    response = HttpResponse(mimetype= 'text/csv') 
-    #Creates the proper csv response type.
-    if flags:
-        response['Content-Disposition'] = 'attachment; filename=all_ips.csv'
-    else:
-        response['Content-Disposition'] = 'attachment; filename=custom_ips.csv'
-
-    #Writes IP list to csv response file.
-    writer = csv.writer(response)
-    for ip in IPs:
-        writer.writerow([ip])
 
     return response

@@ -51,8 +51,40 @@ def splash(request):
 
     return render_to_response("splash.html")
 
+def index_reset(request):
+    if 'filters' in request.session:
+        del request.session['filters']
+    if 'search' in request.session:
+        del request.session['search']
+    if 'sort_filter' in request.session:
+        del request.session['sort_filter']
 
-def index(request):
+    return index(request, "test")
+
+def get_order(sort_filter):
+
+    sort_order = ''
+    order_column_name = ''
+
+    underscore_count = sort_filter.count('_')
+    if not underscore_count == 1:
+        return None, 'ascending'
+    order_column_name, sort_order = sort_filter.split('_')
+    options = ['nickname', 'fingerprint', 'contact',
+                   'bandwidthkbps', 'uptime', 'country',
+                   'address', 'orport', 'dirport',
+                   'isbaddirectory', 'isbadexit',]
+
+    if order_column_name in options:
+        if sort_order == 'ascending':
+            return order_column_name, 'descending'
+        elif sort_order == 'descending':
+            return '-' + order_column_name, 'ascending'
+    else:
+        return None, 'ascending'
+
+
+def index(request, sort_filter):
     """
     Supply a dictionary to the index.html template consisting of a list
     of active relays.
@@ -71,26 +103,41 @@ def index(request):
     active_relays = ActiveRelay.objects.filter(
                     validafter=last_validafter).order_by('nickname')
 
+    # Two cases of search, either basic search or advanced. This block
+    # needs to handle both of these cases.
     basic_input = request.GET.get('search', '')
+    if basic_input:
+        request.session['search'] = basic_input
+    elif 'search' in request.session:
+        basic_input = request.session['search']
 
-    if 'filters' in request.session:
-        del request.session['filters']
-    if 'basic_search' in request.session:
-        del request.session['basic_search']
+    order = 'nickname'
+
+    if sort_filter:
+        request.session['sort_filter'] = sort_filter
+        order, ascending_or_descending = get_order(sort_filter)
+    else:
+        ascending_or_descending = 'ascending'
+
+    if not order:
+        order = 'nickname'
 
     if basic_input:
-        request.session['basic_search'] = basic_input
+        if 'filters' in request.session:
+            del request.session['filters']
         active_relays = active_relays.filter(
                         Q(nickname__istartswith=basic_input) | \
                         Q(fingerprint__istartswith=basic_input) | \
-                        Q(address__istartswith=basic_input))
+                        Q(address__istartswith=basic_input)).order_by(order)
     else:
+        if 'search' in request.session:
+            del request.session['search']
         filter_params = get_filter_params(request)
-        order = get_order(request)
         active_relays = active_relays.filter(
-                        **filter_params).order_by(
-                        order).select_related()
+                        **filter_params).order_by(order)
 
+
+    num_results = active_relays.count()
     # If the search returns only one relay, go to the details page for
     # that relay.
     if active_relays.count() == 1:
@@ -99,27 +146,20 @@ def index(request):
 
     # Make sure paginated is an integer. If 0, then do not paginate.
     # Otherwise, paginate.
-    try:
-        all_relays = int(request.GET.get('all', '0'))
-    except ValueError:
-        all_relays = 0
+
+    all_relays = request.session.get('all', 0)
     
     active_relays_list_dict = gen_list_dict(active_relays)
     if not all_relays:
         # Make sure entries per page is an integer. If not, or
         # if no value is specified, make entries per page 50.
-        try:
-            per_page = int(request.GET.get('pp', 50))
-        except ValueError:
-            per_page = 50
-            
-        #paginator = Paginator(active_relays, per_page)
-        # BETA ==
-        paginator = Paginator(active_relays_list_dict, per_page)        
+        per_page = request.session.get('perpage', 50)
+
+        paginator = Paginator(active_relays_list_dict, per_page)
 
         # Make sure page request is an int. If not, deliver first page.
         try:
-            page = int(request.GET.get('page', '1'))
+            page = int(request.GET.get('page', 1))
         except ValueError:
             page = 1
 
@@ -130,8 +170,7 @@ def index(request):
         except (EmptyPage, InvalidPage):
             paged_relays = paginator.page(paginator.num_pages)
     else:
-        #paginator = Paginator(active_relays, active_relays.count())
-        # BETA ==
+
         paginator = Paginator(active_relays_list_dict,
                         active_relays_list_dict.count())
         paged_relays = paginator.page(1)
@@ -140,11 +179,13 @@ def index(request):
     if not ('currentColumns' in request.session):
         request.session['currentColumns'] = CURRENT_COLUMNS
     current_columns = request.session['currentColumns']
-    
+
     gets = request.get_full_path().split('index/')[1]
     match = re.search(r"[?&]page=[^?&]*", gets)
     if match:
         gets = gets[:match.start()] + gets[match.end():]
+    
+    gets_exist = True if '?' in gets else False
 
     
     
@@ -153,8 +194,12 @@ def index(request):
                        'displayable_columns': DISPLAYABLE_COLUMNS,
                        'not_columns': NOT_MOVABLE_COLUMNS,
                        'gets': gets,
+                       'gets_exist': gets_exist,
                        'request': request,
+                       'column_value_name': COLUMN_VALUE_NAME,
                        'icons_list': ICONS,
+                       'number_of_results': num_results,
+                       'ascending_or_descending': ascending_or_descending,
                       }
     return render_to_response('index.html', template_values)
 
@@ -239,7 +284,7 @@ def whois(request, address):
                               stdout=subprocess.PIPE,
                               shell=True)
 
-    whois, err = proc.communicate()
+    whois = proc.communicate()[0]
 
     template_values = {'whois': whois, 'address': address}
     return render_to_response('whois.html', template_values)
@@ -275,17 +320,14 @@ def exitnodequery(request):
 
     # Get the source, dest_ip, and dest_port from the HttpRequest object
     # if they exist, and declare them valid if they are valid.
-    source = get_if_exists(request, 'queryAddress')
-    if (is_ipaddress(source)):
-        source_valid = True
+    source = request.GET.get('queryAddress', '').strip()
+    if is_ipaddress(source): source_valid = True
 
-    dest_ip = get_if_exists(request, 'destinationAddress')
-    if (is_ipaddress(dest_ip)):
-        dest_ip_valid = True
+    dest_ip = request.GET.get('destinationAddress', '').strip()
+    if is_ipaddress(dest_ip): dest_ip_valid = True
 
-    dest_port = get_if_exists(request, 'destinationPort')
-    if (is_port(dest_port)):
-        dest_port_valid = True
+    dest_port = request.GET.get('destinationPort', '').strip()
+    if is_port(dest_port): dest_port_valid = True
 
     # Some users may assume exiting on port 80. If a destination IP
     # address is given without a port, assume that the user means
@@ -304,14 +346,13 @@ def exitnodequery(request):
 
         # Don't search entries published over 24 hours
         # from the most recent entries.
-        last_va = Statusentry.objects.aggregate(
+        last_va = ActiveRelay.objects.aggregate(
                   last=Max('validafter'))['last']
-        oldest_tolerable = last_va - datetime.timedelta(days=1)
 
-        fingerprints = Statusentry.objects.filter(
-                       address=source,
-                       validafter__gte=oldest_tolerable).values(
-                       'fingerprint').annotate(Count('fingerprint'))
+        fingerprints = ActiveRelay.objects.filter(
+                       address=source).values(
+                       'fingerprint').annotate(
+                       Count('fingerprint'))
 
         # Grouped by fingerprints, which are unique. If at least one
         # fingerprint is found, there is a match, so for each
@@ -326,27 +367,22 @@ def exitnodequery(request):
             for fp_entry in fingerprints:
                 # Note that the trailing [:1] is djangonese for
                 # "LIMIT 1", so this query should not be expensive.
-                statusentry_set = Statusentry.objects.filter(
-                                  fingerprint=fp_entry['fingerprint'],
-                                  validafter__gte=(
-                                  oldest_tolerable)).order_by(
-                                  '-validafter')[:1]
-                statusentry = statusentry_set[0]
+                relay = ActiveRelay.objects.filter(
+                        fingerprint=fp_entry['fingerprint']).order_by(
+                        '-validafter')[:1][0]
 
-                nickname = statusentry.nickname
-                fingerprint = statusentry.fingerprint
+                nickname = relay.nickname
+                fingerprint = relay.fingerprint
                 exit_possible = False
 
                 # If the client also wants to test the relay's exit
                 # policy, dest_ip and dest_port cannot be empty strings.
                 if (dest_ip_valid and dest_port_valid):
-                    router_exit_policy = get_exit_policy(
-                                         statusentry.descriptorid.rawdesc)
 
                     # Search the exit policy information for a case in
                     # which the given IP is in a subnet defined in the
                     # exit policy information of a relay.
-                    for policy_line in router_exit_policy:
+                    for policy_line in relay.exitpolicy:
                         condition, network_line = (policy_line.strip())\
                                                    .split(' ')
                         subnet, port_line = network_line.split(':')
@@ -376,14 +412,12 @@ def exitnodequery(request):
                        'dest_port_valid': dest_port_valid}
     return render_to_response('nodequery.html', template_values)
 
-#@cache_page(60 * 30)
+
+@cache_page(60 * 30)
 def networkstatisticgraphs(request):
     """
     Render an HTML template to response.
     """
-    # As this page is written now, each graph does it's own querying.
-    # Either this structure should be fixed or the queries should be
-    # cached.
     return render_to_response('statisticgraphs.html')
 
 
@@ -401,13 +435,27 @@ def display_options(request):
     @return: renders to the page the currently selected columns, the
         available columns and the previous selection.
     """
+    if 'pp' in request.GET:
+        # Ensure that the supplied information is an integer greater
+        # than zero.
+        try:
+            supplied_pp = int(request.GET.get('pp', ''))
+            if supplied_pp > 1:
+                request.session['perpage'] = supplied_pp
+        except ValueError:
+            pass
+
+    current_pp = int(request.session.get('perpage', 50))
+
     current_columns = []
     available_columns = []
     not_movable_columns = NOT_MOVABLE_COLUMNS
 
     if ('resetPreferences' in request.GET):
-        del request.session['currentColumns']
-        del request.session['availableColumns']
+        if 'currentColumns' in request.session:
+            del request.session['currentColumns']
+        if 'availableColumns' in request.session:
+            del request.session['availableColumns']
 
     if not ('currentColumns' in request.session and 'availableColumns'
             in request.session):
@@ -443,12 +491,18 @@ def display_options(request):
 
     template_values = {'currentColumns': column_lists[0],
                        'availableColumns': column_lists[1],
-                       'selectedEntry': column_lists[2]}
+                       'selectedEntry': column_lists[2],
+                       'current_pp': current_pp}
 
     return render_to_response('displayoptions.html', template_values)
 
 
 def advanced_search(request):
+
+    if 'filters' in request.session:
+        del request.session['filters']
+    if 'search' in request.session:
+        del request.session['search']
 
     search_value = request.GET.get('search', '')
 
@@ -473,9 +527,9 @@ def advanced_search(request):
                        'sortOptions': sort_options,
                        'searchOptionsFieldsOrder': search_options_fields_order,
                        'searchOptionsFields': search_options_fields,
-                       'searchOptionsFieldsBooleans': 
+                       'searchOptionsFieldsBooleans':
                                                 search_options_fields_booleans,
-                       'searchOptionsBooleansOrder': 
+                       'searchOptionsBooleansOrder':
                                                 search_options_booleans_order,
                        'searchOptionsBooleans': search_options_booleans,
                        'filterOptionsOrder': filter_options_order,

@@ -34,10 +34,10 @@ COLUMN_VALUE_NAME = {'Country Code': 'geoip',
                      'Guard': 'isguard',
                      'Stable': 'isstable',
                      'Valid': 'isvalid',
-                     'V2Dir': 'isv2dir',
+                     'Directory': 'isv2dir',
                      'Platform': 'platform',
                      'Fingerprint': 'fingerprint',
-                     'LastDescriptorPublished': 'published',
+                     'Last Descriptor Published': 'published',
                      'Contact': 'contact',
                      'BadDir': 'isbaddirectory',
                     }
@@ -76,7 +76,6 @@ CRITERIA = set(('exact',
                  'gt',
                  'startswith',
                  'istartswith'))
-
 
 SORT_OPTIONS = set((
                 'validafter',
@@ -117,98 +116,6 @@ SORT_OPTIONS = set((
                 'latitude',
                 'longitude'
                 ))
-
-
-def filter_statusentries(statusentries, query_options):
-    """
-    Helper function that gets a QuerySet of status entries and a
-    dictionary of search query options and filteres the QuerySet
-    based on this dictionary.
-
-    @type statusentries: C{QuerySet}
-    @param statusentries: A QuerySet of the statusentries.
-    @type query_options: C{dict}
-    @param query_options: A list of the columns that will be displayed on
-                        this session.
-
-    @see: index
-    @rtype: QuerySet
-    @return: statusentries
-    """
-
-    # ADD ishibernating AFTER WE KNOW HOW TO CHECK THAT
-    options = ['isauthority', 'isbaddirectory', 'isbadexit', \
-               'isexit', 'isfast', 'isguard', 'isnamed', \
-               'isstable', 'isrunning', 'isvalid', 'isv2dir']
-    # options is needed because query_options has some other things that we
-    #      do not need in this case (the other search query key-values).
-    valid_options = filter(lambda k: query_options[k] != '' \
-                            and k in options, query_options)
-    filterby = {}
-    for opt in valid_options:
-        filterby[opt] = 1 if query_options[opt] == 'yes' else 0
-
-    if 'searchValue' in query_options and \
-                query_options['searchValue'] != '':
-        value = query_options['searchValue']
-        criteria = query_options['criteria']
-        logic = query_options['boolLogic']
-
-        options = ['nickname', 'fingerprint', 'geoip',
-                   'published','hostname', 'address',
-                   'orport', 'dirport']
-        descriptorlist_options = ['platform', 'uptime', 'bandwidthobserved']
-
-        # Special case for the value if searching for
-        #       Uptime or Bandwidth and the criteria is
-        #       not Contains
-        if (criteria == 'uptime' or criteria == 'bandwidthobserved') and \
-                logic != 'contains':
-            value = int(value) * (86400 if criteria == 'uptime' else 1024)
-
-
-        key = ('descriptorid__' + criteria) if criteria in \
-                descriptorlist_options else criteria
-
-        if logic == 'contains':
-            key = key + '__contains'
-        elif logic == 'less':
-            key = key + '__lt'
-        elif logic == 'greater':
-            key = key + '__gt'
-
-        if (criteria == 'uptime' or criteria == 'bandwidthobserved') and \
-                logic == 'equals':
-            lower_value = value
-            upper_value = lower_value + (86400 if criteria == 'uptime' else 1024)
-            filterby[key + '__gt'] = lower_value
-            filterby[key + '__lt'] = upper_value
-        else:
-            filterby[key] = value
-
-    statusentries = statusentries.filter(**filterby)
-
-    options = ['nickname', 'fingerprint', 'geoip', 'bandwidthobserved',
-               'uptime', 'published', 'hostname', 'address', 'orport',
-               'dirport', 'platform', 'isauthority',
-               'isbaddirectory', 'isbadexit', 'isexit',
-               'isfast', 'isguard', 'isnamed', 'isstable', 'isrunning',
-               'isvalid', 'isv2dir']
-
-    descriptorlist_options = ['platform', 'uptime', 'contact',
-                            'bandwidthobserved']
-    if 'sortListings' in query_options: 
-        selected_option = query_options['sortListings']
-    else:
-        selected_option = ''
-    if selected_option in options:
-        if selected_option in descriptorlist_options:
-            selected_option = 'descriptorid__' + selected_option
-        if query_options['sortOrder'] == 'ascending':
-            statusentries = statusentries.order_by(selected_option)
-        elif query_options['sortOrder'] == 'descending':
-            statusentries = statusentries.order_by('-' + selected_option)
-    return statusentries
 
 
 def button_choice(request, button, field, current_columns,
@@ -380,7 +287,7 @@ def is_ipaddress(ip):
         if (int(a) > 255 or int(a) < 0 or int(b) > 255 or int(b) < 0 or
             int(c) > 255 or int(c) < 0 or int(d) > 255 or int(d) < 0):
             return False
-    except:
+    except ValueError:
         return False
 
     return True
@@ -439,50 +346,31 @@ def port_match(dest_port, port_line):
     @rtype: C{boolean}
     @return: True if dest_port is "in" port_line, False otherwise.
     """
+    # If port_line is a wildcard character, dest_port is always 'in'
+    # port_line
     if (port_line == '*'):
         return True
 
+    # If port_line contains a dash, a range is given, so get upper
+    # and lower bounds.
     if ('-' in port_line):
         lower_str, upper_str = port_line.split('-')
         lower_bound = int(lower_str)
         upper_bound = int(upper_str)
         dest_port_int = int(dest_port)
 
-        if (dest_port_int >= lower_port and
-            dest_port_int <= upper_port):
+        if (dest_port_int >= lower_bound and
+            dest_port_int <= upper_bound):
             return True
 
+    # If the dest_port is exactly the port_line, then dest_port is
+    # 'in' port_line
     if (dest_port == port_line):
         return True
 
+    # port_line must either be a port number, a range of port numbers,
+    # or a wildcard character, so if no matches are found, return False
     return False
-
-
-def get_if_exists(request, title):
-    """
-    Process the HttpRequest provided to see if a value, L{title}, is
-    provided and retrievable by means of a C{GET}.
-
-    If so, the data itself is returned; if not, an empty string is
-    returned.
-
-    @see: U{https://docs.djangoproject.com/en/1.2/ref/request-response/
-    #httprequest-object}
-
-    @type request: HttpRequest object
-    @param request: The HttpRequest object that contains metadata
-        about the request.
-    @type title: C{string}
-    @param title: The name of the data that may be provided by the
-        request.
-    @rtype: C{string}
-    @return: The data with L{title} referenced in the request, if it
-        exists.
-    """
-    if (title in request.GET and request.GET[title]):
-        return request.GET[title].strip()
-    else:
-        return ""
 
 
 def sorting_link(sort_order, column_name):
@@ -502,6 +390,7 @@ def sorting_link(sort_order, column_name):
     if sort_order == "ascending":
         return "/index/" + column_name + "_descending"
     return "/index/" + column_name + "_ascending"
+
 
 def get_filter_params(request):
     """
@@ -527,7 +416,9 @@ def get_filter_params(request):
             elif filt == '0':
                 filters[flag] = 0
 
-        # Add search filters only if a search term is provided
+        # Add search filters only if a search term is provided. Search
+        # terms are denoted by s_[term]. Similarly, criteria is denoted
+        # by c_[term].
         for search in SEARCHES:
             search_param = ''.join(('s_', search))
             searchinput = request.GET.get(search_param, '')
@@ -717,4 +608,3 @@ def gen_flags_list(relay):
         flags_list.append('Hibernating')
     flags_list.extend(['Named', 'Stable', 'Running', 'Valid', 'V2Dir'])
     return flags_list
-       

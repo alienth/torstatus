@@ -105,7 +105,13 @@
             </tr>
             <tr>
                 <td>
-                    {{ relay.exitpolicy|linebreaksbr }}
+                    {% for line in relay.exitpolicy %}
+                    {% if forloop.counter0|divisibleby:"16" %}
+                    </td>
+                    <td>
+                    {% endif %}
+                    {{ line }}<br />
+                    {% endfor %}
                 </td>
             </tr>
         </table>

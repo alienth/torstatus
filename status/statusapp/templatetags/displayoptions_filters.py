@@ -5,14 +5,14 @@ from django import template
 
 register = template.Library()
 
-COLUMN_VALUE_NAME = {'Country Code': 'geoip', 
-                     'Router Name': 'nickname', 
-                     'Bandwidth': 'bandwidthobserved', 
+COLUMN_VALUE_NAME = {'Country Code': 'geoip',
+                     'Router Name': 'nickname',
+                     'Bandwidth': 'bandwidthobserved',
                      'Uptime': 'uptime',
-                     'IP': 'address', 
-                     'Hostname': 'hostname', 
+                     'IP': 'address',
+                     'Hostname': 'hostname',
                      'Icons': 'icons',
-                     'ORPort': 'orport', 
+                     'ORPort': 'orport',
                      'DirPort': 'dirport',
                      'BadExit': 'isbadexit',
                      'Named': 'isnamed',
@@ -23,10 +23,10 @@ COLUMN_VALUE_NAME = {'Country Code': 'geoip',
                      'Stable': 'isstable',
                      'Running': 'isrunning',
                      'Valid': 'isvalid',
-                     'V2Dir': 'isv2dir',
+                     'Directory': 'isv2dir',
                      'Platform': 'platform',
                      'Fingerprint': 'fingerprint',
-                     'LastDescriptorPublished': 'published',
+                     'Last Descriptor Published': 'published',
                      'Contact': 'contact',
                      'BadDir': 'isbaddirectory',
                     }
@@ -35,11 +35,12 @@ COLUMN_VALUE_NAME = {'Country Code': 'geoip',
 def movable(column_name):
     """
     Checks whether or not the passed column can be moved on the list.
-    
+
     @rtype: C{boolean}
     """
-    not_movable_columns = ["Named", "Exit", "Authority", "Fast", "Guard", "Stable",
-                        "Running", "Valid", "V2Dir", "Platform", "Hibernating"]
+    not_movable_columns = set(("Named", "Exit", "Authority", "Fast",
+                               "Guard", "Stable", "Running", "Valid",
+                               "Directory", "Platform", "Hibernating"))
     if column_name in not_movable_columns:
         return False;
     else:
@@ -50,7 +51,7 @@ def movable(column_name):
 def get_column_value(column_name):
     """
     Returns the database name of the passed column name.
-    
+
     @rtype: C{string}
     @return: Corresponding database name of the passed column name.
     """

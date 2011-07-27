@@ -12,8 +12,7 @@
 
 {% block moreLinks %}
 <br /><br />
-<form>
-    <a class="link" id="csv" href="/tor-query-export.csv">Download CSV Search File</a>
+<a class="link" id="csv" href="/tor-query-export.csv">Download CSV of Current Result Set</a>
 {% endblock %}
 
 {% block pageTitle %} Active Relays {% endblock %}
@@ -28,38 +27,39 @@
 <table>
     <tr>
         {% if paged_relays.has_previous %}
-        <td id="paginatorLinks"><a class="pageLinks" href="{% if gets %}{{ gets }}&amp;{% else %}?{% endif %}page={{ paged_relays.previous_page_number }}">⇽</a></td>
+        <td id="paginatorLinks"><a class="pageLinks" href="/index/{% if gets_exist %}{{ gets }}&amp;{% else %}{{ gets }}?{% endif %}page={{ paged_relays.previous_page_number }}">⇽</a></td>
         {% endif %}
 
         {% if paged_relays.number > 2 %}
-        <td id="paginatorLinks"><a class="pageLinks" href="{% if gets %}{{ gets }}&amp;{% else %}?{% endif %}page=1">1</a></td>
+        <td id="paginatorLinks"><a class="pageLinks" href="/index/{% if gets_exist %}{{ gets }}&amp;{% else %}{{ gets }}?{% endif %}page=1">1</a></td>
         {% endif %}
 
         {% if paged_relays.number > 3 %}
-        <td id="paginatorText">...</td>
+        <td id="paginators">...</td>
         {% endif %}
 
         {% if paged_relays.has_previous %}
-        <td id="paginatorLinks"><a class="pageLinks" href="{% if gets %}{{ gets }}&amp;{% else %}?{% endif %}page={{ paged_relays.previous_page_number }}">{{ paged_relays.previous_page_number }}</a></td>
+        <td id="paginatorLinks"><a class="pageLinks" href="/index/{% if gets_exist %}{{ gets }}&amp;{% else %}{{ gets }}?{% endif %}page={{ paged_relays.previous_page_number }}">{{ paged_relays.previous_page_number }}</a></td>
         {% endif %}
 
-        <td id="paginatorText">{{ paged_relays.number }}</td>
+        <td id="paginators">{{ paged_relays.number }}</td>
 
         {% if paged_relays.has_next %}
-        <td id="paginatorLinks"><a class="pageLinks" href="{% if gets %}{{ gets }}&amp;{% else %}?{% endif %}page={{ paged_relays.next_page_number }}">{{ paged_relays.next_page_number }}</a></td>
+        <td id="paginatorLinks"><a class="pageLinks" href="/index/{% if gets_exist %}{{ gets }}&amp;{% else %}{{ gets }}?{% endif %}page={{ paged_relays.next_page_number }}">{{ paged_relays.next_page_number }}</a></td>
         {% endif %}
 
         {% if paged_relays.paginator.num_pages|subtract:paged_relays.number >= 3 %}
-        <td id="paginatorText">...</td>
+        <td id="paginators">...</td>
         {% endif %}
 
         {% if paged_relays.paginator.num_pages|subtract:paged_relays.number >= 2 %}
-        <td id="paginatorLinks"><a class="pageLinks" href="{% if gets %}{{ gets }}&amp;{% else %}?{% endif %}page={{ paged_relays.paginator.num_pages }}">{{ paged_relays.paginator.num_pages }}</a></td>
+        <td id="paginatorLinks"><a class="pageLinks" href="/index/{% if gets_exist %}{{ gets }}&amp;{% else %}{{ gets }}?{% endif %}page={{ paged_relays.paginator.num_pages }}">{{ paged_relays.paginator.num_pages }}</a></td>
         {% endif %}
 
         {% if paged_relays.has_next %}
-        <td id="paginatorLinks"><a class="pageLinks" href="{% if gets %}{{ gets }}&amp;{% else %}?{% endif %}page={{ paged_relays.next_page_number }}">⇾</a></td>
+        <td id="paginatorLinks"><a class="pageLinks" href="/index/{% if gets_exist %}{{ gets }}&amp;{% else %}{{ gets }}?{% endif %}page={{ paged_relays.next_page_number }}">⇾</a></td>
         {% endif %}
+    </tr>
 </table>
 
 <table class="relayTable">
@@ -82,15 +82,13 @@
 	                                      {% endif %}
 	                                      {% endif %}
 	                                      {% endif %}
-	                                      >
-	        {% if column_name == "Country Code" %} &nbsp; {% else %} {{column_name}} {% endif %}</th>
+	                                      ><a href="/index/sort/{{column_value_name|key:column_name}}_{{ascending_or_descending}}">
+	        {% if column_name == "Country Code" %} &nbsp; {% else %} {{column_name}} {% endif %}</a></th>
 	    {% endif %}
 	    {% endif %}
     {% endfor %}
 	</tr>
-	
-	<!-- == BETA == Displaying the relay rows == BETA == -->
-	
+
 	{% for relay in paged_relays.object_list %}
 	    {% if "BadExit" in current_columns %}
 		<tr {% if relay|field_value:'BadExit' %} class="relayBadExit" {% else %} class="relay" {% endif %}>
@@ -152,7 +150,6 @@
                 {% endif %}
             {% endif %}
             </td>
-            <!-- add KB/s, d     for the corresponding cases -->
             {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
             {% endfor %}
 		</tr>

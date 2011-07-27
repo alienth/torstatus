@@ -49,22 +49,22 @@
                 </tr>
                 <tr>
                     <td>
-                    <table class="">
+                    <table align="center">
                         <tr>
                             <td>
                             <select id="advSearchButton" name="sortListing">
                             {% for option in sortOptionsOrder %}
                             <option value="{{sortOptions|key:option}}"
-                            {% if queryOptions and queryOptions|key:'sortListings' == "{{sortOptions|key:option}}" %}
+                            {% if queryOptions and queryOptions|key:"sortListings" == "{{sortOptions|key:option}}" %}
                                                             SELECTED {% endif %}>{{option}}</option>
                             {% endfor %}
                             </select>
                             </td>
                             <td>
                             <select id="advSearchButton" name="sortOrder">
-                            <option value="ascending" {% if queryOptions and queryOptions|key:'sortOrder' == "ascending" %}
+                            <option value="ascending" {% if queryOptions and queryOptions|key:"sortOrder" == "ascending" %}
                                                             SELECTED {% endif %}>Ascending</option>
-                            <option value="descending" {% if queryOptions and queryOptions|key:'sortOrder' == "descending" %}
+                            <option value="descending" {% if queryOptions and queryOptions|key:"sortOrder" == "descending" %}
                                                             SELECTED {% endif %}>Descending</option>
                             </select>
                             </td>
@@ -80,7 +80,7 @@
                     <table class="flags">
                         <tr>
                             {% for option in filterOptionsOrder %}
-                                {% if forloop.counter0|divisibleby:"3" %}
+                                {% if forloop.counter0|divisibleby:"2" %}
                                 </tr><tr>{% endif %}
                                 <td id="advSearchToolText"> {{option}} </td>
                                 <td>
