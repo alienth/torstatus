@@ -27,11 +27,11 @@
 <table>
     <tr>
         {% if paged_relays.has_previous %}
-        <td id="paginatorLinks"><a class="pageLinks" href="/index/{% if gets_exist %}{{ gets }}&amp;{% else %}{{ gets }}?{% endif %}page={{ paged_relays.previous_page_number }}">⇽</a></td>
+        <td id="paginatorLinks"><a class="pageLinks" href="?page={{ paged_relays.previous_page_number }}">⇽</a></td>
         {% endif %}
 
         {% if paged_relays.number > 2 %}
-        <td id="paginatorLinks"><a class="pageLinks" href="/index/{% if gets_exist %}{{ gets }}&amp;{% else %}{{ gets }}?{% endif %}page=1">1</a></td>
+        <td id="paginatorLinks"><a class="pageLinks" href="?page=1">1</a></td>
         {% endif %}
 
         {% if paged_relays.number > 3 %}
@@ -39,13 +39,13 @@
         {% endif %}
 
         {% if paged_relays.has_previous %}
-        <td id="paginatorLinks"><a class="pageLinks" href="/index/{% if gets_exist %}{{ gets }}&amp;{% else %}{{ gets }}?{% endif %}page={{ paged_relays.previous_page_number }}">{{ paged_relays.previous_page_number }}</a></td>
+        <td id="paginatorLinks"><a class="pageLinks" href="?page={{ paged_relays.previous_page_number }}">{{ paged_relays.previous_page_number }}</a></td>
         {% endif %}
 
         <td id="paginators">{{ paged_relays.number }}</td>
 
         {% if paged_relays.has_next %}
-        <td id="paginatorLinks"><a class="pageLinks" href="/index/{% if gets_exist %}{{ gets }}&amp;{% else %}{{ gets }}?{% endif %}page={{ paged_relays.next_page_number }}">{{ paged_relays.next_page_number }}</a></td>
+        <td id="paginatorLinks"><a class="pageLinks" href="?page={{ paged_relays.next_page_number }}">{{ paged_relays.next_page_number }}</a></td>
         {% endif %}
 
         {% if paged_relays.paginator.num_pages|subtract:paged_relays.number >= 3 %}
@@ -53,11 +53,11 @@
         {% endif %}
 
         {% if paged_relays.paginator.num_pages|subtract:paged_relays.number >= 2 %}
-        <td id="paginatorLinks"><a class="pageLinks" href="/index/{% if gets_exist %}{{ gets }}&amp;{% else %}{{ gets }}?{% endif %}page={{ paged_relays.paginator.num_pages }}">{{ paged_relays.paginator.num_pages }}</a></td>
+        <td id="paginatorLinks"><a class="pageLinks" href="?page={{ paged_relays.paginator.num_pages }}">{{ paged_relays.paginator.num_pages }}</a></td>
         {% endif %}
 
         {% if paged_relays.has_next %}
-        <td id="paginatorLinks"><a class="pageLinks" href="/index/{% if gets_exist %}{{ gets }}&amp;{% else %}{{ gets }}?{% endif %}page={{ paged_relays.next_page_number }}">⇾</a></td>
+        <td id="paginatorLinks"><a class="pageLinks" href="?page={{ paged_relays.next_page_number }}">⇾</a></td>
         {% endif %}
     </tr>
 </table>

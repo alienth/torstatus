@@ -48,8 +48,8 @@ def splash(request):
     """
     The splash page for the TorStatus website.
     """
-
     return render_to_response("splash.html")
+
 
 def index_reset(request):
     if 'filters' in request.session:
@@ -59,8 +59,10 @@ def index_reset(request):
     if 'sort_filter' in request.session:
         del request.session['sort_filter']
 
-    return index(request, "test")
+    return index(request, 'nickname_ascending')
 
+
+"""
 def get_order(sort_filter):
 
     sort_order = ''
@@ -82,9 +84,10 @@ def get_order(sort_filter):
             return '-' + order_column_name, 'ascending'
     else:
         return None, 'ascending'
+"""
 
 
-def index(request, sort_filter):
+def index(request):
     """
     Supply a dictionary to the index.html template consisting of a list
     of active relays.
@@ -103,24 +106,18 @@ def index(request, sort_filter):
     active_relays = ActiveRelay.objects.filter(
                     validafter=last_validafter).order_by('nickname')
 
-    # Two cases of search, either basic search or advanced. This block
-    # needs to handle both of these cases.
     basic_input = request.GET.get('search', '')
     if basic_input:
         request.session['search'] = basic_input
     elif 'search' in request.session:
         basic_input = request.session['search']
 
-    order = 'nickname'
+    if 'sortOrder' in request.GET and 'sortListing' in request.GET:
+        request.session['order'] = get_order(request)
+    elif 'order' not in request.session:
+        request.session['order'] = 'nickname'
 
-    if sort_filter:
-        request.session['sort_filter'] = sort_filter
-        order, ascending_or_descending = get_order(sort_filter)
-    else:
-        ascending_or_descending = 'ascending'
-
-    if not order:
-        order = 'nickname'
+    order = request.session['order']
 
     if basic_input:
         if 'filters' in request.session:
@@ -128,7 +125,8 @@ def index(request, sort_filter):
         active_relays = active_relays.filter(
                         Q(nickname__istartswith=basic_input) | \
                         Q(fingerprint__istartswith=basic_input) | \
-                        Q(address__istartswith=basic_input)).order_by(order)
+                        Q(address__istartswith=basic_input)).\
+                        order_by(order)
     else:
         if 'search' in request.session:
             del request.session['search']
@@ -148,14 +146,13 @@ def index(request, sort_filter):
     # Otherwise, paginate.
 
     all_relays = request.session.get('all', 0)
-    
-    active_relays_list_dict = gen_list_dict(active_relays)
+
     if not all_relays:
         # Make sure entries per page is an integer. If not, or
         # if no value is specified, make entries per page 50.
         per_page = request.session.get('perpage', 50)
 
-        paginator = Paginator(active_relays_list_dict, per_page)
+        paginator = Paginator(active_relays, per_page)
 
         # Make sure page request is an int. If not, deliver first page.
         try:
@@ -171,35 +168,35 @@ def index(request, sort_filter):
             paged_relays = paginator.page(paginator.num_pages)
     else:
 
-        paginator = Paginator(active_relays_list_dict,
-                        active_relays_list_dict.count())
+        paginator = Paginator(active_relays,
+                              active_relays.count())
         paged_relays = paginator.page(1)
+
+    paged_relays.object_list = gen_list_dict(paged_relays.object_list)
 
     current_columns = []
     if not ('currentColumns' in request.session):
         request.session['currentColumns'] = CURRENT_COLUMNS
     current_columns = request.session['currentColumns']
 
-    gets = request.get_full_path().split('index/')[1]
-    match = re.search(r"[?&]page=[^?&]*", gets)
-    if match:
-        gets = gets[:match.start()] + gets[match.end():]
-    
-    gets_exist = True if '?' in gets else False
+    #gets = request.get_full_path().split('index/')[1]
+    #match = re.search(r"[?&]page=[^?&]*", gets)
+    #if match:
+    #    gets = gets[:match.start()] + gets[match.end():]
+    #
+    #request.path = '/index/'
+    #gets_exist = True if '?' in gets else False
 
-    
-    
     template_values = {'paged_relays': paged_relays,
                        'current_columns': current_columns,
                        'displayable_columns': DISPLAYABLE_COLUMNS,
                        'not_columns': NOT_MOVABLE_COLUMNS,
-                       'gets': gets,
-                       'gets_exist': gets_exist,
+                       #'gets': gets,
+                       #'gets_exist': gets_exist,
                        'request': request,
                        'column_value_name': COLUMN_VALUE_NAME,
                        'icons_list': ICONS,
                        'number_of_results': num_results,
-                       'ascending_or_descending': ascending_or_descending,
                       }
     return render_to_response('index.html', template_values)
 
@@ -221,9 +218,9 @@ def details(request, fingerprint):
     if not poss_relay:
         return render_to_response(
                 '404.html',
-                {'debug_message': '''The server could not find any 
-                                  recently active relay with a 
-                                  fingerprint of ''' + fingerprint + '.'})
+                {'debug_message': 'The server could not find any '
+                                  'recently active relay with a '
+                                  'fingerprint of ' + fingerprint + '.'})
     relay = poss_relay[0]
 
     # Some clients may want to look up old relays. Create an attribute

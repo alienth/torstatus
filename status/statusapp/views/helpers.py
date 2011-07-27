@@ -515,7 +515,7 @@ def gen_list_dict(active_relays):
 def gen_relay_dict(relay):
     """
     Method that generates a dictionary of all the fields of a relay.
-    
+
     @type relay: C{ActiveRelay}
     @param relay: The relay for which the fields are going to be generated.
     @rtype: C{dict}

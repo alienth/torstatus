@@ -3,8 +3,6 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 {% spaceless %}
-<!--<div id="wrap">
-    <div id="main">-->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -24,7 +22,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
                 <a class="link" href="/"><img id="TorBannerPicture" src="/static/img/splash-banner.png" alt="TorStatus" title="Network Total Bandwidth" border="0"></a>
             </td>
             <td id="mainLinks">
-                <a class="link" href="/reset_index">List of All Routers</a> |
+                <a class="link" href="/index">List of Active Relays</a> |
                 <a class="link" href="/exit-node-query">Tor Exit Node Query</a> |
                 <a class="link" href="/advanced-search">Advanced Search</a> |
                 <a class="link" href="/display-options">Display Options</a> |
@@ -46,16 +44,12 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
     <td> {% block mainPage %} {% endblock %} </td>
 </tr>
 </table>
-<!--</div>
-</div>
-<div id="footer">-->
     <table class="mainPage">
 <tr>
     <td id="pageFooter">"Tor" and the "Onion Logo" are <a target=_BLANK href="https://www.torproject.org/docs/trademark-faq">registered trademarks</a> of The Tor Project, Inc.
         </td>
     </tr>
 </table>
-<!--</div>-->
 </body>
 </html>
 {% endspaceless %}
