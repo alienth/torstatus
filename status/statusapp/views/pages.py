@@ -58,36 +58,58 @@ def index_reset(request):
         del request.session['search']
     if 'sort_filter' in request.session:
         del request.session['sort_filter']
+    if 'sortOrder' in request.session:
+        del request.session['sortOrder']
+    if 'sortListing' in request.session:
+        del request.session['sortListing']
+    return index(request, '')
 
-    return index(request, 'nickname_ascending')
+def get_order(request):
 
-
-"""
-def get_order(sort_filter):
-
-    sort_order = ''
-    order_column_name = ''
-
-    underscore_count = sort_filter.count('_')
-    if not underscore_count == 1:
-        return None, 'ascending'
-    order_column_name, sort_order = sort_filter.split('_')
     options = ['nickname', 'fingerprint', 'contact',
                    'bandwidthkbps', 'uptime', 'country',
                    'address', 'orport', 'dirport',
                    'isbaddirectory', 'isbadexit',]
+    orders = ['ascending', 'descending']
+    sort_order = ''
+    order_column_name = ''
+    
+    an_order = request.GET.get('sortOrder', '')
+    an_listing = request.GET.get('sortListing', '')
+    valid = False
 
-    if order_column_name in options:
-        if sort_order == 'ascending':
-            return order_column_name, 'descending'
-        elif sort_order == 'descending':
-            return '-' + order_column_name, 'ascending'
-    else:
-        return None, 'ascending'
-"""
+    if 'sort_filter' in request.session:
+        sort_filter = request.session['sort_filter']
+        underscore_count = sort_filter.count('_')
+        if underscore_count == 1:
+            valid = True
+
+        if valid:
+            order_column_name, sort_order = sort_filter.split('_')
+
+        if order_column_name in options:
+            if sort_order == 'ascending':
+                return order_column_name, 'descending'
+            elif sort_order == 'descending':
+                return '-' + order_column_name, 'ascending'
+        else:
+            valid = False
+
+    if an_listing in options and an_order in orders:
+        request.session['sortOrder'] = an_order
+        request.session['sortListing'] = an_listing
+        
+    if 'sortOrder' in request.session and 'sortListing' in request.session:
+        if request.session['sortOrder'] == 'ascending':
+            return request.session['sortListing'], 'descending'
+        elif request.session['sortOrder'] == 'descending':
+            return '-' + request.session['sortListing'], 'ascending'
 
 
-def index(request):
+    return None, 'ascending'
+
+
+def index(request, sort_filter):
     """
     Supply a dictionary to the index.html template consisting of a list
     of active relays.
@@ -112,12 +134,16 @@ def index(request):
     elif 'search' in request.session:
         basic_input = request.session['search']
 
-    if 'sortOrder' in request.GET and 'sortListing' in request.GET:
-        request.session['order'] = get_order(request)
-    elif 'order' not in request.session:
-        request.session['order'] = 'nickname'
+    order = 'nickname'
 
-    order = request.session['order']
+    if sort_filter:
+        request.session['sort_filter'] = sort_filter
+        order, ascending_or_descending = get_order(request)
+    else:
+        order, ascending_or_descending = get_order(request)
+
+    if not order:
+        order = 'nickname'
 
     if basic_input:
         if 'filters' in request.session:
@@ -179,24 +205,25 @@ def index(request):
         request.session['currentColumns'] = CURRENT_COLUMNS
     current_columns = request.session['currentColumns']
 
-    #gets = request.get_full_path().split('index/')[1]
-    #match = re.search(r"[?&]page=[^?&]*", gets)
-    #if match:
-    #    gets = gets[:match.start()] + gets[match.end():]
-    #
-    #request.path = '/index/'
-    #gets_exist = True if '?' in gets else False
+    gets = request.get_full_path().split('index/')[1]
+    match = re.search(r"[?&]page=[^?&]*", gets)
+    if match:
+        gets = gets[:match.start()] + gets[match.end():]
+    
+    request.path = '/index/'
+    gets_exist = True if '?' in gets else False
 
     template_values = {'paged_relays': paged_relays,
                        'current_columns': current_columns,
                        'displayable_columns': DISPLAYABLE_COLUMNS,
                        'not_columns': NOT_MOVABLE_COLUMNS,
-                       #'gets': gets,
-                       #'gets_exist': gets_exist,
+                       'gets': gets,
+                       'gets_exist': gets_exist,
                        'request': request,
                        'column_value_name': COLUMN_VALUE_NAME,
                        'icons_list': ICONS,
                        'number_of_results': num_results,
+                       'ascending_or_descending': ascending_or_descending,
                       }
     return render_to_response('index.html', template_values)
 
@@ -500,6 +527,10 @@ def advanced_search(request):
         del request.session['filters']
     if 'search' in request.session:
         del request.session['search']
+    if 'sortOrder' in request.session:
+        del request.session['sortOrder']
+    if 'sortListing' in request.session:
+        del request.session['sortListing']
 
     search_value = request.GET.get('search', '')
 

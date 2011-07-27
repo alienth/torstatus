@@ -57,6 +57,7 @@ urlpatterns = patterns('',
     (r'^tor-query-export.csv$', 'statusapp.views.csvs.current_results_csv'),
 
     # Index and related pages
-    (r'^index/$', 'statusapp.views.pages.index'),
+    (r'^index/sort/(?P<sort_filter>\w*)$', 'statusapp.views.pages.index'),
+    (r'^index/$', 'statusapp.views.pages.index', {'sort_filter': ''}),
     (r'^reset_index/$', 'statusapp.views.pages.index_reset'),
 )
