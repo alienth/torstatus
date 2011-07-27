@@ -48,8 +48,8 @@ def splash(request):
     """
     The splash page for the TorStatus website.
     """
-
     return render_to_response("splash.html")
+
 
 def index_reset(request):
     if 'filters' in request.session:
@@ -60,6 +60,7 @@ def index_reset(request):
         del request.session['sort_filter']
 
     return index(request, 'nickname_ascending')
+
 
 """
 def get_order(sort_filter):
@@ -145,14 +146,13 @@ def index(request):
     # Otherwise, paginate.
 
     all_relays = request.session.get('all', 0)
-    
-    active_relays_list_dict = gen_list_dict(active_relays)
+
     if not all_relays:
         # Make sure entries per page is an integer. If not, or
         # if no value is specified, make entries per page 50.
         per_page = request.session.get('perpage', 50)
 
-        paginator = Paginator(active_relays_list_dict, per_page)
+        paginator = Paginator(active_relays, per_page)
 
         # Make sure page request is an int. If not, deliver first page.
         try:
@@ -168,9 +168,11 @@ def index(request):
             paged_relays = paginator.page(paginator.num_pages)
     else:
 
-        paginator = Paginator(active_relays_list_dict,
-                        active_relays_list_dict.count())
+        paginator = Paginator(active_relays,
+                              active_relays.count())
         paged_relays = paginator.page(1)
+
+    paged_relays.object_list = gen_list_dict(paged_relays.object_list)
 
     current_columns = []
     if not ('currentColumns' in request.session):

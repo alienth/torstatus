@@ -515,7 +515,7 @@ def gen_list_dict(active_relays):
 def gen_relay_dict(relay):
     """
     Method that generates a dictionary of all the fields of a relay.
-    
+
     @type relay: C{ActiveRelay}
     @param relay: The relay for which the fields are going to be generated.
     @rtype: C{dict}
@@ -525,7 +525,6 @@ def gen_relay_dict(relay):
     relay_dict = {'Router Name': relay.nickname,
                   'Fingerprint': relay.fingerprint,
                   'Active Relay': 'Yes' if relay.active else 'No',
-                  'Adjusted Uptime': relay.adjuptime,
                   'Last Consensus Present (GMT)': relay.validafter,
                   'IP Address': relay.address,
                   'Hostname': relay.hostname,
@@ -558,8 +557,10 @@ def gen_relay_dict(relay):
                  }
     if relay.hasdescriptor:
         relay_dict['Hibernating'] = 1 if relay.ishibernating else 0
+        relay_dict['Adjusted Uptime'] = relay.adjuptime
     else:
         relay_dict['Hibernating'] = 0
+        relay_dict['Adjusted Uptime'] = None
     return relay_dict
 
 
