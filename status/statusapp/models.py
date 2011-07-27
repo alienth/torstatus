@@ -14,7 +14,7 @@ in the object's constructors.
     data. For more detailed descriptions, see
     U{https://gitweb.torproject.org/torspec.git/blob/HEAD:/dir-spec.txt}
 
-@group Custom Fields: L{BigIntegerArrayField}
+@group Custom Fields: L{BigIntegerArrayField}, L{TextArrayField}
 @group Models: L{Descriptor}, L{Extrainfo}, L{Bwhist}, L{Statusentry},
     L{Consensus}, L{Vote}, L{Connbidirect}, L{NetworkSize},
     L{NetworkSizeHour}, L{RelayCountries}, L{RelayPlatforms},
@@ -45,6 +45,20 @@ class BigIntegerArrayField(models.Field):
         return value
 
 
+class TextArrayField(models.Field):
+
+    description = "An array of text"
+
+    __metaclass__ = models.SubfieldBase
+
+    def __init__(self, *args, **kwargs):
+        super(TextArrayField, self).__init__(*args, **kwargs)
+
+    def db_type(self, connection):
+        return 'TEXT[]'
+
+    def to_python(self, value):
+        return value
 # MODELS --------------------------------------------------------------
 # ---------------------------------------------------------------------
 # tordir.public -------------------------------------------------------
@@ -1149,7 +1163,7 @@ class ActiveDescriptor(models.Model):
     contact = models.TextField()
     onionkey = models.CharField(max_length=188)
     signingkey = models.CharField(max_length=188)
-    exitpolicy = models.TextField()
+    exitpolicy = TextArrayField()
     family = models.TextField()
 
     class Meta:
@@ -1293,7 +1307,7 @@ class ActiveRelay(models.Model):
     contact = models.TextField()
     onionkey = models.CharField(max_length=188, blank=True)
     signingkey = models.CharField(max_length=188, blank=True)
-    exitpolicy = models.TextField(blank=True)
+    exitpolicy = TextArrayField()
     family = models.TextField(blank=True)
     ishibernating = models.BooleanField(blank=True)
     country = models.CharField(max_length=2, blank=True)

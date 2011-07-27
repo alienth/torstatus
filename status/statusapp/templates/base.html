@@ -3,6 +3,8 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 {% spaceless %}
+<!--<div id="wrap">
+    <div id="main">-->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -15,14 +17,11 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 <title>{% block mainTitle %} {% endblock %}</title>
 </head>
 
-<body onLoad="document.forms.searchForm.search.focus()">
-    {% block banner %}
+{% block banner %}
     <table class="header">
         <tr>
             <td rowspan="2">
-                <a class="link" href="/">
-                    <img id="TorBannerPicture" src="/static/img/splash-banner.png" alt="TorStatus" title="Network Total Bandwidth" border="0">
-                </a>
+                <a class="link" href="/"><img id="TorBannerPicture" src="/static/img/splash-banner.png" alt="TorStatus" title="Network Total Bandwidth" border="0"></a>
             </td>
             <td id="mainLinks">
                 <a class="link" href="/reset_index">List of All Routers</a> |
@@ -40,19 +39,23 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 {% block extraHeader %} {% endblock %}
 
 <table class="mainPage">
-<tr> 
+<tr>
     {% block noPageTitle %} <td id="pageTitle"> {% block pageTitle %} {% endblock %} </td> {% endblock %}
 </tr>
 <tr>
     <td> {% block mainPage %} {% endblock %} </td>
 </tr>
 </table>
-
-<div id="footer">
-				<p id="trademark">
-					"Tor" and the "Onion Logo" are <a target=_BLANK href="https://www.torproject.org/docs/trademark-faq">registered trademarks</a> of The Tor Project, Inc.
-				</p>
-			</div>
-        </body>
+<!--</div>
+</div>
+<div id="footer">-->
+    <table class="mainPage">
+<tr>
+    <td id="pageFooter">"Tor" and the "Onion Logo" are <a target=_BLANK href="https://www.torproject.org/docs/trademark-faq">registered trademarks</a> of The Tor Project, Inc.
+        </td>
+    </tr>
+</table>
+<!--</div>-->
+</body>
 </html>
 {% endspaceless %}

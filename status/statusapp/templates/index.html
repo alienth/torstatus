@@ -4,7 +4,7 @@
 <link rel="stylesheet" type="text/css" href="/static/css/style.css"></link>
 {% endblock %}
 
-{% block mainTitle %} - TorStatus - Relay List {% endblock %}
+{% block mainTitle %} TorStatus -- Active Relays {% endblock %}
 
 {% block headerTitle %} TorStatus {% endblock %}
 
@@ -13,11 +13,11 @@
 {% block moreLinks %}
 <br /><br />
 <form>
-    <a class="link" id="csv" href="/tor-query-export.csv">Download Relay List CSV File</a>
+    <a class="link" id="csv" href="/tor-query-export.csv">Download CSV of Current Result Set</a>
     {{filter}}
 {% endblock %}
 
-{% block pageTitle %}Number Of Results: {{number_of_results}} {% endblock %}
+{% block pageTitle %} Active Relays {% endblock %}
 
 {% block mainPage %}
 <br />
@@ -37,21 +37,21 @@
         {% endif %}
 
         {% if paged_relays.number > 3 %}
-        <td id="paginatorText">...</td>
+        <td id="paginators">...</td>
         {% endif %}
 
         {% if paged_relays.has_previous %}
         <td id="paginatorLinks"><a class="pageLinks" href="/index/{% if gets_exist %}{{ gets }}&amp;{% else %}{{ gets }}?{% endif %}page={{ paged_relays.previous_page_number }}">{{ paged_relays.previous_page_number }}</a></td>
         {% endif %}
 
-        <td id="paginatorText">{{ paged_relays.number }}</td>
+        <td id="paginators">{{ paged_relays.number }}</td>
 
         {% if paged_relays.has_next %}
         <td id="paginatorLinks"><a class="pageLinks" href="/index/{% if gets_exist %}{{ gets }}&amp;{% else %}{{ gets }}?{% endif %}page={{ paged_relays.next_page_number }}">{{ paged_relays.next_page_number }}</a></td>
         {% endif %}
 
         {% if paged_relays.paginator.num_pages|subtract:paged_relays.number >= 3 %}
-        <td id="paginatorText">...</td>
+        <td id="paginators">...</td>
         {% endif %}
 
         {% if paged_relays.paginator.num_pages|subtract:paged_relays.number >= 2 %}
@@ -112,7 +112,7 @@
 	</tr>
 	{% for relay in paged_relays.object_list %}
 	    {% if "BadExit" in current_columns %}
-		<tr {% if relay.isbadexit == 1 %} class="relayBadExit" {% else %} class="relay" {% endif %}>
+        <tr {% if relay.isbadexit == 1 %} class="relayBadExit" {% else %}{% if relay.ishibernating == 1 %} class="relayHibernating" {% else %} class="relay" {% endif %}{% endif %}>
 		{% else %}
 		<tr class="relay">
 		{% endif %}
@@ -134,7 +134,7 @@
             </td>
             {% endif %}
             {% if column_name == "Bandwidth" %}
-            <td id="col_relayBandwidth">{{ relay.bandwidthkbps }}KB/s</td>
+            <td id="col_relayBandwidth">{{ relay.bandwidthkbps }} KB/s</td>
             {% endif %}
             {% if column_name == "Uptime" %}
             <td id="col_relayUptime">{{ relay.uptimedays }} d</td>
@@ -145,7 +145,7 @@
             {% if column_name == "Fingerprint" %}
             <td id="col_relayFingerprint">{{ relay.fingerprint }}</td>
             {% endif %}
-            {% if column_name == "LastDescriptorPublished" %}
+            {% if column_name == "Last Descriptor Published" %}
             {% load details_filters %}
             <td id="col_relayLastDescPub">{{ relay.published }}</td>
             {% endif %}
@@ -163,7 +163,7 @@
             <td id="col_relayIcons">
                 {% if "Hibernating" in current_columns %}
                 {% if relay.ishibernating %}
-                    <img src="/static/img/status/Fast.png" alt="Hibernating Server" title="Hibernating Server">
+                    <img src="/static/img/status/Hibernating.png" alt="Hibernating Server" title="Hibernating Server">
                 {% endif %}
                 {% endif %}
                 {% if "Fast" in current_columns %}
@@ -171,7 +171,7 @@
                     <img src="/static/img/status/Fast.png" alt="Fast Server" title="Fast Server">
                 {% endif %}
                 {% endif %}
-                {% if "V2Dir" in current_columns %}
+                {% if "Directory" in current_columns %}
                 {% if relay.isv2dir == 1 %}
                     <img src="/static/img/status/Dir.png" alt="Directory Server" title="Directory Server">
                 {% endif %}

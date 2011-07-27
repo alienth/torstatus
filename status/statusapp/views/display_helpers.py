@@ -2,16 +2,17 @@
 Helper variables, lists, dictionaries, used for a clean display in the template.
 """
 
-# Advanced Search Template -----------------------------------
+# Advanced Search Template Helpers -----------------------------------
 SORT_OPTIONS_ORDER = ['Router Name', 'Fingerprint', 'Country Code',
                     'Bandwidth', 'Uptime', 'Last Descriptor Published',
                     'Hostname', 'IP Address', 'ORPort', 'DirPort',
                     'Platform', 'Contact', 'Authority', 'Bad Directory',
-                    'Bad Exit', 'Exit', 'Fast', 'Guard', 'Hibernating',
-                    'Named', 'Stable', 'Running', 'Valid', 'Directory']
+                    'Bad Exit', 'Directory', 'Exit', 'Fast', 'Guard',
+                    'Hibernating', 'HS Directory', 'Named',
+                    'Stable', 'Running', 'Valid',]
 SORT_OPTIONS = {'Router Name': 'nickname',
                 'Fingerprint': 'fingerprint',
-                'Country Code': 'geoip',
+                'Country Code': 'country',
                 'Bandwidth': 'bandwidthobserved',
                 'Uptime': 'uptime',
                 'Last Descriptor Published': 'published',
@@ -24,15 +25,16 @@ SORT_OPTIONS = {'Router Name': 'nickname',
                 'Authority': 'isauthority',
                 'Bad Directory': 'isbaddirectory',
                 'Bad Exit': 'isbadexit',
+                'Directory': 'isv2dir',
                 'Exit': 'isexit',
                 'Fast': 'isfast',
                 'Guard': 'isguard',
                 'Hibernating': 'ishibernating',
+                'HS Directory': 'ishsdir',
                 'Named': 'isnamed',
                 'Stable': 'isstable',
                 'Running': 'isrunning',
                 'Valid': 'isvalid',
-                'Directory': 'isv2dir',
                }
 
 SEARCH_OPTIONS_FIELDS_ORDER = ['Fingerprint', 'Router Name',
@@ -99,22 +101,24 @@ SEARCH_OPTIONS_BOOLEANS = {'Equals': 'exact',
                            'Starts With (case insensitive)': 'istartswith',
                           }
 
-FILTER_OPTIONS_ORDER = ['Authority', 'BadDirectory', 'BadExit', 'Exit',
-                        'Fast', 'Guard', 'Hibernating', 'Named',
-                        'Stable', 'Running', 'Valid', 'V2Dir']
+FILTER_OPTIONS_ORDER = ['Authority', 'BadDirectory', 'BadExit',
+                        'Directory', 'Exit', 'Fast', 'Guard',
+                        'Hibernating', 'HS Directory', 'Named',
+                        'Stable', 'Running', 'Valid']
 
 FILTER_OPTIONS = {'Authority': 'isauthority',
                   'BadDirectory': 'isbaddirectory',
                   'BadExit': 'isbadexit',
+                  'Directory': 'isv2dir',
                   'Exit': 'isexit',
                   'Fast': 'isfast',
                   'Guard': 'isguard',
                   'Hibernating': 'ishibernating',
+                  'HS Directory': 'ishsdir',
                   'Named': 'isnamed',
                   'Stable': 'isstable',
                   'Running': 'isrunning',
                   'Valid': 'isvalid',
-                  'V2Dir': 'isv2dir',
                  }
 # Dictionary that maps the declared variables to variables
 # in actual code.
@@ -131,4 +135,7 @@ ADVANCED_SEARCH_DECLR = {'sort_options_order': SORT_OPTIONS_ORDER,
                          'filter_options_order': FILTER_OPTIONS_ORDER,
                          'filter_options': FILTER_OPTIONS,
                         }
+
+
+# Index Template Helpers ---------------------------------------------
 

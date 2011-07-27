@@ -4,7 +4,7 @@
 <link rel="stylesheet" type="text/css" href="/static/css/details.css"></link>
 {% endblock %}
 
-{% block mainTitle %} - TorStatus - Router Details -- {{ relay.nickname }} {% endblock %}
+{% block mainTitle %} TorStatus - Router Details -- {{ relay.nickname }} {% endblock %}
 
 {% block headerTitle %} TorStatus {% endblock %}
 
@@ -33,10 +33,12 @@
     {% if relay.active %}
     <td id="detailsInfo" style="background-color:rgb(0, 255, 0)">Yes</td>
 </tr>
+{% if relay.hasdescriptor %}
 <tr>
 	<td id="detailsLabel">Adjusted Uptime:</td>
     <td id="detailsInfo">{{ relay.adjuptime|words }}</td>
 </tr>
+{% endif %}
     {% else %}
     <td id="detailsInfo" style="background-color:rgb(255, 0, 0)">No</td>
 </tr>
@@ -44,10 +46,6 @@
     <td id="detailsInfo">{{ relay.validafter|date:"Y-m-d H:i:s" }}</td>
 </tr>
     {% endif %}
-</tr>
-<tr>
-	<td id="detailsLabel">Contact:</td>
-    <td id="detailsInfo">{{ relay.contact|wordwrap:72|linebreaksbr }}</td>
 </tr>
 <tr>
 	<td id="detailsLabel">IP Address:</td>
@@ -73,6 +71,7 @@
     <td id="detailsLabel">Latitude, Longitude:</td>
     <td id="detailsInfo">{{ relay.latitude }}, {{ relay.longitude }}</td>
 </tr>
+{% if relay.hasdescriptor %}
 <tr>
 	<td id="detailsLabel">Platform / Version:</td>
     <td id="detailsInfo">{{ relay.platform|wordwrap:72|linebreaksbr }}</td>
@@ -90,9 +89,14 @@
     <td id="detailsInfo">{{ relay.bandwidthburst }} / {{ relay.bandwidthavg }} / {{ relay.bandwidthobserved }}</td>
 </tr>
 <tr>
+	<td id="detailsLabel">Contact:</td>
+    <td id="detailsInfo">{{ relay.contact|wordwrap:72|linebreaksbr }}</td>
+</tr>
+<tr>
 	<td id="detailsLabel">Family:</td>
     <td id="detailsInfo">{{ relay.family|format_family|safe|linebreaksbr }}</td>
 </tr>
+{% endif %}
 </table>
 <br />
 <table class="detailsTable" id="networkstatisticsummary">
@@ -100,13 +104,14 @@
     <td id="details_boxTitle" colspan="2"> Graphs </td>
 </tr>
 <tr>
-    <td id="detailsInfo"><img src="{{ relay.fingerprint }}/readhist.png" alt="Read Bandwidth History Graph" title="Read Bandwidth History Graph"></td>
-    <td id="detailsInfo"><img src="{{ relay.fingerprint }}/writehist.png" alt="Write Bandwidth History Graph" title="Write Bandwidth History Graph"></td>
+    <td id="detailsInfo"><img src="{{ relay.fingerprint }}/readhist.png" alt="Bandwidth History Not Avaliable" title="Read Bandwidth History Graph"></td>
+    <td id="detailsInfo"><img src="{{ relay.fingerprint }}/writehist.png" alt="Bandwidth History Not Available" title="Write Bandwidth History Graph"></td>
 </tr>
 </table>
 
 <table class="mainDetails">
 <tr>
+    {% if relay.hasdescriptor %}
     <td>
         <table class="details">
             <tr>
@@ -120,6 +125,7 @@
             </tr>
         </table>
     </td>
+    {% endif %}
     <td>
         <table class="details">
             <tr>
@@ -134,48 +140,55 @@
                 <td id="detailBox"> Bad Directory: </td>
                 <td {% if relay.isbaddirectory %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
-            <tr> 
+            <tr>
                 <td id="detailBox"> Bad Exit: </td>
                 <td {% if relay.isbadexit %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
-            <tr> 
+            <tr>
+                <td id="detailBox"> Directory: </td>
+                <td {% if relay.isv2dir %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+            </tr>
+            <tr>
                 <td id="detailBox"> Exit: </td>
                 <td {% if relay.isexit %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
-            <tr> 
+            <tr>
                 <td id="detailBox"> Fast: </td>
                 <td {% if relay.isfast %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
-            <tr> 
+            <tr>
                 <td id="detailBox"> Guard: </td>
                 <td {% if relay.isguard %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
-            <tr> 
+            {% if relay.hasdescriptor %}
+            <tr>
                 <td id="detailBox"> Hibernating: </td>
                 <td {% if relay.ishibernating %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
-            <tr> 
+            {% endif %}
+            <tr>
+                <td id="detailBox"> HS Directory: </td>
+                <td {% if relay.ishsdir %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+            </tr>
+            <tr>
                 <td id="detailBox"> Named: </td>
                 <td {% if relay.isnamed %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
-            <tr> 
+            <tr>
                 <td id="detailBox"> Stable: </td>
                 <td {% if relay.isstable %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
-            <tr> 
+            <tr>
                 <td id="detailBox"> Running: </td>
                 <td {% if relay.isrunning %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
-            <tr> 
+            <tr>
                 <td id="detailBox"> Valid: </td>
                 <td {% if relay.isvalid %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
             </tr>
-            <tr> 
-                <td id="detailBox"> V2Dir: </td>
-                <td {% if relay.isauthority %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
-            </tr>
         </table>
     </td>
+    {% if relay.hasdescriptor %}
     <td>
         <table class="details">
             <tr>
@@ -183,11 +196,18 @@
             </tr>
             <tr>
                 <td>
-                    {{ relay.exitpolicy|linebreaksbr }}
+                    {% for line in relay.exitpolicy %}
+                    {% if forloop.counter0|divisibleby:"16" %}
+                    </td>
+                    <td>
+                    {% endif %}
+                    {{ line }}<br />
+                    {% endfor %}
                 </td>
             </tr>
         </table>
     </td>
+    {% endif %}
 </tr>
 </table>
 {% endblock %}

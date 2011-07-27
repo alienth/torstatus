@@ -88,6 +88,17 @@ let us know by sending e-mail to torstatus@gmail.com.
 ________________________________
 ..Just started this section still needs lots of work..
 
+First install Apache and mod_wsgi...
+> sudo apt-get install apache2 libapache2-mod-wsgi
+
+You might want to make a folder to store your sites
+> sudo mkdir /srv/www
+
+If you want to set up a test server create a hosts file
+> sudo nano /etc/hosts
+
+
+
 Get the appropriate packages. With a minimal debian sqeeze platform you should
 have the necessary packages already.
 

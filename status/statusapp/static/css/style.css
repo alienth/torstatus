@@ -3,8 +3,13 @@ td {
     font-size: 0.875em;
 }
 
+html {
+    height: auto;
+}
+
 body {
     font-family: FreeSans, Arial, Helvetica, sans-serif;
+    height: auto;
 }
 
 th {
@@ -18,7 +23,7 @@ table.mainPage {
     width: 100%;
     padding: 10px;
     border-spacing: 10px;
-    border: 1px bold;
+    border-width: 1px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -27,7 +32,7 @@ table.header {
     border-style: none;
     margin-left: auto;
     margin-right: auto;
-    border-style: 1px;
+    border-width: 1px;
     border-spacing: 0px;
     padding: 0px;
 }
@@ -171,6 +176,13 @@ td#pageTitle {
     font-weight: bold;
 }
 
+td#pageFooter {
+    color: #888;
+    background-color: white;
+    text-align: center;
+    white-space: nowrap;
+}
+
 td#mainTitle {
     background-color: #7BD4F7;
     text-align:center;
@@ -203,7 +215,7 @@ td#col_relayName:hover {
 }
 
 td#col_relayAddress {
-    font-color: #61a;
+    color: #61a;
 }
 
 td#col_relayBandwidth {
@@ -266,6 +278,13 @@ td#mainLinks {
     padding: 10px;
 }
 
+td#paginators {
+    text-align: center;
+    width: 18px;
+    height: 14px;
+    padding: 3px;
+}
+
 td#paginatorLinks {
     text-align: center;
     width: 18px;
@@ -317,6 +336,7 @@ a.pageLinks {
     width: 100%;
     color: #050;
     font-size: 0.875em;
+    font-weight: bold;
     text-decoration: none;
     background-color: #fff4e8;
     padding-top: 2px;
@@ -329,6 +349,7 @@ a.pageLinks {
     border-right: 1px solid;
     border-color: #61a #315 #315 #61a;
 }
+
 a.pageLinks:hover {
     background-color: #dac8e2;
     border-color: #315 #61a #61a #315;
@@ -341,14 +362,11 @@ a.pageLinks:hover {
 }
 
 .relayBadExit {
-    background-color: red;
+    background-color: #DB2929;
 }
 
-p#trademark {
-    color: #666666;
-    text-align: center;
-    font-size: 0.750em;
-    margin: 0 0 1px 0;
+.relayHibernating {
+    background-color: #DBDB29;
 }
 
 img#prevnexticon {
@@ -361,4 +379,19 @@ img#prevnexticon:hover {
     opacity: 1;
 }
 
+div#footer {
+    position: relative;
+    margin-top: -40px;
+    height: 40px;
+    clear: both;
+}
+
+div#wrap {
+    min-height: 100%;
+}
+
+div#main{
+    overflow:auto;
+    padding-bottom: 40px;
+}
 /* END Other ------------------------------------------ */

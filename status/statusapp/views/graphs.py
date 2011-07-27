@@ -339,12 +339,12 @@ def aggregatesummary(request):
              isvalid=CountCase('isvalid', when=True),
              isv2dir=CountCase('isv2dir', when=True))
 
-    keys = ['isauthority', 'isbaddirectory', 'isbadexit', 'isexit',
-            'isfast', 'isguard', 'ishibernating', 'isnamed',
+    keys = ['isauthority', 'isbaddirectory', 'isbadexit', 'isv2dir',
+            'isexit', 'isfast', 'isguard', 'ishibernating', 'isnamed',
             'isstable', 'isrunning', 'isvalid', 'isv2dir']
-    labels = ['Total', 'Authority', 'BadDirectory', 'BadExit', 'Exit',
-              'Fast', 'Guard', 'Hibernating', 'Named', 'Stable',
-              'Running', 'Valid', 'V2Dir']
+    labels = ['Total', 'Authority', 'BadDirectory', 'BadExit',
+              'Directory', 'Exit', 'Fast', 'Guard', 'Hibernating',
+              'Named', 'Stable', 'Running', 'Valid']
     num_params = len(labels)
     xs = range(num_params)
 
