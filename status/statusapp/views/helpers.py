@@ -17,7 +17,7 @@ from matplotlib.figure import Figure
 from statusapp.models import Bwhist, Descriptor
 
 # INIT Variables ------------------------------------------------------
-COLUMN_VALUE_NAME = {'Country Code': 'geoip',
+COLUMN_VALUE_NAME = {'Country Code': 'country',
                      'Router Name': 'nickname',
                      'Bandwidth': 'bandwidthkbps',
                      'Uptime': 'uptime',
