@@ -478,7 +478,9 @@ def display_options(request):
 def advanced_search(request):
 
     if 'filters' in request.session:
-            del request.session['filters']
+        del request.session['filters']
+    if 'search' in request.session:
+        del request.session['search']
 
     search_value = request.GET.get('search', '')
 
