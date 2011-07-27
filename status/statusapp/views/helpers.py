@@ -44,8 +44,8 @@ COLUMN_VALUE_NAME = {'Country Code': 'country',
 
 NOT_COLUMNS = set(('Running', 'Hostname', 'Named', 'Valid'))
 
-ICONS = ['Fast', 'Exit', 'Valid', 'V2Dir', 'Guard', 'Stable', 
-         'Authority', 'Platform']
+ICONS = ['Hibernating', 'Fast', 'Exit', 'Valid', 'V2Dir', 'Guard', 'Stable', 
+         'Authority', 'Platform',]
 
 FLAGS = set(('isauthority',
               'isbaddirectory',
