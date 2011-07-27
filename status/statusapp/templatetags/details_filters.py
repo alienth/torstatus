@@ -131,3 +131,19 @@ def format_family(family):
         return '\n'.join(links)
 
     return None
+
+
+@register.filter
+def key(d, key_name):
+    """
+    Return the value of a key in a dictionary.
+    
+    @type d: C{dict}
+    @param d: The given dictionary.
+    @type key_name: C{string}
+    @param key_name: The given key.
+    @rtype: C{value}
+    @return: The value of the given key in the dictionary.
+    """
+    if key_name in d:
+        return d[key_name]

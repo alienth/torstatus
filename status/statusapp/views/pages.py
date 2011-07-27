@@ -25,17 +25,23 @@ from helpers import *
 from display_helpers import *
 
 # INIT Variables ------------------------------------------------------
-CURRENT_COLUMNS = ["Country Code", "Router Name", "Bandwidth",
-                   "Uptime", "IP", "Icons", "ORPort",
-                   "DirPort", "BadExit", "Named", "Exit",
-                   "Authority", "Fast", "Guard", "Hibernating",
-                   "Stable", "Running", "Valid", "Directory", "Platform"]
-                   #"Hostname"]
-AVAILABLE_COLUMNS = ["Fingerprint", "Last Descriptor Published",
-                     "Contact", "BadDir",]
-NOT_MOVABLE_COLUMNS = ["Named", "Exit", "Authority", "Fast", "Guard",
-                       "Hibernating", "Stable", "Running", "Valid",
-                       "Directory", "Platform"]
+CURRENT_COLUMNS = ['Country Code', 'Router Name', 'Bandwidth',
+                   'Uptime', 'IP', 'Icons', 'ORPort',
+                   'DirPort', 'BadExit', 'Named', 'Exit',
+                   'Authority', 'Fast', 'Guard', 'Hibernating',
+                   'Stable', 'V2Dir', 'Platform',]
+                   #'Hostname'
+
+AVAILABLE_COLUMNS = ['Fingerprint', 'LastDescriptorPublished',
+                     'Contact', 'BadDir',]
+                 
+NOT_MOVABLE_COLUMNS = ['Named', 'Exit', 'Authority', 'Fast', 'Guard',
+                       'Hibernating', 'Stable', 'V2Dir', 'Platform',]
+                
+DISPLAYABLE_COLUMNS = set(('Country Code', 'Router Name', 'Bandwidth',
+                            'Uptime', 'IP', 'Icons', 'ORPort', 'DirPort',
+                            'BadExit', 'Fingerprint', 
+                            'LastDescriptorPublished', 'Contact', 'BadDir'))
 
 
 def splash(request):
@@ -66,7 +72,7 @@ def get_order(sort_filter):
         return None, 'ascending'
     order_column_name, sort_order = sort_filter.split('_')
     options = ['nickname', 'fingerprint', 'contact',
-                   'bandwidthobserved', 'uptime', 'country',
+                   'bandwidthkbps', 'uptime', 'country',
                    'address', 'orport', 'dirport',
                    'isbaddirectory', 'isbadexit',]
 
@@ -137,14 +143,16 @@ def index(request):
 
     # Make sure paginated is an integer. If 0, then do not paginate.
     # Otherwise, paginate.
-    all_relays = request.session.get('all', 0)
 
+    all_relays = request.session.get('all', 0)
+    
+    active_relays_list_dict = gen_list_dict(active_relays)
     if not all_relays:
         # Make sure entries per page is an integer. If not, or
         # if no value is specified, make entries per page 50.
         per_page = request.session.get('perpage', 50)
 
-        paginator = Paginator(active_relays, per_page)
+        paginator = Paginator(active_relays_list_dict, per_page)
 
         # Make sure page request is an int. If not, deliver first page.
         try:
@@ -159,7 +167,9 @@ def index(request):
         except (EmptyPage, InvalidPage):
             paged_relays = paginator.page(paginator.num_pages)
     else:
-        paginator = Paginator(active_relays, num_results)
+
+        paginator = Paginator(active_relays_list_dict,
+                        active_relays_list_dict.count())
         paged_relays = paginator.page(1)
 
     current_columns = []
@@ -177,10 +187,13 @@ def index(request):
 
     template_values = {'paged_relays': paged_relays,
                        'current_columns': current_columns,
+                       'displayable_columns': DISPLAYABLE_COLUMNS,
                        'not_columns': NOT_MOVABLE_COLUMNS,
                        #'gets': gets,
                        #'gets_exist': gets_exist,
                        'request': request,
+                       'column_value_name': COLUMN_VALUE_NAME,
+                       'icons_list': ICONS,
                        'number_of_results': num_results,
                       }
     return render_to_response('index.html', template_values)
@@ -233,8 +246,16 @@ def details(request, fingerprint):
         relay.hasdescriptor = False
 
     relay.hostname = getfqdn(str(relay.address))
+    
+    relay_dict = gen_relay_dict(relay)                 
+    flags_list = gen_flags_list(relay)
+    options_list = gen_options_list(relay)
 
-    template_values = {'relay': relay}
+    template_values = {'relay': relay,
+                       'relay_dict': relay_dict,
+                       'options_list': options_list,
+                       'flags_list': flags_list,
+                       }
     return render_to_response('details.html', template_values)
 
 
@@ -386,6 +407,7 @@ def exitnodequery(request):
                        'dest_port_valid': dest_port_valid}
     return render_to_response('nodequery.html', template_values)
 
+
 @cache_page(60 * 30)
 def networkstatisticgraphs(request):
     """
@@ -473,7 +495,9 @@ def display_options(request):
 def advanced_search(request):
 
     if 'filters' in request.session:
-            del request.session['filters']
+        del request.session['filters']
+    if 'search' in request.session:
+        del request.session['search']
 
     search_value = request.GET.get('search', '')
 

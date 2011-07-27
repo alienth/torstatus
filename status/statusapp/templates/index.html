@@ -12,9 +12,7 @@
 
 {% block moreLinks %}
 <br /><br />
-<form>
-    <a class="link" id="csv" href="/tor-query-export.csv">Download CSV of Current Result Set</a>
-    {{filter}}
+<a class="link" id="csv" href="/tor-query-export.csv">Download CSV of Current Result Set</a>
 {% endblock %}
 
 {% block pageTitle %} Active Relays {% endblock %}
@@ -67,186 +65,92 @@
 <table class="relayTable">
 	<tr>
 	{% for column_name in current_columns %}
-	    {% if column_name == "Country Code" %}
-        <th class="relayHeader hoverable"><a href="/index/sort/country_{{ascending_or_descending}}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></th>
-        {% endif %}
-        {% if column_name == "Router Name" %}
-        <th class="relayHeader hoverable" id="routerName"><a href="/index/sort/nickname_{{ascending_or_descending}}">Router Name</a></th>
-		{% endif %}
-		{% if column_name == "Bandwidth" %}
-		<th class="relayHeader hoverable"><a href="/index/sort/bandwidthobserved_{{ascending_or_descending}}">Bandwidth</a></th>
-		{% endif %}
-		{% if column_name == "Uptime" %}
-        <th class="relayHeader hoverable"><a href="/index/sort/uptime_{{ascending_or_descending}}">Uptime</a></th>
-        {% endif %}
-        {% if column_name == "IP" %}
-        <th class="relayHeader hoverable"><a href="/index/sort/address_{{ascending_or_descending}}">IP</a></th>
-        {% endif %}
-        {% if column_name == "Fingerprint" %}
-        <th class="relayHeader hoverable"><a href="/index/sort/fingerprint_{{ascending_or_descending}}">Fingerprint</a></th>
-        {% endif %}
-        {% if column_name == "LastDescriptorPublished" %}
-        <th class="relayHeader hoverable" id="lastDescPub"><a href="/index/sort/published_{{ascending_or_descending}}">Last Descriptor Published</a></th>
-        {% endif %}
-        {% if column_name == "Contact" %}
-        <th class="relayHeader hoverable"><a href="/index/sort/contact_{{ascending_or_descending}}">Contact</a></th>
-        {% endif %}
-        {% if column_name == "BadDir" %}
-        <th class="relayHeader hoverable" id="badDir"><a href="/index/sort/isbaddirectory_{{ascending_or_descending}}">Bad Directory</a></th>
-        {% endif %}
-        {% if column_name == "Icons" %}
-        {% if "DirPort" in current_columns or "Exit" in current_columns or "Authority" in current_columns or "Fast" in current_columns or "Guard" in current_columns or "V2Dir" in current_columns or "Platform" in current_columns or "Stable" in current_columns %}
+	    {% if column_name == "Icons" %}
+        {% if "DirPort" in current_columns or "Exit" in current_columns or "Authority" in current_columns or "Fast" in current_columns or "Guard" in current_columns or "Directory" in current_columns or "Platform" in current_columns or "Stable" in current_columns %}
 		<th class="" id="relayHeaderInv">Icons</th>
 		{% endif %}
-		{% endif %}
-		{% if column_name == "ORPort" %}
-        <th class="relayHeader hoverable"><a href="/index/sort/orport_{{ascending_or_descending}}">ORPort</a></th>
-        {% endif %}
-        {% if column_name == "DirPort" %}
-        <th class="relayHeader hoverable"><a href="/index/sort/dirport_{{ascending_or_descending}}">DirPort</a></th>
-        {% endif %}
-        {% if column_name == "BadExit" %}
-        <th class="relayHeader hoverable"><a href="/index/sort/isbadexit_{{ascending_or_descending}}">Bad Exit</a></th>
-        {% endif %}
+		{% else %}
+		{% if column_name not in not_columns %}
+	    <th class="relayHeader hoverable" {% if column_name == "Router Name" %} 
+	                                            id="routerName" 
+	                                      {% else %}
+	                                      {% if column_name == "LastDescriptorPublished" %}
+	                                            id="lastDescPub"
+	                                      {% else %} 
+	                                      {% if column_name == "BadDir" %}
+	                                            id="badDir"
+	                                      {% endif %}
+	                                      {% endif %}
+	                                      {% endif %}
+	                                      ><a href="/index/sort/{{column_value_name|key:column_name}}_{{ascending_or_descending}}">
+	        {% if column_name == "Country Code" %} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {% else %} {{column_name}} {% endif %}</a></th>
+	    {% endif %}
+	    {% endif %}
     {% endfor %}
 	</tr>
+
 	{% for relay in paged_relays.object_list %}
 	    {% if "BadExit" in current_columns %}
-        <tr {% if relay.isbadexit == 1 %} class="relayBadExit" {% else %}{% if relay.ishibernating == 1 %} class="relayHibernating" {% else %} class="relay" {% endif %}{% endif %}>
+		<tr {% if relay|field_value:'BadExit' %} class="relayBadExit" {% else %} class="relay" {% endif %}>
 		{% else %}
 		<tr class="relay">
 		{% endif %}
 		    {% for column_name in current_columns %}
 		    {% if column_name == "Country Code" %}
-            <td id="col_relayName"><a href="http://www.openstreetmap.org/?mlon={{ relay.longitude }}&mlat={{ relay.latitude }}&zoom=6"><img src="/static/img/flags/{{ relay.country|lower }}.png" alt={{ relay.country }} title="{{ relay.country }}: {{ relay.latitude }}, {{ relay.longitude }}" border=0></a></td>
-			{% endif %}
+            <td id="col_relayName"><a href="http://www.openstreetmap.org/?mlon={{ relay|field_value:'Longitude' }}&mlat={{ relay|field_value:'Latitude' }}&zoom=6"><img src="/static/img/flags/{{ relay|field_value:column_name|lower }}.png" alt={{ relay|field_value:column_name }} title="{{ relay|field_value:column_name }}: {{ relay|field_value:'Latitude' }}, {{ relay|field_value:'Longitude' }}" border=0></a></td>
+			{% else %}
 			{% if column_name == "Router Name" %}
             <td id="col_relayName">
                 {% if "Named" in current_columns %}
-                {% if relay.isnamed == 1 %}
-                    <b><a class="linkDetails" href="/details/{{ relay.fingerprint }}" target="_BLANK">{{ relay.nickname }}</a></b>
+                {% if relay|field_value:'Named' == 1 %}
+                    <b><a class="linkDetails" href="/details/{{ relay|field_value:'Fingerprint' }}" target="_BLANK">{{ relay|field_value:column_name }}</a></b>
                     {% else %}
-                    <a class="linkDetails" href="/details/{{ relay.fingerprint }}" target="_BLANK">{{ relay.nickname }}</a>
+                    <a class="linkDetails" href="/details/{{ relay|field_value:'Fingerprint' }}" target="_BLANK">{{ relay|field_value:column_name }}</a>
                 {% endif %}
                 {% else %}
-                    <a class="linkDetails" href="/details/{{ relay.fingerprint }}" target="_BLANK">{{ relay.nickname }}</a>
+                    <a class="linkDetails" href="/details/{{ relay|field_value:'Fingerprint' }}" target="_BLANK">{{ relay|field_value:column_name }}</a>
                 {% endif %}
             </td>
-            {% endif %}
-            {% if column_name == "Bandwidth" %}
-            <td id="col_relayBandwidth">{{ relay.bandwidthkbps }} KB/s</td>
-            {% endif %}
-            {% if column_name == "Uptime" %}
-            <td id="col_relayUptime">{{ relay.uptimedays }} d</td>
-            {% endif %}
+            {% else %}
             {% if column_name == "IP" %}
-            <td>[<a id="relayAddress" href="/details/{{ relay.address }}/whois">{{ relay.address }}</a>]</td>
-            {% endif %}
-            {% if column_name == "Fingerprint" %}
-            <td id="col_relayFingerprint">{{ relay.fingerprint }}</td>
-            {% endif %}
-            {% if column_name == "Last Descriptor Published" %}
-            {% load details_filters %}
-            <td id="col_relayLastDescPub">{{ relay.published }}</td>
-            {% endif %}
-            {% if column_name == "Contact" %}
-            <td id="col_relayContact">{{ relay.contact }}</td>
-            {% endif %}
-            {% if column_name == "BadDir" %}
-            <td id="col_relayBadDir" {% if relay.isbaddirectory == 1 %}>
+            <td>[<a id="relayAddress" href="/details/{{ relay|field_value:column_name }}/whois">{{ relay|field_value:column_name }}</a>]</td>
+            {% else %}
+            {% if column_name == "BadDir" == 1 %}
+            <td id="col_relayBadDir" {% if relay|field_value:column_name %}>
                 	<img src="/static/img/bg_yes.png" width="12" height="12" alt="Bad Directory" title="Bad Directory">
                 {% else %}>
                		<img src="/static/img/bg_no.png" width="12" height="12" alt="Not a Bad Directory" title="Not a Bad Directory">
                 {% endif %}</td>
-            {% endif %}
+            {% else %}
             {% if column_name == "Icons" %}
             <td id="col_relayIcons">
-                {% if "Hibernating" in current_columns %}
-                {% if relay.ishibernating %}
-                    <img src="/static/img/status/Hibernating.png" alt="Hibernating Server" title="Hibernating Server">
-                {% endif %}
-                {% endif %}
-                {% if "Fast" in current_columns %}
-                {% if relay.isfast == 1 %}
-                    <img src="/static/img/status/Fast.png" alt="Fast Server" title="Fast Server">
-                {% endif %}
-                {% endif %}
-                {% if "Directory" in current_columns %}
-                {% if relay.isv2dir == 1 %}
-                    <img src="/static/img/status/Dir.png" alt="Directory Server" title="Directory Server">
-                {% endif %}
-                {% endif %}
-                {% if "Exit" in current_columns %}
-                {% if relay.isexit == 1 %}
-                    <img src="/static/img/status/Exit.png" alt="Exit Server" title="Exit Server">
-                {% endif %}
-                {% endif %}
-                {% if "Guard" in current_columns %}
-                {% if relay.isguard == 1 %}
-                    <img src="/static/img/status/Guard.png" alt="Guard Server" title="Guard Server">
-                {% endif %}
-                {% endif %}
-                {% if "Stable" in current_columns %}
-                {% if relay.isstable == 1 %}
-                    <img src="/static/img/status/Stable.png" alt="Stable Server" title="Stable Server">
-                {% endif %}
-                {% endif %}
-                {% if "Authority" in current_columns %}
-                {% if relay.isauthority == 1 %}
-                    <img src="/static/img/status/Authority.png" alt="Authority Server" title="Authority Server">
-                {% endif %}
-                {% endif %}
-                {% if "Platform" in current_columns %}
-                {% if "Linux" in relay.platform %}
-                    <img src="/static/img/os-icons/Linux.png" alt="Linux" title="{{ relay.platform }}">
-                {% else %}{% if "XP" in relay.platform %}
-                    <img src="/static/img/os-icons/WindowsXP.png" alt="WindowsXP" title="{{ relay.platform }}">
-                    {% else %}{% if "Windows" in relay.platform and "Server" in relay.platform %}
-                    <img src="/static/img/os-icons/WindowsServer.png" alt="WindowsServer" title="{{ relay.platform }}">
-                {% else %}{% if "Windows" in relay.platform %}
-                    <img src="/static/img/os-icons/WindowsOther.png" alt="WindowsOther" title="{{ relay.platform }}">
-                {% else %}{% if "Darwin" in relay.platform %}
-                    <img src="/static/img/os-icons/Darwin.png" alt="Darwin" title="{{ relay.platform }}">
-                {% else %}{% if "FreeBSD" in relay.platform %}
-                    <img src="/static/img/os-icons/FreeBSD.png" alt="FreeBSD" title="{{ relay.platform }}">
-                {% else %}{% if "NetBSD" in relay.platform %}
-                    <img src="/static/img/os-icons/NetBSD.png" alt="NetBSD" title="{{ relay.platform }}">
-                {% else %}{% if "OpenBSD" in relay.platform %}
-                    <img src="/static/img/os-icons/OpenBSD.png" alt="OpenBSD" title="{{ relay.platform }}">
-                {% else %}{% if "SunOS" in relay.platform %}
-                    <img src="/static/img/os-icons/SunOS.png" alt="SunOS" title="{{ relay.platform }}">
-                {% else %}{% if "IRIX" in relay.platform %}
-                    <img src="/static/img/os-icons/IRIX64.png" alt="IRIX" title="{{ relay.platform }}">
-                {% else %}{% if "Cygwin" in relay.platform %}
-                    <img src="/static/img/os-icons/Cygwin.png" alt="Cygwin" title="{{ relay.platform }}">
-                {% else %}{% if "Dragon" in relay.platform %}
-                    <img src="/static/img/os-icons/DragonFly.png" alt ="Dragon" title="{{ relay.platform }}">
-                {% else %}
-                    <img src="/static/img/os-icons/NotAvailable.png" alt="NotAvailable" title="Not Available">
-                {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
-                {% endif %}
+                {% for icon in icons_list %}
+                    {% if icon in current_columns %}
+                        {% if icon == "Platform" %}
+                            <img src="/static/img/os-icons/{{ relay|field_value:icon|get_os }}.png" alt="{{ relay|field_value:icon|get_os }}" title="{{ relay|field_value:icon }}">
+                        {% else %}
+                        {% if relay|field_value:icon == 1 %}
+                            <img src="/static/img/status/{{icon}}.png" alt="{{icon}}" title="{{icon}}">
+                        {% endif %}
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
             </td>
-            {% endif %}
-            {% if column_name == "ORPort" %}
-            <td id="col_relayOrport">{{ relay.orport }}</td>
-            {% endif %}
-            {% if column_name == "DirPort" %}
-            <td id="col_relayDirport">
-            {% if relay.dirport == 0 %}
-                None
             {% else %}
-                {{ relay.dirport }}
-            {% endif %}
-            </td>
-            {% endif %}
-            {% if column_name == "BadExit" %}
-            <td id="col_relayBadExit"> {% if relay.isbadexit == 1 %}
-                	<img src="/static/img/bg_yes.png" width="12" height="12" alt="Bad Exit" title="Bad Exit">
+            {% if column_name in displayable_columns %}
+            <td id="col_relay{{column_name}}">
+                {% if column_name == "BadExit" %}
+                    {% if relay|field_value:column_name == 1 %}
+                        <img src="/static/img/bg_yes.png" width="12" height="12" alt="Bad Exit" title="Bad Exit">
+                    {% else %}
+                        <img src="/static/img/bg_no.png" width="12" height="12" alt="Not a Bad Exit" title="Not a Bad Exit">
+                    {% endif %}
                 {% else %}
-               		<img src="/static/img/bg_no.png" width="12" height="12" alt="Not a Bad Exit" title="Not a Bad Exit">
+                    {{ relay|field_value:column_name }}
                 {% endif %}
-            </td>
             {% endif %}
+            </td>
+            {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
             {% endfor %}
 		</tr>
 	{% endfor %}

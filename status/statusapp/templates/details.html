@@ -20,83 +20,40 @@
 <tr>
     <td id="details_boxTitle" colspan="2">General Information</td>
 </tr>
+
+{% for option in options_list %}
 <tr>
-	<td id="detailsLabel">Router Name:</td>
-    <td id="detailsInfo">{{ relay.nickname }}</td>
+    <td id="detailsLabel"> {{option}}: </td>
+    <td id="detailsInfo" {% if option == "Active Relay" %}
+                            {% if relay_dict|key:option == "Yes" %}
+                                style="background-color:rgb(0, 255, 0)"
+                            {% else %}
+                                style="background-color:rgb(255, 0, 0)"
+                            {% endif %}
+                         {% endif %} > 
+                         {% if option == "Fingerprint" %}
+                            {{relay_dict|key:option|format_fing}}
+                         {% else %}
+                         {% if option == "Adjusted Uptime" or option == "Published Uptime" %}
+                            {{relay_dict|key:option|words}}
+                         {% else %}
+                         {% if option == "Last Consensus Present (GMT)" or option == "Last Descriptor Published (GMT)" %}
+                            {{relay_dict|key:option|date:"Y-m-d H:i:s"}}
+                         {% else %}
+                         {% if option == "Country" %}
+                            {{relay_dict|key:option|code_to_country}}
+                         {% else %}
+                         {% if option == "Platform / Version" or option == "Contact" %}
+                            {{relay_dict|key:option|wordwrap:72|linebreaksbr}}
+                         {% else %}
+                         {% if option == "Family" %}
+                            {{relay_dict|key:option|format_family|safe|linebreaksbr}}
+                         {% else %}
+                            {{relay_dict|key:option}}
+                         {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
+    </td>
 </tr>
-<tr>
-	<td id="detailsLabel">Fingerprint:</td>
-    <td id="detailsInfo">{{ relay.fingerprint|format_fing }}</td>
-</tr>
-<tr>
-    <td id="detailsLabel">Active Relay:</td>
-    {% if relay.active %}
-    <td id="detailsInfo" style="background-color:rgb(0, 255, 0)">Yes</td>
-</tr>
-{% if relay.hasdescriptor %}
-<tr>
-	<td id="detailsLabel">Adjusted Uptime:</td>
-    <td id="detailsInfo">{{ relay.adjuptime|words }}</td>
-</tr>
-{% endif %}
-    {% else %}
-    <td id="detailsInfo" style="background-color:rgb(255, 0, 0)">No</td>
-</tr>
-    <td id="detailsLabel">Last Consensus Present (GMT):</td>
-    <td id="detailsInfo">{{ relay.validafter|date:"Y-m-d H:i:s" }}</td>
-</tr>
-    {% endif %}
-</tr>
-<tr>
-	<td id="detailsLabel">IP Address:</td>
-    <td id="detailsInfo">{{ relay.address }}</td>
-</tr>
-<tr>
-	<td id="detailsLabel">Hostname:</td>
-    <td id="detailsInfo">{{ relay.hostname }}</td>
-</tr>
-<tr>
-	<td id="detailsLabel">Onion Router Port:</td>
-    <td id="detailsInfo">{{ relay.orport }}</td>
-</tr>
-<tr>
-	<td id="detailsLabel">Directory Server Port:</td>
-    <td id="detailsInfo">{{ relay.dirport }}</td>
-</tr>
-<tr>
-	<td id="detailsLabel">Country:</td>
-    <td id="detailsInfo">{{ relay.country|code_to_country }}</td>
-</tr>
-<tr>
-    <td id="detailsLabel">Latitude, Longitude:</td>
-    <td id="detailsInfo">{{ relay.latitude }}, {{ relay.longitude }}</td>
-</tr>
-{% if relay.hasdescriptor %}
-<tr>
-	<td id="detailsLabel">Platform / Version:</td>
-    <td id="detailsInfo">{{ relay.platform|wordwrap:72|linebreaksbr }}</td>
-</tr>
-<tr>
-	<td id="detailsLabel">Last Descriptor Published (GMT):</td>
-    <td id="detailsInfo">{{ relay.published|date:"Y-m-d H:i:s" }}</td>
-</tr>
-<tr>
-	<td id="detailsLabel">Published Uptime:</td>
-    <td id="detailsInfo">{{ relay.uptime|words }}</td>
-</tr>
-<tr>
-	<td id="detailsLabel">Bandwidth (Burst/Avg/Observed - In Bps):</td>
-    <td id="detailsInfo">{{ relay.bandwidthburst }} / {{ relay.bandwidthavg }} / {{ relay.bandwidthobserved }}</td>
-</tr>
-<tr>
-	<td id="detailsLabel">Contact:</td>
-    <td id="detailsInfo">{{ relay.contact|wordwrap:72|linebreaksbr }}</td>
-</tr>
-<tr>
-	<td id="detailsLabel">Family:</td>
-    <td id="detailsInfo">{{ relay.family|format_family|safe|linebreaksbr }}</td>
-</tr>
-{% endif %}
+{% endfor %}
 </table>
 <br />
 <table class="detailsTable" id="networkstatisticsummary">
@@ -131,61 +88,13 @@
             <tr>
                 <td id="details_boxTitle" colspan="2"> Router Flags </td>
             </tr>
-
+            
+            {% for flag in flags_list %}
             <tr>
-                <td id="detailBox"> Authority: </td>
-                <td {% if relay.isauthority %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
+                <td id="detailBox"> {{flag}}: </td>
+                <td {% if relay_dict|key:flag == 1 %} id="iconYes" {% else %} id="iconNo" {% endif %}> </td>
             </tr>
-            <tr>
-                <td id="detailBox"> Bad Directory: </td>
-                <td {% if relay.isbaddirectory %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
-            </tr>
-            <tr>
-                <td id="detailBox"> Bad Exit: </td>
-                <td {% if relay.isbadexit %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
-            </tr>
-            <tr>
-                <td id="detailBox"> Directory: </td>
-                <td {% if relay.isv2dir %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
-            </tr>
-            <tr>
-                <td id="detailBox"> Exit: </td>
-                <td {% if relay.isexit %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
-            </tr>
-            <tr>
-                <td id="detailBox"> Fast: </td>
-                <td {% if relay.isfast %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
-            </tr>
-            <tr>
-                <td id="detailBox"> Guard: </td>
-                <td {% if relay.isguard %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
-            </tr>
-            {% if relay.hasdescriptor %}
-            <tr>
-                <td id="detailBox"> Hibernating: </td>
-                <td {% if relay.ishibernating %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
-            </tr>
-            {% endif %}
-            <tr>
-                <td id="detailBox"> HS Directory: </td>
-                <td {% if relay.ishsdir %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
-            </tr>
-            <tr>
-                <td id="detailBox"> Named: </td>
-                <td {% if relay.isnamed %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
-            </tr>
-            <tr>
-                <td id="detailBox"> Stable: </td>
-                <td {% if relay.isstable %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
-            </tr>
-            <tr>
-                <td id="detailBox"> Running: </td>
-                <td {% if relay.isrunning %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
-            </tr>
-            <tr>
-                <td id="detailBox"> Valid: </td>
-                <td {% if relay.isvalid %} id="iconYes" {% else %} id="iconNo" {% endif %}>  </td>
-            </tr>
+            {% endfor %}
         </table>
     </td>
     {% if relay.hasdescriptor %}
