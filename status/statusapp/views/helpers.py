@@ -17,9 +17,9 @@ from matplotlib.figure import Figure
 from statusapp.models import Bwhist, Descriptor
 
 # INIT Variables ------------------------------------------------------
-COLUMN_VALUE_NAME = {'Country Code': 'geoip',
+COLUMN_VALUE_NAME = {'Country Code': 'country',
                      'Router Name': 'nickname',
-                     'Bandwidth': 'bandwidthobserved',
+                     'Bandwidth': 'bandwidthkbps',
                      'Uptime': 'uptime',
                      'IP': 'address',
                      'Hostname': 'hostname',
@@ -33,7 +33,6 @@ COLUMN_VALUE_NAME = {'Country Code': 'geoip',
                      'Fast': 'isfast',
                      'Guard': 'isguard',
                      'Stable': 'isstable',
-                     'Running': 'isrunning',
                      'Valid': 'isvalid',
                      'Directory': 'isv2dir',
                      'Platform': 'platform',
@@ -43,10 +42,10 @@ COLUMN_VALUE_NAME = {'Country Code': 'geoip',
                      'BadDir': 'isbaddirectory',
                     }
 
-NOT_COLUMNS = ['Running', 'Hostname', 'Named', 'Valid',]
+NOT_COLUMNS = set(('Running', 'Hostname', 'Named', 'Valid'))
 
-ICONS = ['Fast', 'Exit', 'Directory', 'Guard', 'Stable', 'Authority',
-         'Platform',]
+ICONS = ['Fast', 'Exit', 'Valid', 'V2Dir', 'Guard', 'Stable', 
+         'Authority', 'Platform']
 
 FLAGS = set(('isauthority',
               'isbaddirectory',
@@ -57,7 +56,6 @@ FLAGS = set(('isauthority',
               'ishibernating',
               'isnamed',
               'isstable',
-              'isrunning',
               'isvalid',
               'isv2dir'))
 SEARCHES = set(('fingerprint',
@@ -78,7 +76,6 @@ CRITERIA = set(('exact',
                  'gt',
                  'startswith',
                  'istartswith'))
-
 
 SORT_OPTIONS = set((
                 'validafter',
@@ -119,21 +116,6 @@ SORT_OPTIONS = set((
                 'latitude',
                 'longitude'
                 ))
-
-# Dictionary of {NameInPlatform: NameOfTheIcon}
-SUPPORTED_PLATFORMS = {'Linux': 'Linux',
-                       'XP': 'WindowsXP',
-                       'Windows Server': 'WindowsServer',
-                       'Windows': 'WindowsOther',
-                       'Darwin': 'Darwin',
-                       'FreeBSD': 'FreeBSD',
-                       'NetBSD': 'NetBSD',
-                       'OpenBSD': 'OpenBSD',
-                       'SunOS': 'SunOS',
-                       'IRIX': 'IRIX',
-                       'Cygwin': 'Cygwin',
-                       'Dragon': 'DragonFly',
-                      }
 
 
 def button_choice(request, button, field, current_columns,
@@ -410,377 +392,6 @@ def sorting_link(sort_order, column_name):
     return "/index/" + column_name + "_ascending"
 
 
-def days(seconds):
-    """
-    Convert an duration in seconds to an uptime in days, rounding down.
-
-    @type seconds: C{int}, C{float}, C{long}, or C{string}
-    @param seconds: The duration in seconds.
-    @rtype: C{int}
-    @return: The duration in days.
-    """
-    # As statusapp.views.details is written now, this value can
-    # be None or an empty string sometimes.
-    if (seconds == '' or seconds is None):
-        return 0
-    else:
-        return int(seconds) / 86400
-
-
-def contact(rawdesc):
-    """
-    Get the contact information of a relay from its raw descriptor.
-
-    It is possible that a relay will not publish any contact information.
-    In this case, "No contact information given" is returned.
-
-    @type rawdesc: C{string} or C{buffer}
-    @param rawdesc: The raw descriptor of a relay.
-    @rtype: C{string}
-    @return: The contact information of the relay.
-    """
-    for line in str(rawdesc).split("\n"):
-        if (line.startswith("contact")):
-            contact_raw = line[8:]
-            return contact_raw.decode('raw_unicode_escape')
-    return None
-
-
-def get_platform(platform):
-    """
-    Method that searches in the platform string for the corresponding
-    platform name and matching it to the corresponding icon name.
-
-    @type platform: C{string}
-    @param platform: A string, raw version of the platform of a relay.
-    @rtype: C{string}
-    @return: The icon name of the specific platform name.
-    """
-    for name in supported_platforms:
-        if name in platform:
-            return supported_platforms[name]
-    return None
-
-
-def generate_table_headers(current_columns, order_column_name, sort_order):
-    """
-    Generates a dictionary of {header_name: html_string_code}.
-
-    @type current_columns: C{list}
-    @param current_columns: A list of the columns that will be
-        displayed on this session.
-    @type order_column_name: C{string}
-    @param order_column_name: A string - the name of the column that is
-        currently ordering by.
-    @type sort_order: C{string}
-    @param sort_order: A string - the type of order
-        (ascending/descending).
-    @rtype: C{dict}, C{list}
-    @return: Dictionary that contains the header name and the HTML code.
-    @rtype: C{list}
-    @return: List of the current columns that will be displayed.
-    """
-
-    # NOTE: The html_current_columns list is needed to preserve the order
-    #   of the displayed columns. It is used in the template to iterate
-    #   through the current columns in the right order that they should be
-    #   displayed.
-
-    html_table_headers = {}
-    html_current_columns = []
-    for column in current_columns:
-        database_name = COLUMN_VALUE_NAME[column]
-        display_name = "&nbsp;&nbsp;" if column == "Country Code" else column
-        sort_arrow = ''
-        if order_column_name == database_name:
-            if sort_order == 'ascending':
-                sort_arrow = "&uarr;"
-            elif sort_order == 'descending':
-                sort_arrow = "&darr;"
-        html_class = "relayHeader hoverable" if database_name != "icons" \
-                                                else "relayHeader"
-
-        if column not in ICONS and column not in NOT_COLUMNS:
-            if column == "Icons":
-                if filter(lambda c: c in current_columns, ICONS):
-                    html_table_headers[column] = "<th class='" + html_class +\
-                                        "' id='" \
-                                        + database_name + "'>" + display_name +\
-                                        "</th>"
-                    html_current_columns.append(column)
-            else:
-                html_table_headers[column] = "<th class='" + html_class + \
-                                    "' id='" + database_name + "'>\
-                                    <a class='sortLink' href='" + \
-                                    sorting_link(sort_order, database_name) \
-                                    + "'>" + display_name + " " + sort_arrow +\
-                                    "</a></th>"
-                html_current_columns.append(column)
-    return html_table_headers, html_current_columns
-
-
-def generate_table_rows(statusentries, current_columns,
-        html_current_columns):
-    """
-    Generates a list of HTML strings. Each string represents a row in
-    the main template table.
-
-    @type statusentries: C{QuerySet}
-    @param statusentries: A QuerySet of the statusentries.
-    @type current_columns: C{list}
-    @param current_columns: A list of the columns that will be displayed
-        on this session.
-    @type html_current_columns: C{list}
-    @param html_current_columns: A list of the HTML string version of
-        the current columns.
-
-    @rtype: C{list}
-    @return: List of HTML strings.
-    """
-    html_table_rows = []
-
-    for relay in statusentries:
-        #TODO: CLEAN THE CODE - QUERY ONLY ON THE NECESSARY COLUMNS
-        #               AND THROW IN DICTIONARY AFTERWARDS!!!
-        # Declarations made in order to avoid multiple queries.
-        r_isbadexit = relay.isbadexit
-        field_isbadexit = "<img src='/static/img/bg_" + \
-                        ("yes" if r_isbadexit else "no") + \
-                        ".png' width='12' height='12' alt='" + \
-                        ("Bad Exit' title='Bad Exit'" \
-                        if r_isbadexit else \
-                        "Not a Bad Exit' title='Not a Bad Exit'") + ">"
-        field_geoip = relay.geoip
-        field_isnamed = relay.isnamed
-        field_fingerprint = relay.fingerprint
-        field_nickname = relay.nickname
-        try:
-            field_bandwidthobserved = str(kilobytes_ps(
-                    relay.descriptorid.bandwidthobserved)) + " KB/s"
-        except Descriptor.DoesNotExist:
-            field_bandwidthobserved = "0 KB/s"
-        try:
-            field_uptime = str(days(relay.descriptorid.uptime)) + " d"
-        except Descriptor.DoesNotExist:
-            field_uptime = "0 d"
-        r_address = relay.address
-        field_address = "[<a href='details/" + r_address + \
-                        "/whois'>" + r_address + "</a>]"
-        field_published = str(relay.published)
-        try:
-            field_contact = contact(relay.descriptorid.rawdesc)
-        except Descriptor.DoesNotExist:
-            field_contact = ''
-        r_isbaddir = relay.isbaddirectory
-        field_isbaddirectory = "<img src='/static/img/bg_" + \
-                        ("yes" if r_isbaddir else "no") + \
-                        ".png' width='12' height='12' alt='" + \
-                        ("Bad Directory' title='Bad Directory'" \
-                        if r_isbaddir else "Not a Bad Directory' \
-                        title='Not a Bad Directory'") + ">"
-        field_isfast = "<img src='/static/img/status/Fast.png' \
-                        alt='Fast Server' title='Fast Server'>" \
-                        if relay.isfast else ""
-        field_isv2dir = "<img src='/static/img/status/Dir.png' \
-                        alt='Directory Server' title='Directory Server'>" \
-                        if relay.isv2dir else ""
-        field_isexit = "<img src='/static/img/status/Exit.png' \
-                        alt='Exit Server' title='Exit Server'>" \
-                        if relay.isexit else ""
-        field_isguard = "<img src='/static/img/status/Guard.png' \
-                        alt='Guard Server' title='Guard Server'>" \
-                        if relay.isguard else ""
-        field_isstable = "<img src='/static/img/status/Stable.png' \
-                        alt='Stable Server' title='Stable Server'>" \
-                        if relay.isstable else ""
-        field_isauthority = "<img src='/static/img/status/Authority.png' \
-                        alt='Authority Server' title='Authority Server'>" \
-                        if relay.isauthority else ""
-        try:
-            r_platform = relay.descriptorid.platform
-        except:
-            r_platform = 'Not Available'
-        r_os_platform = get_platform(r_platform)
-        field_platform = "<img src='/static/img/os-icons/" + r_os_platform + \
-                        ".png' alt='" + r_os_platform + "' title='" + \
-                        r_platform + "'>" if r_os_platform else ""
-        field_orport = str(relay.orport)
-        r_dirport = str(relay.dirport)
-        field_dirport = r_dirport if r_dirport else "None"
-
-
-        RELAY_FIELDS = {'isbadexit': field_isbadexit,
-                        'geoip': field_geoip,
-                        'isnamed': field_isnamed,
-                        'fingerprint': field_fingerprint,
-                        'nickname': field_nickname,
-                        'bandwidthobserved': field_bandwidthobserved,
-                        'uptime': field_uptime,
-                        'address': field_address,
-                        'published': field_published,
-                        'contact': field_contact,
-                        'isbaddirectory': field_isbaddirectory,
-                        'isfast': field_isfast,
-                        'isv2dir': field_isv2dir,
-                        'isexit': field_isexit,
-                        'isguard': field_isguard,
-                        'isstable': field_isstable,
-                        'isauthority': field_isauthority,
-                        'platform': field_platform,
-                        'orport': field_orport,
-                        'dirport': field_dirport,
-                       }
-
-        html_row_code = ''
-
-        if 'isbadexit' in RELAY_FIELDS:
-            html_row_code = "<tr " + ("class='relayBadExit'" if r_isbadexit \
-                            else "class='relay'") + ">"
-        else:
-            html_row_code = "<tr class='relay'>"
-
-        for column in html_current_columns:
-            value_name = COLUMN_VALUE_NAME[column]
-
-            # Special Case: Country Code
-            if column == 'Country Code':
-                c_country = country(RELAY_FIELDS[value_name])
-                c_latitude = latitude(RELAY_FIELDS[value_name])
-                c_longitude = longitude(RELAY_FIELDS[value_name])
-                html_row_code = html_row_code + "<td id='col_relayName'> \
-                                <a href='http://www.openstreetmap.org/?mlon="\
-                                 + c_longitude + "&mlat=" + c_latitude + \
-                                 "&zoom=6'><img src='/static/img/flags/" + \
-                                 c_country + ".png' alt='" + c_country + \
-                                 "' title='" + c_country + ":" + c_latitude +\
-                                 ", " + c_longitude + "' border=0></a></td>"
-            # Special Case: Router Name and Named
-            elif column == 'Router Name':
-                if 'Named' in current_columns:
-                    html_router_name = "<a class='link' href='/details/" + \
-                                        RELAY_FIELDS['fingerprint'] + "' \
-                                        target='_BLANK'>" + \
-                                        RELAY_FIELDS[value_name] + "</a>"
-                    if RELAY_FIELDS['isnamed']:
-                        html_router_name = "<b>" + html_router_name + "</b>"
-                else:
-                    html_router_name = "<a class='link' href='/details/" + \
-                                        RELAY_FIELDS['fingerprint'] + "' \
-                                        target='_BLANK'>" + \
-                                        RELAY_FIELDS[value_name] + "</a>"
-                html_row_code = html_row_code + "<td id='col_relayName'>"\
-                                    + html_router_name + "</td>"
-            # Special Case: Icons
-            elif column == 'Icons':
-                html_icons = "<td id='col_relayIcons'>"
-                for icon in ICONS:
-                    if icon in current_columns:
-                        value_icon = COLUMN_VALUE_NAME[icon]
-                        html_icons = html_icons + RELAY_FIELDS[value_icon]
-                html_icons = html_icons + "</td>"
-                html_row_code = html_row_code + html_icons
-            else:
-                html_row_code = html_row_code + "<td id='col_relay" + column \
-                                + "'>" + RELAY_FIELDS[value_name] + "</td>"
-        html_row_code = html_row_code + "</tr>"
-        html_table_rows.append(html_row_code)
-
-    return html_table_rows
-
-
-def generate_query_list_options(query_options):
-    """
-    Generates the HTML version of each option in the Query List Options
-    field.
-
-    @type query_options: C{dict}
-    @param query_options: A dictionary of the current query options.
-    @rtype: C{list}
-    @return: List of strings - each string represents the HTML version
-        of an option.
-    """
-    # TODO: Finish this. It will clean up the
-    # Advanced Query Options search.
-    LIST_OPTIONS = {'Router Name': 'nickname',
-                    'Fingerprint': 'fingerprint',
-                    'Country Code': 'geoip',
-                    'Bandwidth': 'bandwidthobserved',
-                    'Uptime': 'uptime',
-                    'Last Descriptor Published': 'published',
-                    #'Hostname': 'hostname',
-                    'IP Address': 'address',
-                    'ORPort': 'orport',
-                    'DirPort': 'dirport',
-                    'Platform': 'platform',
-                    'Contact': 'contact',
-                    'Authority': 'isauthority',
-                    'Bad Directory': 'isbaddirectory',
-                    'Bad Exit': 'isbadexit',
-                    'Exit': 'isexit',
-                    'Fast': 'isfast',
-                    'Guard': 'isguard',
-                    'Hibernating': 'ishibernating',
-                    'Named': 'isnamed',
-                    'Stable': 'isstable',
-                    'Valid': 'isvalid',
-                    'Directory': 'isv2dir',
-                   }
-
-    html_query_list_options = []
-    for option in LIST_OPTIONS:
-        list_option = "<option value='" + LIST_OPTIONS[option] + "'"
-        if ('sortListings' in query_options and \
-                query_options['sortListings'] == LIST_OPTIONS[option]):
-            list_option = list_option + " SELECTED>" + option + "</option>"
-        else:
-            list_option = list_option + ">" + option + "</option>"
-        html_query_list_options.append(list_option)
-    return html_query_list_options
-
-
-def generate_query_input_options(query_options):
-    """
-    Generates the HTML version of each input option in the Required Flags
-    feature.
-
-    @type query_options: C{dict}
-    @param query_options: A dictionary of the current query options.
-
-    @rtype: C{list}
-    @return: List of strings - each string represents the HTML version of
-        an input option.
-    """
-    INPUT_OPTIONS = {'Authority': 'isauthority',
-                    'Bad Directory': 'isbaddirectory',
-                    'Bad Exit': 'isbadexit',
-                    'Exit': 'isexit',
-                    'Fast': 'isfast',
-                    'Guard': 'isguard',
-                    'Hibernating': 'ishibernating',
-                    'Named': 'isnamed',
-                    'Stable': 'isstable',
-                    'Valid': 'isvalid',
-                    'Directory': 'isv2dir',
-                   }
-    sorted_input_options = sorted(INPUT_OPTIONS.keys())
-    html_query_input_options = []
-    for option in sorted_input_options:
-        input_option = "<td> " + option + ": </td>"
-        input_string = ''
-        for value in ['', 'yes', 'no']:
-            input_string = input_string + "<input type='radio' \
-                name='" + INPUT_OPTIONS[option] + "' value='" + value + "'"
-            if not query_options and value == '':
-                input_string = input_string + " CHECKED"
-            if (INPUT_OPTIONS[option] in query_options and \
-                    query_options[INPUT_OPTIONS[option]] == value):
-                input_string = input_string + " CHECKED"
-            input_string = input_string + " />" + ("Off" if value == '' else \
-                value.capitalize())
-        input_option = input_option + "<td>" + input_string + "</td>"
-        html_query_input_options.append(input_option)
-    return html_query_input_options
-
 def get_filter_params(request):
     """
     Get the filter preferences provided by the user via the
@@ -854,3 +465,146 @@ def get_order(request):
         param = 'nickname'
 
     return ''.join((orderbit, param))
+
+
+def gen_list_dict(active_relays):
+    """
+    Method that generates a list of dictionaries, where each dictionary
+    contains the fields of a relay.
+    
+    @type active_relays: C{QuerySet}
+    @param active_relays: A set of all the relays that are going to be 
+                        displayed.
+    @rtype: C{list}
+    @return: A list of dictionaries - each dictionary contains the fields
+            of a relay.
+    """
+    list_dict = []
+    if active_relays:
+        for relay in active_relays:
+            relay_dict = {'isbadexit': 1 if relay.isbadexit else 0,
+                          'country': relay.country,
+                          'longitude': relay.longitude,
+                          'latitude': relay.latitude,
+                          'nickname': relay.nickname,
+                          'bandwidthkbps': str(relay.bandwidthkbps) + " Kb/s",
+                          'uptime': str(relay.uptimedays) + " d",
+                          'address': relay.address,
+                          #'hostname': relay.hostname,
+                          'hibernating': 1 if relay.ishibernating else 0, 
+                          'orport': relay.orport,
+                          'dirport': relay.dirport,
+                          'isbadexit': 1 if relay.isbadexit else 0,
+                          'isnamed': 1 if relay.isnamed else 0,
+                          'isexit': 1 if relay.isexit else 0,
+                          'isauthority': 1 if relay.isauthority else 0,
+                          'isfast': 1 if relay.isfast else 0,
+                          'isguard': 1 if relay.isguard else 0,
+                          'isstable': 1 if relay.isstable else 0,
+                          'isv2dir': 1 if relay.isv2dir else 0,
+                          'platform': relay.platform,
+                          'fingerprint': relay.fingerprint,
+                          'published': relay.published,
+                          'contact': relay.contact,
+                          'isbaddirectory': 1 if relay.isbaddirectory else 0,
+                         }
+            list_dict.append(relay_dict)
+    return list_dict
+
+
+def gen_relay_dict(relay):
+    """
+    Method that generates a dictionary of all the fields of a relay.
+    
+    @type relay: C{ActiveRelay}
+    @param relay: The relay for which the fields are going to be generated.
+    @rtype: C{dict}
+    @return: Dictioanary of the Field Name(key): Field Value(value) for the
+            specific relay.
+    """
+    relay_dict = {'Router Name': relay.nickname,
+                  'Fingerprint': relay.fingerprint,
+                  'Active Relay': 'Yes' if relay.active else 'No',
+                  'Adjusted Uptime': relay.adjuptime,
+                  'Last Consensus Present (GMT)': relay.validafter,
+                  'IP Address': relay.address,
+                  'Hostname': relay.hostname,
+                  'Onion Router Port': relay.orport,
+                  'Directory Server Port': relay.dirport,
+                  'Country': relay.country,
+                  'Latitude, Longitude': str(relay.latitude) + ', ' + \
+                            str(relay.longitude),
+                  'Platform / Version': relay.platform,
+                  'Last Descriptor Published (GMT)': relay.published,
+                  'Published Uptime': relay.uptime,
+                  'Bandwidth (Burst/Avg/Observed - In Bps)': \
+                            str(relay.bandwidthburst) + ' / ' + \
+                            str(relay.bandwidthavg) + ' / ' + \
+                            str(relay.bandwidthobserved),
+                  'Contact': relay.contact,
+                  'Family': relay.family,
+                  'Authority': 1 if relay.isauthority else 0,
+                  'Bad Directory': 1 if relay.isbaddirectory else 0,
+                  'Bad Exit': 1 if relay.isbadexit else 0,
+                  'Exit': 1 if relay.isexit else 0,
+                  'Guard': 1 if relay.isguard else 0,
+                  'Fast': 1 if relay.isfast else 0,
+                  'Named': relay.isnamed,
+                  'Stable': relay.isstable,
+                  'Running': relay.isrunning,
+                  'Valid': relay.isvalid,
+                  'V2Dir': relay.isv2dir, 
+                  'HS Directory': relay.ishsdir,                 
+                 }
+    if relay.hasdescriptor:
+        relay_dict['Hibernating'] = 1 if relay.ishibernating else 0
+    else:
+        relay_dict['Hibernating'] = 0
+    return relay_dict
+
+
+def gen_options_list(relay):
+    """
+    Method that generates a list of the fields that will be displayed 
+    on the details page of a specific relay.
+    
+    @type relay: C{ActiveRelay}
+    @param relay: The relay for which the list of fields will be generated
+    @rtype: C{list}
+    @return: List of the fields that will be displayed at the 
+        bottom of the details page.
+    """
+    options_list = ['Router Name', 'Fingerprint', 'Active Relay',]
+    if relay.active:
+        if relay.hasdescriptor:
+            options_list.append('Adjusted Uptime')
+    else:
+        options_list.append('Last Consensus Present (GMT)')  
+    options_list.extend(['IP Address', 'Hostname', 'Onion Router Port',
+                    'Directory Server Port', 'Country',
+                    'Latitude, Longitude',])                
+    if relay.hasdescriptor:
+        descriptor_options_list = ['Platform / Version', 
+                    'Last Descriptor Published (GMT)', 'Published Uptime',
+                    'Bandwidth (Burst/Avg/Observed - In Bps)', 'Contact',
+                    'Family',]
+        options_list.extend(descriptor_options_list)
+    return options_list
+
+def gen_flags_list(relay):
+    """
+    Method that generates a list of the fields(flags) that will be displayed 
+    on the details page of a specific relay.
+    
+    @type relay: C{ActiveRelay}
+    @param relay: The relay for which the list of fields will be generated
+    @rtype: C{list}
+    @return: List of the fields(flags) that will be displayed at the 
+        bottom of the details page.
+    """
+    flags_list = ['Authority', 'Bad Directory', 'Bad Exit', 'Exit', 'Fast', 
+                'Guard', 'HS Directory',]
+    if relay.hasdescriptor:
+        flags_list.append('Hibernating')
+    flags_list.extend(['Named', 'Stable', 'Running', 'Valid', 'V2Dir'])
+    return flags_list
