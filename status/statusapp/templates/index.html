@@ -71,12 +71,12 @@
 		{% endif %}
 		{% else %}
 		{% if column_name not in not_columns %}
-	    <th class="relayHeader hoverable" {% if column_name == "Router Name" %} 
-	                                            id="routerName" 
+	    <th class="relayHeader hoverable" {% if column_name == "Router Name" %}
+	                                            id="routerName"
 	                                      {% else %}
 	                                      {% if column_name == "LastDescriptorPublished" %}
 	                                            id="lastDescPub"
-	                                      {% else %} 
+	                                      {% else %}
 	                                      {% if column_name == "BadDir" %}
 	                                            id="badDir"
 	                                      {% endif %}
@@ -91,7 +91,7 @@
 
 	{% for relay in paged_relays.object_list %}
 	    {% if "BadExit" in current_columns %}
-		<tr {% if relay|field_value:'BadExit' %} class="relayBadExit" {% else %} class="relay" {% endif %}>
+        <tr {% if relay|field_value:'BadExit' %} class="relayBadExit" {% else %}{% if relay|field_value:'Hibernating' %} class="relayHibernating" {% else %} class="relay" {% endif %}{% endif %}>
 		{% else %}
 		<tr class="relay">
 		{% endif %}
