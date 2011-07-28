@@ -7,7 +7,6 @@ This module contains a single controller for each page type.
 import subprocess
 import datetime
 from socket import getfqdn
-import re
 
 # Django-specific import statements -----------------------------------
 from django.shortcuts import render_to_response, redirect
@@ -30,61 +29,24 @@ CURRENT_COLUMNS = ['Country Code', 'Router Name', 'Bandwidth',
                    'DirPort', 'BadExit', 'Named', 'Exit',
                    'Authority', 'Fast', 'Guard', 'Hibernating',
                    'Stable', 'V2Dir', 'Platform',]
-                   #'Hostname'
 
 AVAILABLE_COLUMNS = ['Fingerprint', 'LastDescriptorPublished',
                      'Contact', 'BadDir',]
-                 
+
 NOT_MOVABLE_COLUMNS = ['Named', 'Exit', 'Authority', 'Fast', 'Guard',
                        'Hibernating', 'Stable', 'V2Dir', 'Platform',]
-                
-DISPLAYABLE_COLUMNS = set(('Country Code', 'Router Name', 'Bandwidth',
-                            'Uptime', 'IP', 'Icons', 'ORPort', 'DirPort',
-                            'BadExit', 'Fingerprint', 
-                            'LastDescriptorPublished', 'Contact', 'BadDir'))
 
+DISPLAYABLE_COLUMNS = set(('Country Code', 'Router Name', 'Bandwidth',
+                            'Uptime', 'IP', 'Icons', 'ORPort',
+                            'DirPort', 'BadExit', 'Fingerprint',
+                            'LastDescriptorPublished', 'Contact',
+                            'BadDir'))
 
 def splash(request):
     """
     The splash page for the TorStatus website.
     """
     return render_to_response("splash.html")
-
-
-def index_reset(request):
-    if 'filters' in request.session:
-        del request.session['filters']
-    if 'search' in request.session:
-        del request.session['search']
-    if 'sort_filter' in request.session:
-        del request.session['sort_filter']
-
-    return index(request, 'nickname_ascending')
-
-
-"""
-def get_order(sort_filter):
-
-    sort_order = ''
-    order_column_name = ''
-
-    underscore_count = sort_filter.count('_')
-    if not underscore_count == 1:
-        return None, 'ascending'
-    order_column_name, sort_order = sort_filter.split('_')
-    options = ['nickname', 'fingerprint', 'contact',
-                   'bandwidthkbps', 'uptime', 'country',
-                   'address', 'orport', 'dirport',
-                   'isbaddirectory', 'isbadexit',]
-
-    if order_column_name in options:
-        if sort_order == 'ascending':
-            return order_column_name, 'descending'
-        elif sort_order == 'descending':
-            return '-' + order_column_name, 'ascending'
-    else:
-        return None, 'ascending'
-"""
 
 
 def index(request):
@@ -100,25 +62,35 @@ def index(request):
         in the network as well as aggregate information about the
         network itself.
     """
+    # See if the user wants to reset search and display preferences
+    reset = request.GET.get('reset', '')
+    if reset == 'True':
+        search_cookie_reset(request)
+
     # Get all relays in last consensus
     last_validafter = ActiveRelay.objects.aggregate(
                       last=Max('validafter'))['last']
     active_relays = ActiveRelay.objects.filter(
                     validafter=last_validafter).order_by('nickname')
 
+    # See if the user has defined a "basic search", i.e. if the
+    # user has supplied a search term on the splash page
     basic_input = request.GET.get('search', '')
     if basic_input:
         request.session['search'] = basic_input
     elif 'search' in request.session:
         basic_input = request.session['search']
 
-    if 'sortOrder' in request.GET and 'sortListing' in request.GET:
-        request.session['order'] = get_order(request)
-    elif 'order' not in request.session:
-        request.session['order'] = 'nickname'
+    # Get the order specified by session.request
+    order = get_order(request)
+    if order.startswith('-'):
+        ascending_or_descending = 'ascending'
+    else:
+        ascending_or_descending = 'descending'
 
-    order = request.session['order']
-
+    # If basic search input has been supplied, search the beginnings
+    # of all fingerprints, nicknames, and IPs in the last consensus
+    # and return any matches
     if basic_input:
         if 'filters' in request.session:
             del request.session['filters']
@@ -127,6 +99,8 @@ def index(request):
                         Q(fingerprint__istartswith=basic_input) | \
                         Q(address__istartswith=basic_input)).\
                         order_by(order)
+    # Otherwise, an advanced search may have been defined, so filter
+    # all relays by the parameters given
     else:
         if 'search' in request.session:
             del request.session['search']
@@ -134,24 +108,22 @@ def index(request):
         active_relays = active_relays.filter(
                         **filter_params).order_by(order)
 
-
     num_results = active_relays.count()
+
     # If the search returns only one relay, go to the details page for
     # that relay.
     if active_relays.count() == 1:
         url = ''.join(('/details/', active_relays[0].fingerprint))
         return redirect(url)
 
-    # Make sure paginated is an integer. If 0, then do not paginate.
-    # Otherwise, paginate.
-
+    # TODO: Eventually give client the option to view all relays
+    # on one page.
     all_relays = request.session.get('all', 0)
 
     if not all_relays:
         # Make sure entries per page is an integer. If not, or
         # if no value is specified, make entries per page 50.
         per_page = request.session.get('perpage', 50)
-
         paginator = Paginator(active_relays, per_page)
 
         # Make sure page request is an int. If not, deliver first page.
@@ -166,10 +138,10 @@ def index(request):
             paged_relays = paginator.page(page)
         except (EmptyPage, InvalidPage):
             paged_relays = paginator.page(paginator.num_pages)
+    # Display all relays on one page by making the page size as large
+    # as the current result set
     else:
-
-        paginator = Paginator(active_relays,
-                              active_relays.count())
+        paginator = Paginator(active_relays, num_results)
         paged_relays = paginator.page(1)
 
     paged_relays.object_list = gen_list_dict(paged_relays.object_list)
@@ -187,7 +159,8 @@ def index(request):
                        'column_value_name': COLUMN_VALUE_NAME,
                        'icons_list': ICONS,
                        'number_of_results': num_results,
-                      }
+                       'ascending_or_descending':
+                                ascending_or_descending}
     return render_to_response('index.html', template_values)
 
 
@@ -238,8 +211,8 @@ def details(request, fingerprint):
         relay.hasdescriptor = False
 
     relay.hostname = getfqdn(str(relay.address))
-    
-    relay_dict = gen_relay_dict(relay)                 
+
+    relay_dict = gen_relay_dict(relay)
     flags_list = gen_flags_list(relay)
     options_list = gen_options_list(relay)
 
@@ -422,15 +395,20 @@ def display_options(request):
     @return: renders to the page the currently selected columns, the
         available columns and the previous selection.
     """
+    debug_message = ''
     if 'pp' in request.GET:
-        # Ensure that the supplied information is an integer greater
-        # than zero.
+        # Ensure that the supplied information is an integer between 1
+        # and 200, inclusive.
+        # NOTE/TODO: When the index page loads faster, increase the
+        # upper bound.
         try:
             supplied_pp = int(request.GET.get('pp', ''))
-            if supplied_pp > 1:
-                request.session['perpage'] = supplied_pp
-        except ValueError:
-            pass
+            assert 1 <= supplied_pp <= 200
+            request.session['perpage'] = supplied_pp
+        except (ValueError, AssertionError):
+            debug_message = 'Unable to set \"Relays Per Page\" to' + \
+                            ' the given value.\nPlease enter an' + \
+                            ' integer between 1 and 200, inclusive.'
 
     current_pp = int(request.session.get('perpage', 50))
 
@@ -479,17 +457,15 @@ def display_options(request):
     template_values = {'currentColumns': column_lists[0],
                        'availableColumns': column_lists[1],
                        'selectedEntry': column_lists[2],
-                       'current_pp': current_pp}
+                       'current_pp': current_pp,
+                       'debug_message': debug_message}
 
     return render_to_response('displayoptions.html', template_values)
 
 
 def advanced_search(request):
 
-    if 'filters' in request.session:
-        del request.session['filters']
-    if 'search' in request.session:
-        del request.session['search']
+    search_cookie_reset(request)
 
     search_value = request.GET.get('search', '')
 

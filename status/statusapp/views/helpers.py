@@ -17,7 +17,7 @@ from matplotlib.figure import Figure
 from statusapp.models import Bwhist, Descriptor
 
 # INIT Variables ------------------------------------------------------
-COLUMN_VALUE_NAME = {'Country Code': 'geoip',
+COLUMN_VALUE_NAME = {'Country Code': 'country',
                      'Router Name': 'nickname',
                      'Bandwidth': 'bandwidthkbps',
                      'Uptime': 'uptime',
@@ -437,6 +437,7 @@ def get_filter_params(request):
     filters = request.session['filters']
     return filters
 
+
 def get_order(request):
     """
     Get the sorting parameter and order from the user via the
@@ -451,20 +452,47 @@ def get_order(request):
     @return: The sorting parameter and order as specified by the
         HttpRequest object.
     """
-    # Get the order bit -- that is, '-' or the empty string.
-    # If neither descending or ascending is given, choose ascending.
-    order = request.GET.get('sortOrder', 'ascending')
-    orderbit = ''
-    if order == 'descending':
-        orderbit = '-'
+    DEFAULT_LISTING = 'nickname'
 
-    # Get the order parameter.
-    # If the given value is not a valid parameter, choose nickname.
-    param = request.GET.get('sortListing', 'nickname')
-    if param not in SORT_OPTIONS:
-        param = 'nickname'
+    options = ['nickname', 'fingerprint', 'country',
+                'bandwidthkbps','uptime','published',
+                'hostname', 'address', 'orport',
+                'dirport', 'contact', 'isauthority',
+                'isbaddirectory', 'isbadexit','isv2dir',
+                'isexit', 'isfast','isguard', 'ishibernating',
+                'ishsdir', 'isnamed', 'isstable', 'isrunning',
+                'isvalid']
+    orders = ['ascending', 'descending']
 
-    return ''.join((orderbit, param))
+    advanced_order = ''
+    advanced_listing = ''
+    
+    if request.GET:
+        advanced_order = request.GET.get('sortOrder', '')
+        advanced_listing = request.GET.get('sortListing', '')
+
+    if advanced_listing in options and advanced_order in orders:
+        request.session['sortOrder'] = advanced_order
+        request.session['sortListing'] = advanced_listing
+        
+    if 'sortOrder' in request.session and 'sortListing' in request.session:
+        if request.session['sortOrder'] == 'ascending':
+            return request.session['sortListing']
+        elif request.session['sortOrder'] == 'descending':
+            return '-' + request.session['sortListing']
+
+    return DEFAULT_LISTING
+
+
+def search_cookie_reset(request):
+
+    SEARCH_COOKIE_KEYS = ['filters', 'search', 'sortOrder', 'sortListing']
+
+    for key in SEARCH_COOKIE_KEYS:
+        if key in request.session:
+            del request.session[key]
+
+    return request
 
 
 def gen_list_dict(active_relays):

@@ -27,23 +27,21 @@ def current_results_csv(request):
     @return: csv formatted current queryset
     """
     current_columns = request.session['currentColumns']
+    undisplayed_columns = ['Hostname', 'Valid', 'Running', 'Named']
 
     # Don't provide certain flag information in the csv
     #need to clean this up a bit
-    if "Hostname" in current_columns:
-        current_columns.remove("Hostname")
+
+    for column in undisplayed_columns:
+        if column in current_columns:
+            current_columns.remove(column)
+
     if "Icons" not in current_columns:
         for flag in NOT_MOVABLE_COLUMNS:
             if flag in current_columns:
                 current_columns.remove(flag)
-    if "Icons" in current_columns:
+    elif "Icons" in current_columns:
         current_columns.remove("Icons")
-    if "Valid" in current_columns:
-        current_columns.remove("Valid")
-    if "Running" in current_columns:
-        current_columns.remove("Running")
-    if "Named" in current_columns:
-        current_columns.remove("Named")
 
     last_va = ActiveRelay.objects.aggregate(
               last=Max('validafter'))['last']
@@ -53,15 +51,11 @@ def current_results_csv(request):
     #new way of filtering but it would be nice to abstract to another method
     order = ''
     basic_input = ''
+
     if 'search' in request.session:
         basic_input = request.session['search']
-        sort_filter = ''
-    elif 'sort_filter' in request.session:
-        sort_filter = request.session['sort_filter']
-        order, ascending_or_descending = get_order(sort_filter)
 
-    if not order:
-        order = 'nickname'
+    order = get_order(request)
         
     if basic_input:
         active_relays = active_relays.filter(
@@ -108,7 +102,7 @@ def current_results_csv(request):
                 ("Hibernating", relay.ishibernating),
                 ("Fast", relay.isfast),
                 ("Guard", relay.isguard),
-                ("Directory", relay.isv2dir),
+                ("V2Dir", relay.isv2dir),
                 ("Platform", relay.platform),
                 ("Stable", relay.isstable),
                 ("ORPort", relay.orport),

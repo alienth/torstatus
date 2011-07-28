@@ -58,5 +58,4 @@ urlpatterns = patterns('',
 
     # Index and related pages
     (r'^index/$', 'statusapp.views.pages.index'),
-    (r'^reset_index/$', 'statusapp.views.pages.index_reset'),
 )
