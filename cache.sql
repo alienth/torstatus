@@ -373,13 +373,13 @@ $$ LANGUAGE plpgsql;
 -- TRIGGERS -----------------------------------------------------------
 -- Add descriptors
 CREATE TRIGGER add_descriptor
-    BEFORE UPDATE OR INSERT ON public.descriptor
+    AFTER UPDATE OR INSERT ON public.descriptor
     FOR EACH ROW
     EXECUTE PROCEDURE update_descriptor();
 
 -- Add statusentries
 CREATE TRIGGER add_statusentry
-    BEFORE UPDATE OR INSERT ON public.statusentry
+    AFTER UPDATE OR INSERT ON public.statusentry
     FOR EACH ROW
     EXECUTE PROCEDURE update_statusentry();
 
