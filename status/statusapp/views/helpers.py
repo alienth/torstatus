@@ -452,8 +452,8 @@ def get_order(request):
     @return: The sorting parameter and order as specified by the
         HttpRequest object.
     """
-    DEFAULT_LISTING = 'nickname'
 
+    # Options to sort from.
     options = ['nickname', 'fingerprint', 'country',
                 'bandwidthkbps','uptime','published',
                 'hostname', 'address', 'orport',
@@ -462,11 +462,16 @@ def get_order(request):
                 'isexit', 'isfast','isguard', 'ishibernating',
                 'ishsdir', 'isnamed', 'isstable', 'isrunning',
                 'isvalid']
-    orders = ['ascending', 'descending']
 
+    #The default column to sort by if none specified.
+    DEFAULT_LISTING = 'nickname'
+    orders = ['ascending', 'descending']
+    
     advanced_order = ''
     advanced_listing = ''
     
+    # Gets the order and listing from the cookie then validates
+    # by comparison with specified sort columns
     if request.GET:
         advanced_order = request.GET.get('sortOrder', '')
         advanced_listing = request.GET.get('sortListing', '')
@@ -475,19 +480,31 @@ def get_order(request):
         request.session['sortOrder'] = advanced_order
         request.session['sortListing'] = advanced_listing
         
+    # Returns appropriate sort preference
     if 'sortOrder' in request.session and 'sortListing' in request.session:
         if request.session['sortOrder'] == 'ascending':
             return request.session['sortListing']
         elif request.session['sortOrder'] == 'descending':
             return '-' + request.session['sortListing']
 
+    # If none specified returns default ordering.
     return DEFAULT_LISTING
 
 
 def search_cookie_reset(request):
+    """
+    Function to clear the search filters parameters and orderings.
 
+    @type request: HttpRequest
+    @param request: The HttpRequest provided by the client
+    @rtype: HttpResponse
+    @returns: the request object.
+    """
+    
+    #These are the relevant cookie keys we want to delete.
     SEARCH_COOKIE_KEYS = ['filters', 'search', 'sortOrder', 'sortListing']
 
+    # Loop goes through and erases them.
     for key in SEARCH_COOKIE_KEYS:
         if key in request.session:
             del request.session[key]

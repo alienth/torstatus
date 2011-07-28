@@ -48,13 +48,16 @@ def current_results_csv(request):
     active_relays = ActiveRelay.objects.filter(
                     validafter=last_va).order_by('nickname')
 
-    #new way of filtering but it would be nice to abstract to another method
+    #This filters the results set using the advanced search filters
+    # as well as the basic search input if need be.
     order = ''
     basic_input = ''
 
     if 'search' in request.session:
         basic_input = request.session['search']
 
+    # the get_order function in helpers.py get's the desired ordering
+    # of the result set from the cookie.
     order = get_order(request)
         
     if basic_input:

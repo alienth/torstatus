@@ -64,7 +64,8 @@ def index(request):
         in the network as well as aggregate information about the
         network itself.
     """
-
+    
+    # Resets the query filters and sort parameters
     reset = request.GET.get('reset', '')
     if reset == 'True':
         search_cookie_reset(request)
@@ -75,21 +76,26 @@ def index(request):
     active_relays = ActiveRelay.objects.filter(
                     validafter=last_validafter).order_by('nickname')
 
+    # Checks if there is a basic search parameter
     basic_input = request.GET.get('search', '')
-    order = ''
 
+    # Stores parameter in cookie
     if basic_input:
         request.session['search'] = basic_input
     elif 'search' in request.session:
         basic_input = request.session['search']
 
+    # Get's the appropriate order from the cookie
+    order = ''
     order = get_order(request)
 
+    # Passes to the template whether the columns are ascending or not
     if order[0] == '-':
         ascending_or_descending = 'ascending'
     else:
         ascending_or_descending = 'descending'
 
+    # Basic search action path.
     if basic_input:
         if 'filters' in request.session:
             del request.session['filters']
@@ -98,9 +104,11 @@ def index(request):
                         Q(fingerprint__istartswith=basic_input) | \
                         Q(address__istartswith=basic_input)).\
                         order_by(order)
+
+    # Advanced search action path.
     else:
-        if 'search' in request.session:
-            del request.session['search']
+        #if 'search' in request.session:
+            #del request.session['search']
         filter_params = get_filter_params(request)
         active_relays = active_relays.filter(
                         **filter_params).order_by(order)
@@ -409,7 +417,7 @@ def display_options(request):
         # than zero.
         try:
             supplied_pp = int(request.GET.get('pp', ''))
-            if supplied_pp > 1:
+            if supplied_pp > 1 and supplied_pp < 1000000:
                 request.session['perpage'] = supplied_pp
         except ValueError:
             pass
