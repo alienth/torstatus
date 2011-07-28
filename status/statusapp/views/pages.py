@@ -43,6 +43,8 @@ DISPLAYABLE_COLUMNS = set(('Country Code', 'Router Name', 'Bandwidth',
                             'BadExit', 'Fingerprint', 
                             'LastDescriptorPublished', 'Contact', 'BadDir'))
 
+SEARCH_COOKIE_KEYS = ['filters', 'search', 'sort_filter', 'sortOrder', 'sortListing']
+
 
 def splash(request):
     """
@@ -52,61 +54,12 @@ def splash(request):
 
 
 def index_reset(request):
-    if 'filters' in request.session:
-        del request.session['filters']
-    if 'search' in request.session:
-        del request.session['search']
-    if 'sort_filter' in request.session:
-        del request.session['sort_filter']
-    if 'sortOrder' in request.session:
-        del request.session['sortOrder']
-    if 'sortListing' in request.session:
-        del request.session['sortListing']
+
+    for key in SEARCH_COOKIE_KEYS:
+        if key in request.session:
+            del request.session[key]
+
     return index(request, '')
-
-def get_order(request):
-
-    options = ['nickname', 'fingerprint', 'contact',
-                   'bandwidthkbps', 'uptime', 'country',
-                   'address', 'orport', 'dirport',
-                   'isbaddirectory', 'isbadexit',]
-    orders = ['ascending', 'descending']
-    sort_order = ''
-    order_column_name = ''
-    
-    an_order = request.GET.get('sortOrder', '')
-    an_listing = request.GET.get('sortListing', '')
-    valid = False
-
-    if 'sort_filter' in request.session:
-        sort_filter = request.session['sort_filter']
-        underscore_count = sort_filter.count('_')
-        if underscore_count == 1:
-            valid = True
-
-        if valid:
-            order_column_name, sort_order = sort_filter.split('_')
-
-        if order_column_name in options:
-            if sort_order == 'ascending':
-                return order_column_name, 'descending'
-            elif sort_order == 'descending':
-                return '-' + order_column_name, 'ascending'
-        else:
-            valid = False
-
-    if an_listing in options and an_order in orders:
-        request.session['sortOrder'] = an_order
-        request.session['sortListing'] = an_listing
-        
-    if 'sortOrder' in request.session and 'sortListing' in request.session:
-        if request.session['sortOrder'] == 'ascending':
-            return request.session['sortListing'], 'descending'
-        elif request.session['sortOrder'] == 'descending':
-            return '-' + request.session['sortListing'], 'ascending'
-
-
-    return None, 'ascending'
 
 
 def index(request, sort_filter):
@@ -129,21 +82,17 @@ def index(request, sort_filter):
                     validafter=last_validafter).order_by('nickname')
 
     basic_input = request.GET.get('search', '')
+    order = ''
+
     if basic_input:
         request.session['search'] = basic_input
     elif 'search' in request.session:
         basic_input = request.session['search']
 
-    order = 'nickname'
-
     if sort_filter:
         request.session['sort_filter'] = sort_filter
-        order, ascending_or_descending = get_order(request)
-    else:
-        order, ascending_or_descending = get_order(request)
 
-    if not order:
-        order = 'nickname'
+    order, ascending_or_descending = get_order(request)
 
     if basic_input:
         if 'filters' in request.session:
@@ -523,14 +472,9 @@ def display_options(request):
 
 def advanced_search(request):
 
-    if 'filters' in request.session:
-        del request.session['filters']
-    if 'search' in request.session:
-        del request.session['search']
-    if 'sortOrder' in request.session:
-        del request.session['sortOrder']
-    if 'sortListing' in request.session:
-        del request.session['sortListing']
+    for key in SEARCH_COOKIE_KEYS:
+        if key in request.session:
+            del request.session[key]
 
     search_value = request.GET.get('search', '')
 

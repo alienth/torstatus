@@ -437,8 +437,9 @@ def get_filter_params(request):
     filters = request.session['filters']
     return filters
 
+"""
 def get_order(request):
-    """
+    
     Get the sorting parameter and order from the user via the
     HttpRequest.
 
@@ -450,7 +451,7 @@ def get_order(request):
     @rtype: C{string}
     @return: The sorting parameter and order as specified by the
         HttpRequest object.
-    """
+    
     # Get the order bit -- that is, '-' or the empty string.
     # If neither descending or ascending is given, choose ascending.
     order = request.GET.get('sortOrder', 'ascending')
@@ -465,6 +466,67 @@ def get_order(request):
         param = 'nickname'
 
     return ''.join((orderbit, param))
+"""
+
+def get_order(request):
+    """
+    Get the sorting parameter and order from the user via the
+    HttpRequest.
+
+    This function returns 'nickname' if no order is specified or if
+    there is an error parsing the supplied information.
+
+    @type request: HttpRequest
+    @param request: The HttpRequest provided by the client.
+    @rtype: C{string}
+    @return: The sorting parameter and order as specified by the
+        HttpRequest object.
+    """
+    DEFAULT_ORDER = 'nickname'
+
+    options = ['nickname', 'fingerprint', 'country',
+                'bandwidthkbps','uptime','published',
+                'hostname', 'address', 'orport',
+                'dirport', 'contact', 'isauthority',
+                'isbaddirectory', 'isbadexit','isv2dir',
+                'isexit', 'isfast','isguard', 'ishibernating',
+                'ishsdir', 'isnamed', 'isstable', 'isrunning',
+                'isvalid']
+    orders = ['ascending', 'descending']
+
+    sort_order = ''
+    order_column_name = ''
+    advanced_order = ''
+    advanced_listing = ''
+    
+    if request.GET:
+        advanced_order = request.GET.get('sortOrder', '')
+        advanced_listing = request.GET.get('sortListing', '')
+        
+    if 'sort_filter' in request.session:
+        sort_filter = request.session['sort_filter']
+        underscore_count = sort_filter.count('_')
+
+        if underscore_count == 1:
+            order_column_name, sort_order = sort_filter.split('_')
+
+        if order_column_name in options:
+            if sort_order == 'ascending':
+                return order_column_name, 'descending'
+            elif sort_order == 'descending':
+                return '-' + order_column_name, 'ascending'
+
+    if advanced_listing in options and advanced_order in orders:
+        request.session['sortOrder'] = advanced_order
+        request.session['sortListing'] = advanced_listing
+        
+    if 'sortOrder' in request.session and 'sortListing' in request.session:
+        if request.session['sortOrder'] == 'ascending':
+            return request.session['sortListing'], 'descending'
+        elif request.session['sortOrder'] == 'descending':
+            return '-' + request.session['sortListing'], 'ascending'
+
+    return DEFAULT_ORDER, 'ascending'
 
 
 def gen_list_dict(active_relays):
