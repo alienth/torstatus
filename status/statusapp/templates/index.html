@@ -82,7 +82,7 @@
 	                                      {% endif %}
 	                                      {% endif %}
 	                                      {% endif %}
-	                                      ><a href="/index/sort/{{column_value_name|key:column_name}}_{{ascending_or_descending}}">
+	                                      ><a href="/index/?sortListing={{column_value_name|key:column_name}}&sortOrder={{ascending_or_descending}}">
 	        {% if column_name == "Country Code" %} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {% else %} {{column_name}} {% endif %}</a></th>
 	    {% endif %}
 	    {% endif %}

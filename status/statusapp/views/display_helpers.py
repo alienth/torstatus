@@ -10,6 +10,7 @@ SORT_OPTIONS_ORDER = ['Router Name', 'Fingerprint', 'Country Code',
                     'Bad Exit', 'Directory', 'Exit', 'Fast', 'Guard',
                     'Hibernating', 'HS Directory', 'Named',
                     'Stable', 'Running', 'Valid',]
+
 SORT_OPTIONS = {'Router Name': 'nickname',
                 'Fingerprint': 'fingerprint',
                 'Country Code': 'country',

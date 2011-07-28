@@ -43,8 +43,6 @@ DISPLAYABLE_COLUMNS = set(('Country Code', 'Router Name', 'Bandwidth',
                             'BadExit', 'Fingerprint', 
                             'LastDescriptorPublished', 'Contact', 'BadDir'))
 
-SEARCH_COOKIE_KEYS = ['filters', 'search', 'sort_filter', 'sortOrder', 'sortListing']
-
 
 def splash(request):
     """
@@ -53,16 +51,7 @@ def splash(request):
     return render_to_response("splash.html")
 
 
-def index_reset(request):
-
-    for key in SEARCH_COOKIE_KEYS:
-        if key in request.session:
-            del request.session[key]
-
-    return index(request, '')
-
-
-def index(request, sort_filter):
+def index(request):
     """
     Supply a dictionary to the index.html template consisting of a list
     of active relays.
@@ -75,6 +64,11 @@ def index(request, sort_filter):
         in the network as well as aggregate information about the
         network itself.
     """
+
+    reset = request.GET.get('reset', '')
+    if reset == 'True':
+        search_cookie_reset(request)
+
     # Get all relays in last consensus
     last_validafter = ActiveRelay.objects.aggregate(
                       last=Max('validafter'))['last']
@@ -89,10 +83,12 @@ def index(request, sort_filter):
     elif 'search' in request.session:
         basic_input = request.session['search']
 
-    if sort_filter:
-        request.session['sort_filter'] = sort_filter
+    order = get_order(request)
 
-    order, ascending_or_descending = get_order(request)
+    if order[0] == '-':
+        ascending_or_descending = 'ascending'
+    else:
+        ascending_or_descending = 'descending'
 
     if basic_input:
         if 'filters' in request.session:
@@ -472,9 +468,7 @@ def display_options(request):
 
 def advanced_search(request):
 
-    for key in SEARCH_COOKIE_KEYS:
-        if key in request.session:
-            del request.session[key]
+    search_cookie_reset(request)
 
     search_value = request.GET.get('search', '')
 

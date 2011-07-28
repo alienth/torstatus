@@ -27,9 +27,8 @@ def current_results_csv(request):
     @return: csv formatted current queryset
     """
     current_columns = request.session['currentColumns']
-
-
     undisplayed_columns = ['Hostname', 'Valid', 'Running', 'Named']
+
     # Don't provide certain flag information in the csv
     #need to clean this up a bit
 
@@ -52,16 +51,11 @@ def current_results_csv(request):
     #new way of filtering but it would be nice to abstract to another method
     order = ''
     basic_input = ''
+
     if 'search' in request.session:
         basic_input = request.session['search']
-        sort_filter = ''
-    elif 'sort_filter' in request.session:
-        sort_filter = request.session['sort_filter']
 
-    order, ascending_or_descending = get_order(request)
-
-    if not order:
-        order = 'nickname'
+    order = get_order(request)
         
     if basic_input:
         active_relays = active_relays.filter(
