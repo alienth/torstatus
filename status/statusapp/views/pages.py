@@ -28,13 +28,13 @@ CURRENT_COLUMNS = ['Country Code', 'Router Name', 'Bandwidth',
                    'Uptime', 'IP', 'Icons', 'ORPort',
                    'DirPort', 'BadExit', 'Named', 'Exit',
                    'Authority', 'Fast', 'Guard', 'Hibernating',
-                   'Stable', 'V2Dir', 'Platform',]
+                   'Stable', 'V2Dir', 'Platform']
 
 AVAILABLE_COLUMNS = ['Fingerprint', 'LastDescriptorPublished',
-                     'Contact', 'BadDir',]
+                     'Contact', 'BadDir']
 
 NOT_MOVABLE_COLUMNS = ['Named', 'Exit', 'Authority', 'Fast', 'Guard',
-                       'Hibernating', 'Stable', 'V2Dir', 'Platform',]
+                       'Hibernating', 'Stable', 'V2Dir', 'Platform']
 
 DISPLAYABLE_COLUMNS = set(('Country Code', 'Router Name', 'Bandwidth',
                             'Uptime', 'IP', 'Icons', 'ORPort',
@@ -65,7 +65,7 @@ def index(request):
     # See if the user wants to reset search and display preferences
     reset = request.GET.get('reset', '')
     if reset == 'True':
-        search_cookie_reset(request)
+        search_session_reset(request)
 
     # Get all relays in last consensus
     last_validafter = ActiveRelay.objects.aggregate(
@@ -117,9 +117,12 @@ def index(request):
         return redirect(url)
 
     # TODO: Eventually give client the option to view all relays
-    # on one page.
+    # on one page. The page needs to load faster before this
+    # is possible.
     all_relays = request.session.get('all', 0)
 
+    # If the user doesn't want to see all of the relays, then paginate
+    # results.
     if not all_relays:
         # Make sure entries per page is an integer. If not, or
         # if no value is specified, make entries per page 50.
@@ -144,8 +147,11 @@ def index(request):
         paginator = Paginator(active_relays, num_results)
         paged_relays = paginator.page(1)
 
+    # Convert the list of relays to a dictionary object
     paged_relays.object_list = gen_list_dict(paged_relays.object_list)
 
+    # Get the current columns from the session. If no current columns
+    # are defined, just use the default, CURRENT_COLUMNS
     current_columns = []
     if not ('currentColumns' in request.session):
         request.session['currentColumns'] = CURRENT_COLUMNS
@@ -175,22 +181,27 @@ def details(request, fingerprint):
     @rtype: HttpResponse
     @return: The L{ActiveRelay} information of the router.
     """
+    # We'll let the client look up a relay as long as it is in the
+    # ActiveRelay cache; it need not be in the last consensus
     poss_relay = ActiveRelay.objects.filter(
                  fingerprint=fingerprint).order_by('-validafter')[:1]
 
+    # If no such relay exists, display a 404 page with an informative
+    # debugging message.
     if not poss_relay:
         return render_to_response(
                 '404.html',
-                {'debug_message': 'The server could not find any '
-                                  'recently active relay with a '
+                {'debug_message': 'The server could not find any ' + \
+                                  'recently active relay with a ' + \
                                   'fingerprint of ' + fingerprint + '.'})
+
+    # Otherwise, at least one entry for the relay exists, so get the
+    # most recent entry for this relay
     relay = poss_relay[0]
 
-    # Some clients may want to look up old relays. Create an attribute
-    # to flag active and unactive relays.
+    # Create an attribute, 'active', to flag active/unactive relays.
     last_va = ActiveRelay.objects.aggregate(
               last=Max('validafter'))['last']
-
     if last_va != relay.validafter:
         relay.active = False
     else:
@@ -200,6 +211,12 @@ def details(request, fingerprint):
     # descriptor, its relay.descriptor value will not be null.
     if relay.descriptor:
         relay.hasdescriptor = True
+    else:
+        relay.hasdescriptor = False
+
+    # If the relay has a descriptor and the relay is active, calculate
+    # the adjusted uptime
+    if relay.hasdescriptor and relay.active:
         published = relay.published
         now = datetime.datetime.now()
         diff = now - published
@@ -207,13 +224,24 @@ def details(request, fingerprint):
                     diff.seconds + diff.days * 24 * 3600) * 10**6) \
                     / 10**6
         relay.adjuptime = relay.uptime + diff_sec
-    else:
-        relay.hasdescriptor = False
 
+    # TODO: eventually, we'll want to find a way to add a hostname
+    # attribute into the database instead of calculating it each time
+    # the details page is requested. It might be of interest on the
+    # index page as well.
+    # NOTE: getfqdn returns the IP address itself if no hostname is
+    # available, so there is no need to catch errors or null objects.
     relay.hostname = getfqdn(str(relay.address))
 
+    # Generate a dictionary mapping labels to
+    # values in a router details table
     relay_dict = gen_relay_dict(relay)
+
+    # Generate an alphabetical list of flags
     flags_list = gen_flags_list(relay)
+
+    # Generate a list of labels for which
+    # information about the relay exists
     options_list = gen_options_list(relay)
 
     template_values = {'relay': relay,
@@ -235,16 +263,20 @@ def whois(request, address):
     @rtype: HttpResponse
     @return: The WHOIS information of the L{address} as an HttpResponse.
     """
-    if not is_ipaddress(address):
-        error_msg = 'Unparsable IP address supplied.'
-        template_values = {'whois': error_msg, 'address': address}
-        return render_to_response('whois.html', template_values)
+    # Make sure that the given IP address is in fact an IP address
+    if is_ipaddress(address):
+        # NOTE: Linux/Unix specific command; would break on windows.
+        # TODO: Find a replacement for this command.
+        proc = subprocess.Popen(["whois %s" % address],
+                                  stdout=subprocess.PIPE,
+                                  shell=True)
+        whois = proc.communicate()[0]
 
-    proc = subprocess.Popen(["whois %s" % address],
-                              stdout=subprocess.PIPE,
-                              shell=True)
-
-    whois = proc.communicate()[0]
+    # If the given IP address is not a valid IP address, the whois
+    # information cannot be looked up. Supply helpful debugging
+    # information in this case.
+    else:
+        whois = 'Unparsable IP address supplied.'
 
     template_values = {'whois': whois, 'address': address}
     return render_to_response('whois.html', template_values)
@@ -360,6 +392,9 @@ def exitnodequery(request):
                                     exit_possible = False
                                 break
 
+                # Render a 'relays' list to response consisting only of
+                # the relays' nickname, fingerprint, and whether or not
+                # exiting is possible to the specified IP and port.
                 relays.append((nickname, fingerprint, exit_possible))
 
     template_values = {'is_router': is_router,
@@ -373,7 +408,7 @@ def exitnodequery(request):
     return render_to_response('nodequery.html', template_values)
 
 
-@cache_page(60 * 30)
+@cache_page(60 * 60)
 def networkstatisticgraphs(request):
     """
     Render an HTML template to response.
@@ -381,6 +416,8 @@ def networkstatisticgraphs(request):
     return render_to_response('statisticgraphs.html')
 
 
+# NOTE/TODO: When the index page loads faster, increase the upper bound
+MAX_PP = 200
 def display_options(request):
     """
     Let the user choose what columns should be displayed on the index
@@ -396,76 +433,96 @@ def display_options(request):
         available columns and the previous selection.
     """
     debug_message = ''
+
+    # If the user has specified a number of relays per page, save the
+    # input in the session.
     if 'pp' in request.GET:
         # Ensure that the supplied information is an integer between 1
-        # and 200, inclusive.
-        # NOTE/TODO: When the index page loads faster, increase the
-        # upper bound.
+        # and MAX_PP, inclusive.
         try:
             supplied_pp = int(request.GET.get('pp', ''))
-            assert 1 <= supplied_pp <= 200
+            assert 1 <= supplied_pp <= MAX_PP
             request.session['perpage'] = supplied_pp
+        # Display a helpful debug_message in the case of unusable input
         except (ValueError, AssertionError):
             debug_message = 'Unable to set \"Relays Per Page\" to' + \
                             ' the given value.\nPlease enter an' + \
-                            ' integer between 1 and 200, inclusive.'
+                            ' integer between 1 and ' + str(MAX_PP) + \
+                            ', inclusive.'
 
+    # Get the number of relays per page from the session, and if it
+    # doesn't exist, make it 50 by default.
     current_pp = int(request.session.get('perpage', 50))
 
     current_columns = []
     available_columns = []
     not_movable_columns = NOT_MOVABLE_COLUMNS
 
+    # If the user wants to reset column preferences, remove all
+    # column information from the session
     if ('resetPreferences' in request.GET):
         if 'currentColumns' in request.session:
             del request.session['currentColumns']
         if 'availableColumns' in request.session:
             del request.session['availableColumns']
 
+    # If no currentColumns and availableColumns are defined,
+    # save the defaults in the session
     if not ('currentColumns' in request.session and 'availableColumns'
             in request.session):
         request.session['currentColumns'] = CURRENT_COLUMNS
         request.session['availableColumns'] = AVAILABLE_COLUMNS
-    current_columns = request.session['currentColumns']
-    available_columns = request.session['availableColumns']
 
-    column_lists = [current_columns, available_columns, '']
-    if ('removeColumn' in request.GET and 'selected_removeColumn'
-        in request.GET):
-        column_lists = button_choice(request, 'removeColumn',
-                      'selected_removeColumn', current_columns,
-                      available_columns)
-    elif ('addColumn' in request.GET and 'selected_addColumn'
-          in request.GET):
-        column_lists = button_choice(request, 'addColumn',
-                'selected_addColumn', current_columns, available_columns)
-    elif ('upButton' in request.GET and 'selected_removeColumn'
-          in request.GET):
-        if not(request.GET['selected_removeColumn'] in
-               not_movable_columns):
-            column_lists = button_choice(request, 'upButton',
-                          'selected_removeColumn', current_columns,
-                          available_columns)
-    elif ('downButton' in request.GET and 'selected_removeColumn'
-          in request.GET):
-        if not(request.GET['selected_removeColumn'] in
-               not_movable_columns):
-            column_lists = button_choice(request, 'downButton',
-                          'selected_removeColumn', current_columns,
-                          available_columns)
+    # Now there is guaranteed to be currentColumns and availableColumns
+    # information in the session, so get it
+    # Current columns
+    curr = request.session['currentColumns']
+    # Available columns
+    avail = request.session['availableColumns']
+    # Selected column/entry
+    sel = ''
 
-    template_values = {'currentColumns': column_lists[0],
-                       'availableColumns': column_lists[1],
-                       'selectedEntry': column_lists[2],
+    # The user wants to remove a column
+    if ('removeColumn' in request.GET and
+        'selected_removeColumn' in request.GET):
+        curr, avail, sel = button_choice(request, 'remove',
+                           'selected_removeColumn', curr, avail)
+
+    # The user wants to add a column
+    elif ('addColumn' in request.GET and
+          'selected_addColumn' in request.GET):
+        curr, avail, sel = button_choice(request, 'add',
+                           'selected_addColumn', curr, avail)
+
+    # The user wants to move a column 'up' in the
+    # list of current columns
+    elif ('upButton' in request.GET and
+          'selected_removeColumn' in request.GET and
+          request.GET['selected_removeColumn'] not in not_movable_columns):
+        curr, avail, sel = button_choice(request, 'up',
+                           'selected_removeColumn', curr, avail)
+
+    # The user wants to move a column 'down' in the
+    # list of current columns
+    elif ('downButton' in request.GET and
+          'selected_removeColumn' in request.GET and
+          request.GET['selected_removeColumn'] not in not_movable_columns):
+        curr, avail, sel = button_choice(request, 'down',
+                           'selected_removeColumn', curr, avail)
+
+    template_values = {'currentColumns': curr,
+                       'availableColumns': avail,
+                       'selectedEntry': sel,
                        'current_pp': current_pp,
                        'debug_message': debug_message}
 
     return render_to_response('displayoptions.html', template_values)
 
 
+# TODO: Find out how Vlad wrote this, touch it up, and document it.
 def advanced_search(request):
 
-    search_cookie_reset(request)
+    search_session_reset(request)
 
     search_value = request.GET.get('search', '')
 

@@ -57,7 +57,6 @@ table.relayTable {
 table#legend {
     width: 300px;
     font-size: 0.813em;
-    position: center;
     margin-left: auto;
     margin-right: auto;
 }

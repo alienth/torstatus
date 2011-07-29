@@ -45,7 +45,7 @@
 {% if paged_relays.object_list %}
 <table>
         {% if paged_relays.has_previous %}
-        <td id="paginatorLinks"><a class="pageLinks" href="?page={{ paged_relays.previous_page_number }}">⇽</a></td>
+        <td id="paginatorLinks"><a class="pageLinks" href="?page={{ paged_relays.previous_page_number }}">&#8701;</a></td>
         {% endif %}
 
         {% if paged_relays.number > 2 %}
@@ -75,7 +75,7 @@
         {% endif %}
 
         {% if paged_relays.has_next %}
-        <td id="paginatorLinks"><a class="pageLinks" href="?page={{ paged_relays.next_page_number }}">⇾</a></td>
+        <td id="paginatorLinks"><a class="pageLinks" href="?page={{ paged_relays.next_page_number }}">&#8702;</a></td>
         {% endif %}
     </tr>
 </table>
@@ -89,6 +89,7 @@
 		{% endif %}
 		{% else %}
 		{% if column_name not in not_columns %}
+        {# TODO: add &uarr; and &darr; #}
         <th class="relayHeader hoverable" onClick="document.location.href='/index/?sortListing={{ column_value_name|key:column_name }}&sortOrder={{ ascending_or_descending }}';" {% if column_name == "Router Name" %}
 	                                            id="routerName"
 	                                      {% else %}
@@ -144,10 +145,10 @@
                 {% for icon in icons_list %}
                     {% if icon in current_columns %}
                         {% if icon == "Platform" %}
-                        <img src="/static/img/os-icons/{{ relay|field_value:icon|get_os }}.png" alt="{{ relay|field_value:icon|get_os }}" title="{% with plaform as relay|field_value:icon %}{% if platform %}{{ platform }}{% else %}Platform Not Available{% endif %}{% endwith %}">
+                            <img src="/static/img/os-icons/{{ relay|field_value:icon|get_os }}.png" alt="{{ relay|field_value:icon|get_os }}" title="{% if relay|field_value:icon %}{{ relay|field_value:icon }}{% else %}Platform Not Available{% endif %}">
                         {% else %}
                         {% if relay|field_value:icon == 1 %}
-                            <img src="/static/img/status/{{icon}}.png" alt="{{icon}}" title="{{icon}}">
+                            <img src="/static/img/status/{{ icon }}.png" alt="{{ icon }}" title="{{ icon }}">
                         {% endif %}
                         {% endif %}
                     {% endif %}
@@ -163,7 +164,7 @@
                         <img src="/static/img/bg_no.png" width="12" height="12" alt="Not a Bad Exit" title="Not a Bad Exit">
                     {% endif %}
                 {% else %}
-                    {{ relay|field_value:column_name }}
+                    {{ relay|field_value:column_name|default:'None' }}
                 {% endif %}
             {% endif %}
             </td>

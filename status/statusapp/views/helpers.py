@@ -8,15 +8,12 @@ import datetime
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpRequest, HttpResponse
 
-# Matplotlib-specific import statements -------------------------------
-import matplotlib
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
-
 # TorStatus-specific import statements --------------------------------
 from statusapp.models import Bwhist, Descriptor
 
 # INIT Variables ------------------------------------------------------
+# TODO: Move these variables to settings.py and refactor the code.
+# We're repeating ourselves way too much.
 COLUMN_VALUE_NAME = {'Country Code': 'country',
                      'Router Name': 'nickname',
                      'Bandwidth': 'bandwidthkbps',
@@ -117,56 +114,82 @@ SORT_OPTIONS = set((
                 'longitude'
                 ))
 
+SEARCH_SESSION_KEYS = set(('filters', 'search',
+                           'sortOrder', 'sortListing'))
+
+DEFAULT_LISTING = 'nickname'
+
 
 def button_choice(request, button, field, current_columns,
         available_columns):
     """
-    Helper function that manages the changes in the L{columnpreferences}
-    arrays/lists.
+    Helper function that manages the changes in the
+    L{columnpreferences} lists.
 
+    @type request: C{HttpRequest}
+    @param request: The HttpRequest supplied by the client.
     @type button: C{string}
-    @param button: A string that indicates which button was clicked.
+    @param button: A string that indicates which button was clicked:
+        either C{'remove'}, C{'add'}, C{'up'}, or C{'down'}.
     @type field: C{string}
     @param field: A string that indicates from which preferences column
-        was the corresponding value selected
-        (ADD column, REMOVE column).
+        the corresponding value was selected: either
+        C{'selected_removeColumn'} or C{'selected_addColumn'}.
     @type current_columns: C{list}
     @param current_columns: A list of the columns that will be
         displayed on this session.
     @type available_columns: C{list}
     @param available_columns: A list of the columns that can be added
         to the current ones.
-    @rtype: list(list(int), list(int), string)
-    @return: column_lists
+    @rtype: C{tuple(list(int), list(int))}
+    @return: A triple consisting of the modified C{current_columns},
+        the modified C{available_columns}, and the selected column or
+        entry.
     """
+    # Get the selected column
     selection = request.GET[field]
-    if (button == 'removeColumn'):
+
+    # If the user wants to remove the column, add it to the list of
+    # available columns and remove it from the list of current columns
+    if (button == 'remove'):
         available_columns.append(selection)
         current_columns.remove(selection)
-    elif (button == 'addColumn'):
+
+    # If the user wants to add the column, add it to the list of
+    # current columms and remove it from the list of available columns
+    elif (button == 'add'):
         current_columns.append(selection)
         available_columns.remove(selection)
-    elif (button == 'upButton'):
+
+    # If the user wants to move the column 'up' in priority, get the
+    # current position of the column. If it's greater than 0, it is
+    # possible to move the column 'up' by switching its position
+    # with the column above it.
+    elif (button == 'up'):
         selection_pos = current_columns.index(selection)
         if (selection_pos > 0):
             aux = current_columns[selection_pos - 1]
             current_columns[selection_pos - 1] = \
                            current_columns[selection_pos]
             current_columns[selection_pos] = aux
-    elif (button == 'downButton'):
+
+    # If the user wants to move the column 'down' in priority, get the
+    # current position of the column. If it's not already at the bottom
+    # of the list of current columns, it's possible to move the column
+    # 'down' by switching its position with the column below it.
+    elif (button == 'down'):
         selection_pos = current_columns.index(selection)
         if (selection_pos < len(current_columns) - 1):
             aux = current_columns[selection_pos + 1]
             current_columns[selection_pos + 1] = \
                            current_columns[selection_pos]
             current_columns[selection_pos] = aux
+
+    # Save the changes made in the session
     request.session['currentColumns'] = current_columns
     request.session['availableColumns'] = available_columns
-    column_lists = []
-    column_lists.append(current_columns)
-    column_lists.append(available_columns)
-    column_lists.append(selection)
-    return column_lists
+
+    return (current_columns, available_columns, selection)
 
 
 def is_ip_in_subnet(ip, subnet):
@@ -174,7 +197,9 @@ def is_ip_in_subnet(ip, subnet):
     Return True if the IP is in the subnet, return False otherwise.
 
     This implementation uses bitwise arithmetic and operators on
-    subnets.
+    IPv4 subnets. Currently, this implementation does not accomodate
+    IPv6 address/subnet definitions. This should be added in the
+    future, before Tor core accomodates IPv6 addresses and subnets.
 
     >>> is_ip_in_subnet('0.0.0.0', '0.0.0.0/8')
     True
@@ -202,8 +227,8 @@ def is_ip_in_subnet(ip, subnet):
     if (subnet == ip):
         return True
 
-    # If the IP doesn't match and no bits are provided, the IP is not
-    # in the subnet
+    # If the IP doesn't match and no bits are provided,
+    # the IP is not in the subnet
     if ('/' not in subnet):
         return False
 
@@ -239,10 +264,11 @@ def is_ip_in_subnet(ip, subnet):
     # 11111111.11111111.11111111.11111111.
     upper_bound = subnet_as_int | (~mask & 0xFFFFFFFF)
 
-    # Convert the given IP to an integer, as before.
+    # Convert the given IP to an integer, as before
     a, b, c, d = ip.split('.')
     ip_as_int = (int(a) << 24) + (int(b) << 16) + (int(c) << 8) + int(d)
 
+    # Now we can see if the IP is in the subnet or not
     if (ip_as_int >= lower_bound and ip_as_int <= upper_bound):
         return True
     else:
@@ -373,25 +399,6 @@ def port_match(dest_port, port_line):
     return False
 
 
-def sorting_link(sort_order, column_name):
-    """
-    Returns the proper URL after checking how the sorting is currently
-    set up.
-
-    @type sort_order: C{string}
-    @param sort_order: A string - the type of order
-        (ascending/descending).
-    @type column_name: C{string}
-    @param column_name: A string - the name of the column that is
-                    currently ordering by.
-    @rtype: C{string}
-    @return The proper link for sorting the tables.
-    """
-    if sort_order == "ascending":
-        return "/index/" + column_name + "_descending"
-    return "/index/" + column_name + "_ascending"
-
-
 def get_filter_params(request):
     """
     Get the filter preferences provided by the user via the
@@ -432,12 +439,15 @@ def get_filter_params(request):
                     key = '__'.join((search, criteriainput))
                     filters[key] = searchinput
 
+        # Save these filters in the session
         request.session['filters'] = filters
 
+    # Now the filters must be in the session. Get and return them.
     filters = request.session['filters']
     return filters
 
 
+# TODO: Understand how this works and document it.
 def get_order(request):
     """
     Get the sorting parameter and order from the user via the
@@ -452,8 +462,6 @@ def get_order(request):
     @return: The sorting parameter and order as specified by the
         HttpRequest object.
     """
-    DEFAULT_LISTING = 'nickname'
-
     options = ['nickname', 'fingerprint', 'country',
                 'bandwidthkbps','uptime','published',
                 'hostname', 'address', 'orport',
@@ -466,7 +474,7 @@ def get_order(request):
 
     advanced_order = ''
     advanced_listing = ''
-    
+
     if request.GET:
         advanced_order = request.GET.get('sortOrder', '')
         advanced_listing = request.GET.get('sortListing', '')
@@ -474,23 +482,30 @@ def get_order(request):
     if advanced_listing in options and advanced_order in orders:
         request.session['sortOrder'] = advanced_order
         request.session['sortListing'] = advanced_listing
-        
+
     if 'sortOrder' in request.session and 'sortListing' in request.session:
         if request.session['sortOrder'] == 'ascending':
             return request.session['sortListing']
         elif request.session['sortOrder'] == 'descending':
             return '-' + request.session['sortListing']
+    else:
+        return DEFAULT_LISTING
 
-    return DEFAULT_LISTING
 
+def search_session_reset(request):
+    """
+    Reset all search preferences specified in the session.
 
-def search_cookie_reset(request):
-
-    SEARCH_COOKIE_KEYS = ['filters', 'search', 'sortOrder', 'sortListing']
-
-    for key in SEARCH_COOKIE_KEYS:
-        if key in request.session:
-            del request.session[key]
+    @type request: C{HttpRequest}
+    @param request: The request object to remove search preferences
+        from.
+    @rtype: C{HttpRequest}
+    @return: The C{request} supplied with any references to
+        search filters in the session deleted.
+    """
+    for pref in SEARCH_SESSION_KEYS:
+        if pref in request.session:
+            del request.session[pref]
 
     return request
 
@@ -545,10 +560,11 @@ def gen_relay_dict(relay):
     Method that generates a dictionary of all the fields of a relay.
 
     @type relay: C{ActiveRelay}
-    @param relay: The relay for which the fields are going to be generated.
+    @param relay: The relay for which the fields are going to be
+        generated.
     @rtype: C{dict}
-    @return: Dictioanary of the Field Name(key): Field Value(value) for the
-            specific relay.
+    @return: Dictioanary of the Field Name(key): Field Value(value)
+        for the specific relay.
     """
     relay_dict = {'Router Name': relay.nickname,
                   'Fingerprint': relay.fingerprint,
@@ -583,12 +599,18 @@ def gen_relay_dict(relay):
                   'V2Dir': relay.isv2dir,
                   'HS Directory': relay.ishsdir,
                  }
+
+    # Hibernating and adjusted uptime are only available if the
+    # relay has a descriptor
     if relay.hasdescriptor:
         relay_dict['Hibernating'] = 1 if relay.ishibernating else 0
         relay_dict['Adjusted Uptime'] = relay.adjuptime
+
+    # Default values
     else:
         relay_dict['Hibernating'] = 0
         relay_dict['Adjusted Uptime'] = None
+
     return relay_dict
 
 
@@ -598,42 +620,65 @@ def gen_options_list(relay):
     on the details page of a specific relay.
 
     @type relay: C{ActiveRelay}
-    @param relay: The relay for which the list of fields will be generated
+    @param relay: The relay for which the list of fields will be
+        generated.
     @rtype: C{list}
     @return: List of the fields that will be displayed at the
         bottom of the details page.
     """
-    options_list = ['Router Name', 'Fingerprint', 'Active Relay',]
+    # This information will always be available and displayed
+    options_list = ['Router Name', 'Fingerprint', 'Active Relay']
+
+    # Only display adjusted uptime if the relay is active and
+    # has a descriptor
     if relay.active:
         if relay.hasdescriptor:
             options_list.append('Adjusted Uptime')
+
+    # If the relay is not active, specify when it was last active
     else:
         options_list.append('Last Consensus Present (GMT)')
+
+    # Information that should always be available and viewable
     options_list.extend(['IP Address', 'Hostname', 'Onion Router Port',
-                    'Directory Server Port', 'Country',
-                    'Latitude, Longitude',])
+                         'Directory Server Port', 'Country',
+                         'Latitude, Longitude'])
+
+    # Information that should be available and viewable if and
+    # only if the relay has a descriptor.
     if relay.hasdescriptor:
         descriptor_options_list = ['Platform / Version',
-                    'Last Descriptor Published (GMT)', 'Published Uptime',
-                    'Bandwidth (Burst/Avg/Observed - In Bps)', 'Contact',
-                    'Family',]
+                    'Last Descriptor Published (GMT)',
+                    'Published Uptime',
+                    'Bandwidth (Burst/Avg/Observed - In Bps)',
+                    'Contact', 'Family']
         options_list.extend(descriptor_options_list)
+
     return options_list
 
 def gen_flags_list(relay):
     """
-    Method that generates a list of the fields(flags) that will be displayed
-    on the details page of a specific relay.
+    Method that generates a list of the fields(flags) that will be
+    displayed on the details page of a specific relay.
 
     @type relay: C{ActiveRelay}
-    @param relay: The relay for which the list of fields will be generated
+    @param relay: The relay for which the list of fields will be
+        generated.
     @rtype: C{list}
-    @return: List of the fields(flags) that will be displayed at the
-        bottom of the details page.
+    @return: Alphabetical list of the fields(flags) that will be
+        displayed at the bottom of the details page.
     """
-    flags_list = ['Authority', 'Bad Directory', 'Bad Exit', 'Exit', 'Fast',
-                'Guard', 'HS Directory',]
+    ## This code structure avoids the use of any sort method,
+    ## since the list is guaranteed to be sorted.
+
+    # If the relay doesn't have a descriptor, we can't know whether
+    # or not the relay is hibernating, so don't generate that flag
+    # name in the list of flags.
+    flags_list = ['Authority', 'Bad Directory', 'Bad Exit', 'Exit',
+                  'Fast', 'Guard', 'HS Directory']
+
     if relay.hasdescriptor:
         flags_list.append('Hibernating')
+
     flags_list.extend(['Named', 'Stable', 'Running', 'Valid', 'V2Dir'])
     return flags_list

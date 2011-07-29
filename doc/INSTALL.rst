@@ -49,12 +49,13 @@ So, before importing data into the new database, run the following:
     | tordir=> \i /absolute/path/to/TorStatus/cache.sql
 
 TorStatus does not regularly use "old" relays. To delete old relays
-from the caching schema, add a crontab for the metrics:
+from the caching schema, add a crontab for the metrics user that looks
+something like the following:
 
-    | $ crontab -e
     | 35 * * * * psql -U metrics tordir -c 'SELECT * FROM cache.purge();'
 
-Now imported data will be added to the cache schema used with TorStatus.
+At this point, imported data will be added to the cache schema used
+with TorStatus.
 
 Note that if you have not previously configured postgreSQL, you may
 prefer to use a "password" verification system rather than a "trust"
@@ -101,7 +102,7 @@ let us know by sending e-mail to torstatus@gmail.com.
 
 3: Running Apache and Deployment
 ________________________________
-.. Just started this section still needs lots of work
+.. Incomplete
 
 First install Apache and mod_wsgi...
 > sudo apt-get install apache2 libapache2-mod-wsgi
