@@ -24,65 +24,65 @@ thankfully, called models).
 
 3: Directory Structure
 ----------------------
-Views are stored in status/statusapp/views. Views are organized by
+Views are stored in ``status/statusapp/views``. Views are organized by
 their functions: views that render a text/html object to response
-are stored in pages.py, views that render png images to response
-are stored in graphs.py, and functions that do not return an
-HttpResponse object are stored elsewhere as helper functions.
+are stored in ``pages.py``, views that render ``.png`` images to
+response are stored in ``graphs.py``, and functions that do not return
+an ``HttpResponse`` object are stored elsewhere as helper functions.
 
 4: Modules in statusapp
 -----------------------
 
-4.1: __init__.py
-................
-Contains a custom type cast for BIGINT[] arrays. This is placed in
+4.1: ``__init__.py``
+....................
+Contains a custom type cast for ``BIGINT[]`` arrays. This is placed in
 __init__.py because it is necessary that the custom type cast is
 run on startup. For more on why this type cast is necessary, consult
 __init__.py itself.
 
-4.2: models.py
-..............
+4.2: ``models.py``
+..................
 Contains the classes that corresponds to each table in the
 Tor Metrics database, where an object is analogous to a row in the
 table and a field is analogous to a column in the table.
 
-4.3: tests.py
-.............
+4.3: ``tests.py``
+.................
 Contains basic doctests where needed, mostly for helper functions and
 custom filters.
 
-4.4: urls.py
-............
-Contains the URLCONF for TorStatus pages. Most of urls.py consists of
-tuples with two entries: the first uses regular expressions to match
+4.4: ``urls.py``
+................
+Contains the ``URLCONF`` for TorStatus pages. Most of urls.py consists
+of tuples with two entries: the first uses regular expressions to match
 page requests, and the second specifies what method in views.py will be
 called to serve the page request.
 
-4.5: views
-..........
+4.5: ``views/``
+...............
 Contains the application logic used to serve each page request. Each
 "view" returns an HttpResponse object that refers to an HTML template
 that presents the information to the client.
 
-4.5.1: csvs.py
-~~~~~~~~~~~~~~
+4.5.1: ``csvs.py``
+~~~~~~~~~~~~~~~~~~
 Contains the views for generating comma-separated values files from
 the relay result set currently displayed.
 
-4.5.2: pages.py
-~~~~~~~~~~~~~~~
+4.5.2: ``pages.py``
+~~~~~~~~~~~~~~~~~~~
 Contains the views for "pages" of the TorStatus web application.
 
-4.5.3: graphs.py
-~~~~~~~~~~~~~~~~
+4.5.3: ``graphs.py``
+~~~~~~~~~~~~~~~~~~~~
 Contains the views for the graphs of the TorStatus web application.
 
-4.5.4: helpers.py
-~~~~~~~~~~~~~~~~~
-Contains helper functions for pages.py and graphs.py.
+4.5.4: ``helpers.py``
+~~~~~~~~~~~~~~~~~~~~~
+Contains helper functions for ``pages.py`` and ``graphs.py``.
 
-4.5.5: display_helpers.py
-~~~~~~~~~~~~~~~~~~~~~~~~~
+4.5.5: ``display_helpers.py``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Contains helper functions for the "Display Options" page.
 
 5: Design Decisions
@@ -134,17 +134,24 @@ information that is requested less than frequently.
 
 This schema works by holding descriptors that were published in the
 last 36 hours and by holding statusentries that were published in the
-last 4 hours and keeping one table, "active_relay", that is essentially
-a table that is the result of a join between the statusentry table
-and the descriptor table on the most recent information for each
-relay, though without any descriptor information or relay information
-older than a given interval of time (in this case, 36 hours and 4
-hours, respectively).
+last 4 hours and keeping one table, ``active_relay``, that is
+essentially a table that is the result of a ``LEFT JOIN`` between the
+statusentry table and the descriptor table on the most recent
+information for each relay, though without any descriptor information
+or relay information older than a given interval of time (in this case,
+36 hours and 4 hours, respectively).
 
 6: Issues
 ---------
 
-6.1: Templates
+6.1: Documentation
+..................
+We love Tor and Tor Metrics, but we're not sure much of our
+documentation in ``status/statusapp/models.py`` is accurate. Somebody
+more familiar with Tor Metrics should check our documentation for
+anything that is misleading or simply wrong.
+
+6.2: Templates
 ..............
 Template languages are slow. Django's template language is particularly
 slow. In the past, a few clients of TorStatus have communicated desires
@@ -162,7 +169,7 @@ Coffin. Coffin makes the switch from Django's template language
 to Jinja2's template language relatively painless, though there are a
 few key differences. Preliminary tests showed pages rendering 5-6
 times faster using the Jinja2 template language; if you'd like to test
-this for yourself, checkout the branch called "redesign_jinja_coffin".
+this for yourself, checkout the branch called ``redesign_jinja_coffin``.
 Other template languages for python pride themselves on being the
 fastest template languages around, such as Cheetah and Tenjin.
 However, neither of these template languages are very syntactically
@@ -185,12 +192,12 @@ should be generated only once with respect to the value of
 each relay. We're not sure that django offers support for such a
 mechanism.
 
-6.2: Page Sizes
+6.3: Page Sizes
 ...............
 Thanks to gzip compression, many page sizes are smaller than the page
 sizes of the old implementation. However, CSS files are not compressed,
 and many images (including flags, but especially the image in the
-header) are far too large to expect any torified client to download
+header) are far too large to expect torified clients to download
 happily (in my opinion).
 
 There is a lot of django middleware that handles stylesheets and static
