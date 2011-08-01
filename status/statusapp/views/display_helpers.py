@@ -121,22 +121,3 @@ FILTER_OPTIONS = {'Authority': 'isauthority',
                   'Running': 'isrunning',
                   'Valid': 'isvalid',
                  }
-# Dictionary that maps the declared variables to variables
-# in actual code.
-ADVANCED_SEARCH_DECLR = {'sort_options_order': SORT_OPTIONS_ORDER,
-                         'sort_options': SORT_OPTIONS,
-                         'search_options_fields_order':
-                                    SEARCH_OPTIONS_FIELDS_ORDER,
-                         'search_options_fields': SEARCH_OPTIONS_FIELDS,
-                         'search_options_fields_booleans': 
-                                    SEARCH_OPTIONS_FIELDS_BOOLEANS,
-                         'search_options_booleans_order':
-                                    SEARCH_OPTIONS_BOOLEANS_ORDER,
-                         'search_options_booleans': SEARCH_OPTIONS_BOOLEANS,
-                         'filter_options_order': FILTER_OPTIONS_ORDER,
-                         'filter_options': FILTER_OPTIONS,
-                        }
-
-
-# Index Template Helpers ---------------------------------------------
-

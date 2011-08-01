@@ -73,16 +73,6 @@ def index(request):
     active_relays = ActiveRelay.objects.filter(
                     validafter=last_validafter).order_by('nickname')
 
-    # See if the user has defined a "basic search", i.e. if the
-    # user has supplied a search term on the splash page
-    basic_input = request.GET.get('search', '')
-
-    # Stores parameter in cookie
-    if basic_input:
-        request.session['search'] = basic_input
-    elif 'search' in request.session:
-        basic_input = request.session['search']
-
     # Get the order specified by session.request
     order = get_order(request)
     if order.startswith('-'):
@@ -90,12 +80,50 @@ def index(request):
     else:
         ascending_or_descending = 'descending'
 
+    # See if the user has defined a "basic search", i.e. if the
+    # user has supplied a search term on the splash page
+    basic_input = request.GET.get('search', '')
+
+    # See also if the user has defined an "advanced search", i.e., if
+    # the user has supplied a search term on the advanced search page
+    advanced_input = get_filter_params(request)
+
+    # If the user defines both basic search parameters as well as
+    # advanced search parameters via a GET, use only the advanced
+    # search parameters
+    if basic_input and advanced_input:
+        basic_input = ''
+
+    # If the user has just defined a "basic search", save the
+    # search parameter in the session and delete the advanced
+    # search filters
+    if basic_input:
+        request.session['search'] = basic_input
+        if 'filters' in request.session:
+            del request.session['filters']
+
+    # Otherwise, if the user has just defined an "advanced search",
+    # save the advanced search parameters in the session and delete
+    # the basic search parameter
+    elif advanced_input:
+        advanced_input = get_filter_params(request)
+        if 'search' in request.session:
+            del request.session['search']
+
+    # If neither a basic search nor an advanced search was just
+    # defined, get the search information from the session
+    else:
+        basic_input = request.session.get('search', '')
+        advanced_input = request.session.get('filters', {})
+
+    # We should never have both basic_input AND advanced_input
+    # defined at this point.
+    assert not (basic_input and advanced_input)
+
     # If basic search input has been supplied, search the beginnings
     # of all fingerprints, nicknames, and IPs in the last consensus
     # and return any matches
     if basic_input:
-        if 'filters' in request.session:
-            del request.session['filters']
         active_relays = active_relays.filter(
                         Q(nickname__istartswith=basic_input) | \
                         Q(fingerprint__istartswith=basic_input) | \
@@ -105,9 +133,8 @@ def index(request):
     # Otherwise, an advanced search may have been defined, so filter
     # all relays by the parameters given
     else:
-        filter_params = get_filter_params(request)
         active_relays = active_relays.filter(
-                        **filter_params).order_by(order)
+                        **advanced_input).order_by(order)
 
     num_results = active_relays.count()
 
@@ -525,39 +552,21 @@ def display_options(request):
 
 # TODO: Find out how Vlad wrote this, touch it up, and document it.
 def advanced_search(request):
-
-    search_session_reset(request)
-
-    search_value = request.GET.get('search', '')
-
-    sort_options_order = ADVANCED_SEARCH_DECLR['sort_options_order']
-    sort_options = ADVANCED_SEARCH_DECLR['sort_options']
-
-    search_options_fields_order = ADVANCED_SEARCH_DECLR[
-                                    'search_options_fields_order']
-    search_options_fields = ADVANCED_SEARCH_DECLR['search_options_fields']
-    search_options_fields_booleans = ADVANCED_SEARCH_DECLR[
-                                    'search_options_fields_booleans']
-
-    search_options_booleans_order = ADVANCED_SEARCH_DECLR[
-                                    'search_options_booleans_order']
-    search_options_booleans = ADVANCED_SEARCH_DECLR['search_options_booleans']
-
-    filter_options_order = ADVANCED_SEARCH_DECLR['filter_options_order']
-    filter_options = ADVANCED_SEARCH_DECLR['filter_options']
-
-    template_values = {'search': search_value,
-                       'sortOptionsOrder': sort_options_order,
-                       'sortOptions': sort_options,
-                       'searchOptionsFieldsOrder': search_options_fields_order,
-                       'searchOptionsFields': search_options_fields,
-                       'searchOptionsFieldsBooleans':
-                                                search_options_fields_booleans,
+    """
+    The advanced search page for the TorStatus site.
+    """
+    #search_session_reset(request)
+    #
+    template_values = {'sortOptionsOrder': SORT_OPTIONS_ORDER,
+                       'sortOptions': SORT_OPTIONS,
+                       'searchOptionsFieldsOrder': SEARCH_OPTIONS_FIELDS_ORDER,
+                       'searchOptionsFields': SEARCH_OPTIONS_FIELDS,
+                       'searchOptionsFieldsBooleans': SEARCH_OPTIONS_FIELDS_BOOLEANS,
                        'searchOptionsBooleansOrder':
-                                                search_options_booleans_order,
-                       'searchOptionsBooleans': search_options_booleans,
-                       'filterOptionsOrder': filter_options_order,
-                       'filterOptions': filter_options,
+                                                SEARCH_OPTIONS_BOOLEANS_ORDER,
+                       'searchOptionsBooleans': SEARCH_OPTIONS_BOOLEANS,
+                       'filterOptionsOrder': FILTER_OPTIONS_ORDER,
+                       'filterOptions': FILTER_OPTIONS,
                       }
 
     return render_to_response('advanced_search.html', template_values)

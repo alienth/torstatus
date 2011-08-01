@@ -150,6 +150,7 @@ Now, create a file called
 following lines:
 
 ::
+
   import os, sys
   sys.path.append('/usr/local/www/EXAMPLE')
 
@@ -170,6 +171,7 @@ In this directory, make a file, here called
 (but be sure to replace www.example.com, example.com, and foo@bar.com):
 
 ::
+
   <VirtualHost *:80>
       ServerName www.example.com
       ServerAlias example.com

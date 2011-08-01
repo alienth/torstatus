@@ -402,52 +402,49 @@ def port_match(dest_port, port_line):
 def get_filter_params(request):
     """
     Get the filter preferences provided by the user via the
-    HttpRequest.
+    HttpRequest and store them in the session.
 
     @type request: HttpRequest
     @param request: The HttpRequest provided by the client
     @rtype: C{dict} of C{string} to C{string}
-    @return: A dictionary mapping query parameters to user-supplied
-        input.
+    @return: A dictionary mapping query parameters to only the
+        user-supplied input through a GET.
     """
     filters = {}
 
-    if 'filters' not in request.session:
-        # Add filters for flags only if the parameter is a 0 or a 1
-        for flag in FLAGS:
-            filt = request.GET.get(flag, '')
+    #if 'filters' not in request.session:
+    # Add filters for flags only if the parameter is a 0 or a 1
+    for flag in FLAGS:
+        filt = request.GET.get(flag, '')
+        if filt == '1':
+            filters[flag] = 1
 
-            if filt == '1':
-                filters[flag] = 1
+        elif filt == '0':
+            filters[flag] = 0
 
-            elif filt == '0':
-                filters[flag] = 0
+    # Add search filters only if a search term is provided. Search
+    # terms are denoted by s_[term]. Similarly, criteria is denoted
+    # by c_[term].
+    for search in SEARCHES:
+        search_param = ''.join(('s_', search))
+        searchinput = request.GET.get(search_param, '')
 
-        # Add search filters only if a search term is provided. Search
-        # terms are denoted by s_[term]. Similarly, criteria is denoted
-        # by c_[term].
-        for search in SEARCHES:
-            search_param = ''.join(('s_', search))
-            searchinput = request.GET.get(search_param, '')
+        if searchinput:
+            criteria_param = ''.join(('c_', search))
+            criteriainput = request.GET.get(criteria_param , '')
 
-            if searchinput:
-                criteria_param = ''.join(('c_', search))
-                criteriainput = request.GET.get(criteria_param , '')
+            # Format the key for django's filter
+            if criteriainput in CRITERIA:
+                key = '__'.join((search, criteriainput))
+                filters[key] = searchinput
 
-                # Format the key for django's filter
-                if criteriainput in CRITERIA:
-                    key = '__'.join((search, criteriainput))
-                    filters[key] = searchinput
-
-        # Save these filters in the session
+    # Save these filters in the session
+    if filters:
         request.session['filters'] = filters
 
-    # Now the filters must be in the session. Get and return them.
-    filters = request.session['filters']
     return filters
 
 
-# TODO: Understand how this works and document it.
 def get_order(request):
     """
     Get the sorting parameter and order from the user via the

@@ -48,13 +48,12 @@ def current_results_csv(request):
 
     # Filter the results set using the provided search filters in
     # the session
-    order = ''
-    basic_input = ''
-
-    if 'search' in request.session:
-        basic_input = request.session['search']
-
     order = get_order(request)
+    basic_input = request.session.get('search', '')
+    advanced_input = request.session.get('filters', {})
+
+    # We should never have both basic_input and advanced_input
+    assert not (basic_input and advanced_input)
 
     if basic_input:
         active_relays = active_relays.filter(
