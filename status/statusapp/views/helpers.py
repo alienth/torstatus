@@ -470,11 +470,13 @@ def get_order(request):
                 'isexit', 'isfast','isguard', 'ishibernating',
                 'ishsdir', 'isnamed', 'isstable', 'isrunning',
                 'isvalid']
+
     orders = ['ascending', 'descending']
 
     advanced_order = ''
     advanced_listing = ''
 
+    # Get the order and listing from the session
     if request.GET:
         advanced_order = request.GET.get('sortOrder', '')
         advanced_listing = request.GET.get('sortListing', '')
@@ -483,7 +485,9 @@ def get_order(request):
         request.session['sortOrder'] = advanced_order
         request.session['sortListing'] = advanced_listing
 
-    if 'sortOrder' in request.session and 'sortListing' in request.session:
+    # Return appropriate sort preference
+    if 'sortOrder' in request.session and \
+                   'sortListing' in request.session:
         if request.session['sortOrder'] == 'ascending':
             return request.session['sortListing']
         elif request.session['sortOrder'] == 'descending':

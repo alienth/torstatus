@@ -33,7 +33,8 @@ try running the following:
 
     | ``$ update-python-modules -f``
 
-For more about this bug, see http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=632217 .
+For more about this bug, see
+http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=632217.
 
 1: Installing the Database
 --------------------------
@@ -106,33 +107,111 @@ port that you would like TorStatus to run on:
 At this point, TorStatus should be running; navigate to
 ``localhost:[port]`` in your web browser to view it.
 
-3: Installing Apache
---------------------
-.. Incomplete
+3: Installing Apache and mod_wsgi
+---------------------------------
 
-First, install Apache and mod_wsgi:
+Two packages are most popular for embedding python into the Apache
+server: ``libapache2-mod-python`` and ``libapache2-mod-wsgi``. We've
+found the documentation on mod-wsgi extensive and the community
+helpful, so we recommend mod_wsgi. If you encounter any problems
+while installing mod_wsgi, additional documentation can be found at
+http://code.google.com/p/modwsgi/wiki.
 
-    | ``$ sudo aptitude install apache2 libapache2-mod-wsgi``
+First, install Apache and mod_wsgi. Note that apache2 may already
+be installed:
 
-You might want to make a folder to store your sites:
+    | ``# aptitude install apache2 libapache2-mod-wsgi``
 
-    | ``$ sudo mkdir /srv/www/``
+You might want to make a folder to store your sites. In this example,
+we'll make this folder ``/srv/www/``, but there are many other
+reasonable choices.
 
-If you want to set up a test server, create a hosts file:
+    | ``# mkdir /srv/www/``
 
-    | ``$ sudo nano /etc/hosts``
+We'll also create a ``torstatus`` folder to store the site pages:
 
-Get the appropriate packages. With a minimal debian sqeeze platform
-you should have the necessary packages already. Install the following
-packages:
+    | ``# mkdir /srv/www/torstatus/``
 
-    | ``$ sudo aptitude install apache2-mpm-worker apache2-utils apache2.2-bin apache2.2-common``
+Now we'll want to move our ``TorStatus`` project folder to the new
+location:
 
-Two packages, mod-python and mod_wsgi, are the most popular for
-embedding python into the Apache server.
+    | ``# mv /path/to/TorStatus/* /srv/www/torstatus/``
 
-libapache2-mod-python
-*recommend mod_wsgi*
+The basic file structure is taken care of at this point, but we still
+need to configure Apache and mod_wsgi. We'll create a ``.wsgi`` file
+for Apache and mod_wsgi in ``/srv/www/torstatus/status/apache/``.
 
-documentation for mod_wsgi is located at: code.google.com/p/modwsgi/wiki
-documentation for mod_python
+First, create a directory in ``torstatus/status/`` called ``apache``:
+
+    | ``# mkdir /srv/www/torstatus/status/apache/``
+
+Now, create a file called
+``/srv/www/torstatus/status/apache/django.wsgi`` that contains the
+following lines:
+
+::
+  import os, sys
+  sys.path.append('/usr/local/www/EXAMPLE')
+
+  os.environ['DJANGO_SETTINGS_MODULE'] = 'project.settings'
+
+  import django.core.handlers.wsgi
+
+  application = django.core.handlers.wsgi.WSGIHandler()``
+
+Once this is done, change directory to your apache directory entitled
+``sites-available``, this should be located at
+``/etc/apache2/sites-available``:
+
+    | ``# cd /etc/apache2/sites-available/``
+
+In this directory, make a file, here called
+``/etc/apache2/sites-available/ts``, that contains the following code
+(but be sure to replace www.example.com, example.com, and foo@bar.com):
+
+::
+  <VirtualHost *:80>
+      ServerName www.example.com
+      ServerAlias example.com
+      ServerAdmin foo@bar.com
+
+      <Directory /srv/www/torstatus/status/>
+          Order allow,deny
+          Allow from all
+      </Directory>
+
+      WSGIScriptAlias /ts /srv/www/torstatus/status/apache/django.wsgi
+
+      <Directory /srv/www/torstatus/status/apache>
+          Order allow,deny
+          Allow from all
+      </Directory>
+
+  </VirtualHost>
+
+The WSGIScriptAlias first argument is where the site is hosted, so
+the site will be hosted at http://localhost/example. The second
+argument is the path to the django.wsgi file.
+
+Now we need to let apache know that the site is active:
+
+    | ``# a2ensite example``
+
+This creates a link in the ``sites-enabled`` folder.
+
+Now if you reload apache using the script
+
+    | ``# /etc/init.d/apache2 reload``
+
+Now the site should be up and running at http://localhost/example.
+
+3.1: Troubleshooting Apache
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+There's much more to apache, and there is much that can go wrong. If
+you've never worked with Apache before, here are some things that we
+found helpful:
+
+Find and monitor the log files of apache in case of problems.
+
+Be careful with ``import`` statements, particularly when moving
+directories.

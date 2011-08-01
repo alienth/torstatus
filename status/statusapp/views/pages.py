@@ -76,6 +76,8 @@ def index(request):
     # See if the user has defined a "basic search", i.e. if the
     # user has supplied a search term on the splash page
     basic_input = request.GET.get('search', '')
+
+    # Stores parameter in cookie
     if basic_input:
         request.session['search'] = basic_input
     elif 'search' in request.session:
@@ -99,11 +101,10 @@ def index(request):
                         Q(fingerprint__istartswith=basic_input) | \
                         Q(address__istartswith=basic_input)).\
                         order_by(order)
+
     # Otherwise, an advanced search may have been defined, so filter
     # all relays by the parameters given
     else:
-        if 'search' in request.session:
-            del request.session['search']
         filter_params = get_filter_params(request)
         active_relays = active_relays.filter(
                         **filter_params).order_by(order)
@@ -167,6 +168,7 @@ def index(request):
                        'number_of_results': num_results,
                        'ascending_or_descending':
                                 ascending_or_descending}
+
     return render_to_response('index.html', template_values)
 
 
@@ -437,12 +439,14 @@ def display_options(request):
     # If the user has specified a number of relays per page, save the
     # input in the session.
     if 'pp' in request.GET:
+
         # Ensure that the supplied information is an integer between 1
         # and MAX_PP, inclusive.
         try:
             supplied_pp = int(request.GET.get('pp', ''))
             assert 1 <= supplied_pp <= MAX_PP
             request.session['perpage'] = supplied_pp
+
         # Display a helpful debug_message in the case of unusable input
         except (ValueError, AssertionError):
             debug_message = 'Unable to set \"Relays Per Page\" to' + \

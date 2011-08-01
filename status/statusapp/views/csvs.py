@@ -30,8 +30,6 @@ def current_results_csv(request):
     undisplayed_columns = ['Hostname', 'Valid', 'Running', 'Named']
 
     # Don't provide certain flag information in the csv
-    #need to clean this up a bit
-
     for column in undisplayed_columns:
         if column in current_columns:
             current_columns.remove(column)
@@ -48,7 +46,8 @@ def current_results_csv(request):
     active_relays = ActiveRelay.objects.filter(
                     validafter=last_va).order_by('nickname')
 
-    #new way of filtering but it would be nice to abstract to another method
+    # Filter the results set using the provided search filters in
+    # the session
     order = ''
     basic_input = ''
 
@@ -56,18 +55,19 @@ def current_results_csv(request):
         basic_input = request.session['search']
 
     order = get_order(request)
-        
+
     if basic_input:
         active_relays = active_relays.filter(
                         Q(nickname__istartswith=basic_input) | \
                         Q(fingerprint__istartswith=basic_input) | \
-                        Q(address__istartswith=basic_input)).order_by(order)
+                        Q(address__istartswith=basic_input)).order_by(
+                        order)
     else:
         filter_params = get_filter_params(request)
         active_relays = active_relays.filter(
                         **filter_params).order_by(order)
 
-    # Create the HttpResponse object with the appropriate CSV header.
+    # Create the HttpResponse object with the appropriate CSV header
     response = HttpResponse(mimetype='text/csv')
     response['Content-Disposition'] = 'attachment;\
             filename=current_results.csv'
@@ -75,10 +75,10 @@ def current_results_csv(request):
     rows = {}
     headers = {}
 
-    # Make columns keys to empty lists.
+    # Make columns keys to empty lists
     for column in current_columns: rows[column] = []
 
-    # Populates the row dictionary with all field values.
+    # Populates the row dictionary with all field values
     for relay in active_relays:
         fields_access = [
                 ("Router Name", relay.nickname),
