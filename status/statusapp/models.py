@@ -18,11 +18,12 @@ in the object's constructors.
 @group Models: L{Descriptor}, L{Extrainfo}, L{Bwhist}, L{Statusentry},
     L{Consensus}, L{Vote}, L{Connbidirect}, L{NetworkSize},
     L{NetworkSizeHour}, L{RelayCountries}, L{RelayPlatforms},
-    L{RelayVersions}, L{TotalBandwidth}, L{TotalBwhist}, L{BwhistFlags},
-    L{UserStats}, L{RelayStatusesPerDay}, L{ScheduledUpdates},
-    L{Updates}, L{Geoipdb}, L{RelaysMonthlySnapshots},
-    L{BridgeNetworkSize}, L{DirreqStats}, L{BridgeStats},
-    L{TorperfStats}, L{GettorStats}
+    L{RelayVersions}, L{TotalBandwidth}, L{TotalBwhist},
+    L{BwhistFlags}, L{UserStats}, L{RelayStatusesPerDay},
+    L{ScheduledUpdates}, L{Updates}, L{Geoipdb},
+    L{RelaysMonthlySnapshots}, L{BridgeNetworkSize}, L{DirreqStats},
+    L{BridgeStats}, L{TorperfStats}, L{GettorStats}, L{ActiveRelay},
+    L{ActiveDescriptor}
 """
 from django.db import models
 
@@ -130,13 +131,6 @@ class Descriptor(models.Model):
         db_table = u'descriptor'
 
     def __unicode__(self):
-        """
-        A simple string representation of the L{Descriptor} that
-        consists of the L{Descriptor}'s unique hash.
-
-        @rtype: str
-        @return: A simple description of the L{Descriptor} object.
-        """
         return self.descriptor
 
 
@@ -1148,6 +1142,42 @@ class ActiveDescriptor(models.Model):
     """
     Model for the most recent descriptors for each relay published in
     the last 24 hours.
+
+    @type descriptor: CharField (C{string})
+    @ivar descriptor: The unique descriptor hash of the relay.
+    @type nickname: CharField (C{string})
+    @ivar nickname: The nickname of the relay.
+    @type fingerprint: CharField (C{string})
+    @ivar fingerprint: The unique fingerprint hash of the relay.
+    @type published: DateTimeField (C{datetime})
+    @ivar published: The time that the descriptor associated with
+        the relay was published.
+    @type bandwidthavg: BigIntegerField (C{long})
+    @ivar bandwidthavg: The average bandwidth of the relay, in Bps.
+    @type bandwidthburst: BigIntegerField (C{long})
+    @ivar bandwidthburst: The burst bandwidth of the relay, in Bps.
+    @type bandwidthobserved: BigIntegerField (C{long})
+    @ivar bandwidthobserved: The observed bandwidth of the relay, in
+        Bps.
+    @type bandwidthkbps: BigIntegerField (C{long})
+    @ivar bandwidthkbps: The observed bandwidth of the relay, in KBps.
+    @type uptime: BigIntegerField (C{long})
+    @ivar uptime: The uptime of the relay in seconds.
+    @type uptimedays: BigIntegerField (C{long})
+    @ivar uptimedays: The uptime of the relay in days.
+    @type platform: CharField (C{string})
+    @ivar platform: The platform of the relay.
+    @type contact: CharField (C{string})
+    @ivar contact: The contact information of the operator of the
+        relay.
+    @type onionkey: CharField (C{string})
+    @ivar onionkey: The unique onionkey of the relay.
+    @type signingkey: CharField (C{string})
+    @ivar signingkey: The unique signing key of the relay.
+    @type exitpolicy: TextField (C{string})
+    @ivar exitpolicy: The exitpolicy information of the relay.
+    @type family: TextField (C{string})
+    @ivar family: The family that the relay belongs to.
     """
     descriptor = models.CharField(max_length=40, primary_key=True)
     nickname = models.CharField(max_length=19)
@@ -1278,7 +1308,7 @@ class ActiveRelay(models.Model):
     validafter = models.DateTimeField()
     nickname = models.CharField(max_length=19)
     fingerprint = models.CharField(max_length=40, primary_key=True)
-    address = models.CharField(max_length=15) # Make to ipaddr field
+    address = models.IPAddressField()
     orport = models.IntegerField()
     dirport = models.IntegerField()
     isauthority = models.BooleanField()

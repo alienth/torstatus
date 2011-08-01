@@ -54,6 +54,13 @@ table.relayTable {
     border-spacing: 0px;
 }
 
+table#legend {
+    width: 300px;
+    font-size: 0.813em;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 /* END Table ------------------------------------------ */
 
 /* Table Headers -------------------------------------- */
@@ -379,19 +386,4 @@ img#prevnexticon:hover {
     opacity: 1;
 }
 
-div#footer {
-    position: relative;
-    margin-top: -40px;
-    height: 40px;
-    clear: both;
-}
-
-div#wrap {
-    min-height: 100%;
-}
-
-div#main{
-    overflow:auto;
-    padding-bottom: 40px;
-}
 /* END Other ------------------------------------------ */

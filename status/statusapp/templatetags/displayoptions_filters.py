@@ -5,7 +5,7 @@ from django import template
 
 register = template.Library()
 
-COLUMN_VALUE_NAME = {'Country Code': 'geoip',
+COLUMN_VALUE_NAME = {'Country Code': 'country',
                      'Router Name': 'nickname',
                      'Bandwidth': 'bandwidthobserved',
                      'Uptime': 'uptime',
@@ -26,7 +26,7 @@ COLUMN_VALUE_NAME = {'Country Code': 'geoip',
                      'Directory': 'isv2dir',
                      'Platform': 'platform',
                      'Fingerprint': 'fingerprint',
-                     'Last Descriptor Published': 'published',
+                     'LastDescriptorPublished': 'published',
                      'Contact': 'contact',
                      'BadDir': 'isbaddirectory',
                     }
@@ -40,7 +40,7 @@ def movable(column_name):
     """
     not_movable_columns = set(("Named", "Exit", "Authority", "Fast",
                                "Guard", "Stable", "Running", "Valid",
-                               "Directory", "Platform", "Hibernating"))
+                               "V2Dir", "Platform", "Hibernating"))
     if column_name in not_movable_columns:
         return False;
     else:

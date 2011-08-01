@@ -35,8 +35,7 @@ CREATE TABLE active_relay (
     validafter TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     nickname CHARACTER VARYING(19) NOT NULL,
     fingerprint CHARACTER(40) NOT NULL,
-    -- address INET NOT NULL, can't seem to cast text to inet, see below.
-    address CHARACTER VARYING(15) NOT NULL,
+    address INET NOT NULL,
     orport INTEGER NOT NULL,
     dirport INTEGER NOT NULL,
     isauthority BOOLEAN DEFAULT FALSE NOT NULL,
@@ -75,7 +74,7 @@ CREATE TABLE active_relay (
 );
 
 -- No hostname, for now. I don't think this breaks anybody's heart.
--- Later, could do lookup with socket.getfqdn (python)
+-- Later, could do lookup with socket.getfqdn (plpythonu)
 -- CREATE TABLE hostname (
 --    address INET NOT NULL,
 --    hostname CHARACTER VARYING(255),
@@ -119,8 +118,8 @@ CREATE OR REPLACE FUNCTION update_statusentry()
             validafter = NEW.validafter,
             nickname = NEW.nickname,
             fingerprint = NEW.fingerprint,
-            -- address = NEW.address::INET, doesn't work
-            address = NEW.address,
+            -- varchar cast necessary to convert to INET
+            address = inet(NEW.address::varchar),
             orport = NEW.orport,
             dirport = NEW.dirport,
             isauthority = NEW.isauthority,
@@ -154,7 +153,7 @@ CREATE OR REPLACE FUNCTION update_statusentry()
             isv2dir, isv3dir, country, latitude, longitude)
         VALUES
             (NEW.validafter, NEW.nickname, NEW.fingerprint,
-             NEW.address, NEW.orport, NEW.dirport,
+             inet(NEW.address::varchar), NEW.orport, NEW.dirport,
              NEW.isauthority, NEW.isbadexit, NEW.isbaddirectory,
              NEW.isexit, NEW.isfast, NEW.isguard, NEW.ishsdir,
              NEW.isnamed, NEW.isstable, NEW.isrunning,
@@ -251,7 +250,11 @@ CREATE OR REPLACE FUNCTION update_descriptor()
             family = nfamily,
             ishibernating = nishibernating
         WHERE cache.active_relay.fingerprint = NEW.fingerprint
-        AND CASE WHEN cache.active_relay.published IS NULL THEN '1980-01-01 01:00:00' ELSE cache.active_relay.published END < NEW.published;
+        AND CASE
+            WHEN cache.active_relay.published IS NULL THEN '1980-01-01 01:00:00'
+            ELSE cache.active_relay.published
+            END
+        < NEW.published;
         IF ((SELECT COUNT(*) FROM cache.active_descriptor
              WHERE (descriptor = ndescriptor OR published > npublished)) > 0
              OR (npublished < (SELECT localtimestamp) - INTERVAL '72 hours'))
@@ -341,6 +344,9 @@ $$ LANGUAGE plpgsql;
 
 
 -- Purging functions --------------------------------------------------
+-- NOTE: currently, active relays use last known descriptor,
+-- no matter how old it is (provided that the relay has been
+-- continuously up since that descriptor has been published).
 -- Keep descriptors for no more than 36 hours
 CREATE OR REPLACE FUNCTION purge_descriptor()
 RETURNS INTEGER AS $$
@@ -373,13 +379,13 @@ $$ LANGUAGE plpgsql;
 -- TRIGGERS -----------------------------------------------------------
 -- Add descriptors
 CREATE TRIGGER add_descriptor
-    BEFORE UPDATE OR INSERT ON public.descriptor
+    AFTER UPDATE OR INSERT ON public.descriptor
     FOR EACH ROW
     EXECUTE PROCEDURE update_descriptor();
 
 -- Add statusentries
 CREATE TRIGGER add_statusentry
-    BEFORE UPDATE OR INSERT ON public.statusentry
+    AFTER UPDATE OR INSERT ON public.statusentry
     FOR EACH ROW
     EXECUTE PROCEDURE update_statusentry();
 

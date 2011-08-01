@@ -13,7 +13,12 @@
 {% block pageTitle %} Display Options {% endblock %}
 
 {% block mainPage %}
-
+<table align="center">
+    <tr>
+        <td id="debug">
+            {% if debug_message %}{{ debug_message|linebreaksbr }}{% else %}<br>{% endif %}<br><br></td>
+    </tr>
+</table>
 <table class="displayPref">
 <tr>
     <td>

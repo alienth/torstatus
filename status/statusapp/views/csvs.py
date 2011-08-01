@@ -30,7 +30,6 @@ def current_results_csv(request):
     undisplayed_columns = ['Hostname', 'Valid', 'Running', 'Named']
 
     # Don't provide certain flag information in the csv
-    #need to clean this up a bit
 
     for column in undisplayed_columns:
         if column in current_columns:
@@ -64,13 +63,14 @@ def current_results_csv(request):
         active_relays = active_relays.filter(
                         Q(nickname__istartswith=basic_input) | \
                         Q(fingerprint__istartswith=basic_input) | \
-                        Q(address__istartswith=basic_input)).order_by(order)
+                        Q(address__istartswith=basic_input)).order_by(
+                        order)
     else:
         filter_params = get_filter_params(request)
         active_relays = active_relays.filter(
                         **filter_params).order_by(order)
 
-    # Create the HttpResponse object with the appropriate CSV header.
+    # Create the HttpResponse object with the appropriate CSV header
     response = HttpResponse(mimetype='text/csv')
     response['Content-Disposition'] = 'attachment;\
             filename=current_results.csv'
@@ -78,10 +78,10 @@ def current_results_csv(request):
     rows = {}
     headers = {}
 
-    # Make columns keys to empty lists.
+    # Make columns keys to empty lists
     for column in current_columns: rows[column] = []
 
-    # Populates the row dictionary with all field values.
+    # Populates the row dictionary with all field values
     for relay in active_relays:
         fields_access = [
                 ("Router Name", relay.nickname),

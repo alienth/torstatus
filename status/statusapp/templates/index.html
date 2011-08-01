@@ -18,16 +18,34 @@
 {% block pageTitle %} Active Relays {% endblock %}
 
 {% block mainPage %}
-<br />
-
+<table id="legend">
+    <tr>
+        <td id="pageTitle" align="center">
+            Legend
+        </td>
+    </tr>
+    <tr class="relayOK">
+        <td>
+            Relay is running
+        </td>
+    </tr>
+    <tr class="relayHibernating">
+        <td>
+            Relay is Hibernating
+        </td>
+    </tr>
+    <tr class="relayBadExit">
+        <td>
+            Relay is a Bad Exit
+        </td>
+    </tr>
+</table>
 {% load index_filters %}
 {% spaceless %}
-
 {% if paged_relays.object_list %}
 <table>
-    <tr>
         {% if paged_relays.has_previous %}
-        <td id="paginatorLinks"><a class="pageLinks" href="?page={{ paged_relays.previous_page_number }}">⇽</a></td>
+        <td id="paginatorLinks"><a class="pageLinks" href="?page={{ paged_relays.previous_page_number }}">&#8701;</a></td>
         {% endif %}
 
         {% if paged_relays.number > 2 %}
@@ -57,7 +75,7 @@
         {% endif %}
 
         {% if paged_relays.has_next %}
-        <td id="paginatorLinks"><a class="pageLinks" href="?page={{ paged_relays.next_page_number }}">⇾</a></td>
+        <td id="paginatorLinks"><a class="pageLinks" href="?page={{ paged_relays.next_page_number }}">&#8702;</a></td>
         {% endif %}
     </tr>
 </table>
@@ -71,7 +89,8 @@
 		{% endif %}
 		{% else %}
 		{% if column_name not in not_columns %}
-	    <th class="relayHeader hoverable" {% if column_name == "Router Name" %}
+        {# TODO: add &uarr; and &darr; #}
+        <th class="relayHeader hoverable" onClick="document.location.href='/index/?sortListing={{ column_value_name|key:column_name }}&sortOrder={{ ascending_or_descending }}';" {% if column_name == "Router Name" %}
 	                                            id="routerName"
 	                                      {% else %}
 	                                      {% if column_name == "LastDescriptorPublished" %}
@@ -82,8 +101,7 @@
 	                                      {% endif %}
 	                                      {% endif %}
 	                                      {% endif %}
-	                                      ><a href="/index/?sortListing={{column_value_name|key:column_name}}&sortOrder={{ascending_or_descending}}">
-	        {% if column_name == "Country Code" %} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {% else %} {{column_name}} {% endif %}</a></th>
+                                          >{% if column_name == "Country Code" %}&nbsp;{% else %}{{ column_name }}{% endif %}</th>
 	    {% endif %}
 	    {% endif %}
     {% endfor %}
@@ -127,10 +145,10 @@
                 {% for icon in icons_list %}
                     {% if icon in current_columns %}
                         {% if icon == "Platform" %}
-                            <img src="/static/img/os-icons/{{ relay|field_value:icon|get_os }}.png" alt="{{ relay|field_value:icon|get_os }}" title="{{ relay|field_value:icon }}">
+                            <img src="/static/img/os-icons/{{ relay|field_value:icon|get_os }}.png" alt="{{ relay|field_value:icon|get_os }}" title="{% if relay|field_value:icon %}{{ relay|field_value:icon }}{% else %}Platform Not Available{% endif %}">
                         {% else %}
                         {% if relay|field_value:icon == 1 %}
-                            <img src="/static/img/status/{{icon}}.png" alt="{{icon}}" title="{{icon}}">
+                            <img src="/static/img/status/{{ icon }}.png" alt="{{ icon }}" title="{{ icon }}">
                         {% endif %}
                         {% endif %}
                     {% endif %}
@@ -146,7 +164,7 @@
                         <img src="/static/img/bg_no.png" width="12" height="12" alt="Not a Bad Exit" title="Not a Bad Exit">
                     {% endif %}
                 {% else %}
-                    {{ relay|field_value:column_name }}
+                    {{ relay|field_value:column_name|default:'None' }}
                 {% endif %}
             {% endif %}
             </td>
