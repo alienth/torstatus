@@ -99,30 +99,115 @@ in your web browser to view it.
 If there are any changes that you would like to see in TorStatus, please
 let us know by sending e-mail to torstatus@gmail.com.
 
-3: Running Apache and Deployment
+3: Installing Apache
 ________________________________
-.. Just started this section still needs lots of work
-
-First install Apache and mod_wsgi...
-> sudo apt-get install apache2 libapache2-mod-wsgi
-
-You might want to make a folder to store your sites
-> sudo mkdir /srv/www
-
-If you want to set up a test server create a hosts file
-> sudo nano /etc/hosts
-
-Get the appropriate packages. With a minimal debian sqeeze platform
-you should have the necessary packages already.
-
-You should get apache2-mpm-worker
-apache2-utils
-apache2.2-bin
-apache2.2-common
 
 Two packages are most popular for embedding python into the Apache server:
 libapache2-mod-python
-*recommend mod_wsgi*
+and libapache2-mod-wsgi
 
-documentation for mod_wsgi is located at: code.google.com/p/modwsgi/wiki
-documentation for mod_python
+We've found the documentation on mod-wsgi extensive and the community helpful.
+Apparently it is also faster and simpler to set up, so we recommend
+*mod_wsgi*
+
+Documentation for mod_wsgi is located at: code.google.com/p/modwsgi/wiki
+
+Here is a basic recipe for setting up a django powered site with mod_wsgi
+on apache:
+
+First install Apache and mod_wsgi...
+    | $ sudo apt-get install apache2 libapache2-mod-wsgi
+
+apache2 is probably already installed
+
+For this example we'll make a directory to store the site pages
+    | $ sudo mkdir /usr/local/www/EXAMPLE
+
+You want to move your files to the EXAMPLE Directory. It should be
+the directory in which you ran the django-admin startproject command.
+
+Let's say your project is called "project". So in your project directory
+you want to make a directory entitled "apache" and in that directory
+create a file called "django.wsgi".
+
+    | $ sudo mkdir /usr/local/www/EXAMPLE/project/apache
+    | $ sudo vim /usr/local/www/EXAMPLE/project/apache/django.wsgi
+
+In this document type the following code:
+
+import os, sys
+sys.path.append('/usr/local/www/EXAMPLE')
+
+os.environ['DJANGO_SETTINGS_MODULE'] = 'project.settings'
+
+import django.core.handlers.wsgi
+
+application = django.core.handlers.wsgi.WSGIHandler()
+
+
+Once this is done go to your apache directory entitled
+"sites-available", this should be located at
+/etc/apache2/sites-available.
+
+Make a file to put the virtual host.
+    | $ cd /etc/apache2/sites-available
+    | $ sudo vim example
+
+In this file put the following code:
+
+<VirtualHost *:80>
+    ServerName www.example.com
+    ServerAlias example.com
+    ServerAdmin webmaster@example.com
+
+    <Directory /usr/local/www/EXAMPLE/project/>
+        Order allow,deny
+        Allow from all
+    </Directory>
+
+    WSGIScriptAlias /example /usr/local/www/EXAMPLE/project/apache/django.wsgi
+
+    <Directory /usr/local/www/EXAMPLE/project/apache>
+        Order allow,deny
+        Allow from all
+    </Directory>
+
+</VirtualHost>
+
+
+***
+The WSGIScriptAlias first argument is where you have the site so for example
+now it would be at http://localhost/example. The second argument is
+the path to the django.wsgi file.
+
+Now you need to let apache know that the site is active.
+
+So from the command line input
+
+    | $ sudo a2ensite example
+
+This creates a link in the sites-enabled folder of apache.
+
+Now if you reload apache using the script
+
+    | $ sudo /etc/init.d/apache2 reload
+
+the site should be up and running at http://localhost/example
+
+
+EXTRA NOTES on apache:
+
+Apache is quite the beast to set up and this is not a tell all guide.
+Searching the internet for debugging help would be your best bet.
+Although some helpful tips:
+
+Find and monitor the log files of apache (they can be a life saver)
+
+Sometimes when you move files around for sites the import statements
+might not work any more. Be careful with those.
+
+If you are new with apache you might want to practice on something
+smaller before setting up a full fledged django site.
+
+
+
