@@ -58,11 +58,26 @@ the following:
     | ``$ psql -U metrics tordir``
     | ``tordir=> \i /absolute/path/to/TorStatus/cache.sql``
 
-TorStatus does not regularly use "old" relays. To delete old relays
-from the caching schema, add a crontab for the metrics user that looks
-something like the following:
+TorStatus uses an ``active_relay`` table that is the result of a
+``LEFT JOIN`` between an ``active_statusentry`` table and an
+``active_descriptor`` table. This ``JOIN`` is done in a function that
+requires a crontab to be run shortly after each update cycle.
+For example, if you have a crontab for the ``metrics`` user such as the
+following:
 
-    | ``35 * * * * psql -U metrics tordir -c 'SELECT * FROM cache.purge();'``
+    | ``15 * * * * cd /srv/metrics-web/ && ./run.sh``
+
+Then we could assume that no update cycle will take longer than five
+minutes, and thus add a crontab like this to update the
+``active_relay`` table:
+
+    | ``20 * * * * psql tordir -c 'SELECT * FROM cache.update_relay_table();'``
+
+Additionally, TorStatus does not regularly use "old" relays. To delete
+old relays from the caching schema, add a crontab for the metrics user
+that looks something like the following:
+
+    | ``25 * * * * psql -U metrics tordir -c 'SELECT * FROM cache.purge();'``
 
 At this point, imported data will be added to the ``cache`` schema used
 with TorStatus.

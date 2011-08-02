@@ -22,7 +22,9 @@ from statusapp.models import Bwhist, TotalBandwidth, NetworkSize, \
         ActiveRelay
 from custom.aggregate import CountCase
 
-
+# Default parameters to be used with the graphs. Each graph may change
+# certain parameters, but a default dictionary enforces uniformity
+# on the graphs.
 DEFAULT_PARAMS = {'WIDTH': 960, 'HEIGHT': 320, 'TOP_MARGIN': 25,
                   'BOTTOM_MARGIN': 19, 'LEFT_MARGIN': 38,
                   'RIGHT_MARGIN': 5, 'X_FONT_SIZE': '8',
@@ -30,6 +32,8 @@ DEFAULT_PARAMS = {'WIDTH': 960, 'HEIGHT': 320, 'TOP_MARGIN': 25,
                   'LABEL_FLOAT': 3, 'LABEL_ROT': 'horizontal',
                   'FONT_WEIGHT': 'bold', 'BAR_WIDTH': 0.5,
                   'COLOR': '#005500', 'TITLE': ''}
+
+
 def readhist(request, fingerprint):
     """
     Create a graph of read bandwidth history for the last twenty-four
@@ -84,8 +88,9 @@ def bycountrycode(request):
 
     relays = ActiveRelay.objects.filter(validafter=last_va)
 
+    # Build a dictionary mapping countries to the number of relays
+    # from that country
     country_map = {}
-
     for relay in relays:
         country = relay.country
         if country is None:
@@ -114,6 +119,8 @@ def exitbycountrycode(request):
         code as an HttpResponse object.
     """
     params = copy(DEFAULT_PARAMS)
+    # Make labels vertical to increase readability and minimize
+    # graph width
     params['LABEL_ROT'] = 'vertical'
     params['TITLE'] = 'Number of Exit Routers by Country Code'
 
@@ -122,8 +129,9 @@ def exitbycountrycode(request):
 
     relays = ActiveRelay.objects.filter(validafter=last_va, isexit=1)
 
+    # Build a dictionary mapping countries to the number of relays
+    # from that country
     country_map = {}
-
     for relay in relays:
         country = relay.country
         if country is None:
@@ -162,8 +170,8 @@ def bytimerunning(request):
 
     uptime_map = {}
 
-    # This step is very inefficient; a custom SUM(CASE WHERE...
-    # should be written.
+    # TODO: This step is very inefficient; a custom SUM(CASE WHERE...
+    # should probably be written.
     for relay in relays:
         # The uptime in weeks is seconds / (seconds/min * min/hour
         # * hour/day * day/week), where / signifies floor division.
@@ -206,18 +214,22 @@ def byobservedbandwidth(request):
     params['LABEL_ROT'] = 'vertical'
     params['TITLE'] = 'Number of Routers by Observed Bandwidth (KB/sec)'
 
-    # Define the ranges for the graph, a list of 2-tuples of ints.
+    # Define the ranges for the graph, a list of 2-tuples of ints
     RANGES = [(0, 10), (11, 20), (21, 50), (51, 100), (101, 500),
-              (501, 1000), (1001, 2000), (2001, 3000), (3001, 5000)]
+              (501, 1000), (1001, 2000), (2001, 3000), (3001, 5000),
+              (5001, 10000)]
 
     last_va = ActiveRelay.objects.aggregate(
               last=Max('validafter'))['last']
 
     relays = ActiveRelay.objects.filter(validafter=last_va)
 
-    bw_map = {}
+    # Get the highest defined limit in RANGES
     excess = RANGES[-1][1] + 1
 
+    # Initialize a dictionary mapping bandwidth ranges to number of
+    # routers
+    bw_map = {}
     for rng in RANGES:
         bw_map[rng] = 0
     bw_map[excess] = 0
@@ -225,7 +237,7 @@ def byobservedbandwidth(request):
     for relay in relays:
         kbps = relay.bandwidthkbps
 
-        # Binary search
+        # Binary search -- extensible to finer-grained ranges
         rngs = RANGES
         while (rngs and (not rngs[len(rngs) / 2][0] <= kbps <= \
                              rngs[len(rngs) / 2][1])):
@@ -278,9 +290,9 @@ def byplatform(request):
 
     platform_map['Unknown'] = 0
 
-    # Inefficient for the same reason that the observed bandwidth
-    # graph is inefficient; a custom SUM(CASE WHERE... should be
-    # necessary here.
+    # TODO: Inefficient for the same reason that the observed bandwidth
+    # graph is inefficient; a custom SUM(CASE WHERE...) should be
+    # necessary here
     for relay in relays:
         platform = relay.platform
         if platform is None:
@@ -291,7 +303,7 @@ def byplatform(request):
                 platform_map[key] += 1
                 break
         # 'else' statement only runs if the for loop terminates
-        # normally -- that is, without a break.
+        # normally -- that is, without a break
         else:
             platform_map['Unknown'] += 1
 
@@ -365,7 +377,7 @@ def networktotalbw(request):
     @return: A graph representing the total bandwidth of the
         Tor Network.
     """
-    #TITLE = 'Tor Network Status'
+    # Graph presentation parameters -----------------------------------
     HEIGHT = 160
     WIDTH = 440
     TOP_MARGIN = 8
@@ -378,31 +390,6 @@ def networktotalbw(request):
     LABEL_ROT = 'horizontal'
     FONT_WEIGHT = 'bold'
 
-    tbw_entries = list(TotalBandwidth.objects.all().order_by('-date')[:93])
-
-    data_points = len(tbw_entries)
-    xs = range(data_points)
-
-    ys_bwobserved = []
-    ys_bwburst = []
-    ys_bwadvertised = []
-    ys_bwavg = []
-
-    for i in range(data_points - 1, -1, -1):
-        tbw_today = tbw_entries[i]
-        ys_bwobserved.append(tbw_today.bwobserved / float(1024**2))
-        ys_bwburst.append(tbw_today.bwburst / float(1024**2))
-        ys_bwadvertised.append(tbw_today.bwadvertised / float(1024**2))
-        ys_bwavg.append(tbw_today.bwavg / float(1024**2))
-
-    times = []
-    start_date = tbw_entries[-1].date
-    for i in range(0, data_points, 7):
-        to_add_date = start_date + datetime.timedelta(days=(1 * i))
-        to_add_str = "%s-%0*d" % (to_add_date.month,
-                                  2, to_add_date.day)
-        times.append(to_add_str)
-
     # Set margins according to specification.
     matplotlib.rcParams['figure.subplot.left'] = \
             float(LEFT_MARGIN) / WIDTH
@@ -413,6 +400,29 @@ def networktotalbw(request):
     matplotlib.rcParams['figure.subplot.bottom'] = \
             float(BOTTOM_MARGIN) / HEIGHT
 
+    # TotalBandwidth Plot --------------------------------------------
+    # Get last 93 TotalBandwidth entries
+    tbw_entries = list(TotalBandwidth.objects.all().order_by(
+                       '-date')[:93])
+
+    # Should be 93, but could be less if not enough TotalBandwidth
+    # entries are present
+    data_points = len(tbw_entries)
+    xs = range(data_points)
+
+    ys_bwobserved = []
+    for i in range(data_points - 1, -1, -1):
+        ys_bwobserved.append(
+                      tbw_entries[i].bwobserved / float(1024**2))
+
+    times = []
+    start_date = tbw_entries[-1].date
+    for i in range(0, data_points, 7):
+        to_add_date = start_date + datetime.timedelta(days=(1 * i))
+        to_add_str = "%s-%0*d" % (to_add_date.month,
+                                  2, to_add_date.day)
+        times.append(to_add_str)
+
     width_inches = float(WIDTH) / 80
     height_inches = float(HEIGHT) / 80
 
@@ -421,17 +431,14 @@ def networktotalbw(request):
 
     # Draw bandwidth observed line
     ax1 = fig.add_subplot(111)
-    #ax1.grid(color='#888888')
 
-    # ax.plot(xs, ys_bwobserved, color='#66CD00',
-    #         xs, ys_bwburst, color='#68228B',
-    #         xs, ys_bwadvertised, color='#22688B',
-    #         xs, ys_bwavg, color='#CD6600')
     observed_bw = ax1.plot(xs, ys_bwobserved, color='#68228B',
                            label='Observed Bandwidth')
 
+    # Shade the area below the graph lightly
     ax1.fill_between(xs, 0, ys_bwobserved, color='#DAC8E2')
 
+    # Label the graph with appropriate colors and fontsizes
     ax1.set_xlabel("Date (GMT)", fontsize='8', fontweight=FONT_WEIGHT)
     ax1.set_xticks(range(0, data_points, 7))
     ax1.set_xticklabels(times, fontsize=X_FONT_SIZE,
@@ -439,7 +446,6 @@ def networktotalbw(request):
 
     ax1.set_ylabel("Bandwidth (MiB)",
                   fontsize='8', fontweight=FONT_WEIGHT)
-    #ax1.set_yticks(range(0, 3001, 500))
 
     for tick in ax1.yaxis.get_major_ticks():
         tick.label1.set_fontsize(Y_FONT_SIZE)
@@ -448,18 +454,24 @@ def networktotalbw(request):
     for tick in ax1.get_yticklabels():
         tick.set_color('#68228B')
 
-    # Draw average relays running line
-    # Assume that the dates in net_size are the same as in tbw_entries
+    # Relays Plot -----------------------------------------------------
     net_size = list(NetworkSize.objects.all().order_by('-date')[:93])
+
+    # Assume that the dates in net_size are the same as in tbw_entries,
+    # but assert it, just to be paranoid.
+    assert net_size[0].date == tbw_entries[0].date
+    assert net_size[-1].date == tbw_entries[-1].date
 
     ys = []
     for i in range(data_points - 1, -1, -1):
         ys.append(net_size[i].avg_running)
 
+    # Draw average relays running line using same 'xs' as before.
     ax2 = ax1.twinx()
     active_relays = ax2.plot(xs, ys, color='#005500',
                              label='Average Active Relays')
 
+    # Label the graph with appropriate colors and fontsizes
     ax2.set_xticks(range(0, data_points, 7))
     ax2.set_xticklabels(times, fontsize=X_FONT_SIZE,
                         fontweight=FONT_WEIGHT, rotation=LABEL_ROT)
@@ -474,7 +486,6 @@ def networktotalbw(request):
         tick.set_color('#005500')
 
     # Label entire graph
-    #ax1.set_title(TITLE, fontsize='12', fontweight=FONT_WEIGHT)
     fontparam = matplotlib.font_manager.FontProperties(
                 size=8, weight='bold')
 
@@ -482,15 +493,13 @@ def networktotalbw(request):
     ax1.legend(prop=fontparam, loc='lower left')
     ax2.legend(prop=fontparam, loc='lower right')
 
-    # TODO: Make the grid work for both lines.
-    # Set tick marks such that a grid applies to both lines.
+    # TODO: Make a grid that works for both lines
+    # (Set tick marks such that a grid applies to both lines)
     ax1.set_ylim(ymin=0)
     ax1.set_xlim(xmin=0)
-    ax2.set_ylim(ymin=max((0, min(ys))))
     ax2.set_xlim(xmin=0)
     ax1.yaxis.set_major_locator(MaxNLocator(5))
     ax2.yaxis.set_major_locator(MaxNLocator(5))
-    #ax1.grid(color='#888888')
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
     canvas.print_png(response, ha="center")
@@ -643,11 +652,11 @@ def draw_line_graph(fingerprint, bwtype, color, shade):
                   datetime.time())
 
     # It's possible that we might be missing some entries at the
-    # beginning; add values of 0 in this case.
+    # beginning; add values of 0 in this case
     tr_list[0:0] = ([0] * t_start)
 
     # We want to have 96 data points in our graph; if we don't have
-    # them, get some data points from the day before, if we can.
+    # them, get some data points from the day before, if we can
     to_fill = 96 - len(tr_list)
 
     start_time = recent_time - datetime.timedelta(
@@ -681,7 +690,7 @@ def draw_line_graph(fingerprint, bwtype, color, shade):
                  figsize=(width_inches, height_inches), frameon=False)
     ax = fig.add_subplot(111)
 
-    # Return bytes per second, not total bandwidth for 15 minutes.
+    # Return bytes per second, not total bandwidth for 15 minutes
     bps = map(lambda x: x / (15 * 60), tr_list)
     times = []
     for i in range(0, 104, 8):
@@ -692,7 +701,7 @@ def draw_line_graph(fingerprint, bwtype, color, shade):
 
     dates = range(96)
 
-    # Draw the graph and give the graph a light shade underneath it.
+    # Draw the graph and give the graph a light shade underneath it
     ax.plot(dates, bps, color=color)
     ax.fill_between(dates, 0, bps, color=shade)
 
@@ -703,11 +712,13 @@ def draw_line_graph(fingerprint, bwtype, color, shade):
 
     ax.set_ylabel("Bandwidth (bytes/sec)", fontsize='12')
 
-    # Don't extend the y-axis to negative numbers, in any circumstance.
+    # Don't extend the y-axis to negative numbers, in any circumstance
     ax.set_ylim(ymin=0)
 
-    # Don't use scientific notation.
+    # Don't use scientific notation
     ax.yaxis.major.formatter.set_scientific(False)
+
+    # Format the y-tick labels with the desired font weight and size
     for tick in ax.yaxis.get_major_ticks():
         tick.label1.set_fontsize(Y_FONT_SIZE)
         tick.label1.set_fontweight(FONT_WEIGHT)
