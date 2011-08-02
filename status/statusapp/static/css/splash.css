@@ -19,35 +19,6 @@ table#searchTable {
 /* END Table ------------------------------------------ */
 
 /* Input ---------------------------------------------- */
-input#searchButton {
-    color: #050;
-    font-size: 0.938em;
-    font-weight: bold;
-	background-color:#fed;
-    border: 1px solid;
-    border-color: #61a #315 #315 #61a;
-	opacity: 0.4;
-}
-
-input#searchButton:hover {
-    color: #050;
-    font-size: 0.938em;
-	background-color: #fed;
-    border: 1px solid;
-    border-color: #696 #363 #363 #696;
-	opacity: 1;
-	cursor: pointer;
-}
-
-input#searchButton:focus {
-    color: #050;
-    font-size: 0.938em;
-	background-color: #fed;
-    border: 1px solid;
-    border-color: #696 #363 #363 #696;
-	opacity: 1;
-	cursor: pointer;
-}
 
 input#searchBox {
     font-size: 0.938em;

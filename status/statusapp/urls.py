@@ -3,9 +3,7 @@ The URLCONF for the statusapp.
 """
 
 from django.conf.urls.defaults import *
-from django.views.static import *
 from django.conf import settings
-from django.views.decorators.cache import cache_page
 
 urlpatterns = patterns('',
     # Splash page
@@ -14,13 +12,10 @@ urlpatterns = patterns('',
     # Search
     (r'^advanced-search$', 'statusapp.views.pages.advanced_search'),
 
-    # Unpaged Index and related pages
+    # Index and related pages
+    (r'^index/$', 'statusapp.views.pages.index'),
     (r'^display-options/$', 'statusapp.views.pages.display_options'),
     (r'^exit-node-query/$', 'statusapp.views.pages.exitnodequery'),
-
-    # Media Files
-    (r'^static/(?P<path>.*)$', 'django.views.static.serve',
-            {'document_root': settings.MEDIA_ROOT}),
 
     # Details Page
     (r'^details/(?P<fingerprint>\w{40})$', 'statusapp.views.pages.details'),
@@ -56,6 +51,7 @@ urlpatterns = patterns('',
     # CSV Files
     (r'^tor-query-export.csv$', 'statusapp.views.csvs.current_results_csv'),
 
-    # Index and related pages
-    (r'^index/$', 'statusapp.views.pages.index'),
+    # Media Files
+    (r'^static/(?P<path>.*)$', 'django.views.static.serve',
+            {'document_root': settings.MEDIA_ROOT}),
 )

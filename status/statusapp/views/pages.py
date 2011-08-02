@@ -45,6 +45,9 @@ DISPLAYABLE_COLUMNS = set(('Country Code', 'Router Name', 'Bandwidth',
 def splash(request):
     """
     The splash page for the TorStatus website.
+
+    @rtype: HttpResponse
+    @return: the splash page rendered to html.
     """
     return render_to_response("splash.html")
 
@@ -412,7 +415,7 @@ def exitnodequery(request):
     return render_to_response('nodequery.html', template_values)
 
 
-@cache_page(60 * 60)
+@cache_page(60 * 30)
 def networkstatisticgraphs(request):
     """
     Render an HTML template to response.
@@ -525,7 +528,6 @@ def display_options(request):
     return render_to_response('displayoptions.html', template_values)
 
 
-# TODO: Find out how Vlad wrote this, touch it up, and document it.
 def advanced_search(request):
 
     search_session_reset(request)

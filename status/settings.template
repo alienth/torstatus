@@ -1,5 +1,7 @@
 #-#-#-#-#-#-#-#-#-#-#-# FILL IN THE FOLLOWING #-#-#-#-#-#-#-#-#-#-#-#-#
+# Set to database name
 NAME = ''
+# Set to user acessessing database
 USER = ''
 PASSWORD = ''
 HOST = '' # Leave as empty string for localhost
@@ -64,9 +66,6 @@ MEDIA_ROOT = os.path.join(os.path.dirname(__file__),
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
 MEDIA_URL = '/static/'
-
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = 'p@y@6b2vc#6=rxe^p67ti4vlp_9n+@x27wac1g7mta)hfrmds2'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (

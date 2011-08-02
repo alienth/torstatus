@@ -5,7 +5,7 @@ There is one function for each link.
 """
 # Django-specific import statements -----------------------------------
 from django.http import HttpResponse
-from django.db.models import Max, Sum
+from django.db.models import Max
 
 # CSV specific import statements
 import csv
@@ -30,7 +30,6 @@ def current_results_csv(request):
     undisplayed_columns = ['Hostname', 'Valid', 'Running', 'Named']
 
     # Don't provide certain flag information in the csv
-
     for column in undisplayed_columns:
         if column in current_columns:
             current_columns.remove(column)

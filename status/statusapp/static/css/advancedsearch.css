@@ -54,32 +54,9 @@ select#advSearchButton {
 }
 
 input#searchButton {
-    color: #050;
     font-weight: bold;
     font-size: 1.375em;
     width: 300px;
-	background-color: #fed;
-    border: 1px solid;
-    border-color: #61a #315 #315 #61a;
-	opacity: 0.4;
-}
-
-input#searchButton:hover {
-    color: #050;
-	background-color: #fed;
-    border: 1px solid;
-    border-color: #696 #363 #363 #696;
-	opacity: 1;
-	cursor: pointer;
-}
-
-input#searchButton:focus {
-    color: #050;
-	background-color: #fed;
-    border: 1px solid;
-    border-color: #696 #363 #363 #696;
-	opacity: 1;
-	cursor: pointer;
 }
 
 

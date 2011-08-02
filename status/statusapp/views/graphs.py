@@ -66,7 +66,7 @@ def writehist(request, fingerprint):
     return draw_line_graph(fingerprint, 'Written', '#66CD00', '#D9F3C0')
 
 
-@cache_page(60 * 5)
+@cache_page(60 * 15)
 def bycountrycode(request):
     """
     Return a graph representing the number of routers by country code.
@@ -103,7 +103,7 @@ def bycountrycode(request):
     return draw_bar_graph(xs, ys, keys, params)
 
 
-@cache_page(60 * 5)
+@cache_page(60 * 15)
 def exitbycountrycode(request):
     """
     Return a graph representing the number of exit routers
@@ -141,7 +141,7 @@ def exitbycountrycode(request):
     return draw_bar_graph(xs, ys, keys, params)
 
 
-@cache_page(60 * 5)
+@cache_page(60 * 15)
 def bytimerunning(request):
     """
     Return a graph representing the uptime of routers in the Tor
@@ -184,7 +184,7 @@ def bytimerunning(request):
     return draw_bar_graph(xs, ys, keys, params)
 
 
-@cache_page(60 * 5)
+@cache_page(60 * 15)
 def byobservedbandwidth(request):
     """
     Return a graph representing the observed bandwidth of the
@@ -249,7 +249,7 @@ def byobservedbandwidth(request):
     return draw_bar_graph(xs, ys, labels, params)
 
 
-@cache_page(60 * 5)
+@cache_page(60 * 15)
 def byplatform(request):
     """
     Return a graph representing the platforms of the active relays
@@ -304,7 +304,7 @@ def byplatform(request):
     return draw_bar_graph(xs, ys, keys, params)
 
 
-@cache_page(60 * 5)
+@cache_page(60 * 15)
 def aggregatesummary(request):
     """
     Return a graph representing an aggregate summary of the routers on
@@ -356,7 +356,7 @@ def aggregatesummary(request):
     return draw_bar_graph(xs, ys, labels, params)
 
 
-@cache_page(60 * 5)
+@cache_page(60 * 15)
 def networktotalbw(request):
     """
     Return a graph representing the total bandwidth of the Tor network.

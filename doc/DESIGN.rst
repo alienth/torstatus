@@ -11,16 +11,17 @@ will function properly.
 
 2: Django
 ---------
-TorStatus is written in django to take advantage of Django's
-object-relational mapper (ORM) for straight-forward database access.
-In Django, a database table is analogous to a class, rows are
-analogous to objects of that class, and columns are analogous to the
-fields of that class. Data can be directly accessed by way of Django's
-models, each of which maps to a table in the database and can be
-utilized as an object. Django's adaptation of the model-view-controller
-schema is a bit confusing: controllers are stored in a module named
-views.py and views are called templates (but models are still,
-thankfully, called models).
+TorStatus is written in django to take advantage of Django's easy
+to understand Model-View-Controller architecture (MVC). The model
+level represeants the database or the source of information, the
+controller level contains most of the back-end logic, and the view level
+generates the html/css response that is sent back to the client. Also
+we took advantage of Django's built in object-relational mapper (ORM)
+for straight-forward database access. In Django, a database table
+is analogous to a class, rows are analogous to objects of that
+class, and columns are analogous to the fields of that class. Data
+can be directly accessed by way of Django's models, each of which
+maps to a table in the database and can be utilized as an object.
 
 3: Directory Structure
 ----------------------
@@ -106,9 +107,26 @@ Because of this, we've aimed to make the landing page for TorStatus
 as small as is reasonable and to implement a simple search feature
 capable of looking up relays by nickname, IP address, or fingerprint.
 
+Thanks to gzip compression, many page sizes are smaller than the page
+sizes of the old implementation. However, CSS files are not compressed,
+and many images (including flags, but especially the image in the
+header) are far too large to expect torified clients to download
+happily (in my opinion).
+
+There is a lot of django middleware that handles stylesheets and static
+media intelligently; one such middleware is called django-compress.
+Using django-compress or similar middleware should shave about 3-8 KB
+off of any page size.
+
+Currently, the average country flag is about 1KB, and there are about
+80 unique country flags displayed for every index page of ALL routers
+in the most recent consensus. This seems like a good place to shrink
+page sizes. Note that many flags have a shaded, glossy feature to them,
+which may come at the cost of larger file sizes.
+
 5.2: Security
 .............
-Javascript and cookies are not used in this implementation. Instead,
+Javascript is not used in this implementation. Instead,
 secure sessions are used to store display options and search filters
 on a per-user basis. Data is stored on the server side, and the sending
 and receiving of cookies is abstracted. These sessions use only a
@@ -167,8 +185,8 @@ languages. So far, we have only experimented with Jinja2 -- a template
 language with syntax that is very similar to Django's -- in tandem with
 Coffin. Coffin makes the switch from Django's template language
 to Jinja2's template language relatively painless, though there are a
-few key differences. Preliminary tests showed pages rendering 5-6
-times faster using the Jinja2 template language; if you'd like to test
+few key differences. Preliminary tests showed pages rendering were
+faster using the Jinja2 template language; if you'd like to test
 this for yourself, checkout the branch called ``redesign_jinja_coffin``.
 Other template languages for python pride themselves on being the
 fastest template languages around, such as Cheetah and Tenjin.
@@ -177,8 +195,8 @@ similar to the Django template language.
 
 There seem to be many ways to decreasing the load on the template,
 but it seems like all of them involve writing HTML into python code
-at some level. Ultimately, this might have to be done on some level,
-but we'd rather defer this decision to the future project maintainer,
+at some level. Ultimately, this might have to be done, but
+we'd rather defer this decision to the future project maintainer,
 as with the decision of which template language to ultimately use.
 
 Aside from the template language itself, our team has experienced
@@ -191,22 +209,3 @@ should be generated only once with respect to the value of
 "current_columns", and that this sub-template should be filled out for
 each relay. We're not sure that django offers support for such a
 mechanism.
-
-6.3: Page Sizes
-...............
-Thanks to gzip compression, many page sizes are smaller than the page
-sizes of the old implementation. However, CSS files are not compressed,
-and many images (including flags, but especially the image in the
-header) are far too large to expect torified clients to download
-happily (in my opinion).
-
-There is a lot of django middleware that handles stylesheets and static
-media intelligently; one such middleware is called django-compress.
-Using django-compress or similar middleware should shave about 3-8 KB
-off of any page size.
-
-Currently, the average country flag is about 1KB, and there are about
-80 unique country flags displayed for every index page of ALL routers
-in the most recent consensus. This seems like a good place to shrink
-page sizes. Note that many flags have a shaded, glossy feature to them,
-which may come at the cost of larger file sizes.

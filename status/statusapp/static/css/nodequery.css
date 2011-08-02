@@ -101,34 +101,4 @@ input#ipSearch_DestPort:focus {
 	width: auto;
 }
 
-input#ipSearch_SUBMIT {
-    color: #050;
-    font-weight: bold;
-    font-size: 0.938em;
-	background-color:#fed;
-    border: 1px solid;
-    border-color: #61a #315 #315 #61a;
-	opacity: 0.4;
-}
-
-input#ipSearch_SUBMIT:hover {
-    color: #050;
-    font-size: 0.938em;
-	background-color: #fed;
-    border: 1px solid;
-    border-color: #696 #363 #363 #696;
-	opacity: 1;
-	cursor: pointer;
-}
-
-input#ipSearch_SUBMIT:focus {
-    color: #050;
-    font-size: 0.938em;
-	background-color: #fed;
-    border: 1px solid;
-    border-color: #696 #363 #363 #696;
-	opacity: 1;
-	cursor: pointer;
-}
-
 /* END Input ------------------------------------------ */
