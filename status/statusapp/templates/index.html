@@ -4,49 +4,176 @@
 <link rel="stylesheet" type="text/css" href="/static/css/style.css"></link>
 {% endblock %}
 
-{% block mainTitle %} TorStatus Unpaged Index {% endblock %}
+{% block mainTitle %} TorStatus -- Active Relays {% endblock %}
 
 {% block headerTitle %} TorStatus {% endblock %}
 
 <br />
 
 {% block moreLinks %}
-<tr>
-    <td id="csv">
-        <table class="csv">
-            <tr>
-                <td id="csv">
-                    <a class="link" href="/tor-query-export.csv">Download CSV Search File</a>
-                </td>
-            </tr>
-        </table>
-    </td>
-</tr>
+<br /><br />
+<a class="link" id="csv" href="/tor-query-export.csv">Download CSV of Current Result Set</a>
 {% endblock %}
 
+{% block pageTitle %} Active Relays {% endblock %}
 
 {% block mainPage %}
-
-<br />
-
+<table id="legend">
+    <tr>
+        <td id="pageTitle" align="center">
+            Legend
+        </td>
+    </tr>
+    <tr class="relayOK">
+        <td>
+            Relay is running
+        </td>
+    </tr>
+    <tr class="relayHibernating">
+        <td>
+            Relay is Hibernating
+        </td>
+    </tr>
+    <tr class="relayBadExit">
+        <td>
+            Relay is a Bad Exit
+        </td>
+    </tr>
+</table>
 {% load index_filters %}
 {% spaceless %}
+{% if paged_relays.object_list %}
+<table>
+        {% if paged_relays.has_previous %}
+        <td id="paginatorLinks"><a class="pageLinks" href="?page={{ paged_relays.previous_page_number }}">&#8701;</a></td>
+        {% endif %}
 
-{% if relay_list %}
-<table class="relayTable">
-    <tr>
-        {% autoescape off %}
-        {% for column in htmlCurrentColumns %}
-            {{ htmlTableHeaders|key:column }}
-        {% endfor %}
-        {% endautoescape %}
+        {% if paged_relays.number > 2 %}
+        <td id="paginatorLinks"><a class="pageLinks" href="?page=1">1</a></td>
+        {% endif %}
+
+        {% if paged_relays.number > 3 %}
+        <td id="paginators">...</td>
+        {% endif %}
+
+        {% if paged_relays.has_previous %}
+        <td id="paginatorLinks"><a class="pageLinks" href="?page={{ paged_relays.previous_page_number }}">{{ paged_relays.previous_page_number }}</a></td>
+        {% endif %}
+
+        <td id="paginators">{{ paged_relays.number }}</td>
+
+        {% if paged_relays.has_next %}
+        <td id="paginatorLinks"><a class="pageLinks" href="?page={{ paged_relays.next_page_number }}">{{ paged_relays.next_page_number }}</a></td>
+        {% endif %}
+
+        {% if paged_relays.paginator.num_pages|subtract:paged_relays.number >= 3 %}
+        <td id="paginators">...</td>
+        {% endif %}
+
+        {% if paged_relays.paginator.num_pages|subtract:paged_relays.number >= 2 %}
+        <td id="paginatorLinks"><a class="pageLinks" href="?page={{ paged_relays.paginator.num_pages }}">{{ paged_relays.paginator.num_pages }}</a></td>
+        {% endif %}
+
+        {% if paged_relays.has_next %}
+        <td id="paginatorLinks"><a class="pageLinks" href="?page={{ paged_relays.next_page_number }}">&#8702;</a></td>
+        {% endif %}
     </tr>
-    {% autoescape off %}
-        {% for relay_row in htmlRowCode %}
-            {{relay_row}}
-        {% endfor %}
-    {% endautoescape %}
 </table>
+
+<table class="relayTable">
+	<tr>
+	{% for column_name in current_columns %}
+	    {% if column_name == "Icons" %}
+        {% if "DirPort" in current_columns or "Exit" in current_columns or "Authority" in current_columns or "Fast" in current_columns or "Guard" in current_columns or "Directory" in current_columns or "Platform" in current_columns or "Stable" in current_columns %}
+		<th class="" id="relayHeaderInv">Icons</th>
+		{% endif %}
+		{% else %}
+		{% if column_name not in not_columns %}
+        {# TODO: add &uarr; and &darr; #}
+        <th class="relayHeader hoverable" onClick="document.location.href='/index/?sortListing={{ column_value_name|key:column_name }}&sortOrder={{ ascending_or_descending }}';" {% if column_name == "Router Name" %}
+	                                            id="routerName"
+	                                      {% else %}
+	                                      {% if column_name == "LastDescriptorPublished" %}
+	                                            id="lastDescPub"
+	                                      {% else %}
+	                                      {% if column_name == "BadDir" %}
+	                                            id="badDir"
+	                                      {% endif %}
+	                                      {% endif %}
+	                                      {% endif %}
+                                          >{% if column_name == "Country Code" %}&nbsp;{% else %}{{ column_name }}{% endif %}</th>
+	    {% endif %}
+	    {% endif %}
+    {% endfor %}
+	</tr>
+
+	{% for relay in paged_relays.object_list %}
+	    {% if "BadExit" in current_columns %}
+        <tr {% if relay|field_value:'BadExit' %} class="relayBadExit" {% else %}{% if relay|field_value:'Hibernating' %} class="relayHibernating" {% else %} class="relay" {% endif %}{% endif %}>
+		{% else %}
+		<tr class="relay">
+		{% endif %}
+		    {% for column_name in current_columns %}
+		    {% if column_name == "Country Code" %}
+            <td id="col_relayName"><a href="http://www.openstreetmap.org/?mlon={{ relay|field_value:'Longitude' }}&mlat={{ relay|field_value:'Latitude' }}&zoom=6"><img src="/static/img/flags/{{ relay|field_value:column_name|lower }}.png" alt={{ relay|field_value:column_name }} title="{{ relay|field_value:column_name }}: {{ relay|field_value:'Latitude' }}, {{ relay|field_value:'Longitude' }}" border=0></a></td>
+			{% else %}
+			{% if column_name == "Router Name" %}
+            <td id="col_relayName">
+                {% if "Named" in current_columns %}
+                {% if relay|field_value:'Named' == 1 %}
+                    <b><a class="linkDetails" href="/details/{{ relay|field_value:'Fingerprint' }}" target="_BLANK">{{ relay|field_value:column_name }}</a></b>
+                    {% else %}
+                    <a class="linkDetails" href="/details/{{ relay|field_value:'Fingerprint' }}" target="_BLANK">{{ relay|field_value:column_name }}</a>
+                {% endif %}
+                {% else %}
+                    <a class="linkDetails" href="/details/{{ relay|field_value:'Fingerprint' }}" target="_BLANK">{{ relay|field_value:column_name }}</a>
+                {% endif %}
+            </td>
+            {% else %}
+            {% if column_name == "IP" %}
+            <td>[<a id="relayAddress" href="/details/{{ relay|field_value:column_name }}/whois">{{ relay|field_value:column_name }}</a>]</td>
+            {% else %}
+            {% if column_name == "BadDir" == 1 %}
+            <td id="col_relayBadDir" {% if relay|field_value:column_name %}>
+                	<img src="/static/img/bg_yes.png" width="12" height="12" alt="Bad Directory" title="Bad Directory">
+                {% else %}>
+               		<img src="/static/img/bg_no.png" width="12" height="12" alt="Not a Bad Directory" title="Not a Bad Directory">
+                {% endif %}</td>
+            {% else %}
+            {% if column_name == "Icons" %}
+            <td id="col_relayIcons">
+                {% for icon in icons_list %}
+                    {% if icon in current_columns %}
+                        {% if icon == "Platform" %}
+                            <img src="/static/img/os-icons/{{ relay|field_value:icon|get_os }}.png" alt="{{ relay|field_value:icon|get_os }}" title="{% if relay|field_value:icon %}{{ relay|field_value:icon }}{% else %}Platform Not Available{% endif %}">
+                        {% else %}
+                        {% if relay|field_value:icon == 1 %}
+                            <img src="/static/img/status/{{ icon }}.png" alt="{{ icon }}" title="{{ icon }}">
+                        {% endif %}
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            </td>
+            {% else %}
+            {% if column_name in displayable_columns %}
+            <td id="col_relay{{column_name}}">
+                {% if column_name == "BadExit" %}
+                    {% if relay|field_value:column_name == 1 %}
+                        <img src="/static/img/bg_yes.png" width="12" height="12" alt="Bad Exit" title="Bad Exit">
+                    {% else %}
+                        <img src="/static/img/bg_no.png" width="12" height="12" alt="Not a Bad Exit" title="Not a Bad Exit">
+                    {% endif %}
+                {% else %}
+                    {{ relay|field_value:column_name|default:'None' }}
+                {% endif %}
+            {% endif %}
+            </td>
+            {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
+            {% endfor %}
+		</tr>
+	{% endfor %}
+</table>
+
 {% else %}
 <table id="noTableError">
     <tr>
@@ -54,229 +181,5 @@
     </tr>
 </table>
 {% endif %}
-
-<br />
-<br />
-
-<table class="aggStatisticSummary" id="advancedquery">
-<tr>
-    <td class="boxTitle" colspan="1">Custom / Advanced Query Options</td>
-</tr>
-<tr>
-    <td>
-        <table id="sortRouterListing">
-        <tr>
-            <td colspan="2">
-                <form action="/" method="get">
-                    <input type="hidden" name="resetQuery" value="resetQuery" />
-                    <input id="sortRouterListing_Button" type="submit" value="Reset the Query to DEFAULT" />
-                </form>
-            </td>
-        </tr>
-        </table>
-    </td>
-</tr>
-<tr>
-    <td>
-        <table id="sortRouterListing">
-        <tr>
-            <td> Sort Router Listing By: </td>
-            <td>
-                <form action="/" method="get">
-                <select id="sortRouterListing" name="sortListings">
-                {% autoescape off %}
-                    {% for option in htmlQueryListOptions %}
-                       {{option}}
-                    {% endfor %}
-                {% endautoescape %}
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <td> Sort Order: </td>
-            <td>
-                <select id="sortRouterListing" name="sortOrder">
-                <option value="ascending" {% if queryOptions and queryOptions|key:'sortOrder' == "ascending" %} 
-                                                            SELECTED {% endif %}>Ascending</option>
-                <option value="descending" {% if queryOptions and queryOptions|key:'sortOrder' == "descending" %} 
-                                                            SELECTED {% endif %}>Descending</option>
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <td id="sortRouterListing" colspan="2"> Require Flags </td>
-        </tr>
-        {% autoescape off %}
-            {% for option in htmlQueryInputOptions %}
-                <tr>{{option}}</tr>
-            {% endfor %}
-        {% endautoescape %}
-        </table>
-</tr>
-<tr>
-    <td>
-        <table id="sortRouterListing">
-        <tr>
-            <td id="sortRouterListing" colspan="2"> Advanced Search </td>
-        </tr>
-        <tr>
-            <td>
-            <select id="sortRouterListing" name="criteria">
-            <option value ="fingerprint" {% if not queryOptions or queryOptions|key:'criteria' == "fingerprint" %}
-                                                            SELECTED {% endif %}>Fingerprint</option>
-            <option value ="nickname" {% if queryOptions and queryOptions|key:'criteria' == "nickname" %}
-                                                            SELECTED {% endif %}>Router Name</option>
-            <option value ="geoip" {% if queryOptions and queryOptions|key:'criteria' == "geoip" %}
-                                                            SELECTED {% endif %}>Country Code</option>
-            <option value ="bandwidthobserved" {% if queryOptions and queryOptions|key:'criteria' == "bandwidthobserved" %}
-                                                            SELECTED {% endif %}>Bandwidth (kb/s)</option>
-            <option value ="uptime" {% if queryOptions and queryOptions|key:'criteria' == "uptime" %}
-                                                            SELECTED {% endif %}>Uptime (days)</option>
-            <option value ="published" {% if queryOptions and queryOptions|key:'criteria' == "published" %}
-                                                            SELECTED {% endif %}>Last Descriptor Published</option>
-            <option value ="address" {% if queryOptions and queryOptions|key:'criteria' == "address" %}
-                                                            SELECTED {% endif %}>IP Address</option>
-            <option value ="hostname" {% if queryOptions and queryOptions|key:'criteria' == "hostname" %}
-                                                            SELECTED {% endif %}>Hostname</option>
-            <option value ="orport" {% if queryOptions and queryOptions|key:'criteria' == "orport" %}
-                                                            SELECTED {% endif %}>Onion Router Port</option>
-            <option value ="dirport" {% if queryOptions and queryOptions|key:'criteria' == "dirport" %}
-                                                            SELECTED {% endif %}>Directory Sever Port</option>
-            <option value ="platform" {% if queryOptions and queryOptions|key:'criteria' == "platform" %}
-                                                            SELECTED {% endif %}>Platform</option>
-            </select>
-            </td>
-            <td>
-            <select id="sortRouterListing" name="boolLogic">
-            <option value ="equals" {% if not queryOptions or queryOptions|key:'boolLogic' == "equals" %}
-                                                            SELECTED {% endif %}>Equals</option>
-            <option value ="contains" {% if queryOptions and queryOptions|key:'boolLogic' == "contains" %}
-                                                            SELECTED {% endif %}>Contains</option>
-            <option value ="less" {% if queryOptions and queryOptions|key:'boolLogic' == "less" %}
-                                                            SELECTED {% endif %}>Is Less Than</option>
-            <option value ="greater" {% if queryOptions and queryOptions|key:'boolLogic' == "greater" %}
-                                                            SELECTED {% endif %}>Is Greater Than</option>
-            </select>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2">
-            <input id="sortRouterListing" type="text" name="searchValue" {% if queryOptions and queryOptions|key:'searchValue' %}
-                                                                    value="{{queryOptions|key:'searchValue'}}" 
-                                                                    {% endif %}/>
-            </td>
-        </tr>
-        </table>
-    </td>
-</tr>
-<tr>
-    <td>
-        <table id="sortRouterListing">
-        <tr>
-            <td colspan="2">
-                <input id="sortRouterListing_Button" type="submit" value="Apply Options" />
-            </td>
-        </tr>
-        </table>
-        </form>
-    </td>
-</tr>
-</table>
-</td>
-</tr>
-<tr>
-<td>
-<table class="aggStatisticSummary" id="networkstatisticsummary">
-<tr>
-    <td class="boxTitle" colspan="3">Aggregate Network Statistic Summary |
-    <a class="link" href="network-statistic-graphs">Graphs / Details</a>
-    </td>
-</tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total average bandwidth of displayed routers [KB/s]:</td>
-    <td id="aggBox">{{ counts.bandwidthavg }}</td>
-    <td id="aggBox">{{ counts.bandwidthavg|percent:total_counts.bandwidthavg }}</td>
-</tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total burst bandwidth of displayed routers [KB/s]:</td>
-    <td id="aggBox">{{ counts.bandwidthburst }}</td>
-    <td id="aggBox">{{ counts.bandwidthburst|percent:total_counts.bandwidthburst }}</td>
-</tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total observed bandwidth of displayed routers [KB/s]:</td>
-    <td id="aggBox">{{ counts.bandwidthobserved }}</td>
-    <td id="aggBox">{{ counts.bandwidthobserved|percent:total_counts.bandwidthobserved }}</td>
-</tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total number of Routers:</td>
-    <td id="aggBox">{{ num_routers }}</td>
-    <td id="aggBox">{{ num_routers|percent:num_routers }}</td>
-</tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Routers in current query result set:</td>
-    <td id="aggBox">{{ in_query }}</td>
-    <td id="aggBox">{{ in_query|percent:num_routers }}</td>
-</tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total number of 'authority' routers:</td>
-    <td id="aggBox">{{ counts.isauthority }}</td>
-    <td id="aggBox">{{ counts.isauthority|percent:num_routers }}</td>
-</tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total number of 'bad directory' routers:</td>
-    <td id="aggBox">{{ counts.isbaddirectory }}</td>
-    <td id="aggBox">{{ counts.isbaddirectory|percent:num_routers }}</td>
-</tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total number of 'bad exit' routers:</td>
-    <td id="aggBox">{{ counts.isbadexit }}</td>
-    <td id="aggBox">{{ counts.isbadexit|percent:num_routers }}</td>
-</tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total number of 'exit' routers</td>
-    <td id="aggBox">{{ counts.isexit }}</td>
-    <td id="aggBox">{{ counts.isexit|percent:num_routers }}</td>
-</tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total number of 'fast' routers</td>
-    <td id="aggBox">{{ counts.isfast }}</td>
-    <td id="aggBox">{{ counts.isfast|percent:num_routers }}</td>
-</tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total number of 'guard' routers:</td>
-    <td id="aggBox">{{ counts.isguard }}</td>
-    <td id="aggBox">{{ counts.isguard|percent:num_routers }}</td>
-</tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total number of 'named' routers:</td>
-    <td id="aggBox">{{ counts.isnamed }}</td>
-    <td id="aggBox">{{ counts.isnamed|percent:num_routers }}</td>
-</tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total number of 'stable' routers</td>
-    <td id="aggBox">{{ counts.isstable }}</td>
-    <td id="aggBox">{{ counts.isstable|percent:num_routers }}</td>
-</tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total number of 'running' routers:</td>
-    <td id="aggBox">{{ counts.isrunning }}</td>
-    <td id="aggBox">{{ counts.isrunning|percent:num_routers }}</td>
-</tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total number of 'valid' routers:</td>
-    <td id="aggBox">{{ counts.isvalid }}</td>
-    <td id="aggBox">{{ counts.isvalid|percent:num_routers }}</td>
-</tr>
-<tr id="row_aggStatisticSummary">
-	<td id="aggBox">Total number of 'v2dir' routers:</td>
-    <td id="aggBox">{{ counts.isv2dir }}</td>
-    <td id="aggBox">{{ counts.isv2dir|percent:num_routers }}</td>
-</tr>
-</table>
-</td>
-</tr>
-</table>
-
-<br />
 {% endspaceless %}
 {% endblock %}

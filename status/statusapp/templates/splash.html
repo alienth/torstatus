@@ -11,8 +11,9 @@
 {% block mainPage %}
 {% load index_filters %}
 
-{{search_for}}
+{% block noPageTitle %} {% endblock %}
 
+<body onLoad="document.forms.searchForm.search.focus()">
 <table class="mainTable">
 <tr>
     <td>
@@ -24,27 +25,26 @@
         <table id="searchTable">
         <tr>
             <td colspan="2">
-            <form name="searchForm" action="/" method="get">
-            <input id="searchBox" type="text" name="searchValue" {% if queryOptions and queryOptions|key:'searchValue' %}
-                                                                    value="{{queryOptions|key:'searchValue'}}"
-                                                                    {% endif %} placeholder="Relay Nickname, Fingerprint, etc."/>
+            <form name="searchForm" action="/index" method="get">
+            <input id="searchBox" type="text" name="search" placeholder="(nickname, fingerprint, IP)"/>
             </td>
         </tr>
         <tr>
             <table id="searchTable">
             <tr>
             <td align="center">
-            <input name="button" type="submit" value="Search" id="searchButton" />
+                <input name="searchButton" type="submit" value="Search" id="searchButton">
             </td>
+            </form>
             <td align="center">
-            <input name="button" type="submit" value="Advanced Search" id="searchButton" />
+                <a id="advancedSearchButton" href="/advanced-search">
+                <input type="submit" value="Advanced Search" id="searchButton"/>
+                </a>
             </td>
             </tr>
             </table>
         </tr>
-    </form>
         </table>
-        </form>
     </td>
 </tr>
 </table>

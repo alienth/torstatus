@@ -18,10 +18,9 @@ from matplotlib.figure import Figure
 from matplotlib.ticker import MaxNLocator
 
 # TorStatus specific import statements --------------------------------
-from statusapp.models import Statusentry, Bwhist, TotalBandwidth, \
-        NetworkSize
+from statusapp.models import Bwhist, TotalBandwidth, NetworkSize, \
+        ActiveRelay
 from custom.aggregate import CountCase
-from helpers import draw_bar_graph, draw_line_graph
 
 
 DEFAULT_PARAMS = {'WIDTH': 960, 'HEIGHT': 320, 'TOP_MARGIN': 25,
@@ -30,7 +29,7 @@ DEFAULT_PARAMS = {'WIDTH': 960, 'HEIGHT': 320, 'TOP_MARGIN': 25,
                   'Y_FONT_SIZE': '9', 'LABEL_FONT_SIZE': '8',
                   'LABEL_FLOAT': 3, 'LABEL_ROT': 'horizontal',
                   'FONT_WEIGHT': 'bold', 'BAR_WIDTH': 0.5,
-                  'COLOR': '#66CD00', 'TITLE': ''}
+                  'COLOR': '#005500', 'TITLE': ''}
 def readhist(request, fingerprint):
     """
     Create a graph of read bandwidth history for the last twenty-four
@@ -67,7 +66,7 @@ def writehist(request, fingerprint):
     return draw_line_graph(fingerprint, 'Written', '#66CD00', '#D9F3C0')
 
 
-@cache_page(60 * 5)
+@cache_page(60 * 15)
 def bycountrycode(request):
     """
     Return a graph representing the number of routers by country code.
@@ -80,22 +79,17 @@ def bycountrycode(request):
     params['LABEL_ROT'] = 'vertical'
     params['TITLE'] = 'Number of Routers by Country Code'
 
-    last_va = Statusentry.objects.aggregate(
+    last_va = ActiveRelay.objects.aggregate(
               last=Max('validafter'))['last']
 
-    statusentries = Statusentry.objects.filter(
-                    validafter=last_va).extra(
-                            select={'geoip': 'geoip_lookup(address)'})
+    relays = ActiveRelay.objects.filter(validafter=last_va)
 
     country_map = {}
 
-    for entry in statusentries:
-        # 'geoip' is a string, where the second and third characters
-        # make the country code.
-        if entry.geoip is None:
+    for relay in relays:
+        country = relay.country
+        if country is None:
             country = '??'
-        else:
-            country = entry.geoip[1:3]
         if country in country_map:
             country_map[country] += 1
         else:
@@ -109,7 +103,7 @@ def bycountrycode(request):
     return draw_bar_graph(xs, ys, keys, params)
 
 
-@cache_page(60 * 5)
+@cache_page(60 * 15)
 def exitbycountrycode(request):
     """
     Return a graph representing the number of exit routers
@@ -123,22 +117,17 @@ def exitbycountrycode(request):
     params['LABEL_ROT'] = 'vertical'
     params['TITLE'] = 'Number of Exit Routers by Country Code'
 
-    last_va = Statusentry.objects.aggregate(
+    last_va = ActiveRelay.objects.aggregate(
               last=Max('validafter'))['last']
 
-    statusentries = Statusentry.objects.filter(
-                    validafter=last_va, isexit=1).extra(
-                            select={'geoip': 'geoip_lookup(address)'})
+    relays = ActiveRelay.objects.filter(validafter=last_va, isexit=1)
 
     country_map = {}
 
-    for entry in statusentries:
-        # 'geoip' is a string, where the second and third characters
-        # make the country code.
-        if entry.geoip is None:
+    for relay in relays:
+        country = relay.country
+        if country is None:
             country = '??'
-        else:
-            country = entry.geoip[1:3]
         if country in country_map:
             country_map[country] += 1
         else:
@@ -152,7 +141,7 @@ def exitbycountrycode(request):
     return draw_bar_graph(xs, ys, keys, params)
 
 
-@cache_page(60 * 5)
+@cache_page(60 * 15)
 def bytimerunning(request):
     """
     Return a graph representing the uptime of routers in the Tor
@@ -166,20 +155,22 @@ def bytimerunning(request):
     params['X_FONT_SIZE'] = '9'
     params['TITLE'] = 'Number of Routers by Time Running (weeks)'
 
-    last_va = Statusentry.objects.aggregate(
+    last_va = ActiveRelay.objects.aggregate(
               last=Max('validafter'))['last']
 
-    statusentries = Statusentry.objects.filter(
-                    validafter=last_va)
+    relays = ActiveRelay.objects.filter(validafter=last_va)
 
     uptime_map = {}
 
     # This step is very inefficient; a custom SUM(CASE WHERE...
     # should be written.
-    for entry in statusentries:
+    for relay in relays:
         # The uptime in weeks is seconds / (seconds/min * min/hour
         # * hour/day * day/week), where / signifies floor division.
-        weeks = entry.descriptorid.uptime / (60 * 60 * 24 * 7)
+        uptimedays = relay.uptimedays
+        if uptimedays is None:
+            continue
+        weeks = relay.uptimedays / 7
         if weeks in uptime_map:
             uptime_map[weeks] += 1
         else:
@@ -193,7 +184,7 @@ def bytimerunning(request):
     return draw_bar_graph(xs, ys, keys, params)
 
 
-@cache_page(60 * 5)
+@cache_page(60 * 15)
 def byobservedbandwidth(request):
     """
     Return a graph representing the observed bandwidth of the
@@ -219,11 +210,10 @@ def byobservedbandwidth(request):
     RANGES = [(0, 10), (11, 20), (21, 50), (51, 100), (101, 500),
               (501, 1000), (1001, 2000), (2001, 3000), (3001, 5000)]
 
-    last_va = Statusentry.objects.aggregate(
+    last_va = ActiveRelay.objects.aggregate(
               last=Max('validafter'))['last']
 
-    statusentries = Statusentry.objects.filter(
-                    validafter=last_va)
+    relays = ActiveRelay.objects.filter(validafter=last_va)
 
     bw_map = {}
     excess = RANGES[-1][1] + 1
@@ -232,12 +222,10 @@ def byobservedbandwidth(request):
         bw_map[rng] = 0
     bw_map[excess] = 0
 
-    for entry in statusentries:
-        kbps = entry.descriptorid.bandwidthobserved / 1024
+    for relay in relays:
+        kbps = relay.bandwidthkbps
 
         # Binary search
-        # Is there a way to clean up this bit? It could be its own
-        # function...
         rngs = RANGES
         while (rngs and (not rngs[len(rngs) / 2][0] <= kbps <= \
                              rngs[len(rngs) / 2][1])):
@@ -250,7 +238,6 @@ def byobservedbandwidth(request):
         else:
             bw_map[excess] += 1
 
-
     num_params = len(bw_map)
     xs = range(num_params)
     ys = [bw_map[lower, upper] for lower, upper in RANGES]
@@ -262,7 +249,7 @@ def byobservedbandwidth(request):
     return draw_bar_graph(xs, ys, labels, params)
 
 
-@cache_page(60 * 5)
+@cache_page(60 * 15)
 def byplatform(request):
     """
     Return a graph representing the platforms of the active relays
@@ -278,11 +265,10 @@ def byplatform(request):
     params['X_FONT_SIZE'] = '9'
     params['TITLE'] = 'Number of Routers by Platform'
 
-    last_va = Statusentry.objects.aggregate(
+    last_va = ActiveRelay.objects.aggregate(
               last=Max('validafter'))['last']
 
-    statusentries = Statusentry.objects.filter(
-                    validafter=last_va)
+    relays = ActiveRelay.objects.filter(validafter=last_va)
 
     platform_map = {}
     keys = ['Linux', 'Windows', 'FreeBSD', 'Darwin', 'OpenBSD',
@@ -295,8 +281,11 @@ def byplatform(request):
     # Inefficient for the same reason that the observed bandwidth
     # graph is inefficient; a custom SUM(CASE WHERE... should be
     # necessary here.
-    for entry in statusentries:
-        platform = entry.descriptorid.platform
+    for relay in relays:
+        platform = relay.platform
+        if platform is None:
+            platform_map['Unknown'] += 1
+            continue
         for key in keys:
             if key in platform:
                 platform_map[key] += 1
@@ -315,7 +304,7 @@ def byplatform(request):
     return draw_bar_graph(xs, ys, keys, params)
 
 
-@cache_page(60 * 5)
+@cache_page(60 * 15)
 def aggregatesummary(request):
     """
     Return a graph representing an aggregate summary of the routers on
@@ -330,31 +319,32 @@ def aggregatesummary(request):
     params['TITLE'] = 'Aggregate Summary -- Number of Routers Matching' \
                     + ' Specified Criteria'
 
-    last_va = Statusentry.objects.aggregate(
+    last_va = ActiveRelay.objects.aggregate(
               last=Max('validafter'))['last']
 
-    statusentries = Statusentry.objects.filter(validafter=last_va)
+    relays = ActiveRelay.objects.filter(validafter=last_va)
 
-    total = statusentries.count()
-    counts = Statusentry.objects.filter(validafter=last_va).aggregate(
+    total = relays.count()
+    counts = ActiveRelay.objects.filter(validafter=last_va).aggregate(
              isauthority=CountCase('isauthority', when=True),
              isbaddirectory=CountCase('isbaddirectory', when=True),
              isbadexit=CountCase('isbadexit', when=True),
              isexit=CountCase('isexit', when=True),
              isfast=CountCase('isfast', when=True),
              isguard=CountCase('isguard', when=True),
+             ishibernating=CountCase('ishibernating', when=True),
              isnamed=CountCase('isnamed', when=True),
              isstable=CountCase('isstable', when=True),
              isrunning=CountCase('isrunning', when=True),
              isvalid=CountCase('isvalid', when=True),
              isv2dir=CountCase('isv2dir', when=True))
 
-    keys = ['isauthority', 'isbaddirectory', 'isbadexit', 'isexit',
-            'isfast', 'isguard', 'isnamed', 'isstable', 'isrunning',
-            'isvalid', 'isv2dir']
-    labels = ['Total', 'Authority', 'BadDirectory', 'BadExit', 'Exit',
-            'Fast', 'Guard', 'Named', 'Stable', 'Running', 'Valid',
-            'V2Dir']
+    keys = ['isauthority', 'isbaddirectory', 'isbadexit', 'isv2dir',
+            'isexit', 'isfast', 'isguard', 'ishibernating', 'isnamed',
+            'isstable', 'isrunning', 'isvalid']
+    labels = ['Total', 'Authority', 'BadDirectory', 'BadExit',
+              'Directory', 'Exit', 'Fast', 'Guard', 'Hibernating',
+              'Named', 'Stable', 'Running', 'Valid']
     num_params = len(labels)
     xs = range(num_params)
 
@@ -366,7 +356,7 @@ def aggregatesummary(request):
     return draw_bar_graph(xs, ys, labels, params)
 
 
-cache_page(60 * 5)
+@cache_page(60 * 15)
 def networktotalbw(request):
     """
     Return a graph representing the total bandwidth of the Tor network.
@@ -467,7 +457,7 @@ def networktotalbw(request):
         ys.append(net_size[i].avg_running)
 
     ax2 = ax1.twinx()
-    active_relays = ax2.plot(xs, ys, color='#66CD00',
+    active_relays = ax2.plot(xs, ys, color='#005500',
                              label='Average Active Relays')
 
     ax2.set_xticks(range(0, data_points, 7))
@@ -481,7 +471,7 @@ def networktotalbw(request):
         tick.label2.set_fontweight(FONT_WEIGHT)
 
     for tick in ax2.get_yticklabels():
-        tick.set_color('#66CD00')
+        tick.set_color('#005500')
 
     # Label entire graph
     #ax1.set_title(TITLE, fontsize='12', fontweight=FONT_WEIGHT)
@@ -495,10 +485,238 @@ def networktotalbw(request):
     # TODO: Make the grid work for both lines.
     # Set tick marks such that a grid applies to both lines.
     ax1.set_ylim(ymin=0)
+    ax1.set_xlim(xmin=0)
     ax2.set_ylim(ymin=max((0, min(ys))))
-    ax1.yaxis.set_major_locator(MaxNLocator(4))
+    ax2.set_xlim(xmin=0)
+    ax1.yaxis.set_major_locator(MaxNLocator(5))
     ax2.yaxis.set_major_locator(MaxNLocator(5))
     #ax1.grid(color='#888888')
+    canvas = FigureCanvas(fig)
+    response = HttpResponse(content_type='image/png')
+    canvas.print_png(response, ha="center")
+    return response
+
+
+def draw_bar_graph(xs, ys, labels, params):
+    """
+    Draws a bar graph, given data points, labels, and presentation
+    parameters.
+
+    @type xs: C{list}
+    @param xs: The x values to be plotted.
+    @type ys: C{list}
+    @param ys: The y values to be plotted.
+    @type labels: C{list} of C{string}
+    @param labels: The labels to be used for each data point, where
+        C{labels[i]} labels C{(xs[i], ys[i])}.
+    @type params: C{dict} of C{string} and C{int}
+    @param params: Parameters specifying how the graph is to be drawn.
+        Params must contain the keys: WIDTH, HEIGHT, TOP_MARGIN,
+        BOTTOM_MARGIN, LEFT_MARGIN, RIGHT_MARGIN, X_FONT_SIZE,
+        Y_FONT_SIZE, LABEL_FONT_SIZE, FONT_WEIGHT, BAR_WIDTH,
+        COLOR, LABEL_FLOAT, LABEL_ROT, and TITLE.
+    @rtype: HttpResponse
+    @return: The graph as specified by the parameters given.
+    """
+    ## Get the parameters from the params dictionary
+    # Width and height of the graph in pixels
+    WIDTH = params['WIDTH']
+    HEIGHT = params['HEIGHT']
+    # Space in pixels given around plot
+    TOP_MARGIN = params['TOP_MARGIN']
+    BOTTOM_MARGIN = params['BOTTOM_MARGIN']
+    LEFT_MARGIN = params['LEFT_MARGIN']
+    RIGHT_MARGIN = params['RIGHT_MARGIN']
+    # Font sizes, in pixels
+    X_FONT_SIZE = params['X_FONT_SIZE']
+    Y_FONT_SIZE = params['Y_FONT_SIZE']
+    LABEL_FONT_SIZE = params['LABEL_FONT_SIZE']
+    # How many pixels above each bar the labels should be
+    LABEL_FLOAT = params['LABEL_FLOAT']
+    # How the labels should be presented
+    LABEL_ROT = params['LABEL_ROT']
+    # Font weight used for labels and titles
+    FONT_WEIGHT = params['FONT_WEIGHT']
+    BAR_WIDTH = params['BAR_WIDTH']
+    COLOR = params['COLOR']
+    # Title of graph
+    TITLE = params['TITLE']
+
+    # Set margins according to specification.
+    matplotlib.rcParams['figure.subplot.left'] = \
+            float(LEFT_MARGIN) / WIDTH
+    matplotlib.rcParams['figure.subplot.right'] = \
+            float(WIDTH - RIGHT_MARGIN) / WIDTH
+    matplotlib.rcParams['figure.subplot.top'] = \
+            float(HEIGHT - TOP_MARGIN) / HEIGHT
+    matplotlib.rcParams['figure.subplot.bottom'] = \
+            float(BOTTOM_MARGIN) / HEIGHT
+
+    # Draw the figure.
+    width_inches = float(WIDTH) / 80
+    height_inches = float(HEIGHT) / 80
+    fig = Figure(facecolor='white', edgecolor='black',
+                 figsize=(width_inches, height_inches), frameon=False)
+    ax = fig.add_subplot(111)
+
+    # Plot the data.
+    ax.bar(xs, ys, color=COLOR, width=BAR_WIDTH)
+
+    # Label the height of each bar.
+    label_float_ydist = ax.get_ylim()[1] * LABEL_FLOAT / (
+                        HEIGHT - TOP_MARGIN - BOTTOM_MARGIN)
+    num_params = len(xs)
+    for i in range(num_params):
+        ax.text(xs[i] + (BAR_WIDTH / 2.0),
+                ys[i] + (label_float_ydist), str(ys[i]),
+                fontsize=LABEL_FONT_SIZE, horizontalalignment='center')
+
+    x_index = matplotlib.numpy.arange(num_params)
+    ax.set_xticks(x_index + (BAR_WIDTH / 2.0))
+    ax.set_xticklabels(labels, fontsize=X_FONT_SIZE,
+                       fontweight=FONT_WEIGHT, rotation=LABEL_ROT)
+
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label1.set_fontsize(Y_FONT_SIZE)
+        tick.label1.set_fontweight(FONT_WEIGHT)
+
+    ax.set_title(TITLE, fontsize='12', fontweight=FONT_WEIGHT)
+
+    canvas = FigureCanvas(fig)
+    response = HttpResponse(content_type='image/png')
+    canvas.print_png(response, ha="center")
+    return response
+
+
+def draw_line_graph(fingerprint, bwtype, color, shade):
+    """
+    Draws a line graph with given data points and display parameters.
+
+    @type fingerprint: C{string}
+    @param fingerprint: The fingerprint of the router that the graph
+        is to be drawn for.
+    @type bwtype: C{string}
+    @param bwtype: Either 'read' or 'written', depending on whether the
+        graph to be drawn will be of recent read bandwidth or recent
+        written bandwdith.
+    @type color: C{string}
+    @param color: The color to draw the line graph with.
+    @type shade: C{string}
+    @param shade: The color to shade under the line graph.
+    @rtype: HttpResponse
+    @return: The graph as specified by the parameters given.
+    """
+    # Width and height of the graph in pixels
+    WIDTH = 480
+    HEIGHT = 320
+    # Space in pixels given around plot
+    TOP_MARGIN = 42
+    BOTTOM_MARGIN = 32
+    LEFT_MARGIN = 98
+    RIGHT_MARGIN = 5
+    # Font sizes, in pixels
+    X_FONT_SIZE = '8'
+    Y_FONT_SIZE = '8'
+    # Font weight used for labels and titles.
+    FONT_WEIGHT = 'bold'
+
+    # Set margins according to specification.
+    matplotlib.rcParams['figure.subplot.left'] = \
+            float(LEFT_MARGIN) / WIDTH
+    matplotlib.rcParams['figure.subplot.right'] = \
+            float(WIDTH - RIGHT_MARGIN) / WIDTH
+    matplotlib.rcParams['figure.subplot.top'] = \
+            float(HEIGHT - TOP_MARGIN) / HEIGHT
+    matplotlib.rcParams['figure.subplot.bottom'] = \
+            float(BOTTOM_MARGIN) / HEIGHT
+
+    last_hist = Bwhist.objects.filter(fingerprint=fingerprint)\
+                .order_by('-date')[:1][0]
+
+    if bwtype == 'Read':
+        t_start, t_end, tr_list = last_hist.read
+    elif bwtype == 'Written':
+        t_start, t_end, tr_list = last_hist.written
+
+    recent_date = last_hist.date
+    recent_time = datetime.datetime.combine(recent_date,
+                  datetime.time())
+
+    # It's possible that we might be missing some entries at the
+    # beginning; add values of 0 in this case.
+    tr_list[0:0] = ([0] * t_start)
+
+    # We want to have 96 data points in our graph; if we don't have
+    # them, get some data points from the day before, if we can.
+    to_fill = 96 - len(tr_list)
+
+    start_time = recent_time - datetime.timedelta(
+                 minutes=(15 * to_fill))
+    end_time = start_time + datetime.timedelta(
+               days=1) - datetime.timedelta(minutes=15)
+
+    # If less than 96 entries in the array, get earlier entries.
+    # If they don't exist, fill in the array with '0' values.
+    if to_fill:
+        day_before = last_hist.date - datetime.timedelta(days=1)
+
+        try:
+            day_before_hist = Bwhist.objects.get(
+                    fingerprint=fingerprint,
+                    date=str(day_before))
+            if bwtype == 'Read':
+                y_start, y_end, y_list = day_before_hist.read
+            elif bwtype == 'Written':
+                y_start, y_end, y_list = day_before_hist.written
+            y_list.extend([0] * (95 - y_end))
+            y_list[0:0] = ([0] * y_start)
+
+        except Bwhist.DoesNotExist:
+            y_list = ([0] * 96)
+        tr_list[0:0] = y_list[(-1 * to_fill):]
+
+    width_inches = float(WIDTH) / 80
+    height_inches = float(HEIGHT) / 80
+    fig = Figure(facecolor='white', edgecolor='black',
+                 figsize=(width_inches, height_inches), frameon=False)
+    ax = fig.add_subplot(111)
+
+    # Return bytes per second, not total bandwidth for 15 minutes.
+    bps = map(lambda x: x / (15 * 60), tr_list)
+    times = []
+    for i in range(0, 104, 8):
+        to_add_date = start_time + datetime.timedelta(minutes=(15 * i))
+        to_add_str = "%0*d:%0*d" % (2, to_add_date.hour,
+                                    2, to_add_date.minute)
+        times.append(to_add_str)
+
+    dates = range(96)
+
+    # Draw the graph and give the graph a light shade underneath it.
+    ax.plot(dates, bps, color=color)
+    ax.fill_between(dates, 0, bps, color=shade)
+
+    ax.set_xlabel("Time (GMT)", fontsize='12')
+    ax.set_xticks(range(0, 104, 8))
+    ax.set_xticklabels(times, fontsize=X_FONT_SIZE,
+                       fontweight=FONT_WEIGHT)
+
+    ax.set_ylabel("Bandwidth (bytes/sec)", fontsize='12')
+
+    # Don't extend the y-axis to negative numbers, in any circumstance.
+    ax.set_ylim(ymin=0)
+
+    # Don't use scientific notation.
+    ax.yaxis.major.formatter.set_scientific(False)
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label1.set_fontsize(Y_FONT_SIZE)
+        tick.label1.set_fontweight(FONT_WEIGHT)
+
+    ax.set_title("Average Bandwidth " + bwtype + " History:\n"
+            + start_time.strftime("%Y-%m-%d %H:%M") + " to "
+            + end_time.strftime("%Y-%m-%d %H:%M"), fontsize='12',
+            fontweight=FONT_WEIGHT)
+
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
     canvas.print_png(response, ha="center")

@@ -1,7 +1,4 @@
-td {
-    font-size: 100%;
-}
-
+/* Table -----------------------------------------------*/
 table.mainTable {
     font-size: 30px;
     width: auto;
@@ -19,58 +16,40 @@ table#searchTable {
     margin-right: auto;
 }
 
-input#searchButton { 
-    color: #050; 
-    font: bold 'trebuchet ms',helvetica,sans-serif; 
-    font-size: 0.938em;
-	background-color:#fed; 
-    border: 1px solid; 
-    border-color: #61a #315 #315 #61a;
-	opacity: 0.4; 
-} 
+/* END Table ------------------------------------------ */
 
-input#searchButton:hover {
-    color: #050; 
-    font: bold 'trebuchet ms',helvetica,sans-serif; 
-    font-size: 0.938em;
-	background-color:#fed; 
-    border: 1px solid; 
-    border-color: #696 #363 #363 #696;
-	opacity: 1;
-	cursor: pointer;
-}
-
-input#searchButton:focus {
-    color: #050; 
-    font: bold 'trebuchet ms',helvetica,sans-serif; 
-    font-size: 0.938em;
-	background-color:#fed; 
-    border: 1px solid; 
-    border-color: #696 #363 #363 #696;
-	opacity: 1;
-	cursor: pointer;
-}
+/* Input ---------------------------------------------- */
 
 input#searchBox {
-    font: 0.625em 'trebuchet ms',helvetica,sans-serif; 
     font-size: 0.938em;
-    border: 1px solid; 
-    border-color: #61a #315 #315 #61a; 
+    border: 1px solid;
+    border-color: #61a #315 #315 #61a;
 	width: 400px;
 }
 
 input#searchBox:hover {
-    font: 0.625em 'trebuchet ms',helvetica,sans-serif; 
     font-size: 0.938em;
-    border: 1px solid; 
-    border-color: #696 #363 #363 #696; 
+    border: 1px solid;
+    border-color: #696 #363 #363 #696;
 	width: 400px;
 }
 
 input#searchBox:focus {
-    font: 0.625em 'trebuchet ms',helvetica,sans-serif; 
     font-size: 0.938em;
-    border: 1px solid; 
+    border: 1px solid;
     border-color: #696 #363 #363 #696;
 	width: 400px;
 }
+
+/* END Input ------------------------------------------ */
+
+/* Other ---------------------------------------------- */
+a#advancedSearchButton {
+    text-decoration: none;
+}
+
+a#advancedSearchButton:visited {
+    text-decoration: none;
+}
+
+/* END Other ------------------------------------------ */

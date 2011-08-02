@@ -3,28 +3,19 @@ The URLCONF for the statusapp.
 """
 
 from django.conf.urls.defaults import *
-from django.views.static import *
 from django.conf import settings
-from django.views.decorators.cache import cache_page
 
 urlpatterns = patterns('',
     # Splash page
     (r'^$', 'statusapp.views.pages.splash'),
 
-    # Index and related pages
-    (r'^index/(?P<sort_filter>\w*)$', 'statusapp.views.pages.index'),
-
     # Search
     (r'^advanced-search$', 'statusapp.views.pages.advanced_search'),
 
-    # Unpaged Index and related pages
+    # Index and related pages
+    (r'^index/$', 'statusapp.views.pages.index'),
     (r'^display-options/$', 'statusapp.views.pages.display_options'),
     (r'^exit-node-query/$', 'statusapp.views.pages.exitnodequery'),
-
-    # Media Files
-    (r'^flags/(?P<country_code>\w\w).gif$','statusapp.views.displayFlag'),
-    (r'^static/(?P<path>.*)$', 'django.views.static.serve',
-            {'document_root': settings.MEDIA_ROOT}),
 
     # Details Page
     (r'^details/(?P<fingerprint>\w{40})$', 'statusapp.views.pages.details'),
@@ -59,6 +50,8 @@ urlpatterns = patterns('',
 
     # CSV Files
     (r'^tor-query-export.csv$', 'statusapp.views.csvs.current_results_csv'),
-    (r'^Tor-IP-List-All.csv$', 'statusapp.views.csvs.custom_csv', {'flags': []}),
-    (r'^Tor-IP-List-Exit.csv$', 'statusapp.views.csvs.custom_csv', {'flags': ['isexit']}),
+
+    # Media Files
+    (r'^static/(?P<path>.*)$', 'django.views.static.serve',
+            {'document_root': settings.MEDIA_ROOT}),
 )

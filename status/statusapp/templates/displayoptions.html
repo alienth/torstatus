@@ -1,84 +1,80 @@
 {% extends "base.html" %}
 
 {% block auxCSS %}
-<link rel="stylesheet" type="text/css" href="/static/css/columnpreferences.css"></link>
+<link rel="stylesheet" type="text/css" href="/static/css/displayoptions.css"></link>
 {% endblock %}
 
-{% block mainTitle %} TorStatus Column Display Preferences {% endblock %}
+{% block mainTitle %} - TorStatus - Display Options {% endblock %}
 
 {% block headerTitle %} TorStatus {% endblock %}
 
+{% load displayoptions_filters %}
+
+{% block pageTitle %} Display Options {% endblock %}
+
 {% block mainPage %}
-
-{% load columnpreferences_filters %}
-
+<table align="center">
+    <tr>
+        <td id="debug">
+            {% if debug_message %}{{ debug_message|linebreaksbr }}{% else %}<br>{% endif %}<br><br></td>
+    </tr>
+</table>
 <table class="displayPref">
 <tr>
-    <td class="boxTitle" colspan="1">Column Display Preferences Detail</td>
-</tr>
-<tr>
     <td>
-    <form action='' method='get'>
+    <form action="" method="get">
     <table class="selectionLists">
     <tr>
         <td id="selectForm">
-            <input id='removeList' name='removeColumn' type='submit' value="Remove Column &gt;&gt;" />
+            <input id="removeList" name="removeColumn" type="submit" value="Remove Column &#8702;" />
                 <br />
-                <select name="selected_removeColumn" size='20' id='selectForm_removeColumn'>
-                
+                <select name="selected_removeColumn" size="20" id="selectForm_removeColumn">
                 {% for entry in currentColumns %}
-                    {% if entry == "Router Name" %}
-                    {% else %}
                         {% if entry|movable %}
                             <option value="{{entry}}" {% ifequal entry selectedEntry %} SELECTED {% endifequal %}>{{entry}}</option>
                         {% else %}
                             <option id="notMovable" value="{{entry}}" {% ifequal entry selectedEntry %} SELECTED {% endifequal %}>{{entry}}</option>
                         {% endif %}
-                    {% endif %}                        
                 {% endfor %}
-                
+
                 </select>
-                
-                <p id='selectForm_text'>Currently Selected Columns
+
+                <p id="selectForm_text">Currently Selected Columns</p>
         </td>
         <td>
-            <input id='upButton' name='upButton' type='submit' value='Up' />
+            <input id="upButton" name="upButton" type="submit" value="Up" />
             <br />
-            <input id='downButton' name='downButton' type='submit' value='Down' />
+            <input id="downButton" name="downButton" type="submit" value="Down" />
         </td>
         <td id="selectForm">
-            <input id='addList' name='addColumn' type='submit' value="&lt;&lt; Add Column" />
+            <input id="addList" name="addColumn" type="submit" value="&#8701; Add Column" />
                 <br />
-                <select name="selected_addColumn" size='20' id='selectForm_addColumn'>
-                
+                <select name="selected_addColumn" size="20" id="selectForm_addColumn">
+
                 {% for entry in availableColumns %}
-                {% if entry == "Router Name" %}
-                    {% else %}
                         {% if entry|movable %}
-                            <option value="{{entry}}">{{entry}}</option>
+                            <option value="{{ entry }}">{{ entry }}</option>
                         {% else %}
-                            <option id="notMovable" value="{{entry}}">{{entry}}</option>
+                            <option id="notMovable" value="{{ entry }}">{{ entry }}</option>
                         {% endif %}
-                    {% endif %}
                 {% endfor %}
-                
+
                 </select>
-                
-                <p id='selectForm_text'>Available Columns
+
+                <p id="selectForm_text">Available Columns</p>
         </td>
     </tr>
     </table>
     </form>
     </td>
-</tr>    
+</tr>
 <tr>
     <td>
-    <table id="sortRouterListing">
+    <table class="resetButton_Table">
         <tr>
             <td colspan="2">
                 <form action="/display-options" method="get">
-                    <input type="hidden" name="resetPreferences" value="resetPreferences" />
-                    <input id="sortRouterListing_Button" type="submit" value="Reset the Preferences to DEFAULT" />
+                    <input name="resetPreferences" id="button" type="submit" value="Reset Column Preferences" />
                 </form>
             </td>
         </tr>
@@ -86,7 +82,28 @@
     </td>
 </tr>
 <tr>
-    <td id="selectForm"><a class="link" href="/">Done / Return to Main Page</a></td>
+    <td>
+        <table align="center">
+            <tr>
+                <td>
+                    <form action="" method="get">
+                        <table align="center">
+                            <tr>
+                                <td id="label"> Relays Per Page (Currently {{ current_pp }}) </td>
+                                <td><input id="ppinput" type="text" name="pp"></td>
+                                <td><input type="submit" value="Submit" id="submitButton"></td>
+                            </tr>
+                            </table>
+                        </form>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+<tr>
+    <td id="mainLinks"><a href="/">Return to Splash Screen</a>   |   
+                        <a href="/index/">Return to Index Page</a>
+    </td>
 </tr>
 </table>
 

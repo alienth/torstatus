@@ -1,0 +1,172 @@
+/* Table -----------------------------------------------*/
+table.displayPref {
+    font-size: 20px;
+    width: 325px;
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+    border-color: #61a #315 #315 #61a;
+    margin-left: auto;
+    margin-right: auto;
+    border-collapse: collapse;
+   	white-space:nowrap;
+}
+
+table.resetButton_Table {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* END Table ------------------------------------------ */
+
+/* Table Columns -------------------------------------- */
+td.boxTitle {
+	background-color: #7BD4F7;
+	text-align: center;
+	color: #000000;
+	border-top: 2px solid black;
+	border-bottom: 2px solid black;
+	white-space:nowrap;
+}
+
+td#selectForm {
+    font-size: 0.625em;
+	text-align: center;
+	white-space:nowrap;
+}
+
+td#returnLink {
+    width: 200px;
+    color: #050;
+	background-color:#fed;
+    border: 1px solid;
+    border-color: #61a #315 #315 #61a;
+	opacity: 0.5;
+}
+
+td#returnLink:focus {
+    width: 200px;
+    color: #050;
+	background-color: #fed;
+    border: 1px solid;
+    border-color: #696 #363 #363 #696;
+	opacity: 1;
+	cursor: pointer;
+}
+
+td#returnLink:hover {
+    width: 200px;
+    color: #050;
+	background-color: #fed;
+    border: 1px solid;
+    border-color: #696 #363 #363 #696;
+	opacity: 1;
+	cursor: pointer;
+}
+
+td#label {
+    font-size: 0.750em;
+    color: #050;
+    text-align: center;
+    border-color: #61a #315 #315 #61a;
+    white-space:nowrap;
+}
+
+td#debug {
+    font-size: 0.750em;
+    color: red;
+    text-align: center;
+    white-space:nowrap;
+}
+
+/* END Table Columns ---------------------------------- */
+
+/* Input, Select, Option ------------------------------ */
+
+input#ppinput {
+    font-size: 0.750em;
+    border: 1px solid;
+    border-color: #61a #315 #315 #61a;
+	width: 100%;
+}
+
+input#ppinput:hover {
+    border: 1px solid;
+    border-color: #696 #363 #363 #696;
+}
+
+input#ppinput:focus {
+    border: 1px solid;
+    border-color: #696 #363 #363 #696;
+}
+
+select#selectForm_removeColumn {
+    width: 200px;
+    background-color: white;
+    border: 0px solid;
+    border-color: #61a #315 #315 #61a;
+}
+
+select#selectForm_removeColumn:focus {
+    width: 200px;
+    background-color: white;
+    border: 0px solid;
+    border-color: #61a #315 #315 #61a;
+}
+
+select#selectForm_removeColumn:hover {
+    width: 200px;
+    background-color: white;
+    border: 0px solid;
+    border-color: #61a #315 #315 #61a;
+}
+
+
+select#selectForm_addColumn {
+    width: 200px;
+    background-color: white;
+    border: 0px solid;
+    border-color: #61a #315 #315 #61a;
+}
+
+option#notMovable {
+    font-style:italic;
+    color:red;
+}
+
+a:hover
+{
+    color: black;
+    text-decoration: none;
+}
+
+a.link {
+    color: black;
+    text-decoration: none;
+}
+
+a.link:hover {
+    background-color: #dac8e2;
+}
+
+td#mainLinks {
+    text-align: center;
+    font-size: 0.75em;
+    color: red;
+}
+
+/* END Input, Select, Option -------------------------- */
+
+/* Other ---------------------------------------------- */
+p#selectForm_text {
+    font-size: 10px;
+}
+
+a#returnButtonLink {
+    text-decoration: none;
+}
+
+a#returnButtonLink:visited {
+    text-decoration: none;
+}
+
+/* END Other ------------------------------------------ */

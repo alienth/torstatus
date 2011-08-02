@@ -1,67 +1,63 @@
-td {
-    font-size: 100%;
-}
-
-td#advSearchTitle {
-    color: #050;
-    font-size: 0.625em;
-    background-color: white;
-    text-align: center;
-    border-top: 1px solid;
-    border-bottom: 1px solid;
-    border-color: #61a #315 #315 #61a;
-    white-space:nowrap;
-}
-
-td#advSearchToolText {
-    color: #050;
-    font-size: 0.438em;
-    text-align: center;
-    border-color: #61a #315 #315 #61a;
-    white-space:nowrap;
-    padding-right: 15px;
-    padding-left: 15px;
-}
-
+/* Table -----------------------------------------------*/
 table.advSearchTable {
-    font-size: 30px;
     width: auto;
     padding: 10px;
     border-spacing: 10px;
-    border: 1px bold;
     margin-left: auto;
     margin-right: auto;
 }
 
+table.flags {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* END Table ------------------------------------------ */
+
+/* Table Columns -------------------------------------- */
+td#advSearchToolText {
+    font-size: 100%;
+    color: #050;
+    text-align: center;
+    border-color: #61a #315 #315 #61a;
+    white-space:nowrap;
+}
+
+/* END Table Columns ---------------------------------- */
+
+/* Input, Select, Option ------------------------------ */
 input#advSearchBox {
-    font: 0.438em; 
-    font-size: 0.438em;
-    border: 1px solid; 
+    font-size: 1.0625em;
+    border: 1px solid;
     border-color: #61a #315 #315 #61a;
 	width: 400px;
 }
 
 input#advSearchBox:hover {
-    font: 0.438em; 
-    font-size: 0.438em;
-    border: 1px solid; 
+    border: 1px solid;
     border-color: #696 #363 #363 #696;
 	width: 400px;
 }
 
 input#advSearchBox:focus {
-    font: 0.438em; 
-    font-size: 0.438em;
-    border: 1px solid; 
-    border-color: #696 #363 #363 #696; 
+    border: 1px solid;
+    border-color: #696 #363 #363 #696;
 	width: 400px;
 }
 
-select#advSearchButton { 
-    color: #050; 
-    font: bold; 
-    font-size: 0.438em;
-	background-color: #fed; 
-    border: 1px solid; 
+select#advSearchButton {
+    font-size: 1.0625em;
+    color: #050;
+	background-color: #fed;
+    border: 1px solid;
     border-color: #61a #315 #315 #61a;
-} 
+}
+
+input#searchButton {
+    font-weight: bold;
+    font-size: 1.375em;
+    width: 300px;
+}
+
+
+/* END Input, Select, Option -------------------------- */

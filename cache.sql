@@ -8,16 +8,23 @@ SET TIME ZONE UTC;
 -- TABLE active_descriptor
 -- Contains descriptors published by routers in the last 20 hours.
 CREATE TABLE active_descriptor (
-    descriptor CHARACTER(40) NOT NULL,
-    nickname CHARACTER VARYING(19) NOT NULL,
-    fingerprint CHARACTER(40) NOT NULL,
-    published TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    bandwidthavg BIGINT NOT NULL,
-    bandwidthburst BIGINT NOT NULL,
-    bandwidthobserved BIGINT NOT NULL,
-    platform CHARACTER VARYING(256),
+    descriptor CHARACTER(40),
+    nickname CHARACTER VARYING(19),
+    fingerprint CHARACTER(40),
+    published TIMESTAMP WITHOUT TIME ZONE,
+    bandwidthavg BIGINT,
+    bandwidthburst BIGINT,
+    bandwidthobserved BIGINT,
+    bandwidthkbps BIGINT,
     uptime BIGINT,
-    rawdesc BYTEA NOT NULL,
+    uptimedays BIGINT,
+    platform CHARACTER VARYING(256),
+    contact TEXT,
+    onionkey CHARACTER(188),
+    signingkey CHARACTER(188),
+    exitpolicy TEXT[],
+    family TEXT,
+    ishibernating BOOLEAN DEFAULT FALSE,
     CONSTRAINT active_descriptor_unique PRIMARY KEY (descriptor)
 );
 
@@ -28,8 +35,7 @@ CREATE TABLE active_relay (
     validafter TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     nickname CHARACTER VARYING(19) NOT NULL,
     fingerprint CHARACTER(40) NOT NULL,
-    -- address INET NOT NULL, can't seem to cast text to inet, see below.
-    address CHARACTER VARYING(15) NOT NULL,
+    address INET NOT NULL,
     orport INTEGER NOT NULL,
     dirport INTEGER NOT NULL,
     isauthority BOOLEAN DEFAULT FALSE NOT NULL,
@@ -55,11 +61,12 @@ CREATE TABLE active_relay (
     uptime BIGINT,
     uptimedays BIGINT,
     platform CHARACTER VARYING(256),
-    contact CHARACTER VARYING(96),
+    contact TEXT,
     onionkey CHARACTER(188),
     signingkey CHARACTER(188),
-    exitpolicy TEXT,
+    exitpolicy TEXT[],
     family TEXT,
+    ishibernating BOOLEAN,
     country CHARACTER VARYING(2),
     latitude NUMERIC(7, 4),
     longitude NUMERIC(7, 4),
@@ -67,7 +74,7 @@ CREATE TABLE active_relay (
 );
 
 -- No hostname, for now. I don't think this breaks anybody's heart.
--- Later, could do lookup with socket.getfqdn (python)
+-- Later, could do lookup with socket.getfqdn (plpythonu)
 -- CREATE TABLE hostname (
 --    address INET NOT NULL,
 --    hostname CHARACTER VARYING(255),
@@ -93,13 +100,13 @@ CREATE LANGUAGE plpgsql;
 
 -- FUNCTIONS ----------------------------------------------------------
 -- TRIGGER FUNCTIONS --------------------------------------------------
-CREATE OR REPLACE FUNCTION update_statusentry_relay()
-    RETURNS TRIGGER AS $update_statusentry$
+CREATE OR REPLACE FUNCTION update_statusentry()
+    RETURNS TRIGGER AS $add_statusentry$
     BEGIN
     IF ((SELECT COUNT(*) FROM cache.active_relay
         WHERE validafter = NEW.validafter
         AND fingerprint = NEW.fingerprint) > 0
-        OR (NEW.validafter < (SELECT localtimestamp) - INTERVAL '90 minutes'))
+        OR (NEW.validafter < (SELECT localtimestamp) - INTERVAL '4 hours'))
         THEN
             RETURN NULL;
     ELSE IF (SELECT COUNT(*) FROM cache.active_relay
@@ -111,8 +118,8 @@ CREATE OR REPLACE FUNCTION update_statusentry_relay()
             validafter = NEW.validafter,
             nickname = NEW.nickname,
             fingerprint = NEW.fingerprint,
-            -- address = NEW.address::INET, doesn't work
-            address = NEW.address,
+            -- varchar cast necessary to convert to INET
+            address = inet(NEW.address::varchar),
             orport = NEW.orport,
             dirport = NEW.dirport,
             isauthority = NEW.isauthority,
@@ -146,7 +153,7 @@ CREATE OR REPLACE FUNCTION update_statusentry_relay()
             isv2dir, isv3dir, country, latitude, longitude)
         VALUES
             (NEW.validafter, NEW.nickname, NEW.fingerprint,
-             NEW.address, NEW.orport, NEW.dirport,
+             inet(NEW.address::varchar), NEW.orport, NEW.dirport,
              NEW.isauthority, NEW.isbadexit, NEW.isbaddirectory,
              NEW.isexit, NEW.isfast, NEW.isguard, NEW.ishsdir,
              NEW.isnamed, NEW.isstable, NEW.isrunning,
@@ -162,238 +169,225 @@ CREATE OR REPLACE FUNCTION update_statusentry_relay()
         IF (SELECT COUNT(*) FROM cache.active_descriptor
             WHERE NEW.fingerprint = fingerprint) > 0
             THEN
-                PERFORM cache.insert_descriptor_info (
-                    (SELECT descriptor FROM cache.active_descriptor
-                     WHERE fingerprint = NEW.fingerprint),
-                    (SELECT nickname FROM cache.active_descriptor
-                     WHERE fingerprint = NEW.fingerprint),
-                    (SELECT fingerprint FROM cache.active_descriptor
-                     WHERE fingerprint = NEW.fingerprint),
-                    (SELECT published FROM cache.active_descriptor
-                     WHERE fingerprint = NEW.fingerprint),
-                    (SELECT bandwidthavg FROM cache.active_descriptor
-                     WHERE fingerprint = NEW.fingerprint),
-                    (SELECT bandwidthburst FROM cache.active_descriptor
-                     WHERE fingerprint = NEW.fingerprint),
-                    (SELECT bandwidthobserved FROM cache.active_descriptor
-                     WHERE fingerprint = NEW.fingerprint),
-                    (SELECT platform FROM cache.active_descriptor
-                     WHERE fingerprint = NEW.fingerprint),
-                    (SELECT uptime FROM cache.active_descriptor
-                     WHERE fingerprint = NEW.fingerprint),
-                    (SELECT rawdesc FROM cache.active_descriptor
-                     WHERE fingerprint = NEW.fingerprint)
-                );
+                PERFORM cache.insert_descriptor_info (NEW.fingerprint);
         END IF;
         END;
     END IF;
     END IF;
     RETURN NULL;
     END;
-$update_statusentry$ LANGUAGE plpgsql;
+$add_statusentry$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION update_descriptor_relay()
+CREATE OR REPLACE FUNCTION update_descriptor()
     RETURNS TRIGGER AS $add_descriptor$
     BEGIN
     IF ((SELECT COUNT(*) FROM cache.active_descriptor
          WHERE (descriptor = NEW.descriptor OR published > NEW.published)) > 0
-         OR (NEW.published < (SELECT localtimestamp) - INTERVAL '24 hours'))
+         OR (NEW.published < (SELECT localtimestamp) - INTERVAL '72 hours'))
          THEN
              RETURN NULL;
     ELSE
+        DECLARE
+            ndescriptor CHARACTER(40) := NEW.descriptor;
+            nnickname CHARACTER VARYING(19) := NEW.nickname;
+            nfingerprint CHARACTER(40) := NEW.fingerprint;
+            npublished TIMESTAMP WITHOUT TIME ZONE := NEW.published;
+            nbandwidthavg BIGINT := NEW.bandwidthavg;
+            nbandwidthburst BIGINT := NEW.bandwidthburst;
+            nbandwidthobserved BIGINT := NEW.bandwidthobserved;
+            nbandwidthkbps BIGINT := (NEW.bandwidthobserved / 1024);
+            nplatform CHARACTER VARYING(256) := NEW.platform;
+            nuptime BIGINT := NEW.uptime;
+            nuptimedays BIGINT := (NEW.uptime / 86400);
+            ncontact TEXT := (SELECT unnest(
+                              regexp_matches(
+                              CAST(NEW.rawdesc AS TEXT),
+                              E'\\\\012contact\ (.*?)\\\\012'))::TEXT);
+            nonionkey CHARACTER(188) := (SELECT regexp_replace(
+                                         unnest(
+                                         regexp_matches(
+                                         CAST(NEW.rawdesc AS TEXT),
+                                         E'onion-key\\\\012-----BEGIN\ RSA\ PUBLIC\ KEY-----\\\\012(.*)-----END\ RSA\ PUBLIC\ KEY-----'))::CHARACTER(188),
+                                         E'\\\\012', E'\n', 'g'));
+            nsigningkey CHARACTER(188) := (SELECT regexp_replace(
+                                           unnest(
+                                           regexp_matches(
+                                           CAST(NEW.rawdesc AS TEXT),
+                                           E'signing-key\\\\012-----BEGIN\ RSA\ PUBLIC\ KEY-----\\\\012(.*)-----END\ RSA\ PUBLIC\ KEY-----'))::CHARACTER(188),
+                                           E'\\\\012', E'\n', 'g'));
+            nexitpolicy TEXT[] := (SELECT regexp_split_to_array(
+                                   unnest(
+                                   regexp_matches(
+                                   CAST(NEW.rawdesc AS TEXT),
+                                   E'\\\\012([ar][ce][cj][e][pc][t]\ .*)\\\\012router-signature'))::TEXT, E'\\\\012'));
+            nfamily TEXT := (SELECT unnest(
+                             regexp_matches(
+                             CAST(NEW.rawdesc AS TEXT),
+                             E'\\\\012family\ (.*?)\\\\012'))::TEXT);
+            nishibernating BOOLEAN := (SELECT CASE
+                                       WHEN position('opt hibernating 1'
+                                       in NEW.rawdesc::text) > 0 THEN TRUE
+                                       ELSE FALSE END);
         BEGIN
         UPDATE cache.active_relay
         SET
-            descriptor = NEW.descriptor,
-            nickname = NEW.nickname,
-            fingerprint = NEW.fingerprint,
-            published = NEW.published,
-            bandwidthavg = NEW.bandwidthavg,
-            bandwidthburst = NEW.bandwidthburst,
-            bandwidthobserved = NEW.bandwidthobserved,
-            bandwidthkbps = (NEW.bandwidthobserved / 1024),
-            platform = NEW.platform,
-            uptime = NEW.uptime,
-            uptimedays = (NEW.uptime / 1024),
-            contact = (SELECT regexp_replace(
-                       unnest(
-                       regexp_matches(
-                       CAST(NEW.rawdesc AS TEXT),
-                       E'contact\ ([^\\\\012]*)'))::CHARACTER VARYING(96),
-                       E'\\\\012', E'\n', 'g')),
-            onionkey = (SELECT regexp_replace(
-                        unnest(
-                        regexp_matches(
-                        CAST(NEW.rawdesc AS TEXT),
-                        E'onion-key\\\\012-----BEGIN\ RSA\ PUBLIC\ KEY-----\\\\012(.*)-----END\ RSA\ PUBLIC\ KEY-----'))::CHARACTER VARYING(200),
-                        E'\\\\012', E'\n', 'g')),
-            signingkey = (SELECT regexp_replace(
-                          unnest(
-                          regexp_matches(
-                          CAST(NEW.rawdesc AS TEXT),
-                          E'signing-key\\\\012-----BEGIN\ RSA\ PUBLIC\ KEY-----\\\\012(.*)-----END\ RSA\ PUBLIC\ KEY-----'))::CHARACTER VARYING(200),
-                          E'\\\\012', E'\n', 'g')),
-            exitpolicy = (SELECT regexp_replace(
-                          unnest(
-                          regexp_matches(
-                          CAST(NEW.rawdesc AS TEXT),
-                          E'\\\\012([ar][ce][cj][e][pc][t]\ .*)\\\\012router-signature'))::TEXT,
-                          E'\\\\012', E'\n', 'g')),
-            family = (SELECT unnest(
-                          regexp_matches(
-                          CAST(NEW.rawdesc AS TEXT),
-                          E'\\\\012family\ ([^\\\\012]*)'))::TEXT)
+            descriptor = ndescriptor,
+            nickname = nnickname,
+            fingerprint = nfingerprint,
+            published = npublished,
+            bandwidthavg = nbandwidthavg,
+            bandwidthburst = nbandwidthburst,
+            bandwidthobserved = nbandwidthobserved,
+            bandwidthkbps = nbandwidthkbps,
+            platform = nplatform,
+            uptime = nuptime,
+            uptimedays = nuptimedays,
+            contact = ncontact,
+            onionkey = nonionkey,
+            signingkey = nsigningkey,
+            exitpolicy = nexitpolicy,
+            family = nfamily,
+            ishibernating = nishibernating
         WHERE cache.active_relay.fingerprint = NEW.fingerprint
-        AND CASE WHEN cache.active_relay.published IS NULL THEN '1980-01-01 01:00:00' ELSE cache.active_relay.published END < NEW.published;
+        AND CASE
+            WHEN cache.active_relay.published IS NULL THEN '1980-01-01 01:00:00'
+            ELSE cache.active_relay.published
+            END
+        < NEW.published;
+        IF ((SELECT COUNT(*) FROM cache.active_descriptor
+             WHERE (descriptor = ndescriptor OR published > npublished)) > 0
+             OR (npublished < (SELECT localtimestamp) - INTERVAL '72 hours'))
+         THEN
+            RETURN NULL;
+        ELSE
+            DELETE FROM cache.active_descriptor
+              WHERE cache.active_descriptor.fingerprint = nfingerprint
+              AND cache.active_descriptor.published < npublished;
+            INSERT INTO cache.active_descriptor (descriptor, nickname,
+                fingerprint, published, bandwidthavg, bandwidthburst,
+                bandwidthobserved, bandwidthkbps, platform, uptime,
+                uptimedays, contact, onionkey, signingkey, exitpolicy,
+                family, ishibernating)
+            VALUES
+                (ndescriptor, nnickname, nfingerprint, npublished,
+                 nbandwidthavg, nbandwidthburst, nbandwidthobserved,
+                 nbandwidthkbps, nplatform, nuptime, nuptimedays,
+                 ncontact, nonionkey, nsigningkey, nexitpolicy, nfamily,
+                 nishibernating);
+        END IF;
         END;
     END IF;
     RETURN NULL;
     END;
 $add_descriptor$ LANGUAGE plpgsql;
 
-
-CREATE OR REPLACE FUNCTION update_descriptor_descriptor()
-    RETURNS TRIGGER AS $cache_descriptor$
-    BEGIN
-    IF ((SELECT COUNT(*) FROM cache.active_descriptor
-         WHERE (descriptor = NEW.descriptor OR published > NEW.published)) > 0
-         OR (NEW.published < (SELECT localtimestamp) - INTERVAL '24 hours'))
-         THEN
-            RETURN NULL;
-    ELSE
-        BEGIN
-        DELETE FROM cache.active_descriptor
-          WHERE cache.active_descriptor.fingerprint = NEW.fingerprint
-          AND cache.active_descriptor.published < NEW.published;
-        INSERT INTO cache.active_descriptor (descriptor, nickname,
-            fingerprint, published, bandwidthavg, bandwidthburst,
-            bandwidthobserved, platform, uptime, rawdesc)
-        VALUES
-            (NEW.descriptor, NEW.nickname, NEW.fingerprint,
-             NEW.published, NEW.bandwidthavg, NEW.bandwidthburst,
-             NEW.bandwidthobserved, NEW.platform, NEW.uptime,
-             NEW.rawdesc);
-        END;
-    END IF;
-    RETURN NULL;
-    END;
-$cache_descriptor$ LANGUAGE plpgsql;
-
-
 -- Helper functions ---------------------------------------------------
 CREATE OR REPLACE FUNCTION insert_descriptor_info (
-    insert_descriptor CHARACTER(40), insert_nickname CHARACTER VARYING(19),
-    insert_fingerprint CHARACTER(40), insert_published TIMESTAMP WITHOUT TIME ZONE,
-    insert_bandwidthavg BIGINT, insert_bandwidthburst BIGINT,
-    insert_bandwidthobserved BIGINT, insert_platform CHARACTER VARYING(256),
-    insert_uptime BIGINT, insert_rawdesc BYTEA)
+    given_fingerprint CHARACTER(40))
     RETURNS INTEGER AS $$
+    DECLARE
+        ndescriptor CHARACTER(40);
+        nnickname CHARACTER VARYING(19);
+        nfingerprint CHARACTER(40);
+        npublished TIMESTAMP WITHOUT TIME ZONE;
+        nbandwidthavg BIGINT;
+        nbandwidthburst BIGINT;
+        nbandwidthobserved BIGINT;
+        nbandwidthkbps BIGINT;
+        nplatform CHARACTER VARYING(256);
+        nuptime BIGINT;
+        nuptimedays BIGINT;
+        ncontact TEXT;
+        nonionkey CHARACTER(188);
+        nsigningkey CHARACTER(188);
+        nexitpolicy TEXT[];
+        nfamily TEXT;
+        nishibernating BOOLEAN;
     BEGIN
-    IF (SELECT COUNT(*) FROM cache.active_relay
-        WHERE descriptor = insert_descriptor) > 0
-        THEN
-            RETURN 0;
-    ELSE
-        BEGIN
-        UPDATE cache.active_relay
-        SET
-            descriptor = insert_descriptor,
-            nickname = insert_nickname,
-            fingerprint = insert_fingerprint,
-            published = insert_published,
-            bandwidthavg = insert_bandwidthavg,
-            bandwidthburst = insert_bandwidthburst,
-            bandwidthobserved = insert_bandwidthobserved,
-            bandwidthkbps = (insert_bandwidthobserved / 1024),
-            platform = insert_platform,
-            uptime = insert_uptime,
-            uptimedays = (insert_uptime / 1024),
-            contact = (SELECT regexp_replace(
-                       unnest(
-                       regexp_matches(
-                       CAST(insert_rawdesc AS TEXT),
-                       E'contact\ ([^\\\\012]*)'))::CHARACTER VARYING(96),
-                       E'\\\\012', E'\n', 'g')),
-            onionkey = (SELECT regexp_replace(
-                        unnest(
-                        regexp_matches(
-                        CAST(insert_rawdesc AS TEXT),
-                        E'onion-key\\\\012-----BEGIN\ RSA\ PUBLIC\ KEY-----\\\\012(.*)-----END\ RSA\ PUBLIC\ KEY-----'))::CHARACTER VARYING(200),
-                        E'\\\\012', E'\n', 'g')),
-            signingkey = (SELECT regexp_replace(
-                          unnest(
-                          regexp_matches(
-                          CAST(insert_rawdesc AS TEXT),
-                          E'signing-key\\\\012-----BEGIN\ RSA\ PUBLIC\ KEY-----\\\\012(.*)-----END\ RSA\ PUBLIC\ KEY-----'))::CHARACTER VARYING(200),
-                          E'\\\\012', E'\n', 'g')),
-            exitpolicy = (SELECT regexp_replace(
-                          unnest(
-                          regexp_matches(
-                          CAST(insert_rawdesc AS TEXT),
-                          E'\\\\012([ar][ce][cj][e][pc][t]\ .*)\\\\012router-signature'))::TEXT,
-                          E'\\\\012', E'\n', 'g')),
-            family = (SELECT unnest(
-                      regexp_matches(
-                      CAST(insert_rawdesc AS TEXT),
-                      E'\\\\012family\ ([^\\\\012]*)'))::TEXT)
-        WHERE cache.active_relay.fingerprint = insert_fingerprint;
-        END;
-    END IF;
+      SELECT INTO ndescriptor, nnickname, nfingerprint, npublished,
+                  nbandwidthavg, nbandwidthburst, nbandwidthobserved,
+                  nbandwidthkbps, nplatform, nuptime, nuptimedays,
+                  ncontact, nonionkey, nsigningkey, nexitpolicy, nfamily,
+                  nishibernating
+
+                  descriptor, nickname, fingerprint, published,
+                  bandwidthavg, bandwidthburst, bandwidthobserved,
+                  bandwidthkbps, platform, uptime, uptimedays,
+                  contact, onionkey, signingkey, exitpolicy, family,
+                  nishibernating
+                  FROM cache.active_descriptor
+                  WHERE fingerprint = given_fingerprint;
+    UPDATE cache.active_relay
+    SET
+        descriptor = ndescriptor,
+        nickname = nnickname,
+        fingerprint = nfingerprint,
+        published = npublished,
+        bandwidthavg = nbandwidthavg,
+        bandwidthburst = nbandwidthburst,
+        bandwidthobserved = nbandwidthobserved,
+        bandwidthkbps = nbandwidthkbps,
+        platform = nplatform,
+        uptime = nuptime,
+        uptimedays = nuptimedays,
+        contact = ncontact,
+        onionkey = nonionkey,
+        signingkey = nsigningkey,
+        exitpolicy = nexitpolicy,
+        family = nfamily,
+        ishibernating = nishibernating
+    WHERE cache.active_relay.fingerprint = given_fingerprint;
     RETURN 1;
     END;
 $$ LANGUAGE plpgsql;
 
 
 -- Purging functions --------------------------------------------------
+-- NOTE: currently, active relays use last known descriptor,
+-- no matter how old it is (provided that the relay has been
+-- continuously up since that descriptor has been published).
 -- Keep descriptors for no more than 36 hours
 CREATE OR REPLACE FUNCTION purge_descriptor()
-RETURNS TRIGGER AS $check_to_purge_descriptor$
+RETURNS INTEGER AS $$
     BEGIN
     DELETE FROM cache.active_descriptor
     WHERE published < (SELECT localtimestamp) - INTERVAL '36 hours';
-RETURN NULL;
+RETURN 1;
 END;
-$check_to_purge_descriptor$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql;
 
--- Keep relays for no more than 3 hours
+-- Keep relays for no more than 4 hours
 CREATE OR REPLACE FUNCTION purge_relay()
-RETURNS TRIGGER AS $check_to_purge_relay$
+RETURNS INTEGER AS $$
     BEGIN
     DELETE FROM cache.active_relay
-    WHERE validafter < (SELECT localtimestamp) - INTERVAL '3 hours';
-RETURN NULL;
+    WHERE validafter < (SELECT localtimestamp) - INTERVAL '4 hours';
+RETURN 1;
 END;
-$check_to_purge_relay$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION purge()
+RETURNS INTEGER AS $$
+    BEGIN
+    PERFORM purge_descriptor();
+    PERFORM purge_relay();
+RETURN 1;
+END;
+$$ LANGUAGE plpgsql;
 
 -- TRIGGERS -----------------------------------------------------------
--- Add and purge descriptors
-CREATE TRIGGER cache_descriptor
-    AFTER UPDATE OR INSERT ON public.descriptor
-    FOR EACH ROW
-    EXECUTE PROCEDURE update_descriptor_descriptor();
-
+-- Add descriptors
 CREATE TRIGGER add_descriptor
     AFTER UPDATE OR INSERT ON public.descriptor
     FOR EACH ROW
-    EXECUTE PROCEDURE update_descriptor_relay();
+    EXECUTE PROCEDURE update_descriptor();
 
-CREATE TRIGGER check_to_purge_descriptor
-    AFTER UPDATE OR INSERT ON active_descriptor
-    FOR EACH STATEMENT
-    EXECUTE PROCEDURE purge_descriptor();
-
-
--- Add and purge statusentries
-CREATE TRIGGER update_statusentry
+-- Add statusentries
+CREATE TRIGGER add_statusentry
     AFTER UPDATE OR INSERT ON public.statusentry
     FOR EACH ROW
-    EXECUTE PROCEDURE update_statusentry_relay();
-
-CREATE TRIGGER check_to_purge_relay
-    AFTER UPDATE OR INSERT ON active_relay
-    FOR EACH STATEMENT
-    EXECUTE PROCEDURE purge_relay();
+    EXECUTE PROCEDURE update_statusentry();
 
 -- Set search_path back to public.
 SET search_path TO public;

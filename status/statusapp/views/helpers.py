@@ -8,18 +8,15 @@ import datetime
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpRequest, HttpResponse
 
-# Matplotlib-specific import statements -------------------------------
-import matplotlib
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
-
 # TorStatus-specific import statements --------------------------------
 from statusapp.models import Bwhist, Descriptor
 
 # INIT Variables ------------------------------------------------------
-COLUMN_VALUE_NAME = {'Country Code': 'geoip',
+# TODO: Move these variables to settings.py and refactor the code.
+# We're repeating ourselves way too much.
+COLUMN_VALUE_NAME = {'Country Code': 'country',
                      'Router Name': 'nickname',
-                     'Bandwidth': 'bandwidthobserved',
+                     'Bandwidth': 'bandwidthkbps',
                      'Uptime': 'uptime',
                      'IP': 'address',
                      'Hostname': 'hostname',
@@ -33,180 +30,166 @@ COLUMN_VALUE_NAME = {'Country Code': 'geoip',
                      'Fast': 'isfast',
                      'Guard': 'isguard',
                      'Stable': 'isstable',
-                     'Running': 'isrunning',
                      'Valid': 'isvalid',
-                     'V2Dir': 'isv2dir',
+                     'Directory': 'isv2dir',
                      'Platform': 'platform',
                      'Fingerprint': 'fingerprint',
-                     'LastDescriptorPublished': 'published',
+                     'Last Descriptor Published': 'published',
                      'Contact': 'contact',
                      'BadDir': 'isbaddirectory',
                     }
 
-NOT_COLUMNS = ['Running', 'Hostname', 'Named', 'Valid',]
+NOT_COLUMNS = set(('Running', 'Hostname', 'Named', 'Valid'))
 
-ICONS = ['Fast', 'Exit', 'V2Dir', 'Guard', 'Stable', 'Authority',
-         'Platform',]
+ICONS = ['Hibernating', 'Fast', 'Exit', 'Valid', 'V2Dir', 'Guard',
+         'Stable', 'Authority', 'Platform']
 
+FLAGS = set(('isauthority',
+              'isbaddirectory',
+              'isbadexit',
+              'isexit',
+              'isfast',
+              'isguard',
+              'ishibernating',
+              'isnamed',
+              'isstable',
+              'isvalid',
+              'isv2dir'))
+SEARCHES = set(('fingerprint',
+                 'nickname',
+                 'country',
+                 'bandwidthkbps',
+                 'uptimedays',
+                 'published',
+                 'address',
+                 'orport',
+                 'dirport',
+                 'platform'))
+CRITERIA = set(('exact',
+                 'iexact',
+                 'contains',
+                 'icontains',
+                 'lt',
+                 'gt',
+                 'startswith',
+                 'istartswith'))
 
-def filter_statusentries(statusentries, query_options):
-    """
-    Helper function that gets a QuerySet of status entries and a
-    dictionary of search query options and filteres the QuerySet
-    based on this dictionary.
+SORT_OPTIONS = set((
+                'validafter',
+                'nickname',
+                'fingerprint',
+                'address',
+                'orport',
+                'dirport',
+                'isauthority',
+                'isbadexit',
+                'isbaddirectory',
+                'isexit',
+                'isfast',
+                'isguard',
+                'ishsdir',
+                'isnamed',
+                'isstable',
+                'isrunning',
+                'isunnamed',
+                'isvalid',
+                'isv2dir',
+                'isv3dir',
+                'descriptor',
+                'published',
+                'bandwidthavg',
+                'bandwidthburst',
+                'bandwidthobserved',
+                'bandwidthkbps',
+                'uptime',
+                'uptimedays',
+                'platform',
+                'contact',
+                'onionkey',
+                'signingkey',
+                'exitpolicy',
+                'family',
+                'country',
+                'latitude',
+                'longitude'
+                ))
 
-    @type statusentries: C{QuerySet}
-    @param statusentries: A QuerySet of the statusentries.
-    @type query_options: C{dict}
-    @param query_options: A list of the columns that will be displayed on
-                        this session.
+SEARCH_SESSION_KEYS = set(('filters', 'search',
+                           'sortOrder', 'sortListing'))
 
-    @see: index
-    @rtype: QuerySet
-    @return: statusentries
-    """
+DEFAULT_LISTING = 'nickname'
 
-    # ADD ishibernating AFTER WE KNOW HOW TO CHECK THAT
-    options = ['isauthority', 'isbaddirectory', 'isbadexit', \
-               'isexit', 'isfast', 'isguard', 'isnamed', \
-               'isstable', 'isrunning', 'isvalid', 'isv2dir']
-    # options is needed because query_options has some other things that we
-    #      do not need in this case (the other search query key-values).
-    valid_options = filter(lambda k: query_options[k] != '' \
-                            and k in options, query_options)
-    filterby = {}
-    for opt in valid_options:
-        filterby[opt] = 1 if query_options[opt] == 'yes' else 0
-
-    if 'searchValue' in query_options and \
-                query_options['searchValue'] != '':
-        value = query_options['searchValue']
-        criteria = query_options['criteria']
-        logic = query_options['boolLogic']
-
-        options = ['nickname', 'fingerprint', 'geoip',
-                   'published','hostname', 'address',
-                   'orport', 'dirport']
-        descriptorlist_options = ['platform', 'uptime', 'bandwidthobserved']
-
-        # Special case for the value if searching for
-        #       Uptime or Bandwidth and the criteria is
-        #       not Contains
-        if (criteria == 'uptime' or criteria == 'bandwidthobserved') and \
-                logic != 'contains':
-            value = int(value) * (86400 if criteria == 'uptime' else 1024)
-
-
-        key = ('descriptorid__' + criteria) if criteria in \
-                descriptorlist_options else criteria
-
-        if logic == 'contains':
-            key = key + '__contains'
-        elif logic == 'less':
-            key = key + '__lt'
-        elif logic == 'greater':
-            key = key + '__gt'
-
-        if (criteria == 'uptime' or criteria == 'bandwidthobserved') and \
-                logic == 'equals':
-            lower_value = value
-            upper_value = lower_value + (86400 if criteria == 'uptime' else 1024)
-            filterby[key + '__gt'] = lower_value
-            filterby[key + '__lt'] = upper_value
-        else:
-            filterby[key] = value
-
-    statusentries = statusentries.filter(**filterby)
-
-    options = ['nickname', 'fingerprint', 'geoip', 'bandwidthobserved',
-               'uptime', 'published', 'hostname', 'address', 'orport',
-               'dirport', 'platform', 'isauthority',
-               'isbaddirectory', 'isbadexit', 'isexit',
-               'isfast', 'isguard', 'isnamed', 'isstable', 'isrunning',
-               'isvalid', 'isv2dir']
-
-    descriptorlist_options = ['platform', 'uptime', 'contact',
-                            'bandwidthobserved']
-    if 'sortListings' in query_options: 
-        selected_option = query_options['sortListings']
-    else:
-        selected_option = ''
-    if selected_option in options:
-        if selected_option in descriptorlist_options:
-            selected_option = 'descriptorid__' + selected_option
-        if query_options['sortOrder'] == 'ascending':
-            statusentries = statusentries.order_by(selected_option)
-        elif query_options['sortOrder'] == 'descending':
-            statusentries = statusentries.order_by('-' + selected_option)
-    return statusentries
 
 def button_choice(request, button, field, current_columns,
         available_columns):
     """
-    Helper function that manages the changes in the L{columnpreferences}
-    arrays/lists.
+    Helper function that manages the changes in the
+    L{columnpreferences} lists.
 
+    @type request: C{HttpRequest}
+    @param request: The HttpRequest supplied by the client.
     @type button: C{string}
-    @param button: A string that indicates which button was clicked.
+    @param button: A string that indicates which button was clicked:
+        either C{'remove'}, C{'add'}, C{'up'}, or C{'down'}.
     @type field: C{string}
     @param field: A string that indicates from which preferences column
-        was the corresponding value selected
-        (ADD column, REMOVE column).
+        the corresponding value was selected: either
+        C{'selected_removeColumn'} or C{'selected_addColumn'}.
     @type current_columns: C{list}
     @param current_columns: A list of the columns that will be
         displayed on this session.
     @type available_columns: C{list}
     @param available_columns: A list of the columns that can be added
         to the current ones.
-    @rtype: list(list(int), list(int), string)
-    @return: column_lists
+    @rtype: C{tuple(list(int), list(int))}
+    @return: A triple consisting of the modified C{current_columns},
+        the modified C{available_columns}, and the selected column or
+        entry.
     """
+    # Get the selected column
     selection = request.GET[field]
-    if (button == 'removeColumn'):
+
+    # If the user wants to remove the column, add it to the list of
+    # available columns and remove it from the list of current columns
+    if (button == 'remove'):
         available_columns.append(selection)
         current_columns.remove(selection)
-    elif (button == 'addColumn'):
+
+    # If the user wants to add the column, add it to the list of
+    # current columms and remove it from the list of available columns
+    elif (button == 'add'):
         current_columns.append(selection)
         available_columns.remove(selection)
-    elif (button == 'upButton'):
+
+    # If the user wants to move the column 'up' in priority, get the
+    # current position of the column. If it's greater than 0, it is
+    # possible to move the column 'up' by switching its position
+    # with the column above it.
+    elif (button == 'up'):
         selection_pos = current_columns.index(selection)
         if (selection_pos > 0):
             aux = current_columns[selection_pos - 1]
             current_columns[selection_pos - 1] = \
                            current_columns[selection_pos]
             current_columns[selection_pos] = aux
-    elif (button == 'downButton'):
+
+    # If the user wants to move the column 'down' in priority, get the
+    # current position of the column. If it's not already at the bottom
+    # of the list of current columns, it's possible to move the column
+    # 'down' by switching its position with the column below it.
+    elif (button == 'down'):
         selection_pos = current_columns.index(selection)
         if (selection_pos < len(current_columns) - 1):
             aux = current_columns[selection_pos + 1]
             current_columns[selection_pos + 1] = \
                            current_columns[selection_pos]
             current_columns[selection_pos] = aux
+
+    # Save the changes made in the session
     request.session['currentColumns'] = current_columns
     request.session['availableColumns'] = available_columns
-    column_lists = []
-    column_lists.append(current_columns)
-    column_lists.append(available_columns)
-    column_lists.append(selection)
-    return column_lists
 
-
-def get_exit_policy(rawdesc):
-    """
-    Gets the exit policy information from the raw descriptor
-
-    @type rawdesc: C{string} or C{buffer}
-    @param rawdesc: The raw descriptor of a relay.
-    @rtype: C{list} of C{string}
-    @return: all lines in rawdesc that comprise the exit policy.
-    """
-    policy = []
-    rawdesc_array = str(rawdesc).split("\n")
-    for line in rawdesc_array:
-        if (line.startswith(("accept ", "reject "))):
-            policy.append(line)
-
-    return policy
+    return (current_columns, available_columns, selection)
 
 
 def is_ip_in_subnet(ip, subnet):
@@ -214,7 +197,9 @@ def is_ip_in_subnet(ip, subnet):
     Return True if the IP is in the subnet, return False otherwise.
 
     This implementation uses bitwise arithmetic and operators on
-    subnets.
+    IPv4 subnets. Currently, this implementation does not accomodate
+    IPv6 address/subnet definitions. This should be added in the
+    future, before Tor core accomodates IPv6 addresses and subnets.
 
     >>> is_ip_in_subnet('0.0.0.0', '0.0.0.0/8')
     True
@@ -242,8 +227,8 @@ def is_ip_in_subnet(ip, subnet):
     if (subnet == ip):
         return True
 
-    # If the IP doesn't match and no bits are provided, the IP is not
-    # in the subnet
+    # If the IP doesn't match and no bits are provided,
+    # the IP is not in the subnet
     if ('/' not in subnet):
         return False
 
@@ -279,10 +264,11 @@ def is_ip_in_subnet(ip, subnet):
     # 11111111.11111111.11111111.11111111.
     upper_bound = subnet_as_int | (~mask & 0xFFFFFFFF)
 
-    # Convert the given IP to an integer, as before.
+    # Convert the given IP to an integer, as before
     a, b, c, d = ip.split('.')
     ip_as_int = (int(a) << 24) + (int(b) << 16) + (int(c) << 8) + int(d)
 
+    # Now we can see if the IP is in the subnet or not
     if (ip_as_int >= lower_bound and ip_as_int <= upper_bound):
         return True
     else:
@@ -327,7 +313,7 @@ def is_ipaddress(ip):
         if (int(a) > 255 or int(a) < 0 or int(b) > 255 or int(b) < 0 or
             int(c) > 255 or int(c) < 0 or int(d) > 255 or int(d) < 0):
             return False
-    except:
+    except ValueError:
         return False
 
     return True
@@ -386,748 +372,324 @@ def port_match(dest_port, port_line):
     @rtype: C{boolean}
     @return: True if dest_port is "in" port_line, False otherwise.
     """
+    # If port_line is a wildcard character, dest_port is always 'in'
+    # port_line
     if (port_line == '*'):
         return True
 
+    # If port_line contains a dash, a range is given, so get upper
+    # and lower bounds.
     if ('-' in port_line):
         lower_str, upper_str = port_line.split('-')
         lower_bound = int(lower_str)
         upper_bound = int(upper_str)
         dest_port_int = int(dest_port)
 
-        if (dest_port_int >= lower_port and
-            dest_port_int <= upper_port):
+        if (dest_port_int >= lower_bound and
+            dest_port_int <= upper_bound):
             return True
 
+    # If the dest_port is exactly the port_line, then dest_port is
+    # 'in' port_line
     if (dest_port == port_line):
         return True
 
+    # port_line must either be a port number, a range of port numbers,
+    # or a wildcard character, so if no matches are found, return False
     return False
 
 
-def get_if_exists(request, title):
+def get_filter_params(request):
     """
-    Process the HttpRequest provided to see if a value, L{title}, is
-    provided and retrievable by means of a C{GET}.
+    Get the filter preferences provided by the user via the
+    HttpRequest.
 
-    If so, the data itself is returned; if not, an empty string is
-    returned.
+    @type request: HttpRequest
+    @param request: The HttpRequest provided by the client
+    @rtype: C{dict} of C{string} to C{string}
+    @return: A dictionary mapping query parameters to user-supplied
+        input.
+    """
+    filters = {}
 
-    @see: U{https://docs.djangoproject.com/en/1.2/ref/request-response/
-    #httprequest-object}
+    if 'filters' not in request.session:
+        # Add filters for flags only if the parameter is a 0 or a 1
+        for flag in FLAGS:
+            filt = request.GET.get(flag, '')
 
-    @type request: HttpRequest object
-    @param request: The HttpRequest object that contains metadata
-        about the request.
-    @type title: C{string}
-    @param title: The name of the data that may be provided by the
-        request.
+            if filt == '1':
+                filters[flag] = 1
+
+            elif filt == '0':
+                filters[flag] = 0
+
+        # Add search filters only if a search term is provided. Search
+        # terms are denoted by s_[term]. Similarly, criteria is denoted
+        # by c_[term].
+        for search in SEARCHES:
+            search_param = ''.join(('s_', search))
+            searchinput = request.GET.get(search_param, '')
+
+            if searchinput:
+                criteria_param = ''.join(('c_', search))
+                criteriainput = request.GET.get(criteria_param , '')
+
+                # Format the key for django's filter
+                if criteriainput in CRITERIA:
+                    key = '__'.join((search, criteriainput))
+                    filters[key] = searchinput
+
+        # Save these filters in the session
+        request.session['filters'] = filters
+
+    # Now the filters must be in the session. Get and return them.
+    filters = request.session['filters']
+    return filters
+
+
+def get_order(request):
+    """
+    Get the sorting parameter and order from the user via the
+    HttpRequest.
+
+    This function returns 'nickname' if no order is specified or if
+    there is an error parsing the supplied information.
+
+    @type request: HttpRequest
+    @param request: The HttpRequest provided by the client.
     @rtype: C{string}
-    @return: The data with L{title} referenced in the request, if it
-        exists.
+    @return: The sorting parameter and order as specified by the
+        HttpRequest object.
     """
-    if (title in request.GET and request.GET[title]):
-        return request.GET[title].strip()
-    else:
-        return ""
+
+    # Options to sort from.
+    options = ['nickname', 'fingerprint', 'country',
+                'bandwidthkbps','uptime','published',
+                'hostname', 'address', 'orport',
+                'dirport', 'contact', 'isauthority',
+                'isbaddirectory', 'isbadexit','isv2dir',
+                'isexit', 'isfast','isguard', 'ishibernating',
+                'ishsdir', 'isnamed', 'isstable', 'isrunning',
+                'isvalid']
+
+    #The default column to sort by if none specified.
+    orders = ['ascending', 'descending']
+    
+    advanced_order = ''
+    advanced_listing = ''
+    
+    # Gets the order and listing from the session then validates
+    # by comparison with specified sort columns
+    if request.GET:
+        advanced_order = request.GET.get('sortOrder', '')
+        advanced_listing = request.GET.get('sortListing', '')
+
+    if advanced_listing in options and advanced_order in orders:
+        request.session['sortOrder'] = advanced_order
+        request.session['sortListing'] = advanced_listing
+
+        
+    # Returns appropriate sort preference
+    if 'sortOrder' in request.session and \
+                    'sortListing' in request.session:
+
+        if request.session['sortOrder'] == 'ascending':
+            return request.session['sortListing']
+        elif request.session['sortOrder'] == 'descending':
+            return '-' + request.session['sortListing']
+
+    # If none specified returns default ordering.
+    return DEFAULT_LISTING
 
 
-def sorting_link(sort_order, column_name):
+def search_session_reset(request):
     """
-    Returns the proper URL after checking how the sorting is currently
-    set up.
+    Function to clear the search filters parameters and orderings.
 
-    @type sort_order: C{string}
-    @param sort_order: A string - the type of order
-        (ascending/descending).
-    @type column_name: C{string}
-    @param column_name: A string - the name of the column that is
-                    currently ordering by.
-    @rtype: C{string}
-    @return The proper link for sorting the tables.
+    @type request: C{HttpRequest}
+    @param request: The request provided by the client
+    @rtype: C{HttpResponse}
+    @returns: The C{request} supplied with any references to
+        search filters in the session deleted.
     """
-    if sort_order == "ascending":
-        return "/" + column_name + "_descending"
-    return "/" + column_name + "_ascending"
+
+    # Loop goes through and erases them.
+    for key in SEARCH_SESSION_KEYS:
+        if key in request.session:
+            del request.session[key]
+
+    return request
 
 
-def kilobytes_ps(bytes_ps):
+def gen_list_dict(active_relays):
     """
-    Convert a bandwidth value in bytes to a bandwidth value in kilobytes
+    Method that generates a list of dictionaries, where each dictionary
+    contains the fields of a relay.
 
-    @type bytes_ps: C{int}, C{float}, C{long}, or C{string}
-    @param bytes_ps: The bandwidth value, in bps.
-    @rtype: C{int}
-    @return: The bandwidth value in kbps.
-    """
-    # As statusapp.views.details is written now, this value can
-    # be None or an empty string sometimes.
-    if (bytes_ps == '' or bytes_ps is None):
-        return 0
-    else:
-        return int(bytes_ps) / 1024
-
-
-def days(seconds):
-    """
-    Convert an duration in seconds to an uptime in days, rounding down.
-
-    @type seconds: C{int}, C{float}, C{long}, or C{string}
-    @param seconds: The duration in seconds.
-    @rtype: C{int}
-    @return: The duration in days.
-    """
-    # As statusapp.views.details is written now, this value can
-    # be None or an empty string sometimes.
-    if (seconds == '' or seconds is None):
-        return 0
-    else:
-        return int(seconds) / 86400
-
-
-def contact(rawdesc):
-    """
-    Get the contact information of a relay from its raw descriptor.
-
-    It is possible that a relay will not publish any contact information.
-    In this case, "No contact information given" is returned.
-
-    @type rawdesc: C{string} or C{buffer}
-    @param rawdesc: The raw descriptor of a relay.
-    @rtype: C{string}
-    @return: The contact information of the relay.
-    """
-    for line in str(rawdesc).split("\n"):
-        if (line.startswith("contact")):
-            contact_raw = line[8:]
-            return contact_raw.decode('raw_unicode_escape')
-    return "No contact information given"
-
-
-def country(location):
-    """
-    Get the country associated with a tuple as a string consisting of
-    a country, a latitude, and a longitude.
-
-    >>> getcountry('(US,-43.0156,68.2351)')
-    'US'
-
-    @type location: C{string}
-    @param location: A tuple consisting of a country, latitude, and
-        longitude as a string.
-    @rtype: C{string}
-    @return: The country code in the tuple as a string.
-    """
-    return str(location)[1:3].lower()
-
-
-def latitude(geoip):
-    """
-    Get the latitude from a GeoIP string.
-
-    @type geoip: C{string} or C{buffer}
-    @param geoip: A string formatted as a tuple with entries country
-        code, latitude, and longitude.
-    @rtype: C{string}
-    @return: The latitude associated with C{geoip}.
-    """
-    geoip_list = str(geoip).split(',')
-    cols = len(geoip_list)
-    if cols > 1:
-        return geoip_list[1]
-    else:
-        return ''
-
-
-def longitude(geoip):
-    """
-    Get the longitude from a GeoIP string.
-
-    @type geoip: C{string} or C{buffer}
-    @param geoip: A string formatted as a tuple with entries country
-        code, latitude, and longitude.
-    @rtype: C{string}
-    @return: The longitude associated with C{geoip}.
-    """
-    geoip_list = str(geoip).split(',')
-    cols = len(geoip_list)
-    if cols > 2:
-        return geoip_list[2]
-    else:
-        return ''
-
-
-def get_platform(platform):
-    """
-    Method that searches in the platform string for the corresponding
-    platform name.
-
-    @type platform: C{string}
-    @param platform: A string, raw version of the platform of a relay.
-    @rtype: C{string}
-    @return: The cleaned version of the platform name.
-    """
-    # Dictionary of {NameInPlatform: NameOfTheIcon}
-    supported_platforms = {'Linux': 'Linux',
-                           'XP': 'WindowsXP',
-                           'Windows Server': 'WindowsServer',
-                           'Windows': 'WindowsOther',
-                           'Darwin': 'Darwin',
-                           'FreeBSD': 'FreeBSD',
-                           'NetBSD': 'NetBSD',
-                           'OpenBSD': 'OpenBSD',
-                           'SunOS': 'SunOS',
-                           'IRIX': 'IRIX',
-                           'Cygwin': 'Cygwin',
-                           'Dragon': 'DragonFly',
-                          }
-    for name in supported_platforms:
-        if name in platform:
-            return supported_platforms[name]
-    return 'NotAvailable'
-
-
-def generate_table_headers(current_columns, order_column_name, sort_order):
-    """
-    Generates a dictionary of {header_name: html_string_code}.
-
-    @type current_columns: C{list}
-    @param current_columns: A list of the columns that will be
-        displayed on this session.
-    @type order_column_name: C{string}
-    @param order_column_name: A string - the name of the column that is
-        currently ordering by.
-    @type sort_order: C{string}
-    @param sort_order: A string - the type of order
-        (ascending/descending).
-    @rtype: C{dict}, C{list}
-    @return: Dictionary that contains the header name and the HTML code.
+    @type active_relays: C{QuerySet}
+    @param active_relays: A set of all the relays that are going to be
+                        displayed.
     @rtype: C{list}
-    @return: List of the current columns that will be displayed.
+    @return: A list of dictionaries - each dictionary contains the fields
+            of a relay.
     """
-
-    # NOTE: The html_current_columns list is needed to preserve the order
-    #   of the displayed columns. It is used in the template to iterate
-    #   through the current columns in the right order that they should be
-    #   displayed.
-
-    html_table_headers = {}
-    html_current_columns = []
-    for column in current_columns:
-        database_name = COLUMN_VALUE_NAME[column]
-        display_name = "&nbsp;&nbsp;" if column == "Country Code" else column
-        sort_arrow = ''
-        if order_column_name == database_name:
-            if sort_order == 'ascending':
-                sort_arrow = "&uarr;"
-            elif sort_order == 'descending':
-                sort_arrow = "&darr;"
-        html_class = "relayHeader hoverable" if database_name != "icons" \
-                                                else "relayHeader"
-
-        if column not in ICONS and column not in NOT_COLUMNS:
-            if column == "Icons":
-                if filter(lambda c: c in current_columns, ICONS):
-                    html_table_headers[column] = "<th class='" + html_class +\
-                                        "' id='" \
-                                        + database_name + "'>" + display_name +\
-                                        "</th>"
-                    html_current_columns.append(column)
-            else:
-                html_table_headers[column] = "<th class='" + html_class + \
-                                    "' id='" + database_name + "'>\
-                                    <a class='sortLink' href='" + \
-                                    sorting_link(sort_order, database_name) \
-                                    + "'>" + display_name + " " + sort_arrow +\
-                                    "</a></th>"
-                html_current_columns.append(column)
-    return html_table_headers, html_current_columns
+    list_dict = []
+    if active_relays:
+        for relay in active_relays:
+            relay_dict = {'isbadexit': 1 if relay.isbadexit else 0,
+                          'country': relay.country,
+                          'longitude': relay.longitude,
+                          'latitude': relay.latitude,
+                          'nickname': relay.nickname,
+                          'bandwidthkbps': str(relay.bandwidthkbps) + " Kb/s",
+                          'uptime': str(relay.uptimedays) + " d",
+                          'address': relay.address,
+                          #'hostname': relay.hostname,
+                          'hibernating': 1 if relay.ishibernating else 0,
+                          'orport': relay.orport,
+                          'dirport': relay.dirport,
+                          'isbadexit': 1 if relay.isbadexit else 0,
+                          'isnamed': 1 if relay.isnamed else 0,
+                          'isexit': 1 if relay.isexit else 0,
+                          'isauthority': 1 if relay.isauthority else 0,
+                          'isfast': 1 if relay.isfast else 0,
+                          'isguard': 1 if relay.isguard else 0,
+                          'isstable': 1 if relay.isstable else 0,
+                          'isv2dir': 1 if relay.isv2dir else 0,
+                          'platform': relay.platform,
+                          'fingerprint': relay.fingerprint,
+                          'published': relay.published,
+                          'contact': relay.contact,
+                          'isbaddirectory': 1 if relay.isbaddirectory else 0,
+                         }
+            list_dict.append(relay_dict)
+    return list_dict
 
 
-def generate_table_rows(statusentries, current_columns,
-        html_current_columns):
+def gen_relay_dict(relay):
     """
-    Generates a list of HTML strings. Each string represents a row in
-    the main template table.
+    Method that generates a dictionary of all the fields of a relay.
 
-    @type statusentries: C{QuerySet}
-    @param statusentries: A QuerySet of the statusentries.
-    @type current_columns: C{list}
-    @param current_columns: A list of the columns that will be displayed
-        on this session.
-    @type html_current_columns: C{list}
-    @param html_current_columns: A list of the HTML string version of
-        the current columns.
+    @type relay: C{ActiveRelay}
+    @param relay: The relay for which the fields are going to be
+        generated.
+    @rtype: C{dict}
+    @return: Dictioanary of the Field Name(key): Field Value(value)
+        for the specific relay.
+    """
+    relay_dict = {'Router Name': relay.nickname,
+                  'Fingerprint': relay.fingerprint,
+                  'Active Relay': 'Yes' if relay.active else 'No',
+                  'Last Consensus Present (GMT)': relay.validafter,
+                  'IP Address': relay.address,
+                  'Hostname': relay.hostname,
+                  'Onion Router Port': relay.orport,
+                  'Directory Server Port': relay.dirport,
+                  'Country': relay.country,
+                  'Latitude, Longitude': str(relay.latitude) + ', ' + \
+                            str(relay.longitude),
+                  'Platform / Version': relay.platform,
+                  'Last Descriptor Published (GMT)': relay.published,
+                  'Published Uptime': relay.uptime,
+                  'Bandwidth (Burst/Avg/Observed - In Bps)': \
+                            str(relay.bandwidthburst) + ' / ' + \
+                            str(relay.bandwidthavg) + ' / ' + \
+                            str(relay.bandwidthobserved),
+                  'Contact': relay.contact,
+                  'Family': relay.family,
+                  'Authority': 1 if relay.isauthority else 0,
+                  'Bad Directory': 1 if relay.isbaddirectory else 0,
+                  'Bad Exit': 1 if relay.isbadexit else 0,
+                  'Exit': 1 if relay.isexit else 0,
+                  'Guard': 1 if relay.isguard else 0,
+                  'Fast': 1 if relay.isfast else 0,
+                  'Named': relay.isnamed,
+                  'Stable': relay.isstable,
+                  'Running': relay.isrunning,
+                  'Valid': relay.isvalid,
+                  'V2Dir': relay.isv2dir,
+                  'HS Directory': relay.ishsdir,
+                 }
 
+    # Hibernating and adjusted uptime are only available if the
+    # relay has a descriptor
+    if relay.hasdescriptor:
+        relay_dict['Hibernating'] = 1 if relay.ishibernating else 0
+        relay_dict['Adjusted Uptime'] = relay.adjuptime
+
+    # Default values
+    else:
+        relay_dict['Hibernating'] = 0
+        relay_dict['Adjusted Uptime'] = None
+
+    return relay_dict
+
+
+def gen_options_list(relay):
+    """
+    Method that generates a list of the fields that will be displayed
+    on the details page of a specific relay.
+
+    @type relay: C{ActiveRelay}
+    @param relay: The relay for which the list of fields will be
+        generated.
     @rtype: C{list}
-    @return: List of HTML strings.
+    @return: List of the fields that will be displayed at the
+        bottom of the details page.
     """
-    html_table_rows = []
+    # This information will always be available and displayed
+    options_list = ['Router Name', 'Fingerprint', 'Active Relay']
 
-    for relay in statusentries:
-        #TODO: CLEAN THE CODE - QUERY ONLY ON THE NECESSARY COLUMNS
-        #               AND THROW IN DICTIONARY AFTERWARDS!!!
-        # Declarations made in order to avoid multiple queries.
-        r_isbadexit = relay.isbadexit
-        field_isbadexit = "<img src='/static/img/bg_" + \
-                        ("yes" if r_isbadexit else "no") + \
-                        ".png' width='12' height='12' alt='" + \
-                        ("Bad Exit' title='Bad Exit'" \
-                        if r_isbadexit else \
-                        "Not a Bad Exit' title='Not a Bad Exit'") + ">"
-        field_geoip = relay.geoip
-        field_isnamed = relay.isnamed
-        field_fingerprint = relay.fingerprint
-        field_nickname = relay.nickname
-        try:
-            field_bandwidthobserved = str(kilobytes_ps(
-                    relay.descriptorid.bandwidthobserved)) + " KB/s"
-        except Descriptor.DoesNotExist:
-            field_bandwidthobserved = "0 KB/s"
-        try:
-            field_uptime = str(days(relay.descriptorid.uptime)) + " d"
-        except Descriptor.DoesNotExist:
-            field_uptime = "0 d"
-        r_address = relay.address
-        field_address = "[<a href='details/" + r_address + \
-                        "/whois'>" + r_address + "</a>]"
-        field_published = str(relay.published)
-        try:
-            field_contact = contact(relay.descriptorid.rawdesc)
-        except Descriptor.DoesNotExist:
-            field_contact = ''
-        r_isbaddir = relay.isbaddirectory
-        field_isbaddirectory = "<img src='/static/img/bg_" + \
-                        ("yes" if r_isbaddir else "no") + \
-                        ".png' width='12' height='12' alt='" + \
-                        ("Bad Directory' title='Bad Directory'" \
-                        if r_isbaddir else "Not a Bad Directory' \
-                        title='Not a Bad Directory'") + ">"
-        field_isfast = "<img src='/static/img/status/Fast.png' \
-                        alt='Fast Server' title='Fast Server'>" \
-                        if relay.isfast else ""
-        field_isv2dir = "<img src='/static/img/status/Dir.png' \
-                        alt='Directory Server' title='Directory Server'>" \
-                        if relay.isv2dir else ""
-        field_isexit = "<img src='/static/img/status/Exit.png' \
-                        alt='Exit Server' title='Exit Server'>" \
-                        if relay.isexit else ""
-        field_isguard = "<img src='/static/img/status/Guard.png' \
-                        alt='Guard Server' title='Guard Server'>" \
-                        if relay.isguard else ""
-        field_isstable = "<img src='/static/img/status/Stable.png' \
-                        alt='Stable Server' title='Stable Server'>" \
-                        if relay.isstable else ""
-        field_isauthority = "<img src='/static/img/status/Authority.png' \
-                        alt='Authority Server' title='Authority Server'>" \
-                        if relay.isauthority else ""
-        try:
-            r_platform = relay.descriptorid.platform
-        except:
-            r_platform = 'Not Available'
-        r_os_platform = get_platform(r_platform)
-        field_platform = "<img src='/static/img/os-icons/" + r_os_platform + \
-                        ".png' alt='" + r_os_platform + "' title='" + \
-                        r_platform + "'>" if r_os_platform else ""
-        field_orport = str(relay.orport)
-        r_dirport = str(relay.dirport)
-        field_dirport = r_dirport if r_dirport else "None"
+    # Only display adjusted uptime if the relay is active and
+    # has a descriptor
+    if relay.active:
+        if relay.hasdescriptor:
+            options_list.append('Adjusted Uptime')
 
+    # If the relay is not active, specify when it was last active
+    else:
+        options_list.append('Last Consensus Present (GMT)')
 
-        RELAY_FIELDS = {'isbadexit': field_isbadexit,
-                        'geoip': field_geoip,
-                        'isnamed': field_isnamed,
-                        'fingerprint': field_fingerprint,
-                        'nickname': field_nickname,
-                        'bandwidthobserved': field_bandwidthobserved,
-                        'uptime': field_uptime,
-                        'address': field_address,
-                        'published': field_published,
-                        'contact': field_contact,
-                        'isbaddirectory': field_isbaddirectory,
-                        'isfast': field_isfast,
-                        'isv2dir': field_isv2dir,
-                        'isexit': field_isexit,
-                        'isguard': field_isguard,
-                        'isstable': field_isstable,
-                        'isauthority': field_isauthority,
-                        'platform': field_platform,
-                        'orport': field_orport,
-                        'dirport': field_dirport,
-                       }
+    # Information that should always be available and viewable
+    options_list.extend(['IP Address', 'Hostname', 'Onion Router Port',
+                         'Directory Server Port', 'Country',
+                         'Latitude, Longitude'])
 
-        html_row_code = ''
+    # Information that should be available and viewable if and
+    # only if the relay has a descriptor.
+    if relay.hasdescriptor:
+        descriptor_options_list = ['Platform / Version',
+                    'Last Descriptor Published (GMT)',
+                    'Published Uptime',
+                    'Bandwidth (Burst/Avg/Observed - In Bps)',
+                    'Contact', 'Family']
+        options_list.extend(descriptor_options_list)
 
-        if 'isbadexit' in RELAY_FIELDS:
-            html_row_code = "<tr " + ("class='relayBadExit'" if r_isbadexit \
-                            else "class='relay'") + ">"
-        else:
-            html_row_code = "<tr class='relay'>"
+    return options_list
 
-        for column in html_current_columns:
-            value_name = COLUMN_VALUE_NAME[column]
-
-            # Special Case: Country Code
-            if column == 'Country Code':
-                c_country = country(RELAY_FIELDS[value_name])
-                c_latitude = latitude(RELAY_FIELDS[value_name])
-                c_longitude = longitude(RELAY_FIELDS[value_name])
-                html_row_code = html_row_code + "<td id='col_relayName'> \
-                                <a href='http://www.openstreetmap.org/?mlon="\
-                                 + c_longitude + "&mlat=" + c_latitude + \
-                                 "&zoom=6'><img src='/static/img/flags/" + \
-                                 c_country + ".png' alt='" + c_country + \
-                                 "' title='" + c_country + ":" + c_latitude +\
-                                 ", " + c_longitude + "' border=0></a></td>"
-            # Special Case: Router Name and Named
-            elif column == 'Router Name':
-                if 'Named' in current_columns:
-                    html_router_name = "<a class='link' href='/details/" + \
-                                        RELAY_FIELDS['fingerprint'] + "' \
-                                        target='_BLANK'>" + \
-                                        RELAY_FIELDS[value_name] + "</a>"
-                    if RELAY_FIELDS['isnamed']:
-                        html_router_name = "<b>" + html_router_name + "</b>"
-                else:
-                    html_router_name = "<a class='link' href='/details/" + \
-                                        RELAY_FIELDS['fingerprint'] + "' \
-                                        target='_BLANK'>" + \
-                                        RELAY_FIELDS[value_name] + "</a>"
-                html_row_code = html_row_code + "<td id='col_relayName'>"\
-                                    + html_router_name + "</td>"
-            # Special Case: Icons
-            elif column == 'Icons':
-                html_icons = "<td id='col_relayIcons'>"
-                for icon in ICONS:
-                    if icon in current_columns:
-                        value_icon = COLUMN_VALUE_NAME[icon]
-                        html_icons = html_icons + RELAY_FIELDS[value_icon]
-                html_icons = html_icons + "</td>"
-                html_row_code = html_row_code + html_icons
-            else:
-                html_row_code = html_row_code + "<td id='col_relay" + column \
-                                + "'>" + RELAY_FIELDS[value_name] + "</td>"
-        html_row_code = html_row_code + "</tr>"
-        html_table_rows.append(html_row_code)
-
-    return html_table_rows
-
-
-def generate_query_list_options(query_options):
+def gen_flags_list(relay):
     """
-    Generates the HTML version of each option in the Query List Options
-    field.
+    Method that generates a list of the fields(flags) that will be
+    displayed on the details page of a specific relay.
 
-    @type query_options: C{dict}
-    @param query_options: A dictionary of the current query options.
+    @type relay: C{ActiveRelay}
+    @param relay: The relay for which the list of fields will be
+        generated.
     @rtype: C{list}
-    @return: List of strings - each string represents the HTML version
-        of an option.
+    @return: Alphabetical list of the fields(flags) that will be
+        displayed at the bottom of the details page.
     """
-    # TODO: Finish this. It will clean up the
-    # Advanced Query Options search.
-    LIST_OPTIONS = {'Router Name': 'nickname',
-                    'Fingerprint': 'fingerprint',
-                    'Country Code': 'geoip',
-                    'Bandwidth': 'bandwidthobserved',
-                    'Uptime': 'uptime',
-                    'Last Descriptor Published': 'published',
-                    #'Hostname': 'hostname',
-                    'IP Address': 'address',
-                    'ORPort': 'orport',
-                    'DirPort': 'dirport',
-                    'Platform': 'platform',
-                    'Contact': 'contact',
-                    'Authority': 'isauthority',
-                    'Bad Directory': 'isbaddirectory',
-                    'Bad Exit': 'isbadexit',
-                    'Exit': 'isexit',
-                    'Fast': 'isfast',
-                    'Guard': 'isguard',
-                    #'Hibernating': 'ishibernating',
-                    'Named': 'isnamed',
-                    'Stable': 'isstable',
-                    'Valid': 'isvalid',
-                    'Directory': 'isv2dir',
-                   }
+    ## This code structure avoids the use of any sort method,
+    ## since the list is guaranteed to be sorted.
 
-    html_query_list_options = []
-    for option in LIST_OPTIONS:
-        list_option = "<option value='" + LIST_OPTIONS[option] + "'"
-        if (query_options and query_options['sortListings'] ==
-                LIST_OPTIONS[option]):
-            list_option = list_option + " SELECTED>" + option + "</option>"
-        else:
-            list_option = list_option + ">" + option + "</option>"
-        html_query_list_options.append(list_option)
-    return html_query_list_options
+    # If the relay doesn't have a descriptor, we can't know whether
+    # or not the relay is hibernating, so don't generate that flag
+    # name in the list of flags.
+    flags_list = ['Authority', 'Bad Directory', 'Bad Exit', 'Exit',
+                  'Fast', 'Guard', 'HS Directory']
 
+    if relay.hasdescriptor:
+        flags_list.append('Hibernating')
 
-def generate_query_input_options(query_options):
-    """
-    Generates the HTML version of each input option in the Required Flags
-    feature.
-
-    @type query_options: C{dict}
-    @param query_options: A dictionary of the current query options.
-
-    @rtype: C{list}
-    @return: List of strings - each string represents the HTML version of 
-        an input option.
-    """
-    INPUT_OPTIONS = {'Authority': 'isauthority',
-                    'Bad Directory': 'isbaddirectory',
-                    'Bad Exit': 'isbadexit',
-                    'Exit': 'isexit',
-                    'Fast': 'isfast',
-                    'Guard': 'isguard',
-                    #'Hibernating': 'ishibernating',
-                    'Named': 'isnamed',
-                    'Stable': 'isstable',
-                    'Valid': 'isvalid',
-                    'V2Dir': 'isv2dir',
-                   }
-    sorted_input_options = sorted(INPUT_OPTIONS.keys())
-    html_query_input_options = []
-    for option in sorted_input_options:
-        input_option = "<td> " + option + ": </td>"
-        input_string = ''
-        for value in ['', 'yes', 'no']:
-            input_string = input_string + "<input type='radio' \
-                name='" + INPUT_OPTIONS[option] + "' value='" + value + "'"
-            if not query_options and value == '':
-                input_string = input_string + " CHECKED"
-            if (query_options and query_options[INPUT_OPTIONS[option]] == \
-                value):
-                input_string = input_string + " CHECKED"
-            input_string = input_string + " />" + ("Off" if value == '' else \
-                value.capitalize())
-        input_option = input_option + "<td>" + input_string + "</td>"
-        html_query_input_options.append(input_option)
-    return html_query_input_options
-
-
-def draw_bar_graph(xs, ys, labels, params):
-    """
-    Draws a bar graph, given data points, labels, and presentation
-    parameters.
-
-    @type xs: C{list}
-    @param xs: The x values to be plotted.
-    @type ys: C{list}
-    @param ys: The y values to be plotted.
-    @type labels: C{list} of C{string}
-    @param labels: The labels to be used for each data point, where
-        C{labels[i]} labels C{(xs[i], ys[i])}.
-    @type params: C{dict} of C{string} and C{int}
-    @param params: Parameters specifying how the graph is to be drawn.
-        Params must contain the keys: WIDTH, HEIGHT, TOP_MARGIN,
-        BOTTOM_MARGIN, LEFT_MARGIN, RIGHT_MARGIN, X_FONT_SIZE,
-        Y_FONT_SIZE, LABEL_FONT_SIZE, FONT_WEIGHT, BAR_WIDTH,
-        COLOR, LABEL_FLOAT, LABEL_ROT, and TITLE.
-    @rtype: HttpResponse
-    @return: The graph as specified by the parameters given.
-    """
-    ## Get the parameters from the params dictionary
-    # Width and height of the graph in pixels
-    WIDTH = params['WIDTH']
-    HEIGHT = params['HEIGHT']
-    # Space in pixels given around plot
-    TOP_MARGIN = params['TOP_MARGIN']
-    BOTTOM_MARGIN = params['BOTTOM_MARGIN']
-    LEFT_MARGIN = params['LEFT_MARGIN']
-    RIGHT_MARGIN = params['RIGHT_MARGIN']
-    # Font sizes, in pixels
-    X_FONT_SIZE = params['X_FONT_SIZE']
-    Y_FONT_SIZE = params['Y_FONT_SIZE']
-    LABEL_FONT_SIZE = params['LABEL_FONT_SIZE']
-    # How many pixels above each bar the labels should be
-    LABEL_FLOAT = params['LABEL_FLOAT']
-    # How the labels should be presented
-    LABEL_ROT = params['LABEL_ROT']
-    # Font weight used for labels and titles
-    FONT_WEIGHT = params['FONT_WEIGHT']
-    BAR_WIDTH = params['BAR_WIDTH']
-    COLOR = params['COLOR']
-    # Title of graph
-    TITLE = params['TITLE']
-
-    # Set margins according to specification.
-    matplotlib.rcParams['figure.subplot.left'] = \
-            float(LEFT_MARGIN) / WIDTH
-    matplotlib.rcParams['figure.subplot.right'] = \
-            float(WIDTH - RIGHT_MARGIN) / WIDTH
-    matplotlib.rcParams['figure.subplot.top'] = \
-            float(HEIGHT - TOP_MARGIN) / HEIGHT
-    matplotlib.rcParams['figure.subplot.bottom'] = \
-            float(BOTTOM_MARGIN) / HEIGHT
-
-    # Draw the figure.
-    width_inches = float(WIDTH) / 80
-    height_inches = float(HEIGHT) / 80
-    fig = Figure(facecolor='white', edgecolor='black',
-                 figsize=(width_inches, height_inches), frameon=False)
-    ax = fig.add_subplot(111)
-
-    # Plot the data.
-    ax.bar(xs, ys, color=COLOR, width=BAR_WIDTH)
-
-    # Label the height of each bar.
-    label_float_ydist = ax.get_ylim()[1] * LABEL_FLOAT / (
-                        HEIGHT - TOP_MARGIN - BOTTOM_MARGIN)
-    num_params = len(xs)
-    for i in range(num_params):
-        ax.text(xs[i] + (BAR_WIDTH / 2.0),
-                ys[i] + (label_float_ydist), str(ys[i]),
-                fontsize=LABEL_FONT_SIZE, horizontalalignment='center')
-
-    x_index = matplotlib.numpy.arange(num_params)
-    ax.set_xticks(x_index + (BAR_WIDTH / 2.0))
-    ax.set_xticklabels(labels, fontsize=X_FONT_SIZE,
-                       fontweight=FONT_WEIGHT, rotation=LABEL_ROT)
-
-    for tick in ax.yaxis.get_major_ticks():
-        tick.label1.set_fontsize(Y_FONT_SIZE)
-        tick.label1.set_fontweight(FONT_WEIGHT)
-
-    ax.set_title(TITLE, fontsize='12', fontweight=FONT_WEIGHT)
-
-    canvas = FigureCanvas(fig)
-    response = HttpResponse(content_type='image/png')
-    canvas.print_png(response, ha="center")
-    return response
-
-
-def draw_line_graph(fingerprint, bwtype, color, shade):
-    """
-    Draws a line graph with given data points and display parameters.
-
-    @type fingerprint: C{string}
-    @param fingerprint: The fingerprint of the router that the graph
-        is to be drawn for.
-    @type bwtype: C{string}
-    @param bwtype: Either 'read' or 'written', depending on whether the
-        graph to be drawn will be of recent read bandwidth or recent
-        written bandwdith.
-    @type color: C{string}
-    @param color: The color to draw the line graph with.
-    @type shade: C{string}
-    @param shade: The color to shade under the line graph.
-    @rtype: HttpResponse
-    @return: The graph as specified by the parameters given.
-    """
-    # Width and height of the graph in pixels
-    WIDTH = 480
-    HEIGHT = 320
-    # Space in pixels given around plot
-    TOP_MARGIN = 42
-    BOTTOM_MARGIN = 32
-    LEFT_MARGIN = 98
-    RIGHT_MARGIN = 5
-    # Font sizes, in pixels
-    X_FONT_SIZE = '8'
-    Y_FONT_SIZE = '8'
-    # Font weight used for labels and titles.
-    FONT_WEIGHT = 'bold'
-
-    # Set margins according to specification.
-    matplotlib.rcParams['figure.subplot.left'] = \
-            float(LEFT_MARGIN) / WIDTH
-    matplotlib.rcParams['figure.subplot.right'] = \
-            float(WIDTH - RIGHT_MARGIN) / WIDTH
-    matplotlib.rcParams['figure.subplot.top'] = \
-            float(HEIGHT - TOP_MARGIN) / HEIGHT
-    matplotlib.rcParams['figure.subplot.bottom'] = \
-            float(BOTTOM_MARGIN) / HEIGHT
-
-    last_hist = Bwhist.objects.filter(fingerprint=fingerprint)\
-                .order_by('-date')[:1][0]
-
-    if bwtype == 'Read':
-        t_start, t_end, tr_list = last_hist.read
-    elif bwtype == 'Written':
-        t_start, t_end, tr_list = last_hist.written
-
-    recent_date = last_hist.date
-    recent_time = datetime.datetime.combine(recent_date,
-                  datetime.time())
-
-    # It's possible that we might be missing some entries at the
-    # beginning; add values of 0 in this case.
-    tr_list[0:0] = ([0] * t_start)
-
-    # We want to have 96 data points in our graph; if we don't have
-    # them, get some data points from the day before, if we can.
-    to_fill = 96 - len(tr_list)
-
-    start_time = recent_time - datetime.timedelta(
-                 minutes=(15 * to_fill))
-    end_time = start_time + datetime.timedelta(
-               days=1) - datetime.timedelta(minutes=15)
-
-    # If less than 96 entries in the array, get earlier entries.
-    # If they don't exist, fill in the array with '0' values.
-    if to_fill:
-        day_before = last_hist.date - datetime.timedelta(days=1)
-
-        try:
-            day_before_hist = Bwhist.objects.get(
-                    fingerprint=fingerprint,
-                    date=str(day_before))
-            if bwtype == 'Read':
-                y_start, y_end, y_list = day_before_hist.read
-            elif bwtype == 'Written':
-                y_start, y_end, y_list = day_before_hist.written
-            y_list.extend([0] * (95 - y_end))
-            y_list[0:0] = ([0] * y_start)
-
-        except ObjectDoesNotExist:
-            y_list = ([0] * 96)
-        tr_list[0:0] = y_list[(-1 * to_fill):]
-
-    width_inches = float(WIDTH) / 80
-    height_inches = float(HEIGHT) / 80
-    fig = Figure(facecolor='white', edgecolor='black',
-                 figsize=(width_inches, height_inches), frameon=False)
-    ax = fig.add_subplot(111)
-
-    # Return bytes per second, not total bandwidth for 15 minutes.
-    bps = map(lambda x: x / (15 * 60), tr_list)
-    times = []
-    for i in range(0, 104, 8):
-        to_add_date = start_time + datetime.timedelta(minutes=(15 * i))
-        to_add_str = "%0*d:%0*d" % (2, to_add_date.hour,
-                                    2, to_add_date.minute)
-        times.append(to_add_str)
-
-    dates = range(96)
-
-    # Draw the graph and give the graph a light shade underneath it.
-    ax.plot(dates, bps, color=color)
-    ax.fill_between(dates, 0, bps, color=shade)
-
-    ax.set_xlabel("Time (GMT)", fontsize='12')
-    ax.set_xticks(range(0, 104, 8))
-    ax.set_xticklabels(times, fontsize=X_FONT_SIZE,
-                       fontweight=FONT_WEIGHT)
-
-    ax.set_ylabel("Bandwidth (bytes/sec)", fontsize='12')
-
-    # Don't extend the y-axis to negative numbers, in any circumstance.
-    ax.set_ylim(ymin=0)
-
-    # Don't use scientific notation.
-    ax.yaxis.major.formatter.set_scientific(False)
-    for tick in ax.yaxis.get_major_ticks():
-        tick.label1.set_fontsize(Y_FONT_SIZE)
-        tick.label1.set_fontweight(FONT_WEIGHT)
-
-    ax.set_title("Average Bandwidth " + bwtype + " History:\n"
-            + start_time.strftime("%Y-%m-%d %H:%M") + " to "
-            + end_time.strftime("%Y-%m-%d %H:%M"), fontsize='12',
-            fontweight=FONT_WEIGHT)
-
-    canvas = FigureCanvas(fig)
-    response = HttpResponse(content_type='image/png')
-    canvas.print_png(response, ha="center")
-    return response
+    flags_list.extend(['Named', 'Stable', 'Running', 'Valid', 'V2Dir'])
+    return flags_list

@@ -5,163 +5,126 @@ There is one function for each link.
 """
 # Django-specific import statements -----------------------------------
 from django.http import HttpResponse
-from django.db.models import Max, Sum
+from django.db.models import Max
 
 # CSV specific import statements
 import csv
 
 # TorStatus specific import statements --------------------------------
-from statusapp.models import Statusentry, Descriptor
+from statusapp.models import ActiveRelay
 from helpers import *
+from pages import *
+
+NOT_MOVABLE_COLUMNS = ["Named", "Exit", "Authority", "Fast", "Guard",
+                       "Hibernating", "Stable", "Running", "Valid",
+                       "V2Dir", "Platform",]
 
 def current_results_csv(request):
     """
-    Reformats the current Queryset object into a csv format.
+    Reformat the current Queryset object into a csv format.
 
     @rtype: HttpResponse
     @return: csv formatted current queryset
     """
-    #Get the current columns from the session.
     current_columns = request.session['currentColumns']
+    undisplayed_columns = ['Hostname', 'Valid', 'Running', 'Named']
 
-    #Remove columns in which we don't take information from the fields.
-    current_columns.remove("Hostname")
-    current_columns.remove("Icons")
-    current_columns.remove("Valid")
-    current_columns.remove("Running")
-    #current_columns.remove("Hibernating")
-    current_columns.remove("Named")
+    # Don't provide certain flag information in the csv
+    for column in undisplayed_columns:
+        if column in current_columns:
+            current_columns.remove(column)
 
-    #Performs the query.
-    last_va = Statusentry.objects.aggregate(
-            last=Max('validafter'))['last']
-    statusentries = Statusentry.objects.filter(validafter=last_va).\
-            extra(select={'geoip': 'geoip_lookup(address)'}).\
-            order_by('nickname')
+    if "Icons" not in current_columns:
+        for flag in NOT_MOVABLE_COLUMNS:
+            if flag in current_columns:
+                current_columns.remove(flag)
+    elif "Icons" in current_columns:
+        current_columns.remove("Icons")
 
-    #Gets the query options.
-    query_options = {}
-    if (request.GET):
-        if ('resetQuery' in request.GET):
-            if ('queryOptions' in request.session):
-                del request.session['queryOptions']
-        else:
-            query_options = request.GET    
-            request.session['queryOptions'] = query_options    
-    if (not query_options and 'queryOptions' in request.session):
-            query_options = request.session['queryOptions']
+    last_va = ActiveRelay.objects.aggregate(
+              last=Max('validafter'))['last']
+    active_relays = ActiveRelay.objects.filter(
+                    validafter=last_va).order_by('nickname')
 
-    #Use method in helper functions to filter the query results.
-    statusentries = filter_statusentries(statusentries, query_options)
+    #This filters the results set using the advanced search filters
+    # as well as the basic search input if need be.
+    order = ''
+    basic_input = ''
 
-    #Create the HttpResponse object with the appropriate CSV header.
+    if 'search' in request.session:
+        basic_input = request.session['search']
+
+    # the get_order function in helpers.py get's the desired ordering
+    # of the result set from the cookie.
+    order = get_order(request)
+        
+    if basic_input:
+        active_relays = active_relays.filter(
+                        Q(nickname__istartswith=basic_input) | \
+                        Q(fingerprint__istartswith=basic_input) | \
+                        Q(address__istartswith=basic_input)).order_by(
+                        order)
+    else:
+        filter_params = get_filter_params(request)
+        active_relays = active_relays.filter(
+                        **filter_params).order_by(order)
+
+    # Create the HttpResponse object with the appropriate CSV header
     response = HttpResponse(mimetype='text/csv')
     response['Content-Disposition'] = 'attachment;\
             filename=current_results.csv'
 
-    #Initialize dictionaries to write csv Data.
     rows = {}
     headers = {}
-    
-    #Make columns keys to empty lists.
+
+    # Make columns keys to empty lists
     for column in current_columns: rows[column] = []
 
-    #Populates the row dictionary with all field values.
-    for entry in statusentries:
-        fields_access = [("Router Name", entry.nickname),\
-                #Sometimes no country code I included a check below.
-                ("Country Code", ""),\
-                ("Bandwidth", entry.descriptorid.bandwidthobserved),\
-                ("Uptime", entry.descriptorid.uptime),\
-                ("IP", entry.address),\
-                ("Fingerprint", entry.fingerprint),\
-                ("LastDescriptorPublished", entry.published),\
-                ("Contact", entry.descriptorid.rawdesc),\
-                ("BadDir", entry.isbaddirectory),\
-                ("DirPort", entry.dirport), ("Exit", entry.isexit),\
-                ("Authority", entry.isauthority),\
-                ("Fast", entry.isfast), ("Guard", entry.isguard),\
-                ("V2Dir", entry.isv2dir),\
-                ("Platform", entry.descriptorid.platform),\
-                ("Stable", entry.isstable), ("ORPort", entry.orport),\
-                ("BadExit", entry.isbadexit)]
+    # Populates the row dictionary with all field values
+    for relay in active_relays:
+        fields_access = [
+                ("Router Name", relay.nickname),
+                ("Country Code", relay.country),
+                ("Latitude", relay.latitude),
+                ("Longitude", relay.longitude),
+                ("Exit Policy", relay.exitpolicy),
+                ("Contact", relay.contact),
+                ("Onion Key", relay.onionkey),
+                ("Signing Key", relay.signingkey),
+                ("Family", relay.family),
+                ("Bandwidth", relay.bandwidthobserved),
+                ("Uptime", relay.uptime),
+                ("IP", relay.address),
+                ("Fingerprint", relay.fingerprint),
+                ("Last Descriptor Published", relay.published),
+                ("BadDir", relay.isbaddirectory),
+                ("DirPort", relay.dirport),
+                ("Exit", relay.isexit),
+                ("Authority", relay.isauthority),
+                ("Hibernating", relay.ishibernating),
+                ("Fast", relay.isfast),
+                ("Guard", relay.isguard),
+                ("V2Dir", relay.isv2dir),
+                ("Platform", relay.platform),
+                ("Stable", relay.isstable),
+                ("ORPort", relay.orport),
+                ("BadExit", relay.isbadexit)]
 
-        #Removes cases when country code is inaccesible
-        if entry.geoip:
-            fields_access[fields_access.index(("Country Code", ""))] =\
-                    ("Country Code", entry.geoip.split(',')[0][1:3])
         for k, v in fields_access:
             if k in current_columns: rows[k].append(v)
 
-    # needed to write to the response
     writer = csv.writer(response)
     writer = csv.DictWriter(response, fieldnames=current_columns)
 
-    #Write the headers row.
+    # Write the headers row
     for column in current_columns: headers[column] = column
     writer.writerow(headers)
 
-    #Write each row in the dictionary to the csv.
+    # Write each row in the dictionary to the csv
     for i in range(0, len(rows[current_columns[0]])):
         dict_row = {}
         for column in current_columns:
             dict_row[column] = rows[column][i]
         writer.writerow(dict_row)
-
-    return response
-
-
-def custom_csv(request, flags):
-    """
-    Returns a csv formatted file that contains either all Tor ip
-        addresses or all Tor exit node ip addresses.
-
-    @oaram all_flag: a variable that represents the clients
-        desire to get all the ips or only the exit node ips from
-        the Tor network.
-
-    @rtype: HttpResponse
-    @return: csv formatted list of either all ip address or all
-        exit node ip addresses.
-    """
-    
-    filterby = {}
-    for element in flags:
-        filterby[element] = True
-    
-    last_va = Statusentry.objects.aggregate(
-                last=Max('validafter'))['last']
-    statusentries = Statusentry.objects.filter(validafter=last_va, **filterby)
-
-
-    """
-    #Performs the necessary query depending on what is requested
-    if all_flag:
-        last_va = Statusentry.objects.aggregate(
-                last=Max('validafter'))['last']
-        statusentries = Statusentry.objects.filter(validafter=last_va)
-    else:
-        last_va = Statusentry.objects.aggregate(
-                last=Max('validafter'))['last']
-        statusentries = Statusentry.objects.filter(
-                validafter=last_va, isexit=True)
-    """
-
-    #Initialize list to hold ips and populates it.
-    IPs = []
-    for entry in statusentries:
-        IPs.append(entry.address)
-
-    response = HttpResponse(mimetype= 'text/csv') 
-    #Creates the proper csv response type.
-    if flags:
-        response['Content-Disposition'] = 'attachment; filename=all_ips.csv'
-    else:
-        response['Content-Disposition'] = 'attachment; filename=custom_ips.csv'
-
-    #Writes IP list to csv response file.
-    writer = csv.writer(response)
-    for ip in IPs:
-        writer.writerow([ip])
 
     return response

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% spaceless %}
 {% block mainCSS %}
 <link rel="stylesheet" type="text/css" href="../../static/css/style.css"></link>
 {% endblock %}
@@ -8,49 +8,47 @@
 <link rel="stylesheet" type="text/css" href="../../static/css/nodequery.css"></link>
 {% endblock %}
 
-{% block mainTitle %} Tor Network Status -- Tor Exit Query {% endblock %}
+{% block mainTitle %} - TorStatus - Tor Exit Query {% endblock %}
 
 {% block headerTitle %} TorStatus {% endblock %}
+
+{% block pageTitle %} Tor Exit Query {% endblock %}
 
 {% block mainPage %}
 
 <table class="searchQuery">
 <tr>
-    <td id="searchQInfo"> You can use this page to determine if an IP address is an active Tor server, and optionally see if that Tor server's Exit Policy would permit it to exit a certain destination IP address and port.</td>
+    <td id="searchQInfo"> You can use this page to determine if an IP address is an active Tor relay, and optionally see if that Tor relay's Exit Policy would permit it to exit a certain destination IP address and port.</td>
 </tr>
-    {% ifequal source "" %}
-        <td id="searchQError">You must enter a Query IP, at minimum.</td>
-    {% else %}
-    {% if source_valid %}
-        {% if dest_ip %}
-            {% if dest_ip_valid %}
-                {% if dest_port_valid %}
-                {% else %}
-                    <tr><td id="searchQError">The destination port you supplied, {{dest_port}}, is not a valid port.</td></tr>
-                {% endif %}
-            {% else %}
-                <tr><td id="searchQError">The destination IP address you supplied, {{dest_ip}}, is not a valid IP address.</td></tr>
-            {% endif %}
-        {% endif %}
-    {% else %}
-    <tr><td id="searchQError">The Query IP address you supplied, {{source}}, is not a valid IP
+{% if source == "" %}
+    <td id="searchQError">You must enter a Query IP, at minimum.</td>
+{% else %}
+    {% if source_valid and dest_ip and dest_ip_valid and not dest_port_valid %}
+        <tr><td id="searchQError">The destination port you supplied, "{{ dest_port }}", is not a valid port.</td></tr>
     {% endif %}
-    {% endifequal %}
+    {% if source_valid and dest_ip and not dest_ip_valid %}
+        <tr><td id="searchQError">The destination IP address you supplied, "{{ dest_ip }}", is not a valid IP address.</td></tr>
+    {% endif %}
+    {% if source_valid and dest_port and not dest_ip %}
+    <tr><td id="searchQError">You supplied a destination port, "{{ dest_port }}", but you did not supply a destination IP address.<br>The exit policy information of any matching relay(s) was not parsed.</td></tr>
+    {% endif %}
+    {% if not source_valid %}
+    <tr><td id="searchQError">The Query IP address you supplied, "{{ source }}", is not a valid IP</td></tr>
+    {% endif %}
+{% endif %}
 <tr>
-    <td id="searchQMessage"> 
+    <td id="searchQMessage">
         {% if is_router %}
-        The IP address you entered, {{source}}, matches one or more active Tor servers:
+            The IP address you entered, {{ source }}, matches one or more active Tor servers:
     </td></tr>
     <tr><td>
             {% for nickname, fingerprint, exit_possible in relays %}
-            Server name: <a href="/details/{{fingerprint}}">{{nickname}}</a>
-                {% if dest_ip_valid %}
-                    {% if dest_port_valid %}
-                        {% if exit_possible %}
-                            WOULD allow exiting to {{dest_ip}}:{{dest_port}}
-                        {% else %}
-                            would NOT allow exiting to {{dest_ip}}:{{dest_port}}
-                        {% endif %}
+                Server name: <a href="/details/{{ fingerprint }}">{{ nickname }}</a>
+                {% if dest_ip_valid and dest_port_valid %}
+                    {% if exit_possible %}
+                        WOULD allow exiting to {{ dest_ip }}:{{ dest_port }}
+                    {% else %}
+                        would NOT allow exiting to {{ dest_ip }}:{{ dest_port }}
                     {% endif %}
                 {% endif %}
                 <br>
@@ -59,7 +57,7 @@
         {% else %}
             {% if source_valid %}
                 <tr><td id="searchQError">
-                The IP address you entered, {{source}}, does not match any active Tor servers.
+                The IP address you entered, "{{ source }}", does not match any active Tor servers.
                 </td>
             {% endif %}
         {% endif %}
@@ -94,7 +92,7 @@
             </tr>
             <tr>
                 <td id="ipSearch_SUBMIT">
-                    <input type="submit" value="Submit Query" />
+                    <input type="submit" id="ipSearch_SUBMIT" value="Submit Query" />
                 </td>
             </tr>
             </form>
@@ -102,5 +100,5 @@
     </td>
 </tr>
 </table>
-
 {% endblock %}
+{% endspaceless %}

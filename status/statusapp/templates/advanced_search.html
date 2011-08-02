@@ -2,156 +2,108 @@
 
 {% block auxCSS %}
 <link rel="stylesheet" type="text/css" href="/static/css/advancedsearch.css"></link>
+<link rel="stylesheet" type="text/css" href="/static/css/columnpreferences.css"></link>
 {% endblock %}
 
-{% block mainTitle %} TorStatus {% endblock %}
+{% block mainTitle %} TorStatus - Advanced Search {% endblock %}
 
 {% block headerTitle %} TorStatus {% endblock %}
 
-{% block mainPage %}
 {% load index_filters %}
+
+{% block pageTitle %} Advanced Search {% endblock %}
+
+{% block mainPage %}
 
 <table class="advSearchTable">
     <tr>
-        <td id="advSearchTitle"> Advanced Search </td>
-    </tr>
-    <tr>
         <td>
-        <form name="searchForm" action="" method="get">
-        <table class="">
-            <tr>
-                <td id='advSearchToolText'>
-                Filter By
-                </td>
-                <td>
-                <select id="advSearchButton" name="criteria">
-                {% for option in searchOptionsFieldsOrder %}
-                    <option value="{{searchOptionsFields|key:option}}" 
-                    {% if queryOptions and queryOptions|key:'criteria' == "{{searchOptionsFields|key: option}}" %}
-                                SELECTED {% endif %}>{{option}}</option>
-                {% endfor %}
-                </select>
-                </td>
-                <td>
-                <select id="advSearchButton" name="boolLogic">
-                {% for option in searchOptionsBooleansOrder %}
-                    <option value="{{searchOptionsBooleans|key:option}}" 
-                    {% if queryOptions and queryOptions|key:'boolLogic' == "{{searchOptionsBooleans|key:option}}" %} 
-                                SELECTED {% endif %}>{{option}}</option>
-                {% endfor %}
-                </select>
-                </td>
-                <td>
-                <input id="advSearchBox" type="text" name="searchValue" value="{{searchValue}}"/>
-                </td>
-            </tr>
-            <tr>
-                <td id='advSearchToolText'>
-                Sort Order
-                </td>
-                <td>
-                <select id="advSearchButton" name="sortListing">
-                {% for option in sortOptionsOrder %}
-                    <option value="{{sortOptions|key:option}}" 
-                    {% if queryOptions and queryOptions|key:'sortListings' == "{{sortOptions|key:option}}" %} 
+            <table class="advSearchTable">
+                <tr>
+                    <td id="pageTitle"> Filter Options </td>
+                </tr>
+                <tr>
+                    <td>
+                    <form name="searchForm" action="/index" method="get">
+                    <table class="">
+                        {% for option in searchOptionsFieldsOrder %}
+                        <tr>
+                            <td id="advSearchToolText"> {{option}} </td>
+                            <td>
+                            <select id="advSearchButton" name="c_{{searchOptionsFields|key:option}}">
+                            {% for boolean_option in searchOptionsFieldsBooleans|key:option %}
+                                <option value="{{searchOptionsBooleans|key:boolean_option}}">{{boolean_option}}</option>
+                            {% endfor %}
+                            </select>
+                            </td>
+                            <td>
+                            <input id="advSearchBox" type="text" name="s_{{searchOptionsFields|key:option}}" value="{{search}}"/>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td id="pageTitle" colspan="2"> Sort Order </td>
+                </tr>
+                <tr>
+                    <td>
+                    <table align="center">
+                        <tr>
+                            <td>
+                            <select id="advSearchButton" name="sortListing">
+                            {% for option in sortOptionsOrder %}
+                            <option value="{{sortOptions|key:option}}"
+                            {% if queryOptions and queryOptions|key:"sortListings" == "{{sortOptions|key:option}}" %}
                                                             SELECTED {% endif %}>{{option}}</option>
-                {% endfor %}
-                </select>
-                </td>
-                <td>
-                <select id="advSearchButton" name="sortOrder">
-                <option value="ascending" {% if queryOptions and queryOptions|key:'sortOrder' == "ascending" %} 
+                            {% endfor %}
+                            </select>
+                            </td>
+                            <td>
+                            <select id="advSearchButton" name="sortOrder">
+                            <option value="ascending" {% if queryOptions and queryOptions|key:"sortOrder" == "ascending" %}
                                                             SELECTED {% endif %}>Ascending</option>
-                <option value="descending" {% if queryOptions and queryOptions|key:'sortOrder' == "descending" %} 
+                            <option value="descending" {% if queryOptions and queryOptions|key:"sortOrder" == "descending" %}
                                                             SELECTED {% endif %}>Descending</option>
-                </select>
-                </td>
-            </tr>
-        <tr>
-            <td id="advSearchToolText"> 
-            Require Flags 
-            </td>
-        </tr>
-        {% for option in filterOptionsOrder %}
-        <tr>
-            <td id="advSearchToolText"> {{option}} </td>
-            <td>
-            <input type="radio" name="{{filterOptions|key:option}}" value="" {% if not queryOptions %} CHECKED 
-                                            {% else %} {% if queryOptions and queryOptions|key:'isauthority' == "" %}
+                            </select>
+                            </td>
+                        </tr>
+                    </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td id="pageTitle" colspan="6"> Flags </td>
+                </tr>
+                <tr>
+                    <td>
+                    <table class="flags">
+                        <tr>
+                            {% for option in filterOptionsOrder %}
+                                {% if forloop.counter0|divisibleby:"2" %}
+                                </tr><tr>{% endif %}
+                                <td id="advSearchToolText"> {{option}} </td>
+                                <td>
+                                <input type="radio" name="{{filterOptions|key:option}}" value="" {% if not queryOptions %} CHECKED
+                                            {% else %} {% if queryOptions and queryOptions|key:option == "" %}
                                                             CHECKED {% endif %}{% endif %} />Off
-            <input type="radio" name="{{filterOptions|key:option}}" value="yes" {% if queryOptions and queryOptions|key:'isauthority' == "yes" %}
+                                <input type="radio" name="{{filterOptions|key:option}}" value="1" {% if queryOptions and queryOptions|key:option == "1" %}
                                                             CHECKED {% endif %} />Yes
-            <input type="radio" name="{{filterOptions|key:option}}" value="no" {% if queryOptions and queryOptions|key:'isauthority' == "no" %}
+                                <input type="radio" name="{{filterOptions|key:option}}" value="0" {% if queryOptions and queryOptions|key:option == "0" %}
                                                             CHECKED {% endif %} />No
-            </td>
-        </tr>
-        {% endfor %}
-
-        </table>
-        </form>
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    </table>
+                    </td>
+                <tr>
+                    <td colspan="6" align="center">
+                    <input type="submit" value="Search" id="searchButton">
+                    </td>
+                </tr>
+                </form>
+            </table>
         </td>
     </tr>
-    <tr>
-        <td>
-        
-    
 </table>
 {% endblock %}
-
-<tr>
-            <td> Sort Router Listing By: </td>
-            <td>
-                <form action="/" method="get">
-                <select id="sortRouterListing" name="sortListings">
-                <option value="nickname" {% if not queryOptions or queryOptions|key:'sortListings' == "nickname" %} 
-                                                            SELECTED {% endif %}>Router Name</option>
-                <option value="fingerprint" {% if queryOptions and queryOptions|key:'sortListings' == "fingerprint" %} 
-                                                            SELECTED {% endif %}>Fingerprint</option>
-                <option value="geoip" {% if queryOptions and queryOptions|key:'sortListings' == "geoip" %} 
-                                                            SELECTED {% endif %}>Country Code</option>
-                <option value="bandwidthobserved" {% if queryOptions and queryOptions|key:'sortListings' == "bandwidthobserved" %} 
-                                                            SELECTED {% endif %}>Bandwidth</option>
-                <option value="uptime" {% if queryOptions and queryOptions|key:'sortListings' == "uptime" %} 
-                                                            SELECTED {% endif %}>Uptime</option>
-                <option value="published" {% if queryOptions and queryOptions|key:'sortListings' == "published" %} 
-                                                            SELECTED {% endif %}>Last Descriptor Published</option>
-                <option value="hostname" {% if queryOptions and queryOptions|key:'sortListings' == "hostname" %} 
-                                                            SELECTED {% endif %}>Hostname</option>
-                <option value="address" {% if queryOptions and queryOptions|key:'sortListings' == "address" %} 
-                                                            SELECTED {% endif %}>IP Address</option>
-                <option value="orport" {% if queryOptions and queryOptions|key:'sortListings' == "orport" %} 
-                                                            SELECTED {% endif %}>ORPort</option>
-                <option value="dirport" {% if queryOptions and queryOptions|key:'sortListings' == "dirport" %} 
-                                                            SELECTED {% endif %}>DirPort</option>
-                <option value="platform" {% if queryOptions and queryOptions|key:'sortListings' == "platform" %} 
-                                                            SELECTED {% endif %}>Platform</option>
-                <option value="contact" {% if queryOptions and queryOptions|key:'sortListings' == "contact" %} 
-                                                            SELECTED {% endif %}>Contact</option>
-                <option value="isauthority" {% if queryOptions and queryOptions|key:'sortListings' == "isauthority" %} 
-                                                            SELECTED {% endif %}>Authority</option>
-                <option value="isbaddirectory" {% if queryOptions and queryOptions|key:'sortListings' == "isbaddirectory" %} 
-                                                            SELECTED {% endif %}>Bad Directory</option>
-                <option value="isbadexit" {% if queryOptions and queryOptions|key:'sortListings' == "isbadexit" %} 
-                                                            SELECTED {% endif %}>Bad Exit</option>
-                <option value="isexit" {% if queryOptions and queryOptions|key:'sortListings' == "isexit" %} 
-                                                            SELECTED {% endif %}>Exit</option>
-                <option value="isfast" {% if queryOptions and queryOptions|key:'sortListings' == "isfast" %} 
-                                                            SELECTED {% endif %}>Fast</option>
-                <option value="isguard" {% if queryOptions and queryOptions|key:'sortListings' == "isguard" %} 
-                                                            SELECTED {% endif %}>Guard</option>
-                <option value="ishibernating" {% if queryOptions and queryOptions|key:'sortListings' == "ishibernating" %} 
-                                                            SELECTED {% endif %}>Hibernating</option>
-                <option value="isnamed" {% if queryOptions and queryOptions|key:'sortListings' == "isnamed" %} 
-                                                            SELECTED {% endif %}>Named</option>
-                <option value="isstable" {% if queryOptions and queryOptions|key:'sortListings' == "isstable" %} 
-                                                            SELECTED {% endif %}>Stable</option>
-                <option value="isrunning" {% if queryOptions and queryOptions|key:'sortListings' == "isrunning" %} 
-                                                            SELECTED {% endif %}>Running</option>
-                <option value="isvalid" {% if queryOptions and queryOptions|key:'sortListings' == "isvalid" %} 
-                                                            SELECTED {% endif %}>Valid</option>
-                <option value="isv2dir" {% if queryOptions and queryOptions|key:'sortListings' == "isv2dir" %} 
-                                                            SELECTED {% endif %}>Directory</option>
-                </select>
-            </td>
-        </tr>
-

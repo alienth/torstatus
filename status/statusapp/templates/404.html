@@ -1,7 +1,20 @@
-{% extends 'error.html' %}
+{% extends 'base.html' %}
 
-{% block error-text %}
+{% block mainCSS %}
+<link rel="stylesheet" type="text/css" href="/static/css/style.css"></link>
+{% endblock %}
 
-404: Page Not Found
+{% block mainTitle %} TorStatus -- 404: Page Not Found {% endblock %}
 
-{% endblock error-text %}
+{% block headerTitle %} TorStatus {% endblock %}
+
+{% block pageTitle %} 404: Page Not Found {% endblock %}
+
+{% block mainPage %}
+<br />
+<table align="center">
+    <tr>
+        <td>{{ debug_message }}</td>
+    </tr>
+</table>
+{% endblock %}

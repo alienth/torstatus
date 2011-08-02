@@ -1,7 +1,8 @@
+/* Table -----------------------------------------------*/
 table.aggNetworkStatistic {
-    border-style: solid;
-    border-color: black;
-    border-width: 4px;
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+    border-color: #61a #315 #315 #61a;
     margin-left: auto;
     margin-right: auto;
     border-spacing: 1px;
@@ -9,8 +10,13 @@ table.aggNetworkStatistic {
    	white-space:nowrap;
 }
 
+/* END Table ------------------------------------------ */
+
+/* Table Columns -------------------------------------- */
 td#graphEntry {
-    border-style: solid;
-    border-width: 2px;
+    border-bottom: 1px solid;
+    border-color: #61a #315 #315 #61a;
 }
+
+/* END Table Columns ---------------------------------- */
 

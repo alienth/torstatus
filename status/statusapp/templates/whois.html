@@ -8,15 +8,17 @@
 <link rel="stylesheet" type="text/css" href="/static/css/whois.css"></link>
 {% endblock %}
 
-{% block mainTitle %} TorStatus WHOIS Query {% endblock %}
+{% block mainTitle %} - TorStatus - WHOIS Query {% endblock %}
 
 {% block headerTitle %} TorStatus {% endblock %}
+
+{% block pageTitle %} WHOIS Query {% endblock %}
 
 {% block mainPage %}
 
 <table class="whois">
 <tr>
-    <td class="boxTitle">WHOIS Query For {{ address }}</td>
+    <td id="pageTitle">WHOIS Query For {{ address }}</td>
 </tr>
 <tr>
     <td><pre class="whois">{{ whois }}</pre></td>
