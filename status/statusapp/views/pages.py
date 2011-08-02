@@ -77,8 +77,10 @@ def index(request):
     order = get_order(request)
     if order.startswith('-'):
         ascending_or_descending = 'ascending'
+        order_param = order[1:]
     else:
         ascending_or_descending = 'descending'
+        order_param = order
 
     # See if the user has defined a "basic search", i.e. if the
     # user has supplied a search term on the splash page
@@ -194,7 +196,8 @@ def index(request):
                        'icons_list': ICONS,
                        'number_of_results': num_results,
                        'ascending_or_descending':
-                                ascending_or_descending}
+                                ascending_or_descending,
+                       'order_param': order_param}
 
     return render_to_response('index.html', template_values)
 
@@ -555,8 +558,6 @@ def advanced_search(request):
     """
     The advanced search page for the TorStatus site.
     """
-    #search_session_reset(request)
-    #
     template_values = {'sortOptionsOrder': SORT_OPTIONS_ORDER,
                        'sortOptions': SORT_OPTIONS,
                        'searchOptionsFieldsOrder': SEARCH_OPTIONS_FIELDS_ORDER,
