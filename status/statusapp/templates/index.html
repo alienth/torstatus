@@ -42,7 +42,9 @@
 </table>
 {% load index_filters %}
 {% spaceless %}
+
 {% if paged_relays.object_list %}
+{% if not all %}
 <table>
         {% if paged_relays.has_previous %}
         <td id="paginatorLinks"><a class="pageLinks" href="?page={{ paged_relays.previous_page_number }}">&#8701;</a></td>
@@ -79,6 +81,7 @@
         {% endif %}
     </tr>
 </table>
+{% endif %}
 
 <table class="relayTable">
 	<tr>
@@ -89,7 +92,7 @@
 		{% endif %}
 		{% else %}
 		{% if column_name not in not_columns %}
-        <th class="relayHeader hoverable" onClick="document.location.href='/index/?sortListing={{ column_value_name|key:column_name }}&sortOrder={{ ascending_or_descending }}';" {% if column_name == "Router Name" %}
+        <th class="relayHeader hoverable" {% if not all %}onClick="document.location.href='/index/?sortListing={{ column_value_name|key:column_name }}&sortOrder={{ ascending_or_descending }}';"{% endif %} {% if column_name == "Router Name" %}
 	                                            id="routerName"
 	                                      {% else %}
 	                                      {% if column_name == "LastDescriptorPublished" %}
@@ -100,7 +103,7 @@
 	                                      {% endif %}
 	                                      {% endif %}
 	                                      {% endif %}
-                                          >{% if column_name == "Country Code" %}&nbsp;{% else %}{{ column_name }}{% endif %}{% if column_value_name|key:column_name == order_param %}{% if ascending_or_descending == "ascending" %}&uarr;{% else %}&darr;{% endif %}{% endif %}</th>
+                                          >{% if column_name == "Country Code" %}&nbsp;{% else %}{{ column_name }}{% endif %}{% if not all and column_value_name|key:column_name == order_param %}{% if ascending_or_descending == "ascending" %}&uarr;{% else %}&darr;{% endif %}{% endif %}</th>
 	    {% endif %}
 	    {% endif %}
     {% endfor %}
@@ -114,7 +117,7 @@
 		{% endif %}
 		    {% for column_name in current_columns %}
 		    {% if column_name == "Country Code" %}
-            <td id="col_relayName"><a href="http://www.openstreetmap.org/?mlon={{ relay|field_value:'Longitude' }}&mlat={{ relay|field_value:'Latitude' }}&zoom=6"><img src="/static/img/flags/{{ relay|field_value:column_name|lower }}.png" alt={{ relay|field_value:column_name }} title="{{ relay|field_value:column_name }}: {{ relay|field_value:'Latitude' }}, {{ relay|field_value:'Longitude' }}" border=0></a></td>
+            <td id="col_relayName"><a href="http://www.openstreetmap.org/?mlon={{ relay|field_value:'Longitude' }}&mlat={{ relay|field_value:'Latitude' }}&zoom=6"><img src="/static/img/flags/{{ relay|field_value:column_name|default:"zz"|lower }}.png" alt={{ relay|field_value:column_name|default:"?" }} title="{{ relay|field_value:column_name|default:"?" }}: {{ relay|field_value:'Latitude'|default:"?" }}, {{ relay|field_value:'Longitude'|default:"?" }}" border=0></a></td>
 			{% else %}
 			{% if column_name == "Router Name" %}
             <td id="col_relayName">

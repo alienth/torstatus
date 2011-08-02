@@ -197,7 +197,48 @@ def index(request):
                        'number_of_results': num_results,
                        'ascending_or_descending':
                                 ascending_or_descending,
-                       'order_param': order_param}
+                       'order_param': order_param,
+                       'all': False}
+
+    return render_to_response('index.html', template_values)
+
+
+@cache_page(60 * 10)
+def full_index(request):
+    """
+    Display all columns and routers available.
+
+    @rtype: C{HttpResponse}
+    @return: The full, unpaged list of all columns and relays.
+    """
+    last_validafter = ActiveRelay.objects.aggregate(
+                      last=Max('validafter'))['last']
+    active_relays = ActiveRelay.objects.filter(
+                    validafter=last_validafter).order_by(
+                    'nickname')
+
+    num_results = active_relays.count()
+
+    columns = ['Country Code', 'Router Name', 'Fingerprint',
+               'Bandwidth', 'Uptime', 'IP', 'Icons', 'ORPort',
+               'DirPort', 'Named', 'Exit', 'Authority', 'Fast',
+               'Guard', 'Hibernating', 'Stable', 'V2Dir', 'Platform',
+               'Contact', 'LastDescriptorPublished', 'BadDir',
+               'BadExit']
+
+    paginator = Paginator(active_relays, num_results)
+    paged_relays = paginator.page(1)
+    paged_relays.object_list = gen_list_dict(paged_relays.object_list)
+
+    template_values = {'paged_relays': paged_relays,
+                       'current_columns': columns,
+                       'displayable_columns': DISPLAYABLE_COLUMNS,
+                       'not_columns': NOT_MOVABLE_COLUMNS,
+                       'request': request,
+                       'column_value_name': COLUMN_VALUE_NAME,
+                       'icons_list': ICONS,
+                       'number_of_results': num_results,
+                       'all': True}
 
     return render_to_response('index.html', template_values)
 

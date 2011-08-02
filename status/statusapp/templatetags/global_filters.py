@@ -10,7 +10,7 @@ register = template.Library()
 
 __COUNTRY_MAP = {
         '': u'Unknown',
-        None: u'Unknown',
+        'None': u'Unknown',
         'a1': u'Unknown',
         'a2': u'Unknown',
         'ad': u'Andorra',
@@ -275,4 +275,7 @@ def code_to_country(code):
     @return: The name of the country that the two-letter country code
         represents.
     """
-    return __COUNTRY_MAP[code.lower()]
+    try:
+        return __COUNTRY_MAP[code.lower()]
+    except:
+        return u'Unknown'
