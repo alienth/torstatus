@@ -89,7 +89,6 @@
 		{% endif %}
 		{% else %}
 		{% if column_name not in not_columns %}
-        {# TODO: add &uarr; and &darr; #}
         <th class="relayHeader hoverable" onClick="document.location.href='/index/?sortListing={{ column_value_name|key:column_name }}&sortOrder={{ ascending_or_descending }}';" {% if column_name == "Router Name" %}
 	                                            id="routerName"
 	                                      {% else %}
@@ -101,7 +100,7 @@
 	                                      {% endif %}
 	                                      {% endif %}
 	                                      {% endif %}
-                                          >{% if column_name == "Country Code" %}&nbsp;{% else %}{{ column_name }}{% endif %}</th>
+                                          >{% if column_name == "Country Code" %}&nbsp;{% else %}{{ column_name }}{% endif %}{% if column_value_name|key:column_name == order_param %}{% if ascending_or_descending == "ascending" %}&uarr;{% else %}&darr;{% endif %}{% endif %}</th>
 	    {% endif %}
 	    {% endif %}
     {% endfor %}
