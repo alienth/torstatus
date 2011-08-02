@@ -60,6 +60,8 @@ class TextArrayField(models.Field):
 
     def to_python(self, value):
         return value
+
+
 # MODELS --------------------------------------------------------------
 # ---------------------------------------------------------------------
 # tordir.public -------------------------------------------------------
@@ -193,7 +195,8 @@ class Bwhist(models.Model):
     @type written_sum: BigIntegerField (C{long})
     @ivar written_sum: The sum of the reported writing bandwidth.
     @type dirread: BigIntegerArrayField (C{list})
-    @ivar dirread: The reported directory reading bandwidth as an array.
+    @ivar dirread: The reported directory reading bandwidth as an
+        array.
     @type dirread_sum: BigIntegerField (C{long})
     @ivar dirread_sum: The sum of the reported directory reading
         bandwidth.
@@ -273,7 +276,8 @@ class Statusentry(models.Model):
     @type isfast: BooleanField (C{boolean})
     @ivar isfast: True if the relay is a fast server, False otherwise.
     @type isguard: BooleanField (C{boolean})
-    @ivar isguard: True if the relay is a guard server, False otherwise.
+    @ivar isguard: True if the relay is a guard server,
+        False otherwise.
     @type ishsdir: BooleanField (C{boolean})
     @ivar ishsdir: True if the relay is a hidden service directory,
         False otherwise.
@@ -290,17 +294,19 @@ class Statusentry(models.Model):
     @type isvalid: BooleanField (C{boolean})
     @ivar isvalid: True if the relay is valid, False otherwise.
     @type isv2dir: BooleanField (C{boolean})
-    @ivar isv2dir: True if the relay is a v2 directory, False otherwise.
+    @ivar isv2dir: True if the relay is a v2 directory,
+        False otherwise.
     @type isv3dir: BooleanField (C{boolean})
-    @ivar isv3dir: True if the relay is a v3 directory, False otherwise.
+    @ivar isv3dir: True if the relay is a v3 directory,
+        False otherwise.
         As of 06-20-2011, there are not yet any v3 directories.
     @type version: CharField (C{string})
     @ivar version: The version of Tor that the relay is running.
     @type bandwidth: BigIntegerField (C{long})
     @ivar bandwidth: The bandwidth of the relay in bytes per second.
     @type ports: TextField (C{string})
-    @ivar ports: The ports that the relay does or does not allow exiting
-        to. Includes the keywords "reject" and "accept".
+    @ivar ports: The ports that the relay does or does not allow
+        exiting to. Includes the keywords "reject" and "accept".
     @type rawdesc: TextField (C{string})
     @ivar rawdesc: The raw descriptor information associated with the
         L{Statusentry}, which may or may not contain information
@@ -403,9 +409,9 @@ class Vote(models.Model):
 class Connbidirect(models.Model):
     # TODO: Validate documentation
     """
-    Model for the number of connections, split into 10-second intervals,
-    that are used uni-directionally or bi-directionally in a given
-    number of seconds before a given date.
+    Model for the number of connections, split into 10-second
+    intervals, that are used uni-directionally or bi-directionally in
+    a given number of seconds before a given date.
 
     @type source: CharField (C{string})
     @ivar source: The reporting source, such as siv, moria, torperf, or
@@ -419,15 +425,15 @@ class Connbidirect(models.Model):
     @ivar belownum: The number of connections that read and wrote less
         than 20 KiB.
     @type readnum: BigIntegerField (C{long})
-    @ivar readnum: The number of connections that read at least 10 times
-        more than they wrote.
+    @ivar readnum: The number of connections that read at least 10
+        times more than they wrote.
     @type writenum: BigIntegerField (C{long})
     @ivar writenum: The number of connections that wrote at least 10
         times more than they wrote.
     @type bothnum: BigIntegerField (C{long})
     @ivar bothnum: The number of connections that do not read 10 times
-        more than they write or write 10 times more than they read while
-        also reading and writing more than 20 KiB.
+        more than they write or write 10 times more than they read
+        while also reading and writing more than 20 KiB.
     """
     source = models.CharField(max_length=40, primary_key=True)
     statsend = models.DateTimeField()
@@ -484,7 +490,8 @@ class NetworkSizeHour(models.Model):
     """
     Model for the size of the network with respect to a certain
     validafter date that corresponds to the validafter dates found
-    in L{Descriptor}, L{Statusentry}, L{Consensus}, and L{Vote} objects.
+    in L{Descriptor}, L{Statusentry}, L{Consensus}, and L{Vote}
+    objects.
 
     @type validafter: DateField (C{datetime})
     @ivar validafter: The hour that corresponds to the network size.
@@ -526,8 +533,8 @@ class RelayCountries(models.Model):
     @ivar country: The two letter country code that the
         L{RelayCountries} object refers to.
     @type relays: IntegerField (C{int})
-    @ivar relays: The number of relays active from a given L{country} on
-        a given L{date}.
+    @ivar relays: The number of relays active from a given L{country}
+        on a given L{date}.
     """
     date = models.DateField()
     country = models.CharField(max_length=2, primary_key=True)
@@ -545,15 +552,15 @@ class RelayCountries(models.Model):
 
 class RelayPlatforms(models.Model):
     """
-    Model for the number of relays active running on a given platform on
-    a given date.
+    Model for the number of relays active running on a given platform
+    on a given date.
 
     @type date: DateField (C{datetime})
     @ivar date: The date that corresponds to the L{RelayPlatforms}
         object.
     @type avg_linux: IntegerField (C{int})
-    @ivar avg_linux: The average number of relays in the network running
-        Linux.
+    @ivar avg_linux: The average number of relays in the network
+        running Linux.
     @type avg_darwin: IntegerField (C{int})
     @ivar avg_darwin: The average number of relays in the network
         running Darwin/OSX
@@ -564,8 +571,9 @@ class RelayPlatforms(models.Model):
     @ivar avg_windows: The average number of relays in the network
         running Windows.
     @type avg_other: IntegerField (C{int})
-    @ivar avg_other: The average number of relays in the network running
-        on a platform that is not Linux, Darwin/OSX, BSD, or Windows.
+    @ivar avg_other: The average number of relays in the network
+        running on a platform that is not Linux, Darwin/OSX, BSD, or
+        Windows.
     """
     date = models.DateField(primary_key=True)
     avg_linux = models.IntegerField()
@@ -656,8 +664,8 @@ class TotalBwhist(models.Model):
     @ivar read: The total number of dir bytes that are read by all
         relays on the given date.
     @type written: BigIntegerField (C{long})
-    @ivar written: The total number of dir bytes that are written by all
-        relays on the given date.
+    @ivar written: The total number of dir bytes that are written by
+        all relays on the given date.
     """
     date = models.DateField(primary_key=True)
     read = models.BigIntegerField()
@@ -685,9 +693,9 @@ class BwhistFlags(models.Model):
         be exit routers, False if the statistics gathered required that
         routers not be exit routers.
     @type isguard: BooleanField (C{boolean})
-    @ivar isguard: True if the statistics gathered required that routers
-        be guard routers, False if the statistics gathered required that
-        routers not be guard routers.
+    @ivar isguard: True if the statistics gathered required that
+        routers be guard routers, False if the statistics gathered
+        required that routers not be guard routers.
     @type read: BooleanField (C{boolean})
     @ivar read: The total read bandwidth of routers that fit the given
         criteria on the given date.
@@ -708,7 +716,8 @@ class BwhistFlags(models.Model):
         db_table = u'bwhist_flags'
 
     def __unicode__(self):
-        return str(self.date) + ": " + self.isexit + ", " + self.isguard
+        return (str(self.date) + ": " + self.isexit + ", "
+               + self.isguard)
 
 
 class UserStats(models.Model):
@@ -750,8 +759,8 @@ class UserStats(models.Model):
     @ivar brd: Bandwidth read, in bytes, where directory bandwidth
         written is reported.
     @type bwr: BigIntegerField (C{long})
-    @ivar bwr: Bandwidth written, in bytes, where directory requests are
-        reported.
+    @ivar bwr: Bandwidth written, in bytes, where directory requests
+        are reported.
     @type brr: BigIntegerField (C{long})
     @ivar brr: Bandwidth read, in bytes, where directory requests are
         reported.
@@ -771,8 +780,8 @@ class UserStats(models.Model):
     @ivar bwn: Bandwidth written, in bytes, where the directory port is
         not open.
     @type brn: BigIntegerField (C{long})
-    @ivar brn: Bandwidth read, in bytes, where the directory port is not
-        open.
+    @ivar brn: Bandwidth read, in bytes, where the directory port is
+        not open.
     """
     date = models.DateField()
     country = models.CharField(max_length=2, primary_key=True)
@@ -806,7 +815,8 @@ class UserStats(models.Model):
 
 class RelayStatusesPerDay(models.Model):
     """
-    Model for the helper table which is used to update the other tables.
+    Model for the helper table which is used to update the other
+    tables.
 
     @type date: DateField (C{datetime})
     @ivar date: The date that corresponds to the L{RelayStatusesPerDay}
@@ -909,7 +919,8 @@ class Geoipdb(models.Model):
 
 class RelaysMonthlySnapshots(models.Model):
     """
-    Model for the first known consensuses of all months in the database.
+    Model for the first known consensuses of all months in the
+    database.
 
     @type validafter: DateTimeField (C{datetime})
     @ivar validafter: The time that the consensus was published.
@@ -934,7 +945,8 @@ class RelaysMonthlySnapshots(models.Model):
     @type isfast: BooleanField (C{boolean})
     @ivar isfast: True if the relay is a fast server, False otherwise.
     @type isguard: BooleanField (C{boolean})
-    @ivar isguard: True if the relay is a guard server, False otherwise.
+    @ivar isguard: True if the relay is a guard server,
+        False otherwise.
     @type isstable: BooleanField (C{boolean})
     @ivar isstable: True if the relay is stable, False otherwise.
     @type version: CharField (C{string})
@@ -1136,12 +1148,115 @@ class GettorStats(models.Model):
     def __unicode__(self):
         return str(self.date) + ": " + self.bundle
 
-# tordir.cache  --------------------------------------------------------
-# ----------------------------------------------------------------------
+
+# tordir.cache  -------------------------------------------------------
+# ---------------------------------------------------------------------
+class ActiveStatusentry(models.Model):
+    """
+    Model for the most recent statusentries for each relay published in
+    the last 4 hours.
+
+    @type validafter: DateTimeField (C{datetime})
+    @ivar validafter: The time that the consensus was published.
+    @type nickname: CharField (C{string})
+    @ivar nickname: The nickname of the router that the L{Statusentry}
+        describes.
+    @type fingerprint: CharField (C{string})
+    @ivar fingerprint: The unique fingerprint hash of the router that
+        the L{Statusentry} describes.
+    @type address: CharField (C{string})
+    @ivar address: The IP address of the relay that the L{Statusentry}
+        describes.
+    @type orport: IntegerField (C{int})
+    @ivar orport: The ORPort of the relay that the L{Statusentry}
+        describes.
+    @type dirport: IntegerField (C{int})
+    @ivar dirport: The DirPort of the relay that the L{Statusentry}
+        describes.
+    @type isauthority: BooleanField (C{boolean})
+    @ivar isauthority: True if the relay is an authority relay,
+        False otherwise.
+    @type isbadexit: BooleanField (C{boolean})
+    @ivar isbadexit: True if the relay is a bad exit node, False
+        otherwise.
+    @type isbaddirectory: BooleanField (C{boolean})
+    @ivar isbaddirectory: True if the relay is a bad directory node,
+        False otherwise.
+    @type isexit: BooleanField (C{boolean})
+    @ivar isexit: True if the relay is an exit relay, False otherwise.
+    @type isfast: BooleanField (C{boolean})
+    @ivar isfast: True if the relay is a fast server, False otherwise.
+    @type isguard: BooleanField (C{boolean})
+    @ivar isguard: True if the relay is a guard server,
+        False otherwise.
+    @type ishsdir: BooleanField (C{boolean})
+    @ivar ishsdir: True if the relay is a hidden service directory,
+        False otherwise.
+    @type isnamed: BooleanField (C{boolean})
+    @ivar isnamed: True if the relay's name has been validated,
+        False otherwise.
+    @type isstable: BooleanField (C{boolean})
+    @ivar isstable: True if the relay is stable, False otherwise.
+    @type isrunning: BooleanField (C{boolean})
+    @ivar isrunning: True if the relay is running at the time that the
+        L{Statusentry} is published, False otherwise.
+    @type isunnamed: BooleanField (C{boolean})
+    @ivar isunnamed: True if the relay is unnamed, False otherwise.
+    @type isvalid: BooleanField (C{boolean})
+    @ivar isvalid: True if the relay is valid, False otherwise.
+    @type isv2dir: BooleanField (C{boolean})
+    @ivar isv2dir: True if the relay is a v2 directory,
+        False otherwise.
+    @type isv3dir: BooleanField (C{boolean})
+    @ivar isv3dir: True if the relay is a v3 directory,
+        False otherwise. As of 08-01-2011, there are not yet any
+        v3 directories.
+    @type country: CharField (C{string})
+    @ivar country: The country that the relay is located in.
+    @type latitude: DecimalField (C{float})
+    @ivar latitude: The latitude at which the relay is located.
+    @type longitude: DecimalField (C{float})
+    @ivar longitude: The longitude at which the relay is located.
+    """
+    validafter = models.DateTimeField()
+    nickname = models.CharField(max_length=19)
+    fingerprint = models.CharField(max_length=40, primary_key=True)
+    address = models.CharField(max_length=15)
+    orport = models.IntegerField()
+    dirport = models.IntegerField()
+    isauthority = models.BooleanField()
+    isbadexit = models.BooleanField()
+    isbaddirectory = models.BooleanField()
+    isexit = models.BooleanField()
+    isfast = models.BooleanField()
+    isguard = models.BooleanField()
+    ishsdir = models.BooleanField()
+    isnamed = models.BooleanField()
+    isstable = models.BooleanField()
+    isrunning = models.BooleanField()
+    isunnamed = models.BooleanField()
+    isvalid = models.BooleanField()
+    isv2dir = models.BooleanField()
+    isv3dir = models.BooleanField()
+    country = models.CharField(max_length=2)
+    latitude = models.DecimalField(
+               max_digits=7, decimal_places=4, blank=True)
+    longitude = models.DecimalField(
+                max_digits=7, decimal_places=4, blank=True)
+
+    class Meta:
+        verbose_name = "active statusentry"
+        verbose_name_plural = "active statusentries"
+        db_table = 'cache\".\"active_statusentries'
+
+    def __unicode__(self):
+        return self.fingerprint
+
+
 class ActiveDescriptor(models.Model):
     """
     Model for the most recent descriptors for each relay published in
-    the last 24 hours.
+    the last 48 hours.
 
     @type descriptor: CharField (C{string})
     @ivar descriptor: The unique descriptor hash of the relay.
@@ -1179,9 +1294,9 @@ class ActiveDescriptor(models.Model):
     @type family: TextField (C{string})
     @ivar family: The family that the relay belongs to.
     """
-    descriptor = models.CharField(max_length=40, primary_key=True)
+    descriptor = models.CharField(max_length=40)
     nickname = models.CharField(max_length=19)
-    fingerprint = models.CharField(max_length=40)
+    fingerprint = models.CharField(max_length=40, primary_key=True)
     published = models.DateTimeField()
     bandwidthavg = models.BigIntegerField()
     bandwidthburst = models.BigIntegerField()
@@ -1201,12 +1316,12 @@ class ActiveDescriptor(models.Model):
         db_table = 'cache\".\"active_descriptor'
 
     def __unicode__(self):
-        return str(self.descriptor)
+        return self.fingerprint
 
 
 class ActiveRelay(models.Model):
     """
-    Model for the relays in the two most recent consensuses, with all
+    Model for the relays in the four most recent consensuses, with all
     relevant and available information.
 
     @type validafter: DateTimeField (C{datetime})
@@ -1341,12 +1456,14 @@ class ActiveRelay(models.Model):
     family = models.TextField(blank=True)
     ishibernating = models.BooleanField(blank=True)
     country = models.CharField(max_length=2, blank=True)
-    latitude = models.DecimalField(max_digits=7, decimal_places=4, blank=True)
-    longitude = models.DecimalField(max_digits=7, decimal_places=4, blank=True)
+    latitude = models.DecimalField(
+               max_digits=7, decimal_places=4, blank=True)
+    longitude = models.DecimalField(
+                max_digits=7, decimal_places=4, blank=True)
 
     class Meta:
         verbose_name = 'active relay'
         db_table = 'cache\".\"active_relay'
 
     def __unicode__(self):
-        return ': '.join((str(self.nickname), str(self.fingerprint)))
+        return self.fingerprint

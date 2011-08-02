@@ -531,7 +531,7 @@ def gen_list_dict(active_relays):
                           'longitude': relay.longitude,
                           'latitude': relay.latitude,
                           'nickname': relay.nickname,
-                          'bandwidthkbps': str(relay.bandwidthkbps) + " Kb/s",
+                          'bandwidthkbps': str(relay.bandwidthkbps) + " KB/s",
                           'uptime': str(relay.uptimedays) + " d",
                           'address': relay.address,
                           #'hostname': relay.hostname,
