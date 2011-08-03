@@ -45,6 +45,9 @@ DISPLAYABLE_COLUMNS = set(('Country Code', 'Router Name', 'Bandwidth',
 def splash(request):
     """
     The splash page for the TorStatus website.
+
+    @rtype: HttpResponse
+    @return: the splash page rendered to html.
     """
     return render_to_response("splash.html")
 
@@ -62,6 +65,7 @@ def index(request):
         in the network as well as aggregate information about the
         network itself.
     """
+
     # See if the user wants to reset search and display preferences
     reset = request.GET.get('reset', '')
     if reset == 'True':
@@ -186,6 +190,7 @@ def index(request):
     if not ('currentColumns' in request.session):
         request.session['currentColumns'] = CURRENT_COLUMNS
     current_columns = request.session['currentColumns']
+
 
     template_values = {'paged_relays': paged_relays,
                        'current_columns': current_columns,
@@ -481,7 +486,7 @@ def exitnodequery(request):
     return render_to_response('nodequery.html', template_values)
 
 
-@cache_page(60 * 60)
+@cache_page(60 * 30)
 def networkstatisticgraphs(request):
     """
     Render an HTML template to response.
@@ -594,7 +599,6 @@ def display_options(request):
     return render_to_response('displayoptions.html', template_values)
 
 
-# TODO: Find out how Vlad wrote this, touch it up, and document it.
 def advanced_search(request):
     """
     The advanced search page for the TorStatus site.

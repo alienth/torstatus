@@ -109,12 +109,8 @@ just built. Save these changes to a file called ``settings.py``. Note
 that if you are not using password verification for the ``metrics``
 user in postgres, you may leave the 'password' field blank.
 
-While still in ``TorStatus/status``, run the following to synchronize
-TorStatus with the database:
 
-    | ``$ python manage.py syncdb``
-
-And run the following to initiate TorStatus, where ``[port]`` is the
+Run the following to initiate TorStatus, where ``[port]`` is the
 port that you would like TorStatus to run on:
 
     | ``$ python manage.py runserver [port]``
@@ -162,18 +158,17 @@ First, create a directory in ``torstatus/status/`` called ``apache``:
 
 Now, create a file called
 ``/srv/www/torstatus/status/apache/django.wsgi`` that contains the
-following lines:
-
-::
+following lines::
 
   import os, sys
-  sys.path.append('/usr/local/www/EXAMPLE')
+  sys.path.append('/usr/local/www/torstatus')
+  sys.path.append('/usr/local/www/torstatus/status')
 
-  os.environ['DJANGO_SETTINGS_MODULE'] = 'project.settings'
+  os.environ['DJANGO_SETTINGS_MODULE'] = 'status.settings'
 
   import django.core.handlers.wsgi
 
-  application = django.core.handlers.wsgi.WSGIHandler()``
+  application = django.core.handlers.wsgi.WSGIHandler()
 
 Once this is done, change directory to your apache directory entitled
 ``sites-available``, this should be located at
@@ -182,10 +177,9 @@ Once this is done, change directory to your apache directory entitled
     | ``# cd /etc/apache2/sites-available/``
 
 In this directory, make a file, here called
-``/etc/apache2/sites-available/ts``, that contains the following code
-(but be sure to replace www.example.com, example.com, and foo@bar.com):
-
-::
+``/etc/apache2/sites-available/tor-status``, that contains the
+following code (but be sure to replace www.example.com,
+example.com, and foo@bar.com)::
 
   <VirtualHost *:80>
       ServerName www.example.com
@@ -197,7 +191,7 @@ In this directory, make a file, here called
           Allow from all
       </Directory>
 
-      WSGIScriptAlias /ts /srv/www/torstatus/status/apache/django.wsgi
+      WSGIScriptAlias / /srv/www/torstatus/status/apache/django.wsgi
 
       <Directory /srv/www/torstatus/status/apache>
           Order allow,deny
@@ -210,9 +204,13 @@ The WSGIScriptAlias first argument is where the site is hosted, so
 the site will be hosted at http://localhost/example. The second
 argument is the path to the django.wsgi file.
 
+First we need to disable the default apache site:
+
+    | ``# a2dissite default``
+
 Now we need to let apache know that the site is active:
 
-    | ``# a2ensite example``
+    | ``# a2ensite tor-status``
 
 This creates a link in the ``sites-enabled`` folder.
 
@@ -220,7 +218,7 @@ Now if you reload apache using the script
 
     | ``# /etc/init.d/apache2 reload``
 
-Now the site should be up and running at http://localhost/example.
+Now the site should be up and running at http://localhost/.
 
 3.1: Troubleshooting Apache
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -232,3 +230,7 @@ Find and monitor the log files of apache in case of problems.
 
 Be careful with ``import`` statements, particularly when moving
 directories.
+
+Finally and most importantly if you are new to apache spend some time
+learning how to best configure your copy to provide an adequete
+level of security.

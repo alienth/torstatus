@@ -81,62 +81,6 @@ td#debug {
 /* END Table Columns ---------------------------------- */
 
 /* Input, Select, Option ------------------------------ */
-input#removeList {
-    width: 200px;
-    color: #050;
-	background-color:#fed;
-    border: 1px solid;
-    border-color: #61a #315 #315 #61a;
-	opacity: 0.5;
-}
-
-input#removeList:focus {
-    width: 200px;
-    color: #050;
-	background-color: #fed;
-    border: 1px solid;
-    border-color: #696 #363 #363 #696;
-	opacity: 1;
-	cursor: pointer;
-}
-
-input#removeList:hover {
-    width: 200px;
-    color: #050;
-	background-color: #fed;
-    border: 1px solid;
-    border-color: #696 #363 #363 #696;
-	opacity: 1;
-	cursor: pointer;
-}
-
-input#addList {
-    width: 200px;
-    color: #050;
-	background-color:#fed;
-    border: 1px solid;
-    border-color: #61a #315 #315 #61a;
-	opacity: 0.5;
-}
-
-input#addList:focus {
-    width: 200px;
-    color: #050;
-	background-color: #fed;
-    border: 1px solid;
-    border-color: #696 #363 #363 #696;
-	opacity: 1;
-	cursor: pointer;
-}
-
-input#addList:hover {
-    width: 200px;
-    color: #050;
-    border: 1px solid;
-    border-color: #696 #363 #363 #696;
-	opacity: 1;
-	cursor: pointer;
-}
 
 input#ppinput {
     font-size: 0.750em;
@@ -153,32 +97,6 @@ input#ppinput:hover {
 input#ppinput:focus {
     border: 1px solid;
     border-color: #696 #363 #363 #696;
-}
-
-input#submitButton {
-    color: #050;
-    font-weight: bold;
-    font-size: 0.750em;
-	background-color: #fed;
-    border: 1px solid;
-    border-color: #61a #315 #315 #61a;
-	opacity: 0.4;
-}
-
-input#submitButton:hover {
-    color: #050;
-	background-color: #fed;
-    border-color: #696 #363 #363 #696;
-	opacity: 1;
-	cursor: pointer;
-}
-
-input#submitButton:focus {
-    color: #050;
-	background-color: #fed;
-    border-color: #696 #363 #363 #696;
-	opacity: 1;
-	cursor: pointer;
 }
 
 select#selectForm_removeColumn {
@@ -210,96 +128,30 @@ select#selectForm_addColumn {
     border-color: #61a #315 #315 #61a;
 }
 
-input#upButton {
-    width: 70px;
-    color: #050;
-	background-color:#fed;
-    border: 1px solid;
-    border-color: #61a #315 #315 #61a;
-	opacity: 0.5;
-}
-
-input#upButton:focus {
-    width: 70px;
-    color: #050;
-	background-color: #fed;
-    border: 1px solid;
-    border-color: #696 #363 #363 #696;
-	opacity: 1;
-	cursor: pointer;
-}
-
-input#upButton:hover {
-    width: 70px;
-    color: #050;
-	background-color: #fed;
-    border: 1px solid;
-    border-color: #696 #363 #363 #696;
-	opacity: 1;
-	cursor: pointer;
-}
-
-input#downButton {
-    width: 70px;
-    color: #050;
-	background-color:#fed;
-    border: 1px solid;
-    border-color: #61a #315 #315 #61a;
-	opacity: 0.5;
-}
-
-input#downButton:focus {
-    width: 70px;
-    color: #050;
-	background-color: #fed;
-    border: 1px solid;
-    border-color: #696 #363 #363 #696;
-	opacity: 1;
-	cursor: pointer;
-}
-
-input#downButton:hover {
-    width: 70px;
-    color: #050;
-	background-color: #fed;
-    border: 1px solid;
-    border-color: #696 #363 #363 #696;
-	opacity: 1;
-	cursor: pointer;
-}
-
 option#notMovable {
     font-style:italic;
     color:red;
 }
 
-input#button {
-    width: 200px;
-    color: #050;
-	background-color:#fed;
-    border: 1px solid;
-    border-color: #61a #315 #315 #61a;
-	opacity: 0.5;
+a:hover
+{
+    color: black;
+    text-decoration: none;
 }
 
-input#button:focus {
-    width: 200px;
-    color: #050;
-	background-color: #fed;
-    border: 1px solid;
-    border-color: #696 #363 #363 #696;
-	opacity: 1;
-	cursor: pointer;
+a.link {
+    color: black;
+    text-decoration: none;
 }
 
-input#button:hover {
-    width: 200px;
-    color: #050;
-	background-color: #fed;
-    border: 1px solid;
-    border-color: #696 #363 #363 #696;
-	opacity: 1;
-	cursor: pointer;
+a.link:hover {
+    background-color: #dac8e2;
+}
+
+td#mainLinks {
+    text-align: center;
+    font-size: 0.75em;
+    color: red;
 }
 
 /* END Input, Select, Option -------------------------- */

@@ -78,10 +78,8 @@
                 <tr>
                     <td>
                     <table class="flags">
-                        <tr>
                             {% for option in filterOptionsOrder %}
-                                {% if forloop.counter0|divisibleby:"2" %}
-                                </tr><tr>{% endif %}
+                            <tr>
                                 <td id="advSearchToolText"> {{option}} </td>
                                 <td>
                                 <input type="radio" name="{{filterOptions|key:option}}" value="" {% if not queryOptions %} CHECKED
@@ -92,8 +90,8 @@
                                 <input type="radio" name="{{filterOptions|key:option}}" value="0" {% if queryOptions and queryOptions|key:option == "0" %}
                                                             CHECKED {% endif %} />No
                                 </td>
+                            </tr>
                             {% endfor %}
-                        </tr>
                     </table>
                     </td>
                 <tr>

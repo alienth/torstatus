@@ -459,6 +459,8 @@ def get_order(request):
     @return: The sorting parameter and order as specified by the
         HttpRequest object.
     """
+
+    # Options to sort from.
     options = ['nickname', 'fingerprint', 'country',
                 'bandwidthkbps','uptime','published',
                 'hostname', 'address', 'orport',
@@ -468,12 +470,14 @@ def get_order(request):
                 'ishsdir', 'isnamed', 'isstable', 'isrunning',
                 'isvalid']
 
+    #The default column to sort by if none specified.
     orders = ['ascending', 'descending']
-
+    
     advanced_order = ''
     advanced_listing = ''
-
-    # Get the order and listing from the session
+    
+    # Gets the order and listing from the session then validates
+    # by comparison with specified sort columns
     if request.GET:
         advanced_order = request.GET.get('sortOrder', '')
         advanced_listing = request.GET.get('sortListing', '')
@@ -482,31 +486,35 @@ def get_order(request):
         request.session['sortOrder'] = advanced_order
         request.session['sortListing'] = advanced_listing
 
-    # Return appropriate sort preference
+        
+    # Returns appropriate sort preference
     if 'sortOrder' in request.session and \
-                   'sortListing' in request.session:
+                    'sortListing' in request.session:
+
         if request.session['sortOrder'] == 'ascending':
             return request.session['sortListing']
         elif request.session['sortOrder'] == 'descending':
             return '-' + request.session['sortListing']
-    else:
-        return DEFAULT_LISTING
+
+    # If none specified returns default ordering.
+    return DEFAULT_LISTING
 
 
 def search_session_reset(request):
     """
-    Reset all search preferences specified in the session.
+    Function to clear the search filters parameters and orderings.
 
     @type request: C{HttpRequest}
-    @param request: The request object to remove search preferences
-        from.
-    @rtype: C{HttpRequest}
-    @return: The C{request} supplied with any references to
+    @param request: The request provided by the client
+    @rtype: C{HttpResponse}
+    @returns: The C{request} supplied with any references to
         search filters in the session deleted.
     """
-    for pref in SEARCH_SESSION_KEYS:
-        if pref in request.session:
-            del request.session[pref]
+
+    # Loop goes through and erases them.
+    for key in SEARCH_SESSION_KEYS:
+        if key in request.session:
+            del request.session[key]
 
     return request
 

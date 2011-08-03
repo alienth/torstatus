@@ -5,7 +5,7 @@ There is one function for each link.
 """
 # Django-specific import statements -----------------------------------
 from django.http import HttpResponse
-from django.db.models import Max, Sum
+from django.db.models import Max
 
 # CSV specific import statements
 import csv

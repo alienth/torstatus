@@ -45,15 +45,3 @@ def movable(column_name):
         return False;
     else:
         return True;
-
-'''
-@register.filter
-def get_column_value(column_name):
-    """
-    Returns the database name of the passed column name.
-
-    @rtype: C{string}
-    @return: Corresponding database name of the passed column name.
-    """
-    return COLUMN_VALUE_NAME[column_name]
-'''

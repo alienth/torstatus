@@ -273,12 +273,6 @@ td#col_relayLastDescriptorPublished {
 }
 
 td#mainLinks {
-    text-align: left;
-    font-size: 0.75em;
-    color: red;
-}
-
-td#mainLinks {
     text-align: center;
     font-size: 0.75em;
     color: red;
