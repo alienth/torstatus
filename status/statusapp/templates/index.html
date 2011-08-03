@@ -92,7 +92,7 @@
 		{% endif %}
 		{% else %}
 		{% if column_name not in not_columns %}
-        <th class="relayHeader hoverable" {% if not all %}onClick="document.location.href='/index/?sortListing={{ column_value_name|key:column_name }}&sortOrder={{ ascending_or_descending }}';"{% endif %} {% if column_name == "Router Name" %}
+        <th class="relayHeader hoverable" {% if not all %}onClick="document.location.href='/index/?sortListing={{ column_value_name|key:column_name }}&sortOrder={% if column_value_name|key:column_name != order_param %}ascending{% else %}{{ ascending_or_descending }}{% endif %}';"{% endif %} {% if column_name == "Router Name" %}
 	                                            id="routerName"
 	                                      {% else %}
 	                                      {% if column_name == "LastDescriptorPublished" %}

@@ -108,15 +108,9 @@ as small as is reasonable and to implement a simple search feature
 capable of looking up relays by nickname, IP address, or fingerprint.
 
 Thanks to gzip compression, many page sizes are smaller than the page
-sizes of the old implementation. However, CSS files are not compressed,
-and many images (including flags, but especially the image in the
-header) are far too large to expect torified clients to download
-happily (in my opinion).
-
-There is a lot of django middleware that handles stylesheets and static
-media intelligently; one such middleware is called django-compress.
-Using django-compress or similar middleware should shave about 3-8 KB
-off of any page size.
+sizes of the old implementation. However many images (including flags,
+but especially the image in the header) are far too large to expect
+torified clients to download happily (in my opinion).
 
 Currently, the average country flag is about 1KB, and there are about
 80 unique country flags displayed for every index page of ALL routers
@@ -128,9 +122,10 @@ which may come at the cost of larger file sizes.
 .............
 Javascript is not used in this implementation. Instead,
 secure sessions are used to store display options and search filters
-on a per-user basis. Data is stored on the server side, and the sending
-and receiving of cookies is abstracted. These sessions use only a
-hashed session ID rather than the data itself.
+on a per-user basis. Data is encrypted and stored on the server side,
+and the sending and receiving of cookies is abstracted. These sessions
+use only a hashed session ID rather than the data itself, so only a
+hashed session ID is stored by the client.
 
 For more on Django and sessions, see:
 http://www.djangobook.com/en/2.0/chapter14/

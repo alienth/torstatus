@@ -186,11 +186,9 @@ def index(request):
 
     # Get the current columns from the session. If no current columns
     # are defined, just use the default, CURRENT_COLUMNS
-    current_columns = []
-    if not ('currentColumns' in request.session):
-        request.session['currentColumns'] = CURRENT_COLUMNS
-    current_columns = request.session['currentColumns']
-
+    current_columns = request.session.get(
+                      'currentColumns', CURRENT_COLUMNS)
+    request.session['currentColumns'] = current_columns
 
     template_values = {'paged_relays': paged_relays,
                        'current_columns': current_columns,
@@ -269,24 +267,27 @@ def details(request, fingerprint):
     if not poss_relay:
         return render_to_response(
                 '404.html',
-                {'debug_message': 'The server could not find any ' + \
-                                  'recently active relay with a ' + \
-                                  'fingerprint of ' + fingerprint + '.'})
+                {'debug_message': ('The server could not find any ' +
+                                   'recently active relay with a ' +
+                                   'fingerprint of ' + fingerprint +
+                                   '.')})
 
     # Otherwise, at least one entry for the relay exists, so get the
     # most recent entry for this relay
     relay = poss_relay[0]
 
-    # Create an attribute, 'active', to flag active/unactive relays.
+    # Create an attribute, 'active', to flag active/unactive relays
     last_va = ActiveRelay.objects.aggregate(
               last=Max('validafter'))['last']
+
+    # A relay is "active" if it is in the last consensus
     if last_va != relay.validafter:
         relay.active = False
     else:
         relay.active = True
 
     # Not all relays will have descriptors, but if a relay has a
-    # descriptor, its relay.descriptor value will not be null.
+    # descriptor, its relay.descriptor value will not be null
     if relay.descriptor:
         relay.hasdescriptor = True
     else:
@@ -389,7 +390,7 @@ def exitnodequery(request):
     dest_port_valid = False
 
     # Get the source, dest_ip, and dest_port from the HttpRequest object
-    # if they exist, and declare them valid if they are valid.
+    # if they exist, and declare them valid if they are valid
     source = request.GET.get('queryAddress', '').strip()
     if is_ipaddress(source): source_valid = True
 
@@ -414,13 +415,12 @@ def exitnodequery(request):
     relays = []
     if (source_valid):
 
-        # Don't search entries published over 24 hours
-        # from the most recent entries.
+        # Search only entries in the last consensus.
         last_va = ActiveRelay.objects.aggregate(
                   last=Max('validafter'))['last']
 
         fingerprints = ActiveRelay.objects.filter(
-                       address=source).values(
+                       address=source, validafter=last_va).values(
                        'fingerprint').annotate(
                        Count('fingerprint'))
 
@@ -446,7 +446,7 @@ def exitnodequery(request):
                 exit_possible = False
 
                 # If the client also wants to test the relay's exit
-                # policy, dest_ip and dest_port cannot be empty strings.
+                # policy, dest_ip and dest_port cannot be empty strings
                 if (dest_ip_valid and dest_port_valid):
 
                     # Search the exit policy information for a case in

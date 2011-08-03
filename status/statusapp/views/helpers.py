@@ -34,7 +34,7 @@ COLUMN_VALUE_NAME = {'Country Code': 'country',
                      'Directory': 'isv2dir',
                      'Platform': 'platform',
                      'Fingerprint': 'fingerprint',
-                     'Last Descriptor Published': 'published',
+                     'LastDescriptorPublished': 'published',
                      'Contact': 'contact',
                      'BadDir': 'isbaddirectory',
                     }
