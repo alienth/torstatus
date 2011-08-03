@@ -354,7 +354,7 @@ def aggregatesummary(request):
     keys = ['isauthority', 'isbaddirectory', 'isbadexit', 'isv2dir',
             'isexit', 'isfast', 'isguard', 'ishibernating', 'isnamed',
             'isstable', 'isrunning', 'isvalid']
-    labels = ['Total', 'Authority', 'BadDirectory', 'BadExit',
+    labels = ['Total', 'Authority', 'Bad Directory', 'Bad Exit',
               'Directory', 'Exit', 'Fast', 'Guard', 'Hibernating',
               'Named', 'Stable', 'Running', 'Valid']
     num_params = len(labels)

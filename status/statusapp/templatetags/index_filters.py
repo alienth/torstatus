@@ -80,3 +80,16 @@ def get_os(platform):
                 else:
                     return os
     return 'NotAvailable'
+
+
+@register.filter
+def nospace(string):
+    """
+    Strip all space characters from a string.
+
+    @type string: C{string}
+    @param string: The string to remove all space characters from.
+    @rtype: C{string}
+    @return: The string provided, but with all spaces removed.
+    """
+    return string.replace(' ', '')

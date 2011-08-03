@@ -205,8 +205,8 @@ def full_index(request):
                'Bandwidth', 'Uptime', 'IP', 'Icons', 'ORPort',
                'DirPort', 'Named', 'Exit', 'Authority', 'Fast',
                'Guard', 'Hibernating', 'Stable', 'V2Dir', 'Platform',
-               'Contact', 'LastDescriptorPublished', 'BadDir',
-               'BadExit']
+               'Contact', 'Last Descriptor Published', 'Bad Directory',
+               'Bad Exit']
 
     paginator = Paginator(active_relays, num_results)
     paged_relays = paginator.page(1)

@@ -91,7 +91,7 @@ def current_results_csv(request):
                 ("IP", relay.address),
                 ("Fingerprint", relay.fingerprint),
                 ("Last Descriptor Published", relay.published),
-                ("BadDir", relay.isbaddirectory),
+                ("Bad Directory", relay.isbaddirectory),
                 ("DirPort", relay.dirport),
                 ("Exit", relay.isexit),
                 ("Authority", relay.isauthority),
@@ -102,7 +102,7 @@ def current_results_csv(request):
                 ("Platform", relay.platform),
                 ("Stable", relay.isstable),
                 ("ORPort", relay.orport),
-                ("BadExit", relay.isbadexit)]
+                ("Bad Exit", relay.isbadexit)]
 
         for k, v in fields_access:
             if k in current_columns: rows[k].append(v)

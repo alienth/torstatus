@@ -92,17 +92,7 @@
 		{% endif %}
 		{% else %}
 		{% if column_name not in not_columns %}
-        <th class="relayHeader hoverable" {% if not all %}onClick="document.location.href='/index/?sortListing={{ column_value_name|key:column_name }}&sortOrder={% if column_value_name|key:column_name != order_param %}ascending{% else %}{{ ascending_or_descending }}{% endif %}';"{% endif %} {% if column_name == "Router Name" %}
-	                                            id="routerName"
-	                                      {% else %}
-	                                      {% if column_name == "LastDescriptorPublished" %}
-	                                            id="lastDescPub"
-	                                      {% else %}
-	                                      {% if column_name == "BadDir" %}
-	                                            id="badDir"
-	                                      {% endif %}
-	                                      {% endif %}
-	                                      {% endif %}
+        <th class="relayHeader hoverable" {% if not all %}onClick="document.location.href='/index/?sortListing={{ column_value_name|key:column_name }}&sortOrder={% if column_value_name|key:column_name != order_param %}ascending{% else %}{{ ascending_or_descending }}{% endif %}';"{% endif %}
                                           >{% if column_name == "Country Code" %}&nbsp;{% else %}{{ column_name }}{% endif %}{% if not all and column_value_name|key:column_name == order_param %}{% if ascending_or_descending == "ascending" %}&uarr;{% else %}&darr;{% endif %}{% endif %}</th>
 	    {% endif %}
 	    {% endif %}
@@ -110,8 +100,8 @@
 	</tr>
 
 	{% for relay in paged_relays.object_list %}
-	    {% if "BadExit" in current_columns %}
-        <tr {% if relay|field_value:'BadExit' %} class="relayBadExit" {% else %}{% if relay|field_value:'Hibernating' %} class="relayHibernating" {% else %} class="relay" {% endif %}{% endif %}>
+	    {% if "Bad Exit" in current_columns %}
+        <tr {% if relay|field_value:'Bad Exit' %} class="relayBadExit" {% else %}{% if relay|field_value:'Hibernating' %} class="relayHibernating" {% else %} class="relay" {% endif %}{% endif %}>
 		{% else %}
 		<tr class="relay">
 		{% endif %}
@@ -135,12 +125,20 @@
             {% if column_name == "IP" %}
             <td>[<a id="relayAddress" href="/details/{{ relay|field_value:column_name }}/whois">{{ relay|field_value:column_name }}</a>]</td>
             {% else %}
-            {% if column_name == "BadDir" == 1 %}
+            {% if column_name == "Bad Directory" == 1 %}
             <td id="col_relayBadDir" {% if relay|field_value:column_name %}>
                 	<img src="/static/img/bg_yes.png" width="12" height="12" alt="Bad Directory" title="Bad Directory">
                 {% else %}>
                		<img src="/static/img/bg_no.png" width="12" height="12" alt="Not a Bad Directory" title="Not a Bad Directory">
                 {% endif %}</td>
+            {% else %}
+            {% if column_name == "Bad Exit" %}
+                <td id="col_relayBadExit">
+                {% if relay|field_value:column_name == 1 %}
+                    <img src="/static/img/bg_yes.png" width="12" height="12" alt="Bad Exit" title="Bad Exit">
+                {% else %}
+                    <img src="/static/img/bg_no.png" width="12" height="12" alt="Not a Bad Exit" title="Not a Bad Exit">
+                {% endif %}
             {% else %}
             {% if column_name == "Icons" %}
             <td id="col_relayIcons">
@@ -158,19 +156,10 @@
             </td>
             {% else %}
             {% if column_name in displayable_columns %}
-            <td id="col_relay{{column_name}}">
-                {% if column_name == "BadExit" %}
-                    {% if relay|field_value:column_name == 1 %}
-                        <img src="/static/img/bg_yes.png" width="12" height="12" alt="Bad Exit" title="Bad Exit">
-                    {% else %}
-                        <img src="/static/img/bg_no.png" width="12" height="12" alt="Not a Bad Exit" title="Not a Bad Exit">
-                    {% endif %}
-                {% else %}
-                    {{ relay|field_value:column_name|default:'None' }}
-                {% endif %}
+            <td id="col_relay{{ column_name|nospace }}">{{ relay|field_value:column_name|default:'None' }}
             {% endif %}
             </td>
-            {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
+            {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
             {% endfor %}
 		</tr>
 	{% endfor %}

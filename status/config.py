@@ -1,5 +1,8 @@
 """
 Configuration and presentation variables for TorStatus.
+
+@group Column Prefences/Defaults: L{AVAILABLE_COLUMNS}, L{DEFAULT_COLUMNS}
+@group
 """
 
 """
@@ -7,22 +10,30 @@ C{frozenset} of all attributes of L{ActiveRelay}, since there
 is no reason that a column should not be sortable.
 """
 
+"""Columns not shown by default, but showable by selection"""
 AVAILABLE_COLUMNS = ['Fingerprint', 'Last Descriptor Published',
-                     'Contact', 'BadDir']
+                     'Contact', 'Bad Directory']
 
+"""Columns shown by default"""
+DEFAULT_COLUMNS = ['Country Code', 'Router Name', 'Bandwidth',
+                   'Uptime', 'IP', 'Icons', 'ORPort',
+                   'DirPort', 'Bad Exit', 'Named', 'Exit',
+                   'Authority', 'Fast', 'Guard', 'Hibernating',
+                   'Stable', 'V2Dir', 'Platform']
 """
-Map titles of columns to attribute names in ActiveRelay
+Map titles of entries in curernt_columns to attribute names in
+L{ActiveRelay}
 """
 COLUMN_VALUE_NAME = {'Country Code': 'country',
                      'Router Name': 'nickname',
                      'Bandwidth': 'bandwidthkbps',
                      'Uptime': 'uptime',
                      'IP': 'address',
-                     'Hostname': 'hostname',
+                     #'Hostname': 'hostname',
                      'Icons': 'icons',
                      'ORPort': 'orport',
                      'DirPort': 'dirport',
-                     'BadExit': 'isbadexit',
+                     'Bad Exit': 'isbadexit',
                      'Named': 'isnamed',
                      'Exit': 'isexit',
                      'Authority': 'isauthority',
@@ -36,17 +47,12 @@ COLUMN_VALUE_NAME = {'Country Code': 'country',
                      'Fingerprint': 'fingerprint',
                      'Last Descriptor Published': 'published',
                      'Contact': 'contact',
-                     'BadDir': 'isbaddirectory',
+                     'Bad Directory': 'isbaddirectory',
                     }
 
 CRITERIA = frozenset(('exact', 'iexact', 'contains', 'icontains',
                       'lt', 'gt', 'startswith', 'istartswith'))
 
-DEFAULT_COLUMNS = ['Country Code', 'Router Name', 'Bandwidth',
-                   'Uptime', 'IP', 'Icons', 'ORPort',
-                   'DirPort', 'BadExit', 'Named', 'Exit',
-                   'Authority', 'Fast', 'Guard', 'Hibernating',
-                   'Stable', 'V2Dir', 'Platform']
 """
 Default search column and order.
 
@@ -57,14 +63,14 @@ DEFAULT_LISTING = 'nickname'
 
 DISPLAYABLE_COLUMNS = frozenset(('Country Code', 'Router Name',
                                  'Bandwidth', 'Uptime', 'IP', 'Icons',
-                                 'ORPort', 'DirPort', 'BadExit',
+                                 'ORPort', 'DirPort', 'Bad Exit',
                                  'Fingerprint',
                                  'Last Descriptor Published',
-                                 'Contact', 'BadDir'))
+                                 'Contact', 'Bad Directory'))
 
 FILTER_OPTIONS = {'Authority': 'isauthority',
-                  'BadDirectory': 'isbaddirectory',
-                  'BadExit': 'isbadexit',
+                  'Bad Directory': 'isbaddirectory',
+                  'Bad Exit': 'isbadexit',
                   'Directory': 'isv2dir',
                   'Exit': 'isexit',
                   'Fast': 'isfast',
@@ -80,7 +86,7 @@ FILTER_OPTIONS = {'Authority': 'isauthority',
 """
 Define an order on the flags to be selected in display preferences.
 """
-FILTER_OPTIONS_ORDER = ['Authority', 'BadDirectory', 'BadExit',
+FILTER_OPTIONS_ORDER = ['Authority', 'Bad Directory', 'Bad Exit',
                         'Directory', 'Exit', 'Fast', 'Guard',
                         'Hibernating', 'HS Directory', 'Named',
                         'Stable', 'Running', 'Valid']
@@ -93,10 +99,11 @@ FILTERED_NAME = {'Longitude': 'longitude',
                  'Bandwidth': 'bandwidthkbps',
                  'Uptime': 'uptime',
                  'IP': 'address',
+                 #'Hostname': 'hostname',
                  'Hibernating': 'hibernating',
                  'ORPort': 'orport',
                  'DirPort': 'dirport',
-                 'BadExit': 'isbadexit',
+                 'Bad Exit': 'isbadexit',
                  'Named': 'isnamed',
                  'Exit': 'isexit',
                  'Authority': 'isauthority',
@@ -108,27 +115,43 @@ FILTERED_NAME = {'Longitude': 'longitude',
                  'Fingerprint': 'fingerprint',
                  'Last Descriptor Published': 'published',
                  'Contact': 'contact',
-                 'BadDir': 'isbaddirectory',
+                 'Bad Directory': 'isbaddirectory',
                 }
 
+"""
+Names of attributes of L{ActiveRelay} objects that are either
+C{True} or C{False}
+"""
 FLAGS = frozenset(('isauthority', 'isbaddirectory', 'isbadexit',
                    'isexit', 'isfast', 'isguard', 'ishibernating',
-                   'isnamed', 'isstable', 'isvalid','isv2dir'))
+                   'ishsdir', 'isnamed', 'isstable', 'isrunning',
+                   'isunnamed', 'isvalid', 'isv2dir', 'isv3dir'))
 
+"""
+Titles of columns for which icons are displayed
+"""
 ICONS = ('Hibernating', 'Fast', 'Exit', 'Valid', 'V2Dir', 'Guard',
          'Stable', 'Authority', 'Platform')
 
+"""
+Maximum number of routers to be viewable per page
+"""
 MAX_PP = 200
-"""Titles of relay attributes to be considered unmovable"""
+
+"""
+Titles of relay attributes to be considered unmovable
+"""
 NOT_MOVABLE_COLUMNS = frozenset(("Named", "Exit", "Authority", "Fast",
                                  "Guard", "Hibernating", "Stable",
-                                 "Running", "Valid", "V2Dir", "Platform"))
+                                 "Running", "Valid", "V2Dir",
+                                 "Platform"))
 
 SEARCHES = frozenset(('fingerprint', 'nickname', 'country',
                       'bandwidthkbps', 'uptimedays', 'published',
                       'address', 'orport', 'dirport', 'platform'))
 
-"""Map the title of a search criteria in the list of values of SEARCH_OPTIONS_FIELDS_BOOLEANS to a criteria in CRITERIA"""
+"""Map the title of a search criteria in the list of values of
+SEARCH_OPTIONS_FIELDS_BOOLEANS to a criteria in CRITERIA"""
 SEARCH_OPTIONS_BOOLEANS = {'Equals': 'exact',
                            'Equals (case sensitive)': 'exact',
                            'Equals (case insensitive)': 'iexact',
@@ -203,7 +226,7 @@ SORT_OPTIONS = {'Router Name': 'nickname',
                 'Bandwidth': 'bandwidthkbps',
                 'Uptime': 'uptime',
                 'Last Descriptor Published': 'published',
-                'Hostname': 'hostname',
+                #'Hostname': 'hostname',
                 'IP Address': 'address',
                 'ORPort': 'orport',
                 'DirPort': 'dirport',
@@ -226,7 +249,7 @@ SORT_OPTIONS = {'Router Name': 'nickname',
 
 SORT_OPTIONS_ORDER = ('Router Name', 'Fingerprint', 'Country Code',
                       'Bandwidth', 'Uptime',
-                      'Last Descriptor Published', 'Hostname',
+                      'Last Descriptor Published', #'Hostname',
                       'IP Address', 'ORPort', 'DirPort',
                       'Platform', 'Contact', 'Authority',
                       'Bad Directory', 'Bad Exit', 'Directory',
@@ -235,5 +258,5 @@ SORT_OPTIONS_ORDER = ('Router Name', 'Fingerprint', 'Country Code',
                       'Valid')
 
 """Titles of columns to never display in CSV files"""
-UNDISPLAYED_IN_CSVS = frozenset(('Hostname', 'Valid',
-                                 'Running', 'Named'))
+UNDISPLAYED_IN_CSVS = frozenset((#'Hostname',
+                                 'Valid', 'Running', 'Named'))
