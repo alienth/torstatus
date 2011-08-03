@@ -10,114 +10,10 @@ from django.http import HttpRequest, HttpResponse
 
 # TorStatus-specific import statements --------------------------------
 from statusapp.models import Bwhist, Descriptor
+import config
 
-# INIT Variables ------------------------------------------------------
-# TODO: Move these variables to settings.py and refactor the code.
-# We're repeating ourselves way too much.
-COLUMN_VALUE_NAME = {'Country Code': 'country',
-                     'Router Name': 'nickname',
-                     'Bandwidth': 'bandwidthkbps',
-                     'Uptime': 'uptime',
-                     'IP': 'address',
-                     'Hostname': 'hostname',
-                     'Icons': 'icons',
-                     'ORPort': 'orport',
-                     'DirPort': 'dirport',
-                     'BadExit': 'isbadexit',
-                     'Named': 'isnamed',
-                     'Exit': 'isexit',
-                     'Authority': 'isauthority',
-                     'Fast': 'isfast',
-                     'Guard': 'isguard',
-                     'Stable': 'isstable',
-                     'Valid': 'isvalid',
-                     'Directory': 'isv2dir',
-                     'Platform': 'platform',
-                     'Fingerprint': 'fingerprint',
-                     'LastDescriptorPublished': 'published',
-                     'Contact': 'contact',
-                     'BadDir': 'isbaddirectory',
-                    }
-
-NOT_COLUMNS = set(('Running', 'Hostname', 'Named', 'Valid'))
-
-ICONS = ['Hibernating', 'Fast', 'Exit', 'Valid', 'V2Dir', 'Guard',
-         'Stable', 'Authority', 'Platform']
-
-FLAGS = set(('isauthority',
-              'isbaddirectory',
-              'isbadexit',
-              'isexit',
-              'isfast',
-              'isguard',
-              'ishibernating',
-              'isnamed',
-              'isstable',
-              'isvalid',
-              'isv2dir'))
-SEARCHES = set(('fingerprint',
-                 'nickname',
-                 'country',
-                 'bandwidthkbps',
-                 'uptimedays',
-                 'published',
-                 'address',
-                 'orport',
-                 'dirport',
-                 'platform'))
-CRITERIA = set(('exact',
-                 'iexact',
-                 'contains',
-                 'icontains',
-                 'lt',
-                 'gt',
-                 'startswith',
-                 'istartswith'))
-
-SORT_OPTIONS = set((
-                'validafter',
-                'nickname',
-                'fingerprint',
-                'address',
-                'orport',
-                'dirport',
-                'isauthority',
-                'isbadexit',
-                'isbaddirectory',
-                'isexit',
-                'isfast',
-                'isguard',
-                'ishsdir',
-                'isnamed',
-                'isstable',
-                'isrunning',
-                'isunnamed',
-                'isvalid',
-                'isv2dir',
-                'isv3dir',
-                'descriptor',
-                'published',
-                'bandwidthavg',
-                'bandwidthburst',
-                'bandwidthobserved',
-                'bandwidthkbps',
-                'uptime',
-                'uptimedays',
-                'platform',
-                'contact',
-                'onionkey',
-                'signingkey',
-                'exitpolicy',
-                'family',
-                'country',
-                'latitude',
-                'longitude'
-                ))
-
-SEARCH_SESSION_KEYS = set(('filters', 'search',
+__SEARCH_SESSION_KEYS = set(('filters', 'search',
                            'sortOrder', 'sortListing'))
-
-DEFAULT_LISTING = 'nickname'
 
 
 def button_choice(request, button, field, current_columns,
@@ -414,7 +310,7 @@ def get_filter_params(request):
 
     #if 'filters' not in request.session:
     # Add filters for flags only if the parameter is a 0 or a 1
-    for flag in FLAGS:
+    for flag in config.FLAGS:
         filt = request.GET.get(flag, '')
         if filt == '1':
             filters[flag] = 1
@@ -425,7 +321,7 @@ def get_filter_params(request):
     # Add search filters only if a search term is provided. Search
     # terms are denoted by s_[term]. Similarly, criteria is denoted
     # by c_[term].
-    for search in SEARCHES:
+    for search in config.SEARCHES:
         search_param = ''.join(('s_', search))
         searchinput = request.GET.get(search_param, '')
 
@@ -434,7 +330,7 @@ def get_filter_params(request):
             criteriainput = request.GET.get(criteria_param , '')
 
             # Format the key for django's filter
-            if criteriainput in CRITERIA:
+            if criteriainput in config.CRITERIA:
                 key = '__'.join((search, criteriainput))
                 filters[key] = searchinput
 
@@ -472,10 +368,10 @@ def get_order(request):
 
     #The default column to sort by if none specified.
     orders = ['ascending', 'descending']
-    
+
     advanced_order = ''
     advanced_listing = ''
-    
+
     # Gets the order and listing from the session then validates
     # by comparison with specified sort columns
     if request.GET:
@@ -486,7 +382,6 @@ def get_order(request):
         request.session['sortOrder'] = advanced_order
         request.session['sortListing'] = advanced_listing
 
-        
     # Returns appropriate sort preference
     if 'sortOrder' in request.session and \
                     'sortListing' in request.session:
@@ -497,7 +392,7 @@ def get_order(request):
             return '-' + request.session['sortListing']
 
     # If none specified returns default ordering.
-    return DEFAULT_LISTING
+    return config.DEFAULT_LISTING
 
 
 def search_session_reset(request):
@@ -512,7 +407,7 @@ def search_session_reset(request):
     """
 
     # Loop goes through and erases them.
-    for key in SEARCH_SESSION_KEYS:
+    for key in __SEARCH_SESSION_KEYS:
         if key in request.session:
             del request.session[key]
 

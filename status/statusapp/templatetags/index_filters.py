@@ -4,34 +4,12 @@ Custom filters for the index page.
 # Django-specific import statements -----------------------------------
 from django import template
 
-# INIT Variables ------------------------------------------------------
-FILTERED_NAME = {'Longitude': 'longitude',
-                 'Latitude': 'latitude',
-                 'Country Code': 'country',
-                 'Router Name': 'nickname',
-                 'Bandwidth': 'bandwidthkbps',
-                 'Uptime': 'uptime',
-                 'IP': 'address',
-                 'Hibernating': 'hibernating',
-                 'ORPort': 'orport',
-                 'DirPort': 'dirport',
-                 'BadExit': 'isbadexit',
-                 'Named': 'isnamed',
-                 'Exit': 'isexit',
-                 'Authority': 'isauthority',
-                 'Fast': 'isfast',
-                 'Guard': 'isguard',
-                 'Stable': 'isstable',
-                 'V2Dir': 'isv2dir',
-                 'Platform': 'platform',
-                 'Fingerprint': 'fingerprint',
-                 'LastDescriptorPublished': 'published',
-                 'Contact': 'contact',
-                 'BadDir': 'isbaddirectory',
-                }
+# TorStatus-specific import statements --------------------------------
+import config
 
-OS_LIST = set(('Linux', 'XP', 'Windows', 'Darwin', 'FreeBSD', 'NetBSD',
-            'OpenBSD', 'SunOS', 'IRIX', 'Cygwin', 'Dragon'))
+# INIT Variables ------------------------------------------------------
+__OS_LIST = frozenset(('Linux', 'XP', 'Windows', 'Darwin', 'FreeBSD',
+                     'NetBSD', 'OpenBSD', 'SunOS', 'IRIX', 'Cygwin', 'Dragon'))
 
 register = template.Library()
 
@@ -80,7 +58,7 @@ def field_value(relay_dict, key_name):
     @rtype: C{value}
     @return: The value of the given key in the relay dictionary.
     """
-    return relay_dict[FILTERED_NAME[key_name]]
+    return relay_dict[config.FILTERED_NAME[key_name]]
 
 
 @register.filter
@@ -95,7 +73,7 @@ def get_os(platform):
     @return: The icon-name version of the OS of the relay.
     """
     if platform:
-        for os in OS_LIST:
+        for os in __OS_LIST:
             if os in platform:
                 if os == 'Windows' and 'Server' in platform:
                     return 'WindowsServer'

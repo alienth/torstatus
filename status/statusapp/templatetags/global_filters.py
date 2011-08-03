@@ -8,6 +8,7 @@ from django import template
 
 register = template.Library()
 
+"""Map ISO-3166-1-alpha-2 codes to ISO 3166 country names"""
 __COUNTRY_MAP = {
         '': u'Unknown',
         'None': u'Unknown',

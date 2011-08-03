@@ -12,35 +12,14 @@ from socket import getfqdn
 from django.shortcuts import render_to_response, redirect
 from django.http import HttpResponse, HttpRequest
 from django.db.models import Q, Max, Sum, Count
-from django.db import connection
 from django.views.decorators.cache import cache_page
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 
 # TorStatus specific import statements --------------------------------
-from statusapp.models import Statusentry, Descriptor, Bwhist,\
-        TotalBandwidth, ActiveRelay
-from custom.aggregate import CountCase
+from statusapp.models import Bwhist, TotalBandwidth, ActiveRelay
 from helpers import *
-from display_helpers import *
+import config
 
-# INIT Variables ------------------------------------------------------
-CURRENT_COLUMNS = ['Country Code', 'Router Name', 'Bandwidth',
-                   'Uptime', 'IP', 'Icons', 'ORPort',
-                   'DirPort', 'BadExit', 'Named', 'Exit',
-                   'Authority', 'Fast', 'Guard', 'Hibernating',
-                   'Stable', 'V2Dir', 'Platform']
-
-AVAILABLE_COLUMNS = ['Fingerprint', 'LastDescriptorPublished',
-                     'Contact', 'BadDir']
-
-NOT_MOVABLE_COLUMNS = ['Named', 'Exit', 'Authority', 'Fast', 'Guard',
-                       'Hibernating', 'Stable', 'V2Dir', 'Platform']
-
-DISPLAYABLE_COLUMNS = set(('Country Code', 'Router Name', 'Bandwidth',
-                            'Uptime', 'IP', 'Icons', 'ORPort',
-                            'DirPort', 'BadExit', 'Fingerprint',
-                            'LastDescriptorPublished', 'Contact',
-                            'BadDir'))
 
 def splash(request):
     """
@@ -185,18 +164,18 @@ def index(request):
     paged_relays.object_list = gen_list_dict(paged_relays.object_list)
 
     # Get the current columns from the session. If no current columns
-    # are defined, just use the default, CURRENT_COLUMNS
+    # are defined, just use the config.DEFAULT_COLUMNS
     current_columns = request.session.get(
-                      'currentColumns', CURRENT_COLUMNS)
+                      'currentColumns', config.DEFAULT_COLUMNS)
     request.session['currentColumns'] = current_columns
 
     template_values = {'paged_relays': paged_relays,
                        'current_columns': current_columns,
-                       'displayable_columns': DISPLAYABLE_COLUMNS,
-                       'not_columns': NOT_MOVABLE_COLUMNS,
+                       'displayable_columns': config.DISPLAYABLE_COLUMNS,
+                       'not_columns': config.NOT_MOVABLE_COLUMNS,
                        'request': request,
-                       'column_value_name': COLUMN_VALUE_NAME,
-                       'icons_list': ICONS,
+                       'column_value_name': config.COLUMN_VALUE_NAME,
+                       'icons_list': config.ICONS,
                        'number_of_results': num_results,
                        'ascending_or_descending':
                                 ascending_or_descending,
@@ -235,11 +214,11 @@ def full_index(request):
 
     template_values = {'paged_relays': paged_relays,
                        'current_columns': columns,
-                       'displayable_columns': DISPLAYABLE_COLUMNS,
-                       'not_columns': NOT_MOVABLE_COLUMNS,
+                       'displayable_columns': config.DISPLAYABLE_COLUMNS,
+                       'not_columns': config.NOT_MOVABLE_COLUMNS,
                        'request': request,
-                       'column_value_name': COLUMN_VALUE_NAME,
-                       'icons_list': ICONS,
+                       'column_value_name': config.COLUMN_VALUE_NAME,
+                       'icons_list': config.ICONS,
                        'number_of_results': num_results,
                        'all': True}
 
@@ -494,8 +473,6 @@ def networkstatisticgraphs(request):
     return render_to_response('statisticgraphs.html')
 
 
-# NOTE/TODO: When the index page loads faster, increase the upper bound
-MAX_PP = 200
 def display_options(request):
     """
     Let the user choose what columns should be displayed on the index
@@ -517,18 +494,18 @@ def display_options(request):
     if 'pp' in request.GET:
 
         # Ensure that the supplied information is an integer between 1
-        # and MAX_PP, inclusive.
+        # and config.MAX_PP, inclusive.
         try:
             supplied_pp = int(request.GET.get('pp', ''))
-            assert 1 <= supplied_pp <= MAX_PP
+            assert 1 <= supplied_pp <= config.MAX_PP
             request.session['perpage'] = supplied_pp
 
         # Display a helpful debug_message in the case of unusable input
         except (ValueError, AssertionError):
-            debug_message = 'Unable to set \"Relays Per Page\" to' + \
-                            ' the given value.\nPlease enter an' + \
-                            ' integer between 1 and ' + str(MAX_PP) + \
-                            ', inclusive.'
+            debug_message = ('Unable to set \"Relays Per Page\" to' +
+                             ' the given value.\nPlease enter an' +
+                             ' integer between 1 and ' +
+                             str(config.MAX_PP) + ', inclusive.')
 
     # Get the number of relays per page from the session, and if it
     # doesn't exist, make it 50 by default.
@@ -536,7 +513,6 @@ def display_options(request):
 
     current_columns = []
     available_columns = []
-    not_movable_columns = NOT_MOVABLE_COLUMNS
 
     # If the user wants to reset column preferences, remove all
     # column information from the session
@@ -545,13 +521,12 @@ def display_options(request):
             del request.session['currentColumns']
         if 'availableColumns' in request.session:
             del request.session['availableColumns']
-
     # If no currentColumns and availableColumns are defined,
     # save the defaults in the session
     if not ('currentColumns' in request.session and 'availableColumns'
             in request.session):
-        request.session['currentColumns'] = CURRENT_COLUMNS
-        request.session['availableColumns'] = AVAILABLE_COLUMNS
+        request.session['currentColumns'] = config.DEFAULT_COLUMNS
+        request.session['availableColumns'] = config.AVAILABLE_COLUMNS
 
     # Now there is guaranteed to be currentColumns and availableColumns
     # information in the session, so get it
@@ -578,7 +553,8 @@ def display_options(request):
     # list of current columns
     elif ('upButton' in request.GET and
           'selected_removeColumn' in request.GET and
-          request.GET['selected_removeColumn'] not in not_movable_columns):
+          request.GET['selected_removeColumn'] not in \
+                  config.NOT_MOVABLE_COLUMNS):
         curr, avail, sel = button_choice(request, 'up',
                            'selected_removeColumn', curr, avail)
 
@@ -586,7 +562,8 @@ def display_options(request):
     # list of current columns
     elif ('downButton' in request.GET and
           'selected_removeColumn' in request.GET and
-          request.GET['selected_removeColumn'] not in not_movable_columns):
+          request.GET['selected_removeColumn'] not in \
+                  config.NOT_MOVABLE_COLUMNS):
         curr, avail, sel = button_choice(request, 'down',
                            'selected_removeColumn', curr, avail)
 
@@ -603,16 +580,16 @@ def advanced_search(request):
     """
     The advanced search page for the TorStatus site.
     """
-    template_values = {'sortOptionsOrder': SORT_OPTIONS_ORDER,
-                       'sortOptions': SORT_OPTIONS,
-                       'searchOptionsFieldsOrder': SEARCH_OPTIONS_FIELDS_ORDER,
-                       'searchOptionsFields': SEARCH_OPTIONS_FIELDS,
-                       'searchOptionsFieldsBooleans': SEARCH_OPTIONS_FIELDS_BOOLEANS,
+    template_values = {'sortOptionsOrder': config.SORT_OPTIONS_ORDER,
+                       'sortOptions': config.SORT_OPTIONS,
+                       'searchOptionsFieldsOrder': config.SEARCH_OPTIONS_FIELDS_ORDER,
+                       'searchOptionsFields': config.SEARCH_OPTIONS_FIELDS,
+                       'searchOptionsFieldsBooleans': config.SEARCH_OPTIONS_FIELDS_BOOLEANS,
                        'searchOptionsBooleansOrder':
-                                                SEARCH_OPTIONS_BOOLEANS_ORDER,
-                       'searchOptionsBooleans': SEARCH_OPTIONS_BOOLEANS,
-                       'filterOptionsOrder': FILTER_OPTIONS_ORDER,
-                       'filterOptions': FILTER_OPTIONS,
+                                                config.SEARCH_OPTIONS_BOOLEANS_ORDER,
+                       'searchOptionsBooleans': config.SEARCH_OPTIONS_BOOLEANS,
+                       'filterOptionsOrder': config.FILTER_OPTIONS_ORDER,
+                       'filterOptions': config.FILTER_OPTIONS,
                       }
 
     return render_to_response('advanced_search.html', template_values)
