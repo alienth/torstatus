@@ -54,4 +54,7 @@ urlpatterns = patterns('',
     # Media Files
     (r'^static/(?P<path>.*)$', 'django.views.static.serve',
             {'document_root': settings.MEDIA_ROOT}),
+
+    # About Tor Status
+    (r'^about$', 'statusapp.views.pages.about'),
 )

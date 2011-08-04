@@ -575,3 +575,14 @@ def advanced_search(request):
                       }
 
     return render_to_response('advanced_search.html', template_values)
+
+def about(request):
+    """
+    A place for the average Tor status client to learn about the
+    sites functionality and a limited look into some technical
+    information
+    """
+
+    template_values = {'test': 'test'}
+
+    return render_to_response('about.html', template_values)
