@@ -188,6 +188,7 @@ td#pageFooter {
     background-color: white;
     text-align: center;
     white-space: nowrap;
+    font-size: 0.9em;
 }
 
 td#mainTitle {
@@ -378,6 +379,11 @@ img#prevnexticon {
 
 img#prevnexticon:hover {
     opacity: 1;
+}
+
+p#aboutFooter {
+    line-height: 0%;
+
 }
 
 /* END Other ------------------------------------------ */

@@ -366,7 +366,6 @@ def get_order(request):
                 'ishsdir', 'isnamed', 'isstable', 'isrunning',
                 'isvalid']
 
-    #The default column to sort by if none specified.
     orders = ['ascending', 'descending']
 
     advanced_order = ''

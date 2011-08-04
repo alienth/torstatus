@@ -169,6 +169,7 @@ def index(request):
                       'currentColumns', config.DEFAULT_COLUMNS)
     request.session['currentColumns'] = current_columns
 
+
     template_values = {'paged_relays': paged_relays,
                        'current_columns': current_columns,
                        'displayable_columns': config.DISPLAYABLE_COLUMNS,
@@ -593,3 +594,14 @@ def advanced_search(request):
                       }
 
     return render_to_response('advanced_search.html', template_values)
+
+def about(request):
+    """
+    A place for the average Tor status client to learn about the
+    sites functionality and a limited look into some technical
+    information
+    """
+
+    template_values = {'test': 'test'}
+
+    return render_to_response('about.html', template_values)
