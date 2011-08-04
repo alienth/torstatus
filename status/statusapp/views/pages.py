@@ -11,14 +11,14 @@ from socket import getfqdn
 # Django-specific import statements -----------------------------------
 from django.shortcuts import render_to_response, redirect
 from django.http import HttpResponse, HttpRequest
-from django.db.models import Q, Max, Sum, Count
+from django.db.models import Q, Max, Count
 from django.views.decorators.cache import cache_page
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 
 # TorStatus specific import statements --------------------------------
-from statusapp.models import Bwhist, TotalBandwidth, ActiveRelay
-from helpers import *
+from statusapp.models import ActiveRelay
 import config
+import helpers
 
 
 def splash(request):
@@ -48,7 +48,7 @@ def index(request):
     # See if the user wants to reset search and display preferences
     reset = request.GET.get('reset', '')
     if reset == 'True':
-        search_session_reset(request)
+        helpers.search_session_reset(request)
 
     # Get all relays in last consensus
     last_validafter = ActiveRelay.objects.aggregate(
@@ -57,7 +57,7 @@ def index(request):
                     validafter=last_validafter).order_by('nickname')
 
     # Get the order specified by session.request
-    order = get_order(request)
+    order = helpers.get_order(request)
     if order.startswith('-'):
         ascending_or_descending = 'ascending'
         order_param = order[1:]
@@ -71,7 +71,7 @@ def index(request):
 
     # See also if the user has defined an "advanced search", i.e., if
     # the user has supplied a search term on the advanced search page
-    advanced_input = get_filter_params(request)
+    advanced_input = helpers.get_filter_params(request)
 
     # If the user defines both basic search parameters as well as
     # advanced search parameters via a GET, use only the advanced
@@ -91,7 +91,7 @@ def index(request):
     # save the advanced search parameters in the session and delete
     # the basic search parameter
     elif advanced_input:
-        advanced_input = get_filter_params(request)
+        advanced_input = helpers.get_filter_params(request)
         if 'search' in request.session:
             del request.session['search']
 
@@ -161,7 +161,8 @@ def index(request):
         paged_relays = paginator.page(1)
 
     # Convert the list of relays to a dictionary object
-    paged_relays.object_list = gen_list_dict(paged_relays.object_list)
+    paged_relays.object_list = helpers.gen_list_dict(
+                               paged_relays.object_list)
 
     # Get the current columns from the session. If no current columns
     # are defined, just use the config.DEFAULT_COLUMNS
@@ -211,7 +212,8 @@ def full_index(request):
 
     paginator = Paginator(active_relays, num_results)
     paged_relays = paginator.page(1)
-    paged_relays.object_list = gen_list_dict(paged_relays.object_list)
+    paged_relays.object_list = helpers.gen_list_dict(
+                               paged_relays.object_list)
 
     template_values = {'paged_relays': paged_relays,
                        'current_columns': columns,
@@ -277,7 +279,7 @@ def details(request, fingerprint):
     # the adjusted uptime
     if relay.hasdescriptor and relay.active:
         published = relay.published
-        now = datetime.datetime.now()
+        now = datetime.datetime.utcnow()
         diff = now - published
         diff_sec = (diff.microseconds + (
                     diff.seconds + diff.days * 24 * 3600) * 10**6) \
@@ -294,14 +296,14 @@ def details(request, fingerprint):
 
     # Generate a dictionary mapping labels to
     # values in a router details table
-    relay_dict = gen_relay_dict(relay)
+    relay_dict = helpers.gen_relay_dict(relay)
 
     # Generate an alphabetical list of flags
-    flags_list = gen_flags_list(relay)
+    flags_list = helpers.gen_flags_list(relay)
 
     # Generate a list of labels for which
     # information about the relay exists
-    options_list = gen_options_list(relay)
+    options_list = helpers.gen_options_list(relay)
 
     template_values = {'relay': relay,
                        'relay_dict': relay_dict,
@@ -323,7 +325,7 @@ def whois(request, address):
     @return: The WHOIS information of the L{address} as an HttpResponse.
     """
     # Make sure that the given IP address is in fact an IP address
-    if is_ipaddress(address):
+    if helpers.is_ipaddress(address):
         # NOTE: Linux/Unix specific command; would break on windows.
         # TODO: Find a replacement for this command.
         proc = subprocess.Popen(["whois %s" % address],
@@ -372,13 +374,13 @@ def exitnodequery(request):
     # Get the source, dest_ip, and dest_port from the HttpRequest object
     # if they exist, and declare them valid if they are valid
     source = request.GET.get('queryAddress', '').strip()
-    if is_ipaddress(source): source_valid = True
+    if helpers.is_ipaddress(source): source_valid = True
 
     dest_ip = request.GET.get('destinationAddress', '').strip()
-    if is_ipaddress(dest_ip): dest_ip_valid = True
+    if helpers.is_ipaddress(dest_ip): dest_ip_valid = True
 
     dest_port = request.GET.get('destinationPort', '').strip()
-    if is_port(dest_port): dest_port_valid = True
+    if helpers.is_port(dest_port): dest_port_valid = True
 
     # Some users may assume exiting on port 80. If a destination IP
     # address is given without a port, assume that the user means
@@ -442,8 +444,9 @@ def exitnodequery(request):
                         # in the port defined in the exit policy
                         # information. When a match is found, see if the
                         # condition is "accept" or "reject".
-                        if (is_ip_in_subnet(dest_ip, subnet)):
-                            if (port_match(dest_port, port_line)):
+                        if (helpers.is_ip_in_subnet(dest_ip, subnet)):
+                            if (helpers.port_match(
+                                        dest_port, port_line)):
                                 if (condition == 'accept'):
                                     exit_possible = True
                                 else:
@@ -541,13 +544,13 @@ def display_options(request):
     # The user wants to remove a column
     if ('removeColumn' in request.GET and
         'selected_removeColumn' in request.GET):
-        curr, avail, sel = button_choice(request, 'remove',
+        curr, avail, sel = helpers.button_choice(request, 'remove',
                            'selected_removeColumn', curr, avail)
 
     # The user wants to add a column
     elif ('addColumn' in request.GET and
           'selected_addColumn' in request.GET):
-        curr, avail, sel = button_choice(request, 'add',
+        curr, avail, sel = helpers.button_choice(request, 'add',
                            'selected_addColumn', curr, avail)
 
     # The user wants to move a column 'up' in the
@@ -556,7 +559,7 @@ def display_options(request):
           'selected_removeColumn' in request.GET and
           request.GET['selected_removeColumn'] not in \
                   config.NOT_MOVABLE_COLUMNS):
-        curr, avail, sel = button_choice(request, 'up',
+        curr, avail, sel = helpers.button_choice(request, 'up',
                            'selected_removeColumn', curr, avail)
 
     # The user wants to move a column 'down' in the
@@ -565,7 +568,7 @@ def display_options(request):
           'selected_removeColumn' in request.GET and
           request.GET['selected_removeColumn'] not in \
                   config.NOT_MOVABLE_COLUMNS):
-        curr, avail, sel = button_choice(request, 'down',
+        curr, avail, sel = helpers.button_choice(request, 'down',
                            'selected_removeColumn', curr, avail)
 
     template_values = {'currentColumns': curr,

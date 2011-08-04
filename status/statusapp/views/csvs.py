@@ -12,9 +12,8 @@ import csv
 
 # TorStatus specific import statements --------------------------------
 from statusapp.models import ActiveRelay
-from helpers import *
-from pages import *
 import config
+import helpers
 
 
 def current_results_csv(request):
@@ -45,7 +44,7 @@ def current_results_csv(request):
 
     # Filter the results set using the provided search filters in
     # the session
-    order = get_order(request)
+    order = helpers.get_order(request)
     basic_input = request.session.get('search', '')
     advanced_input = request.session.get('filters', {})
 
@@ -59,7 +58,7 @@ def current_results_csv(request):
                         Q(address__istartswith=basic_input)).order_by(
                         order)
     else:
-        filter_params = get_filter_params(request)
+        filter_params = helpers.get_filter_params(request)
         active_relays = active_relays.filter(
                         **filter_params).order_by(order)
 

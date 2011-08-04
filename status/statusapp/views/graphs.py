@@ -173,11 +173,16 @@ def bytimerunning(request):
     # TODO: This step is very inefficient; a custom SUM(CASE WHERE...
     # should probably be written.
     for relay in relays:
+
         # The uptime in weeks is seconds / (seconds/min * min/hour
         # * hour/day * day/week), where / signifies floor division.
         uptimedays = relay.uptimedays
+
+        # Some relays don't have descriptors
         if uptimedays is None:
             continue
+
+        # Add the relay's uptime to the mapping
         weeks = relay.uptimedays / 7
         if weeks in uptime_map:
             uptime_map[weeks] += 1
