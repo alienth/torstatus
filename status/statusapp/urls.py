@@ -35,7 +35,7 @@ urlpatterns = patterns('',
 
     # Network Statistic Graphs Page
     (r'^network-statistic-graphs/$',
-        'statusapp.views.pages.networkstatisticgraphs'),
+        'statusapp.views.pages.netstatgraphs'),
     # Network Statistic Graphs .png
     (r'^network-statistic-graphs/aggregatesummary.png$',
         'statusapp.views.graphs.aggregatesummary'),

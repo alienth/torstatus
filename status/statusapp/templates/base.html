@@ -40,7 +40,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 
 <table class="mainPage">
 <tr>
-    {% block noPageTitle %} <td id="pageTitle"> {% block pageTitle %} {% endblock %} </td> {% endblock %}
+    <td id="pageTitle"> {% block pageTitle %} {% endblock %} </td>
 </tr>
 <tr>
     <td> {% block mainPage %} {% endblock %} </td>
@@ -48,8 +48,8 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 </table>
     <table class="mainPage">
 <tr>
-    <td id="pageFooter"><a class="link" href="/about" title="This document explains a bit about how to use Tor Status as well as some technical information.">Learn More About Tor Status</a>
-        <p id="aboutFooter">"Tor" and the "Onion Logo" are <a class="link" target=_BLANK href="https://www.torproject.org/docs/trademark-faq">registered trademarks</a> of The Tor Project, Inc.</p>
+    <td id="pageFooter"><p id="aboutFooter"><a class="link" href="/about" title="This document explains a bit about how to use Tor Status as well as some technical information.">Learn More About Tor Status</a><br>
+"Tor" and the "Onion Logo" are <a class="link" target=_BLANK href="https://www.torproject.org/docs/trademark-faq">registered trademarks</a> of The Tor Project, Inc.</p>
         </td>
     </tr>
 </table>

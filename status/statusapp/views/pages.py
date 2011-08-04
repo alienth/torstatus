@@ -25,7 +25,7 @@ def splash(request):
     """
     The splash page for the TorStatus website.
 
-    @rtype: HttpResponse
+    @rtype: C{HttpResponse}
     @return: the splash page rendered to html.
     """
     return render_to_response("splash.html")
@@ -39,7 +39,7 @@ def index(request):
     Currently, an "active relay" is a relay that has a status entry
     that was published in the last consensus.
 
-    @rtype: HttpResponse
+    @rtype: C{HttpResponse}
     @return: A dictionary consisting of information about each router
         in the network as well as aggregate information about the
         network itself.
@@ -236,7 +236,7 @@ def details(request, fingerprint):
     @type fingerprint: C{string}
     @param fingerprint: The fingerprint of the router to display the
         details of.
-    @rtype: HttpResponse
+    @rtype: C{HttpResponse}
     @return: The L{ActiveRelay} information of the router.
     """
     # We'll let the client look up a relay as long as it is in the
@@ -321,7 +321,7 @@ def whois(request, address):
 
     @type address: C{string}
     @param address: The IP address to gather WHOIS information for.
-    @rtype: HttpResponse
+    @rtype: C{HttpResponse}
     @return: The WHOIS information of the L{address} as an HttpResponse.
     """
     # Make sure that the given IP address is in fact an IP address
@@ -470,9 +470,12 @@ def exitnodequery(request):
 
 
 @cache_page(60 * 30)
-def networkstatisticgraphs(request):
+def netstatgraphs(request):
     """
-    Render an HTML template to response.
+    Show a page containing numerous network statistic graphs.
+
+    @rtype: C{HttpResponse}
+    @return: A page containing numerous graphs from views.graphs.
     """
     return render_to_response('statisticgraphs.html')
 
@@ -480,16 +483,18 @@ def networkstatisticgraphs(request):
 def display_options(request):
     """
     Let the user choose what columns should be displayed on the index
-    page. This view makes use of the sessions in order to store two
+    page.
+
+    This view makes use of the sessions in order to store two
     array-listobjects (currentColumns and availableColumns) in a
     "cookie" file so that the implementation of the "REMOVE", "ADD",
     "UP" and "DOWN" options from the page could be possible. It orders
     the two array-lists by using the user input, through a GET single
     selection HTML form.
 
-    @param: request
-    @return: renders to the page the currently selected columns, the
-        available columns and the previous selection.
+    @rtype: C{HttpResponse}
+    @return: The currently selected columns, the available columns,
+        and the previous selection.
     """
     debug_message = ''
 
@@ -583,6 +588,10 @@ def display_options(request):
 def advanced_search(request):
     """
     The advanced search page for the TorStatus site.
+
+    @rtype: C{HttpResponse}
+    @return: A page providing a form of advanced search options to
+        the client.
     """
     template_values = {'sortOptionsOrder': config.SORT_OPTIONS_ORDER,
                        'sortOptions': config.SORT_OPTIONS,
@@ -601,10 +610,9 @@ def advanced_search(request):
 def about(request):
     """
     A place for the average Tor status client to learn about the
-    sites functionality and a limited look into some technical
-    information
+    site's functionality.
+
+    @rtype: C{HttpResponse}
+    @return: A page explaining how to use TorStatus.
     """
-
-    template_values = {'test': 'test'}
-
-    return render_to_response('about.html', template_values)
+    return render_to_response('about.html')

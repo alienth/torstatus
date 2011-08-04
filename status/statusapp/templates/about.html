@@ -1,107 +1,70 @@
 {% extends "base.html" %}
-
+{% spaceless %}
 {% block auxCSS %}
-<link rel="stylesheet" type="text/css" href="/static/css/splash.css"></link>
+<link rel="stylesheet" type="text/css" href="/static/css/style.css"></link>
 {% endblock %}
 
-{% block mainTitle %} TorStatus {% endblock %}
+{% block mainTitle %} TorStatus -- About {% endblock %}
 
 {% block headerTitle %} TorStatus {% endblock %}
 
+{% block pageTitle %} How To Use TorStatus {% endblock %}
+
 {% block mainPage %}
-{% load index_filters %}
-
-{% block noPageTitle %} {% endblock %}
-<body>
-    <div class="document" id="torstatus-design-documentation">
-<h1 class="title">TorStatus Design Documentation</h1>
-
-<div class="section" id="software">
-<h1>1: Software</h1>
-<p>This implementation of TorStatus was developed using Django 1.2.3,
-Python 2.6.6, psycopg 2.2.1-1, matplotlib 0.99.3-1, and a postgreSQL
-Tor Metrics database. While it is possible that TorStatus will run on
-newer versions of this software, we cannot guarantee that TorStatus
-will function properly.</p>
-</div>
-<div class="section" id="django">
-<h1>2: Django</h1>
-<p>TorStatus is written in django to take advantage of Django's easy
-to understand Model-View-Controller architecture (MVC). The model
-level represeants the database or the source of information, the
-controller level contains most of the back-end logic, and the view level
-generates the html/css response that is sent back to the client. Also
-we made use of Django's built in object-relational mapper (ORM)
-for straight-forward database access. In Django, a database table
-is analogous to a class, rows are analogous to objects of that
-class, and columns are analogous to the fields of that class. Data
-can be directly accessed by way of Django's models, each of which
-maps to a table in the database and can be utilized as an object.</p>
-</div>
-<div class="section" id="directory-structure">
-<h1>3: Design Decisions</h1>
-<div class="section" id="page-sizes">
-<h2>3.1: Page Sizes</h2>
-<p>TorStatus is likely to be viewed by a larger-than-usual number of
-clients of the Tor network. When torified, data transfer is bounded
-by the connection speed of the slowest relay in a Tor relay circuit.
-Additionally, many common tools such as cookies or javascript can pose
-more security problems than usual.</p>
-<p>The current design displays only 50 relays per page by default, with
-options to go on to the first page, previous page, next page, or last
-page. This reduces page sizes which in turn reduces loading times.</p>
-<p>Additionally, we anticipate that many users of TorStatus only want
-to view information about one specific relay in the Tor network.
-Because of this, we've aimed to make the landing page for TorStatus
-as small as is reasonable and to implement a simple search feature
-capable of looking up relays by nickname, IP address, or fingerprint.</p>
-<p>Thanks to gzip compression, many page sizes are smaller than the page
-sizes of the old implementation. However, CSS files are not compressed,
-and many images (including flags, but especially the image in the
-header) are far too large to expect torified clients to download
-happily (in my opinion).</p>
-<p>There is a lot of django middleware that handles stylesheets and static
-media intelligently; one such middleware is called django-compress.
-Using django-compress or similar middleware should shave about 3-8 KB
-off of any page size.</p>
-<p>Currently, the average country flag is about 1KB, and there are about
-80 unique country flags displayed for every index page of ALL routers
-in the most recent consensus. This seems like a good place to shrink
-page sizes. Note that many flags have a shaded, glossy feature to them,
-which may come at the cost of larger file sizes.</p>
-</div>
-<div class="section" id="security">
-<h2>3.2: Security</h2>
-<p>Javascript is not used in this implementation. Instead,
-secure sessions are used to store display options and search filters
-on a per-user basis. Data is stored on the server side, and the sending
-and receiving of cookies is abstracted. These sessions use only a
-hashed session ID rather than the data itself.</p>
-<p>For more on Django and sessions, see:
-<a class="reference external" href="http://www.djangobook.com/en/2.0/chapter14/">http://www.djangobook.com/en/2.0/chapter14/</a></p>
-</div>
-<div class="section" id="databases">
-<h2>3.3: Databases</h2>
-<p>This implementation of TorStatus was designed to be integrated with the
-Tor Metrics database. In this database, relay data is spread across
-multiple tables, and for good reason. However, this makes displaying
-dynamically-generated relay data somewhat difficult. Additionally,
-clients of TorStatus may have a desire to view information about a
-relay that clients of Tor Metrics rarely have interest in.</p>
-<p>Our solution to this problem was to maintain a small schema in the
-Tor Metrics database designed solely for the purpose of holding
-information about active relays in the Tor network. This means that
-the raw descriptor of any relay will only need to be parsed once for
-information that is requested less than frequently.</p>
-<p>This schema works by holding descriptors that were published in the
-last 36 hours and by holding statusentries that were published in the
-last 4 hours and keeping one table, <tt class="docutils literal">active_relay</tt>, that is
-essentially a table that is the result of a <tt class="docutils literal">LEFT JOIN</tt> between the
-statusentry table and the descriptor table on the most recent
-information for each relay, though without any descriptor information
-or relay information older than a given interval of time (in this case,
-36 hours and 4 hours, respectively).</p>
-</div>
-</body>
-
+<table id="aboutTable">
+    <tr>
+        <td id="pageTitle">
+            Layout
+        </td>
+    </tr>
+    <tr>
+        <td id="about">TorStatus is oriented around a
+            <a href="/index">current result set</a> of relays in the
+            Tor network. Other pages serve to provide an interface for
+            modifying how this result set is presented, such as
+            <a href="/display-options">display options</a>, and other
+            pages change the routers that appear in the result set
+            itself, such as the search bars on <a href="/">the splash
+            page</a> or the <a href="/advanced-search">
+            advanced search</a> page. If a user wishes to undo any
+            provided search filters, clicking on
+            <a href="/index?reset=True">reset search filters</a>
+            will remove all search filters. All of these results are
+            paginated, with 50 relays per page by default, but all
+            relays and data available about the relays is can be viewed
+            as an <a href="/all">unpaged list of relays</a>.
+            <br>Other pages include the
+            <a href="/exit-node-query">exit node query</a> page, which
+            enables searching for Tor relays by IP addresses and seeing
+            if those relays would allow exiting to an IP address and
+            port, and the <a href='/network-statistic-graphs'>
+            network statistics</a> page, which displays graphs
+            consisting of current aggregate statistics about the
+            network.
+        </td>
+    </tr>
+    <tr>
+        <td id="pageTitle">Sessions</td>
+    </tr>
+    <tr>
+        <td id="about">TorStatus uses sessions to keep track of a
+            user's search preferences as they are defined and
+            continuously redefined. These sessions work by assigning a
+            unique hash to the user that corresponds to an encrypted
+            mapping of search preferences that is stored on the server.
+            This is, in our view, more secure and private than using
+            GETs or conventional cookies, as no extra unencrypted data
+            is sent to TorStatus. However, many torified clients may
+            have cookies disabled, which currently disables much of the
+            functionality that TorStatus provides. In the future, we
+            could include a workaround for this that passes session
+            hashes as a GET rather than as a cookie for users that have
+            cookies disabled, but this seems more insecure to us than
+            simply allowing cookies for TorStatus. But we aren't security
+            experts, and you could very well be, so if you have any
+            suggestions, let us know.
+        </td>
+    </tr>
+</table>
 {% endblock %}
+{% endspaceless %}
