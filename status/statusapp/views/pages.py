@@ -385,7 +385,7 @@ def exitnodequery(request):
     # Some users may assume exiting on port 80. If a destination IP
     # address is given without a port, assume that the user means
     # port 80.
-    if (dest_ip_valid == True and dest_port_valid == False):
+    if (dest_ip_valid == True and not dest_port):
         dest_port = "80"
         dest_port_valid = True
 

@@ -24,31 +24,44 @@
     <td id="searchQError">You must enter a Query IP, at minimum.</td>
 {% else %}
     {% if source_valid and dest_ip and dest_ip_valid and not dest_port_valid %}
-        <tr><td id="searchQError">The destination port you supplied, "{{ dest_port }}", is not a valid port.</td></tr>
+    <tr><td id="searchQError">The destination port you supplied,
+            "{{ dest_port }}", is not a valid port.</td></tr>
     {% endif %}
     {% if source_valid and dest_ip and not dest_ip_valid %}
-        <tr><td id="searchQError">The destination IP address you supplied, "{{ dest_ip }}", is not a valid IP address.</td></tr>
+    <tr><td id="searchQError">The destination IP address you supplied,
+            "{{ dest_ip }}", is not a valid IP address.</td></tr>
     {% endif %}
     {% if source_valid and dest_port and not dest_ip %}
-    <tr><td id="searchQError">You supplied a destination port, "{{ dest_port }}", but you did not supply a destination IP address.<br>The exit policy information of any matching relay(s) was not parsed.</td></tr>
+    <tr><td id="searchQError">You supplied a destination port,
+            "{{ dest_port }}", but you did not supply a destination
+            IP address.</td></tr>
     {% endif %}
     {% if not source_valid %}
-    <tr><td id="searchQError">The Query IP address you supplied, "{{ source }}", is not a valid IP</td></tr>
+    <tr><td id="searchQError">The Query IP address you supplied,
+            "{{ source }}", is not a valid IP address.</td></tr>
+    {% endif %}
+    {% if not source_valid or not dest_ip_valid or not dest_port_valid %}
+    <tr><td id="searchQError">The exit policy information of any
+            matching relay(s) was not parsed.</td></tr>
     {% endif %}
 {% endif %}
 <tr>
     <td id="searchQMessage">
         {% if is_router %}
-            The IP address you entered, {{ source }}, matches one or more active Tor servers:
+        The IP address you entered, {{ source }}, matches one or
+        more active Tor servers:
     </td></tr>
     <tr><td>
             {% for nickname, fingerprint, exit_possible in relays %}
-                Server name: <a href="/details/{{ fingerprint }}">{{ nickname }}</a>
+            Server name:
+            <a href="/details/{{ fingerprint }}">{{ nickname }}</a>
                 {% if dest_ip_valid and dest_port_valid %}
                     {% if exit_possible %}
-                        WOULD allow exiting to {{ dest_ip }}:{{ dest_port }}
+                    WOULD allow exiting to
+                    {{ dest_ip }}:{{ dest_port }}
                     {% else %}
-                        would NOT allow exiting to {{ dest_ip }}:{{ dest_port }}
+                    would NOT allow exiting to
+                    {{ dest_ip }}:{{ dest_port }}
                     {% endif %}
                 {% endif %}
                 <br>
@@ -56,8 +69,10 @@
         </td></tr>
         {% else %}
             {% if source_valid %}
-                <tr><td id="searchQError">
-                The IP address you entered, "{{ source }}", does not match any active Tor servers.
+            <tr>
+                <td id="searchQError">
+                    The IP address you entered, "{{ source }}",
+                    does not match any active Tor servers.
                 </td>
             {% endif %}
         {% endif %}
@@ -71,28 +86,34 @@
             </tr>
             <tr>
                 <td>
-                    <input id="ipSearch_AddressQ" type="text" name="queryAddress" />
+                    <input id="ipSearch_AddressQ" type="text"
+                    name="queryAddress" />
                 </td>
             </tr>
             <tr>
-                <td id="ipSearch_DestIP">Destination IP Address:<br><small>(optional)</small></td>
+                <td id="ipSearch_DestIP">Destination IP Address:<br>
+                    <small>(optional)</small></td>
             </tr>
             <tr>
                 <td>
-                    <input id="ipSearch_DestIP" type="text" name="destinationAddress" />
+                    <input id="ipSearch_DestIP" type="text"
+                    name="destinationAddress" />
                 </td>
             </tr>
             <tr>
-                <td id="ipSearch_DestPort">Destination Port:<br><small>(optional)</small></td>
+                <td id="ipSearch_DestPort">Destination Port:<br>
+                    <small>(optional)</small></td>
             </tr>
             <tr>
                 <td>
-                    <input id="ipSearch_DestPort" type="text" name="destinationPort" />
+                    <input id="ipSearch_DestPort" type="text"
+                    name="destinationPort" />
                 </td>
             </tr>
             <tr>
                 <td id="ipSearch_SUBMIT">
-                    <input type="submit" id="ipSearch_SUBMIT" value="Submit Query" />
+                    <input type="submit" id="ipSearch_SUBMIT"
+                    value="Submit Query" />
                 </td>
             </tr>
             </form>
