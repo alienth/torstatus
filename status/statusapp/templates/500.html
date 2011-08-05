@@ -1,7 +1,21 @@
-{% extends 'error.html' %}
+{% extends 'base.html' %}
+{% spaceless %}
+{% block mainCSS %}
+<link rel="stylesheet" type="text/css" href="/static/css/style.css"></link>
+{% endblock %}
 
-{% block error-text %}
+{% block mainTitle %} TorStatus -- 500: Internal Server Error {% endblock %}
 
-500: Server Error
+{% block headerTitle %} TorStatus {% endblock %}
 
-{% endblock error-text %}
+{% block pageTitle %} 500: Internal Server Error {% endblock %}
+
+{% block mainPage %}
+<br />
+<table align="center">
+    <tr>
+        <td>{{ debug_message }}</td>
+    </tr>
+</table>
+{% endblock %}
+{% endspaceless %}

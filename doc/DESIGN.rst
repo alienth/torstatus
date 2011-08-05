@@ -204,3 +204,8 @@ should be generated only once with respect to the value of
 "current_columns", and that this sub-template should be filled out for
 each relay. We're not sure that django offers support for such a
 mechanism.
+
+6.3: More
+.........
+A partial list of still more work that remains to do exists,
+conveniently, in ``doc/TODO``.

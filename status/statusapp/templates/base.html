@@ -36,12 +36,12 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 
 {% endblock %}
 
-{% block extraHeader %} {% endblock %}
-
 <table class="mainPage">
+{% block noPageTitle %}
 <tr>
-    <td id="pageTitle"> {% block pageTitle %} {% endblock %} </td>
+    <td id="pageTitle">{% block pageTitle %}{% endblock %}</td>
 </tr>
+{% endblock noPageTitle %}
 <tr>
     <td> {% block mainPage %} {% endblock %} </td>
 </tr>
