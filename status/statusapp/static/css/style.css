@@ -19,9 +19,15 @@ th {
 /* END General Settings ------------------------------- */
 
 /* Table -----------------------------------------------*/
+table.aboutTable {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 1.5%;
+    padding-right: 1.5%;
+}
+
 table.mainPage {
     width: 100%;
-    padding: 10px;
     border-spacing: 10px;
     border-width: 1px;
     margin-left: auto;
@@ -171,6 +177,25 @@ tr.relay:hover {
 /* END Table Rows */
 
 /* Table Columns -------------------------------------- */
+td#about {
+    padding-top: 5px;
+    padding-bottom: 15px;
+    padding-right: 3%;
+    padding-left: 3%;
+}
+
+td#aboutTitle {
+    color: #050;
+    background-color: white;
+    text-align: center;
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+    border-color: #61a #315 #315 #61a;
+    white-space:nowrap;
+    font-size: 0.875em;
+    font-weight: bold;
+}
+
 td#pageTitle {
     color: #050;
     background-color: white;
@@ -187,7 +212,7 @@ td#pageFooter {
     color: #888;
     background-color: white;
     text-align: center;
-    white-space: nowrap;
+    font-size: 0.9em;
 }
 
 td#mainTitle {

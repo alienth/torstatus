@@ -4,34 +4,13 @@ Custom filters for the index page.
 # Django-specific import statements -----------------------------------
 from django import template
 
-# INIT Variables ------------------------------------------------------
-FILTERED_NAME = {'Longitude': 'longitude',
-                 'Latitude': 'latitude',
-                 'Country Code': 'country',
-                 'Router Name': 'nickname',
-                 'Bandwidth': 'bandwidthkbps',
-                 'Uptime': 'uptime',
-                 'IP': 'address',
-                 'Hibernating': 'hibernating',
-                 'ORPort': 'orport',
-                 'DirPort': 'dirport',
-                 'BadExit': 'isbadexit',
-                 'Named': 'isnamed',
-                 'Exit': 'isexit',
-                 'Authority': 'isauthority',
-                 'Fast': 'isfast',
-                 'Guard': 'isguard',
-                 'Stable': 'isstable',
-                 'V2Dir': 'isv2dir',
-                 'Platform': 'platform',
-                 'Fingerprint': 'fingerprint',
-                 'LastDescriptorPublished': 'published',
-                 'Contact': 'contact',
-                 'BadDir': 'isbaddirectory',
-                }
+# TorStatus-specific import statements --------------------------------
+import config
 
-OS_LIST = set(('Linux', 'XP', 'Windows', 'Darwin', 'FreeBSD', 'NetBSD',
-            'OpenBSD', 'SunOS', 'IRIX', 'Cygwin', 'Dragon'))
+# INIT Variables ------------------------------------------------------
+__OS_LIST = frozenset(('Linux', 'XP', 'Windows', 'Darwin', 'FreeBSD',
+                     'NetBSD', 'OpenBSD', 'SunOS', 'IRIX', 'Cygwin',
+                     'Dragon'))
 
 register = template.Library()
 
@@ -40,6 +19,12 @@ register = template.Library()
 def key(d, key_name):
     """
     Return the value of a key in a dictionary.
+
+    Django provides something that looks like attribute lookups in
+    templates that usually provide this functionality, but if the
+    keys for the dictionary are generated dynamically, this
+    attribute-like lookup (with syntax dict.key) does not function
+    as desired.
 
     @type d: C{dict}
     @param d: The given dictionary.
@@ -80,7 +65,7 @@ def field_value(relay_dict, key_name):
     @rtype: C{value}
     @return: The value of the given key in the relay dictionary.
     """
-    return relay_dict[FILTERED_NAME[key_name]]
+    return relay_dict[config.FILTERED_NAME[key_name]]
 
 
 @register.filter
@@ -95,7 +80,7 @@ def get_os(platform):
     @return: The icon-name version of the OS of the relay.
     """
     if platform:
-        for os in OS_LIST:
+        for os in __OS_LIST:
             if os in platform:
                 if os == 'Windows' and 'Server' in platform:
                     return 'WindowsServer'
@@ -103,3 +88,20 @@ def get_os(platform):
                     return os
     return 'NotAvailable'
 
+
+@register.filter
+def nospace(string):
+    """
+    Strip all space characters from a string.
+
+    This function does not remove any other whitespace characters.
+
+    >>> nospace('    t   hi \t s    has   n o \n s p    a ces   ')
+    'thi\tshasno\nspaces'
+
+    @type string: C{string}
+    @param string: The string to remove all space characters from.
+    @rtype: C{string}
+    @return: The string provided, but with all spaces removed.
+    """
+    return string.replace(' ', '')

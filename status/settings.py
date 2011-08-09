@@ -31,7 +31,7 @@ DATABASES = {
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'GMT' + str((time.timezone / 3600) - time.daylight)
+TIME_ZONE = None
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -103,7 +103,7 @@ INSTALLED_APPS = (
     # python manage.py test.
     # @see: http://www.mail-archive.com/django-users@googlegroups.com/
     # msg78059.html
-    'django.contrib.admin', 
+    'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )

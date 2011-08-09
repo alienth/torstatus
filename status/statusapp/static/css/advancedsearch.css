@@ -54,10 +54,7 @@ select#advSearchButton {
 }
 
 input#searchButton {
-    font-weight: bold;
-    font-size: 1.375em;
-    width: 300px;
+    width: 200px;
 }
-
 
 /* END Input, Select, Option -------------------------- */

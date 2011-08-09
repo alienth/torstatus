@@ -1,0 +1,67 @@
+Things to be added/fixed in TorStatus:
+
+- Input validation should be added for the advanced search page.
+  Currently, if an invalid input is given, say 'foo' for bandwidth,
+  a 500 Error is raised, but the parameter remains stored in the
+  session. We need to add input validation to all GETs that could be
+  provided by the user.
+
+- If the user has defined advanced search parameters, when the user
+  loads the advanced search page, the parameters that have already been
+  defined should be entered automatically in the form. This is already
+  done with "Flags", but it needs to be added for "Sort Order" and
+  "Filter Options".
+
+- Currently, "None" is the default value for all null values shown in
+  the index page. This might be misleading.
+  E.g.: "None" is certainly an appropriate value for a dirport value
+  that is null, since this means that no dirport is defined, but if a
+  relay has no descriptor, "None" is displayed for "Bandwidth" and
+  "Uptime" as well. But "None" probably makes sense for
+  "Last Descriptor Published".
+
+- There are too many parameters to be defined in status/config. It
+  seems that combining some of them would be possible, since many of
+  them are very similar.
+
+- It'd be nice to show all of the routers on a single page for some
+  clients, but the page loads far to slow to consider doing this. When
+  this is done, config.MAX_PP could be set to a higher value.
+
+- Any caching mechanism should automatically update the caches for the
+  "Unpaged List of Relays" and the graphs rather than waiting for a
+  client to request them.
+
+- Some clients may miss the "Hostname" column.
+  Here's a rough guideline for an implementation:
+  This should probably be implemented on the database level by keeping
+  a table consisting of an INET, a TIMESTAMP, and a CHARACTER
+  VARYING(255), with indexes on the INET and TIMESTAMP. Then, when the
+  LEFT JOIN is performed, we can LEFT JOIN that result with the
+  hostname table on the IP addresses.
+  We'd lookup hostnames whenever a new IP address is added to the table,
+  whenever we have a hostname that more than (interval) old and the IP
+  address is in the active_statusentry table, or an IP address is added
+  to the active_statusentry table that does not exist in the hostname
+  table. We'd delete hostnames that are older than (interval) old.
+
+- Currently, TorStatus requires cookies to be enabled, which are used
+  only to store hashed sessionIDs that map to encrypted search
+  preferences that are stored on the TorStatus server. Many users have
+  cookies disabled, however. We should provide functionality to these
+  users; some Django programmers have written middleware that passes
+  the sessionID as a GET to the controller if the client has cookies
+  disabled. This doesn't seem to be any more secure than simply
+  enabling cookies for the TorStatus website, however.
+
+- At some point, IPv6 support should be added.
+  On the database level, this requires converting IPv4 INET values to
+  IPv6 INET values, since IPv4 and IPv6 values do not play nicely
+  together in PostgreSQL <= 8.4.8.
+  (see: http://archives.postgresql.org/pgsql-admin/2011-07/msg00201.php)
+  A helpful postgres dev suggests doing something along the lines of
+  "address = '::ffff:0.0.0.0'::inet + (NEW.address::varchar::inet -
+  '0.0.0.0'::inet)".
+  Next, statusapp.views.helpers.is_ipaddress and
+  statusapp.views.helpers.is_ip_in_subnet should be rewritten to work
+  with IPv6 input and IP addresses.

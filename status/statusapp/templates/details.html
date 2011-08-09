@@ -4,11 +4,11 @@
 <link rel="stylesheet" type="text/css" href="/static/css/details.css"></link>
 {% endblock %}
 
-{% block mainTitle %} TorStatus - Router Details -- {{ relay.nickname }} {% endblock %}
+{% block mainTitle %} TorStatus -- Router Details for {{ relay.nickname }} {% endblock %}
 
 {% block headerTitle %} TorStatus {% endblock %}
 
-{% block pageTitle %} Router Details -- {{ relay.nickname }} {% endblock %}
+{% block pageTitle %} {{ relay.nickname }} {% endblock %}
 
 {% load details_filters %}
 {% load global_filters %}
@@ -30,7 +30,7 @@
                             {% else %}
                                 style="background-color:rgb(255, 0, 0)"
                             {% endif %}
-                         {% endif %} > 
+                         {% endif %} >
                          {% if option == "Fingerprint" %}
                             {{relay_dict|key:option|format_fing}}
                          {% else %}
@@ -88,7 +88,7 @@
             <tr>
                 <td id="details_boxTitle" colspan="2"> Router Flags </td>
             </tr>
-            
+
             {% for flag in flags_list %}
             <tr>
                 <td id="detailBox"> {{flag}}: </td>

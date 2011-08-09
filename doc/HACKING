@@ -3,6 +3,7 @@ Some notes on code style:
 General:
 - Lines do not exceed 72 characters unless things become really ugly.
 - No whitespace at the end of any line or file.
+- One tab space is four space characters.
 
 Python code:
 - Unless something stated in General conflicts, code adheres to PEP 8
@@ -11,8 +12,3 @@ Python code:
   to Django coding standards for developers of the Django platform
   (viewable at: https://docs.djangoproject.com/en/dev/internals/
   contributing/writing-code/coding-style/)
-
-SQL code:
-- Only cache.sql is currently written in SQL. Having never written
-  SQL code before, style is not consistent and probably unconventional.
-  Feel free to propose style guidelines.

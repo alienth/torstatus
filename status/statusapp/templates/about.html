@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% spaceless %}
+{% block auxCSS %}
+<link rel="stylesheet" type="text/css" href="/static/css/style.css"></link>
+{% endblock %}
+
+{% block mainTitle %} TorStatus -- About {% endblock %}
+
+{% block headerTitle %} TorStatus {% endblock %}
+
+{% block pageTitle %} How To Use TorStatus {% endblock %}
+
+{% block mainPage %}
+<table id="aboutTable">
+    <tr>
+        <td id="pageTitle">
+            Layout
+        </td>
+    </tr>
+    <tr>
+        <td id="about">TorStatus is oriented around a
+            <a href="/index">current result set</a> of relays in the
+            Tor network. Other pages serve to provide an interface for
+            modifying how this result set is presented, such as
+            <a href="/display-options">display options</a>, and other
+            pages change the routers that appear in the result set
+            itself, such as the search bars on <a href="/">the splash
+            page</a> or the <a href="/advanced-search">
+            advanced search</a> page. If a user wishes to undo any
+            provided search filters, clicking on
+            <a href="/index?reset=True">reset search filters</a>
+            will remove all search filters. All of these results are
+            paginated, with 50 relays per page by default, but all
+            relays and data available about the relays is can be viewed
+            as an <a href="/all">unpaged list of relays</a>.
+            <br>Other pages include the
+            <a href="/exit-node-query">exit node query</a> page, which
+            enables searching for Tor relays by IP addresses and seeing
+            if those relays would allow exiting to an IP address and
+            port, and the <a href='/network-statistic-graphs'>
+            network statistics</a> page, which displays graphs
+            consisting of current aggregate statistics about the
+            network.
+        </td>
+    </tr>
+    <tr>
+        <td id="pageTitle">Sessions</td>
+    </tr>
+    <tr>
+        <td id="about">TorStatus uses sessions to keep track of a
+            user's search preferences as they are defined and
+            continuously redefined. These sessions work by assigning a
+            unique hash to the user that corresponds to an encrypted
+            mapping of search preferences that is stored on the server.
+            This is, in our view, more secure and private than using
+            GETs or conventional cookies, as no extra unencrypted data
+            is sent to TorStatus. However, many torified clients may
+            have cookies disabled, which currently disables much of the
+            functionality that TorStatus provides. In the future, we
+            could include a workaround for this that passes session
+            hashes as a GET rather than as a cookie for users that have
+            cookies disabled, but this seems no more secure to us than
+            simply allowing cookies for TorStatus. If you have any
+            suggestions, let us know.
+        </td>
+    </tr>
+</table>
+{% endblock %}
+{% endspaceless %}

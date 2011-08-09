@@ -6,6 +6,10 @@ from django.conf.urls.defaults import *
 from django.conf import settings
 
 urlpatterns = patterns('',
+    # Media Files
+    (r'^static/(?P<path>.*)$', 'django.views.static.serve',
+            {'document_root': settings.MEDIA_ROOT}),
+
     # Splash page
     (r'^$', 'statusapp.views.pages.splash'),
 
@@ -31,7 +35,7 @@ urlpatterns = patterns('',
 
     # Network Statistic Graphs Page
     (r'^network-statistic-graphs/$',
-        'statusapp.views.pages.networkstatisticgraphs'),
+        'statusapp.views.pages.netstatgraphs'),
     # Network Statistic Graphs .png
     (r'^network-statistic-graphs/aggregatesummary.png$',
         'statusapp.views.graphs.aggregatesummary'),
@@ -51,7 +55,12 @@ urlpatterns = patterns('',
     # CSV Files
     (r'^tor-query-export.csv$', 'statusapp.views.csvs.current_results_csv'),
 
-    # Media Files
-    (r'^static/(?P<path>.*)$', 'django.views.static.serve',
-            {'document_root': settings.MEDIA_ROOT}),
+    # Index and related pages
+    (r'^index/$', 'statusapp.views.pages.index'),
+    ## Uncomment this line to enable a cached page of all routers.
+    ## This loads slowly and doesn't provide search and display options
+    #(r'^all$', 'statusapp.views.pages.full_index'),
+
+    # About Tor Status
+    (r'^about$', 'statusapp.views.pages.about'),
 )

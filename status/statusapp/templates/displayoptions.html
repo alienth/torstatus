@@ -26,7 +26,7 @@
     <table class="selectionLists">
     <tr>
         <td id="selectForm">
-            <input id="removeList" name="removeColumn" type="submit" value="Remove Column &#8702;" />
+            <input id="removeList" name="removeColumn" type="submit" value="Remove Column &#8702;" style="width:100%"/>
                 <br />
                 <select name="selected_removeColumn" size="20" id="selectForm_removeColumn">
                 {% for entry in currentColumns %}
@@ -42,12 +42,12 @@
                 <p id="selectForm_text">Currently Selected Columns</p>
         </td>
         <td>
-            <input id="upButton" name="upButton" type="submit" value="Up" />
+            <input id="upButton" name="upButton" type="submit" value="Up" style="width:50px"/>
             <br />
-            <input id="downButton" name="downButton" type="submit" value="Down" />
+            <input id="downButton" name="downButton" type="submit" value="Down" style="width:50px" />
         </td>
         <td id="selectForm">
-            <input id="addList" name="addColumn" type="submit" value="&#8701; Add Column" />
+            <input id="addList" name="addColumn" type="submit" value="&#8701; Add Column" style="width:100%"/>
                 <br />
                 <select name="selected_addColumn" size="20" id="selectForm_addColumn">
 
@@ -101,8 +101,8 @@
         </td>
     </tr>
 <tr>
-    <td id="mainLinks"><a href="/">Return to Splash Screen</a>   |   
-                        <a href="/index/">Return to Index Page</a>
+    <td id="mainLinks"><a class="link" href="/">Return to Splash Screen</a>   |
+                        <a class="link" href="/index/">Return to Index Page</a>
     </td>
 </tr>
 </table>

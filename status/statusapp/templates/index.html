@@ -42,7 +42,9 @@
 </table>
 {% load index_filters %}
 {% spaceless %}
+
 {% if paged_relays.object_list %}
+{% if not all %}
 <table>
         {% if paged_relays.has_previous %}
         <td id="paginatorLinks"><a class="pageLinks" href="?page={{ paged_relays.previous_page_number }}">&#8701;</a></td>
@@ -79,6 +81,7 @@
         {% endif %}
     </tr>
 </table>
+{% endif %}
 
 <table class="relayTable">
 	<tr>
@@ -89,32 +92,22 @@
 		{% endif %}
 		{% else %}
 		{% if column_name not in not_columns %}
-        <th class="relayHeader hoverable" onClick="document.location.href='/index/?sortListing={{ column_value_name|key:column_name }}&sortOrder={{ ascending_or_descending }}';" {% if column_name == "Router Name" %}
-	                                            id="routerName"
-	                                      {% else %}
-	                                      {% if column_name == "LastDescriptorPublished" %}
-	                                            id="lastDescPub"
-	                                      {% else %}
-	                                      {% if column_name == "BadDir" %}
-	                                            id="badDir"
-	                                      {% endif %}
-	                                      {% endif %}
-	                                      {% endif %}
-                                          >{% if column_name == "Country Code" %}&nbsp;{% else %}{{ column_name }}{% endif %}{% if column_value_name|key:column_name == order_param %}{% if ascending_or_descending == "ascending" %}&uarr;{% else %}&darr;{% endif %}{% endif %}</th>
+        <th class="relayHeader hoverable" {% if not all %}onClick="document.location.href='/index/?sortListing={{ column_value_name|key:column_name }}&sortOrder={% if column_value_name|key:column_name != order_param %}ascending{% else %}{{ ascending_or_descending }}{% endif %}';"{% endif %}
+                                          >{% if column_name == "Country Code" %}&nbsp;{% else %}{{ column_name }}{% endif %}{% if not all and column_value_name|key:column_name == order_param %}{% if ascending_or_descending == "ascending" %}&uarr;{% else %}&darr;{% endif %}{% endif %}</th>
 	    {% endif %}
 	    {% endif %}
     {% endfor %}
 	</tr>
 
 	{% for relay in paged_relays.object_list %}
-	    {% if "BadExit" in current_columns %}
-        <tr {% if relay|field_value:'BadExit' %} class="relayBadExit" {% else %}{% if relay|field_value:'Hibernating' %} class="relayHibernating" {% else %} class="relay" {% endif %}{% endif %}>
+	    {% if "Bad Exit" in current_columns %}
+        <tr {% if relay|field_value:'Bad Exit' %} class="relayBadExit" {% else %}{% if relay|field_value:'Hibernating' %} class="relayHibernating" {% else %} class="relay" {% endif %}{% endif %}>
 		{% else %}
 		<tr class="relay">
 		{% endif %}
 		    {% for column_name in current_columns %}
 		    {% if column_name == "Country Code" %}
-            <td id="col_relayName"><a href="http://www.openstreetmap.org/?mlon={{ relay|field_value:'Longitude' }}&mlat={{ relay|field_value:'Latitude' }}&zoom=6"><img src="/static/img/flags/{{ relay|field_value:column_name|lower }}.png" alt={{ relay|field_value:column_name }} title="{{ relay|field_value:column_name }}: {{ relay|field_value:'Latitude' }}, {{ relay|field_value:'Longitude' }}" border=0></a></td>
+            <td id="col_relayName"><a href="http://www.openstreetmap.org/?mlon={{ relay|field_value:'Longitude' }}&mlat={{ relay|field_value:'Latitude' }}&zoom=6"><img src="/static/img/flags/{{ relay|field_value:column_name|default:"zz"|lower }}.png" alt={{ relay|field_value:column_name|default:"?" }} title="{{ relay|field_value:column_name|default:"?" }}: {{ relay|field_value:'Latitude'|default:"?" }}, {{ relay|field_value:'Longitude'|default:"?" }}" border=0></a></td>
 			{% else %}
 			{% if column_name == "Router Name" %}
             <td id="col_relayName">
@@ -132,12 +125,20 @@
             {% if column_name == "IP" %}
             <td>[<a id="relayAddress" href="/details/{{ relay|field_value:column_name }}/whois">{{ relay|field_value:column_name }}</a>]</td>
             {% else %}
-            {% if column_name == "BadDir" == 1 %}
+            {% if column_name == "Bad Directory" == 1 %}
             <td id="col_relayBadDir" {% if relay|field_value:column_name %}>
                 	<img src="/static/img/bg_yes.png" width="12" height="12" alt="Bad Directory" title="Bad Directory">
                 {% else %}>
                		<img src="/static/img/bg_no.png" width="12" height="12" alt="Not a Bad Directory" title="Not a Bad Directory">
                 {% endif %}</td>
+            {% else %}
+            {% if column_name == "Bad Exit" %}
+                <td id="col_relayBadExit">
+                {% if relay|field_value:column_name == 1 %}
+                    <img src="/static/img/bg_yes.png" width="12" height="12" alt="Bad Exit" title="Bad Exit">
+                {% else %}
+                    <img src="/static/img/bg_no.png" width="12" height="12" alt="Not a Bad Exit" title="Not a Bad Exit">
+                {% endif %}
             {% else %}
             {% if column_name == "Icons" %}
             <td id="col_relayIcons">
@@ -155,19 +156,10 @@
             </td>
             {% else %}
             {% if column_name in displayable_columns %}
-            <td id="col_relay{{column_name}}">
-                {% if column_name == "BadExit" %}
-                    {% if relay|field_value:column_name == 1 %}
-                        <img src="/static/img/bg_yes.png" width="12" height="12" alt="Bad Exit" title="Bad Exit">
-                    {% else %}
-                        <img src="/static/img/bg_no.png" width="12" height="12" alt="Not a Bad Exit" title="Not a Bad Exit">
-                    {% endif %}
-                {% else %}
-                    {{ relay|field_value:column_name|default:'None' }}
-                {% endif %}
+            <td id="col_relay{{ column_name|nospace }}">{{ relay|field_value:column_name|default:'None' }}
             {% endif %}
             </td>
-            {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
+            {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
             {% endfor %}
 		</tr>
 	{% endfor %}

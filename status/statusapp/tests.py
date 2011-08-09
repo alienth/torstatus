@@ -3,8 +3,8 @@ The test module. To run tests, change directory to status and run
 'python manage.py test statusapp'.
 """
 import django.test
-from statusapp.views.helpers import is_ip_in_subnet, get_exit_policy, \
-        is_ipaddress, is_port
+from statusapp.views.helpers import is_ip_in_subnet, is_ipaddress, \
+        is_port
 
 
 class IpInSubnetTest(django.test.TestCase):
@@ -36,25 +36,6 @@ class IpInSubnetTest(django.test.TestCase):
         self.assertEqual(is_ip_in_subnet('129.133.1.125', '*'), True)
         self.assertEqual(is_ip_in_subnet('129.133.1.125', '129.133.1.126'),
                 False)
-
-
-class ExitPolicyTest(django.test.TestCase):
-    """
-    Test the get_exit_policy function.
-    """
-
-    def test_get_policy(self):
-        """
-        Test that, given an arbitrary raw descriptor, exit policy information
-        is properly collected.
-        """
-        rawdesc = "router testrouter\ninfo here it is\nfield this is another \
-                one\naccept 129.133.8.19:80\naccept 209.59.220.195:80\naccept \
-                69.164.213.224:41231\nreject *:*\njunk more of it is here"
-        self.assertEqual(get_exit_policy(rawdesc),
-                ['accept 129.133.8.19:80',
-                'accept 209.59.220.195:80', 'accept \
-                69.164.213.224:41231', 'reject *:*'])
 
 
 class IpAddressTest(django.test.TestCase):

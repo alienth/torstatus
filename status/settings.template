@@ -1,3 +1,5 @@
+import os
+
 #-#-#-#-#-#-#-#-#-#-#-# FILL IN THE FOLLOWING #-#-#-#-#-#-#-#-#-#-#-#-#
 # Set to database name
 NAME = ''
@@ -6,23 +8,45 @@ USER = ''
 PASSWORD = ''
 HOST = '' # Leave as empty string for localhost
 PORT = '' # Leave as empty string for localhost/default
+
 # Set SECRET_KEY to a long string of random characters, and keep it
 # a secret.
 SECRET_KEY = ''
+
 # Set to False by default for deployment. For development, set to True.
 DEBUG = False
 TEMPLATE_DEBUG = False
-# Set a cache backend. For testing purposes, 'locmem://' is okay.
+
+# Set a cache backend. For testing purposes, 'locmem://' is okay, but
+# for production, use memcached!
+# SEE: https://docs.djangoproject.com/en/1.2/topics/http/sessions/
+# to learn why locmem:// shouldn't be used for production.
 # SEE: https://docs.djangoproject.com/en/1.2/topics/cache/
 # to learn more about possible cache backends.
 CACHE_BACKEND = 'locmem://'
+# This default setting uses the CACHE_BACKEND to store sessions, too.
+# For deployment, you may want to consider using a database backend,
+# but this would only be necessary if the website has to store a VERY
+# large number of sessions.
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-# Module for setting up the proper Timezone.
-import os
+# Local time zone for this installation. Choices can be found here:
+# http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
+# although not all choices may be available on all operating systems.
+# On Unix systems, a value of None will cause Django to use the same
+# timezone as the operating system, which is usually okay.
+# If running in a Windows environment this must be set to the same as
+# your system time zone.
+TIME_ZONE = None
 
-# Specify NAME,
+# Language code for this installation. All choices can be found here:
+# http://www.i18nguy.com/unicode/language-identifiers.html
+LANGUAGE_CODE = 'en-us'
+
+#-#-#-#-#-#-#-#-#-#-#- FILL IN THE PRECEEDING -#-#-#-#-#-#-#-#-#-#-#-#-
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -33,19 +57,6 @@ DATABASES = {
         'PORT': PORT,
     }
 }
-
-# Local time zone for this installation. Choices can be found here:
-# http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
-# although not all choices may be available on all operating systems.
-# On Unix systems, a value of None will cause Django to use the same
-# timezone as the operating system.
-# If running in a Windows environment this must be set to the same as
-# your system time zone.
-TIME_ZONE = None
-
-# Language code for this installation. All choices can be found here:
-# http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'en-us'
 
 SITE_ID = 1
 
@@ -79,10 +90,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
 )
-
-SESSION_ENGINE = 'django.contrib.sessions.backends.file'
-
-SESSION_FILE_PATH = os.path.join(os.path.dirname(__file__), 'tmp/')
 
 INTERNAL_IPS = ('127.0.0.1',)
 

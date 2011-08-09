@@ -12,30 +12,26 @@ import csv
 
 # TorStatus specific import statements --------------------------------
 from statusapp.models import ActiveRelay
-from helpers import *
-from pages import *
+import config
+import helpers
 
-NOT_MOVABLE_COLUMNS = ["Named", "Exit", "Authority", "Fast", "Guard",
-                       "Hibernating", "Stable", "Running", "Valid",
-                       "V2Dir", "Platform",]
 
 def current_results_csv(request):
     """
-    Reformat the current Queryset object into a csv format.
+    Reformat the current result set to csv format.
 
     @rtype: HttpResponse
-    @return: csv formatted current queryset
+    @return: The CSV formatted current result set.
     """
     current_columns = request.session['currentColumns']
-    undisplayed_columns = ['Hostname', 'Valid', 'Running', 'Named']
 
     # Don't provide certain flag information in the csv
-    for column in undisplayed_columns:
+    for column in config.UNDISPLAYED_IN_CSVS:
         if column in current_columns:
             current_columns.remove(column)
 
     if "Icons" not in current_columns:
-        for flag in NOT_MOVABLE_COLUMNS:
+        for flag in config.NOT_MOVABLE_COLUMNS:
             if flag in current_columns:
                 current_columns.remove(flag)
     elif "Icons" in current_columns:
@@ -48,7 +44,7 @@ def current_results_csv(request):
 
     # Filter the results set using the provided search filters in
     # the session
-    order = get_order(request)
+    order = helpers.get_order(request)
     basic_input = request.session.get('search', '')
     advanced_input = request.session.get('filters', {})
 
@@ -62,7 +58,7 @@ def current_results_csv(request):
                         Q(address__istartswith=basic_input)).order_by(
                         order)
     else:
-        filter_params = get_filter_params(request)
+        filter_params = helpers.get_filter_params(request)
         active_relays = active_relays.filter(
                         **filter_params).order_by(order)
 
@@ -77,7 +73,7 @@ def current_results_csv(request):
     # Make columns keys to empty lists
     for column in current_columns: rows[column] = []
 
-    # Populates the row dictionary with all field values
+    # Populate the row dictionary with all field values
     for relay in active_relays:
         fields_access = [
                 ("Router Name", relay.nickname),
@@ -94,7 +90,7 @@ def current_results_csv(request):
                 ("IP", relay.address),
                 ("Fingerprint", relay.fingerprint),
                 ("Last Descriptor Published", relay.published),
-                ("BadDir", relay.isbaddirectory),
+                ("Bad Directory", relay.isbaddirectory),
                 ("DirPort", relay.dirport),
                 ("Exit", relay.isexit),
                 ("Authority", relay.isauthority),
@@ -105,7 +101,7 @@ def current_results_csv(request):
                 ("Platform", relay.platform),
                 ("Stable", relay.isstable),
                 ("ORPort", relay.orport),
-                ("BadExit", relay.isbadexit)]
+                ("Bad Exit", relay.isbadexit)]
 
         for k, v in fields_access:
             if k in current_columns: rows[k].append(v)

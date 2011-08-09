@@ -11,42 +11,21 @@ from socket import getfqdn
 # Django-specific import statements -----------------------------------
 from django.shortcuts import render_to_response, redirect
 from django.http import HttpResponse, HttpRequest
-from django.db.models import Q, Max, Sum, Count
-from django.db import connection
+from django.db.models import Q, Max, Count
 from django.views.decorators.cache import cache_page
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 
 # TorStatus specific import statements --------------------------------
-from statusapp.models import Statusentry, Descriptor, Bwhist,\
-        TotalBandwidth, ActiveRelay
-from custom.aggregate import CountCase
-from helpers import *
-from display_helpers import *
+from statusapp.models import ActiveRelay
+import config
+import helpers
 
-# INIT Variables ------------------------------------------------------
-CURRENT_COLUMNS = ['Country Code', 'Router Name', 'Bandwidth',
-                   'Uptime', 'IP', 'Icons', 'ORPort',
-                   'DirPort', 'BadExit', 'Named', 'Exit',
-                   'Authority', 'Fast', 'Guard', 'Hibernating',
-                   'Stable', 'V2Dir', 'Platform']
-
-AVAILABLE_COLUMNS = ['Fingerprint', 'LastDescriptorPublished',
-                     'Contact', 'BadDir']
-
-NOT_MOVABLE_COLUMNS = ['Named', 'Exit', 'Authority', 'Fast', 'Guard',
-                       'Hibernating', 'Stable', 'V2Dir', 'Platform']
-
-DISPLAYABLE_COLUMNS = set(('Country Code', 'Router Name', 'Bandwidth',
-                            'Uptime', 'IP', 'Icons', 'ORPort',
-                            'DirPort', 'BadExit', 'Fingerprint',
-                            'LastDescriptorPublished', 'Contact',
-                            'BadDir'))
 
 def splash(request):
     """
     The splash page for the TorStatus website.
 
-    @rtype: HttpResponse
+    @rtype: C{HttpResponse}
     @return: the splash page rendered to html.
     """
     return render_to_response("splash.html")
@@ -60,7 +39,7 @@ def index(request):
     Currently, an "active relay" is a relay that has a status entry
     that was published in the last consensus.
 
-    @rtype: HttpResponse
+    @rtype: C{HttpResponse}
     @return: A dictionary consisting of information about each router
         in the network as well as aggregate information about the
         network itself.
@@ -69,7 +48,7 @@ def index(request):
     # See if the user wants to reset search and display preferences
     reset = request.GET.get('reset', '')
     if reset == 'True':
-        search_session_reset(request)
+        helpers.search_session_reset(request)
 
     # Get all relays in last consensus
     last_validafter = ActiveRelay.objects.aggregate(
@@ -78,7 +57,7 @@ def index(request):
                     validafter=last_validafter).order_by('nickname')
 
     # Get the order specified by session.request
-    order = get_order(request)
+    order = helpers.get_order(request)
     if order.startswith('-'):
         ascending_or_descending = 'ascending'
         order_param = order[1:]
@@ -92,7 +71,7 @@ def index(request):
 
     # See also if the user has defined an "advanced search", i.e., if
     # the user has supplied a search term on the advanced search page
-    advanced_input = get_filter_params(request)
+    advanced_input = helpers.get_filter_params(request)
 
     # If the user defines both basic search parameters as well as
     # advanced search parameters via a GET, use only the advanced
@@ -112,7 +91,7 @@ def index(request):
     # save the advanced search parameters in the session and delete
     # the basic search parameter
     elif advanced_input:
-        advanced_input = get_filter_params(request)
+        advanced_input = helpers.get_filter_params(request)
         if 'search' in request.session:
             del request.session['search']
 
@@ -182,27 +161,75 @@ def index(request):
         paged_relays = paginator.page(1)
 
     # Convert the list of relays to a dictionary object
-    paged_relays.object_list = gen_list_dict(paged_relays.object_list)
+    paged_relays.object_list = helpers.gen_list_dict(
+                               paged_relays.object_list)
 
     # Get the current columns from the session. If no current columns
-    # are defined, just use the default, CURRENT_COLUMNS
-    current_columns = []
-    if not ('currentColumns' in request.session):
-        request.session['currentColumns'] = CURRENT_COLUMNS
-    current_columns = request.session['currentColumns']
+    # are defined, just use the config.DEFAULT_COLUMNS
+    current_columns = request.session.get(
+                      'currentColumns', config.DEFAULT_COLUMNS)
+    request.session['currentColumns'] = current_columns
 
 
     template_values = {'paged_relays': paged_relays,
                        'current_columns': current_columns,
-                       'displayable_columns': DISPLAYABLE_COLUMNS,
-                       'not_columns': NOT_MOVABLE_COLUMNS,
+                       'displayable_columns': config.DISPLAYABLE_COLUMNS,
+                       'not_columns': config.NOT_MOVABLE_COLUMNS,
                        'request': request,
-                       'column_value_name': COLUMN_VALUE_NAME,
-                       'icons_list': ICONS,
+                       'column_value_name': config.COLUMN_VALUE_NAME,
+                       'icons_list': config.ICONS,
                        'number_of_results': num_results,
                        'ascending_or_descending':
                                 ascending_or_descending,
-                       'order_param': order_param}
+                       'order_param': order_param,
+                       'all': False}
+
+    return render_to_response('index.html', template_values)
+
+
+# We can't cache the page too often, since we'd like to provide recent
+# information about the relays in the Tor network, but we can't cache
+# the page too infrequently, either. It'd be nice to have a cache
+# that updates itself without being requested.
+@cache_page(60 * 10)
+def full_index(request):
+    """
+    Display all columns and routers available.
+
+    @rtype: C{HttpResponse}
+    @return: The full, unpaged list of all columns and relays.
+    """
+    # For now, clients don't have a choice for current columns
+    # and filters, since the index page loads slowly.
+    last_validafter = ActiveRelay.objects.aggregate(
+                      last=Max('validafter'))['last']
+    active_relays = ActiveRelay.objects.filter(
+                    validafter=last_validafter).order_by(
+                    'nickname')
+
+    num_results = active_relays.count()
+
+    columns = ['Country Code', 'Router Name', 'Fingerprint',
+               'Bandwidth', 'Uptime', 'IP', 'Icons', 'ORPort',
+               'DirPort', 'Named', 'Exit', 'Authority', 'Fast',
+               'Guard', 'Hibernating', 'Stable', 'V2Dir', 'Platform',
+               'Contact', 'Last Descriptor Published', 'Bad Directory',
+               'Bad Exit']
+
+    paginator = Paginator(active_relays, num_results)
+    paged_relays = paginator.page(1)
+    paged_relays.object_list = helpers.gen_list_dict(
+                               paged_relays.object_list)
+
+    template_values = {'paged_relays': paged_relays,
+                       'current_columns': columns,
+                       'displayable_columns': config.DISPLAYABLE_COLUMNS,
+                       'not_columns': config.NOT_MOVABLE_COLUMNS,
+                       'request': request,
+                       'column_value_name': config.COLUMN_VALUE_NAME,
+                       'icons_list': config.ICONS,
+                       'number_of_results': num_results,
+                       'all': True}
 
     return render_to_response('index.html', template_values)
 
@@ -215,7 +242,7 @@ def details(request, fingerprint):
     @type fingerprint: C{string}
     @param fingerprint: The fingerprint of the router to display the
         details of.
-    @rtype: HttpResponse
+    @rtype: C{HttpResponse}
     @return: The L{ActiveRelay} information of the router.
     """
     # We'll let the client look up a relay as long as it is in the
@@ -228,24 +255,27 @@ def details(request, fingerprint):
     if not poss_relay:
         return render_to_response(
                 '404.html',
-                {'debug_message': 'The server could not find any ' + \
-                                  'recently active relay with a ' + \
-                                  'fingerprint of ' + fingerprint + '.'})
+                {'debug_message': ('The server could not find any ' +
+                                   'recently active relay with a ' +
+                                   'fingerprint of ' + fingerprint +
+                                   '.')})
 
     # Otherwise, at least one entry for the relay exists, so get the
     # most recent entry for this relay
     relay = poss_relay[0]
 
-    # Create an attribute, 'active', to flag active/unactive relays.
+    # Create an attribute, 'active', to flag active/unactive relays
     last_va = ActiveRelay.objects.aggregate(
               last=Max('validafter'))['last']
+
+    # A relay is "active" if it is in the last consensus
     if last_va != relay.validafter:
         relay.active = False
     else:
         relay.active = True
 
     # Not all relays will have descriptors, but if a relay has a
-    # descriptor, its relay.descriptor value will not be null.
+    # descriptor, its relay.descriptor value will not be null
     if relay.descriptor:
         relay.hasdescriptor = True
     else:
@@ -255,7 +285,7 @@ def details(request, fingerprint):
     # the adjusted uptime
     if relay.hasdescriptor and relay.active:
         published = relay.published
-        now = datetime.datetime.now()
+        now = datetime.datetime.utcnow()
         diff = now - published
         diff_sec = (diff.microseconds + (
                     diff.seconds + diff.days * 24 * 3600) * 10**6) \
@@ -272,14 +302,14 @@ def details(request, fingerprint):
 
     # Generate a dictionary mapping labels to
     # values in a router details table
-    relay_dict = gen_relay_dict(relay)
+    relay_dict = helpers.gen_relay_dict(relay)
 
     # Generate an alphabetical list of flags
-    flags_list = gen_flags_list(relay)
+    flags_list = helpers.gen_flags_list(relay)
 
     # Generate a list of labels for which
     # information about the relay exists
-    options_list = gen_options_list(relay)
+    options_list = helpers.gen_options_list(relay)
 
     template_values = {'relay': relay,
                        'relay_dict': relay_dict,
@@ -297,11 +327,11 @@ def whois(request, address):
 
     @type address: C{string}
     @param address: The IP address to gather WHOIS information for.
-    @rtype: HttpResponse
+    @rtype: C{HttpResponse}
     @return: The WHOIS information of the L{address} as an HttpResponse.
     """
     # Make sure that the given IP address is in fact an IP address
-    if is_ipaddress(address):
+    if helpers.is_ipaddress(address):
         # NOTE: Linux/Unix specific command; would break on windows.
         # TODO: Find a replacement for this command.
         proc = subprocess.Popen(["whois %s" % address],
@@ -348,20 +378,20 @@ def exitnodequery(request):
     dest_port_valid = False
 
     # Get the source, dest_ip, and dest_port from the HttpRequest object
-    # if they exist, and declare them valid if they are valid.
+    # if they exist, and declare them valid if they are valid
     source = request.GET.get('queryAddress', '').strip()
-    if is_ipaddress(source): source_valid = True
+    if helpers.is_ipaddress(source): source_valid = True
 
     dest_ip = request.GET.get('destinationAddress', '').strip()
-    if is_ipaddress(dest_ip): dest_ip_valid = True
+    if helpers.is_ipaddress(dest_ip): dest_ip_valid = True
 
     dest_port = request.GET.get('destinationPort', '').strip()
-    if is_port(dest_port): dest_port_valid = True
+    if helpers.is_port(dest_port): dest_port_valid = True
 
     # Some users may assume exiting on port 80. If a destination IP
     # address is given without a port, assume that the user means
     # port 80.
-    if (dest_ip_valid == True and dest_port_valid == False):
+    if (dest_ip_valid == True and not dest_port):
         dest_port = "80"
         dest_port_valid = True
 
@@ -373,13 +403,12 @@ def exitnodequery(request):
     relays = []
     if (source_valid):
 
-        # Don't search entries published over 24 hours
-        # from the most recent entries.
+        # Search only entries in the last consensus.
         last_va = ActiveRelay.objects.aggregate(
                   last=Max('validafter'))['last']
 
         fingerprints = ActiveRelay.objects.filter(
-                       address=source).values(
+                       address=source, validafter=last_va).values(
                        'fingerprint').annotate(
                        Count('fingerprint'))
 
@@ -405,7 +434,7 @@ def exitnodequery(request):
                 exit_possible = False
 
                 # If the client also wants to test the relay's exit
-                # policy, dest_ip and dest_port cannot be empty strings.
+                # policy, dest_ip and dest_port cannot be empty strings
                 if (dest_ip_valid and dest_port_valid):
 
                     # Search the exit policy information for a case in
@@ -421,8 +450,9 @@ def exitnodequery(request):
                         # in the port defined in the exit policy
                         # information. When a match is found, see if the
                         # condition is "accept" or "reject".
-                        if (is_ip_in_subnet(dest_ip, subnet)):
-                            if (port_match(dest_port, port_line)):
+                        if (helpers.is_ip_in_subnet(dest_ip, subnet)):
+                            if (helpers.port_match(
+                                        dest_port, port_line)):
                                 if (condition == 'accept'):
                                     exit_possible = True
                                 else:
@@ -446,28 +476,31 @@ def exitnodequery(request):
 
 
 @cache_page(60 * 30)
-def networkstatisticgraphs(request):
+def netstatgraphs(request):
     """
-    Render an HTML template to response.
+    Show a page containing numerous network statistic graphs.
+
+    @rtype: C{HttpResponse}
+    @return: A page containing numerous graphs from views.graphs.
     """
     return render_to_response('statisticgraphs.html')
 
 
-# NOTE/TODO: When the index page loads faster, increase the upper bound
-MAX_PP = 200
 def display_options(request):
     """
     Let the user choose what columns should be displayed on the index
-    page. This view makes use of the sessions in order to store two
+    page.
+
+    This view makes use of the sessions in order to store two
     array-listobjects (currentColumns and availableColumns) in a
     "cookie" file so that the implementation of the "REMOVE", "ADD",
     "UP" and "DOWN" options from the page could be possible. It orders
     the two array-lists by using the user input, through a GET single
     selection HTML form.
 
-    @param: request
-    @return: renders to the page the currently selected columns, the
-        available columns and the previous selection.
+    @rtype: C{HttpResponse}
+    @return: The currently selected columns, the available columns,
+        and the previous selection.
     """
     debug_message = ''
 
@@ -476,18 +509,18 @@ def display_options(request):
     if 'pp' in request.GET:
 
         # Ensure that the supplied information is an integer between 1
-        # and MAX_PP, inclusive.
+        # and config.MAX_PP, inclusive.
         try:
             supplied_pp = int(request.GET.get('pp', ''))
-            assert 1 <= supplied_pp <= MAX_PP
+            assert 1 <= supplied_pp <= config.MAX_PP
             request.session['perpage'] = supplied_pp
 
         # Display a helpful debug_message in the case of unusable input
         except (ValueError, AssertionError):
-            debug_message = 'Unable to set \"Relays Per Page\" to' + \
-                            ' the given value.\nPlease enter an' + \
-                            ' integer between 1 and ' + str(MAX_PP) + \
-                            ', inclusive.'
+            debug_message = ('Unable to set \"Relays Per Page\" to' +
+                             ' the given value.\nPlease enter an' +
+                             ' integer between 1 and ' +
+                             str(config.MAX_PP) + ', inclusive.')
 
     # Get the number of relays per page from the session, and if it
     # doesn't exist, make it 50 by default.
@@ -495,7 +528,6 @@ def display_options(request):
 
     current_columns = []
     available_columns = []
-    not_movable_columns = NOT_MOVABLE_COLUMNS
 
     # If the user wants to reset column preferences, remove all
     # column information from the session
@@ -504,13 +536,12 @@ def display_options(request):
             del request.session['currentColumns']
         if 'availableColumns' in request.session:
             del request.session['availableColumns']
-
     # If no currentColumns and availableColumns are defined,
-    # save the defaults in the session
+    # save the defanults in the session
     if not ('currentColumns' in request.session and 'availableColumns'
             in request.session):
-        request.session['currentColumns'] = CURRENT_COLUMNS
-        request.session['availableColumns'] = AVAILABLE_COLUMNS
+        request.session['currentColumns'] = config.DEFAULT_COLUMNS
+        request.session['availableColumns'] = config.AVAILABLE_COLUMNS
 
     # Now there is guaranteed to be currentColumns and availableColumns
     # information in the session, so get it
@@ -524,29 +555,31 @@ def display_options(request):
     # The user wants to remove a column
     if ('removeColumn' in request.GET and
         'selected_removeColumn' in request.GET):
-        curr, avail, sel = button_choice(request, 'remove',
+        curr, avail, sel = helpers.button_choice(request, 'remove',
                            'selected_removeColumn', curr, avail)
 
     # The user wants to add a column
     elif ('addColumn' in request.GET and
           'selected_addColumn' in request.GET):
-        curr, avail, sel = button_choice(request, 'add',
+        curr, avail, sel = helpers.button_choice(request, 'add',
                            'selected_addColumn', curr, avail)
 
     # The user wants to move a column 'up' in the
     # list of current columns
     elif ('upButton' in request.GET and
           'selected_removeColumn' in request.GET and
-          request.GET['selected_removeColumn'] not in not_movable_columns):
-        curr, avail, sel = button_choice(request, 'up',
+          request.GET['selected_removeColumn'] not in \
+                  config.NOT_MOVABLE_COLUMNS):
+        curr, avail, sel = helpers.button_choice(request, 'up',
                            'selected_removeColumn', curr, avail)
 
     # The user wants to move a column 'down' in the
     # list of current columns
     elif ('downButton' in request.GET and
           'selected_removeColumn' in request.GET and
-          request.GET['selected_removeColumn'] not in not_movable_columns):
-        curr, avail, sel = button_choice(request, 'down',
+          request.GET['selected_removeColumn'] not in \
+                  config.NOT_MOVABLE_COLUMNS):
+        curr, avail, sel = helpers.button_choice(request, 'down',
                            'selected_removeColumn', curr, avail)
 
     template_values = {'currentColumns': curr,
@@ -561,17 +594,34 @@ def display_options(request):
 def advanced_search(request):
     """
     The advanced search page for the TorStatus site.
+
+    @rtype: C{HttpResponse}
+    @return: A page providing a form of advanced search options to
+        the client.
     """
-    template_values = {'sortOptionsOrder': SORT_OPTIONS_ORDER,
-                       'sortOptions': SORT_OPTIONS,
-                       'searchOptionsFieldsOrder': SEARCH_OPTIONS_FIELDS_ORDER,
-                       'searchOptionsFields': SEARCH_OPTIONS_FIELDS,
-                       'searchOptionsFieldsBooleans': SEARCH_OPTIONS_FIELDS_BOOLEANS,
-                       'searchOptionsBooleansOrder':
-                                                SEARCH_OPTIONS_BOOLEANS_ORDER,
-                       'searchOptionsBooleans': SEARCH_OPTIONS_BOOLEANS,
-                       'filterOptionsOrder': FILTER_OPTIONS_ORDER,
-                       'filterOptions': FILTER_OPTIONS,
+    template_values = {'sortOptionsOrder': config.SORT_OPTIONS_ORDER,
+            'sortOptions': config.SORT_OPTIONS,
+            'searchOptionsFieldsOrder':
+                    config.SEARCH_OPTIONS_FIELDS_ORDER,
+            'searchOptionsFields': config.SEARCH_OPTIONS_FIELDS,
+            'searchOptionsFieldsBooleans':
+                    config.SEARCH_OPTIONS_FIELDS_BOOLEANS,
+            'searchOptionsBooleansOrder':
+                    config.SEARCH_OPTIONS_BOOLEANS_ORDER,
+            'searchOptionsBooleans': config.SEARCH_OPTIONS_BOOLEANS,
+            'filterOptionsOrder': config.FILTER_OPTIONS_ORDER,
+            'filterOptions': config.FILTER_OPTIONS,
                       }
 
     return render_to_response('advanced_search.html', template_values)
+
+
+def about(request):
+    """
+    A place for the average Tor status client to learn about the
+    site's functionality.
+
+    @rtype: C{HttpResponse}
+    @return: A page explaining how to use TorStatus.
+    """
+    return render_to_response('about.html')

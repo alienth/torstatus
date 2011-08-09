@@ -22,8 +22,8 @@ in the object's constructors.
     L{BwhistFlags}, L{UserStats}, L{RelayStatusesPerDay},
     L{ScheduledUpdates}, L{Updates}, L{Geoipdb},
     L{RelaysMonthlySnapshots}, L{BridgeNetworkSize}, L{DirreqStats},
-    L{BridgeStats}, L{TorperfStats}, L{GettorStats}, L{ActiveRelay},
-    L{ActiveDescriptor}
+    L{BridgeStats}, L{TorperfStats}, L{GettorStats},
+    L{ActiveStatusentry}, L{ActiveRelay}, L{ActiveDescriptor}
 """
 from django.db import models
 

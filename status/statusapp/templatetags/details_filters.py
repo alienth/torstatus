@@ -25,7 +25,8 @@ def words(seconds):
     @type seconds: C{int}, C{float}, C{long}, C{string}, or C{buffer}
     @param seconds: The duration in seconds.
     @rtype: C{string}
-    @return: The duration divided into days, hours, minutes, and seconds.
+    @return: The duration divided into days, hours, minutes, and
+        seconds.
     """
     seconds = int(seconds)
 
@@ -137,7 +138,7 @@ def format_family(family):
 def key(d, key_name):
     """
     Return the value of a key in a dictionary.
-    
+
     @type d: C{dict}
     @param d: The given dictionary.
     @type key_name: C{string}
