@@ -38,22 +38,16 @@ http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=632217.
 
 1: Installing the Database
 --------------------------
-This implementation of TorStatus currently uses features that are not
-part of the ``master`` branch of ``metrics-web``. Do the following to
-get the correct branch of ``metrics-web``:
-
-    | ``$ mkdir /srv/metrics-web``
-    | ``$ cd /srv/metrics-web``
-    | ``$ git init``
-    | ``$ git remote add karsten git://git.torproject.org/karsten/metrics-web``
-    | ``$ git fetch karsten``
-    | ``$ git checkout -b foreignkey karsten/foreignkey``
+This implementation of TorStatus requires uses a Tor Metrics database.
+To build the database, get the head of the master branch
+of ``metrics-web``, currently located at
+https://gitweb.torproject.org/metrics-web.git.
 
 Before following the instructions in the ``README`` to build the
 database, be aware that TorStatus maintains relay data from consensuses
 and descriptors in its own schema that is not included in
-``metrics-web``. So, before importing data into the new database, run
-the following:
+``metrics-web``. So, before importing recent data into the new
+database, run the following:
 
     | ``$ psql -U metrics tordir``
     | ``tordir=> \i /absolute/path/to/TorStatus/cache.sql``
@@ -101,7 +95,7 @@ enter all necessary data into the database to run TorStatus.
 If you have not done so already, get the most recent version of
 TorStatus:
 
-    | ``$ git clone https://github.com/dcalderon/TorStatus``
+    | ``$ git clone https://github.com/jfehr/TorStatus``
 
 Now change directory to ``TorStatus/status`` and edit
 ``config.template`` such that TorStatus can connect to the database
