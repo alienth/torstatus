@@ -266,8 +266,8 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION purge()
 RETURNS INTEGER AS $$
     BEGIN
-        PERFORM purge_descriptor();
-        PERFORM purge_statusentry();
+        PERFORM cache.purge_descriptor();
+        PERFORM cache.purge_statusentry();
     RETURN 1;
     END;
 $$ LANGUAGE plpgsql;
